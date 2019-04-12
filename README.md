@@ -7,9 +7,9 @@
 </p>
 
 MotifLab is a general workbench for analysing regulatory regions and discovering transcription factor binding sites and cis-regulatory modules in DNA sequences.
-For more information, including screenshots and examples, please visit the project web site at ![www.motiflab.org](https://www.motiflab.org)
+For more information, including screenshots and examples, please visit the project web site at [www.motiflab.org](https://www.motiflab.org)
 
-![Screenshot](https://www.motiflab.org/screenshots/motiflab_github_screenshot.png =850px)
+![Screenshot](https://www.motiflab.org/screenshots/motiflab_github_screenshot.png)
 
 ### Note
 
