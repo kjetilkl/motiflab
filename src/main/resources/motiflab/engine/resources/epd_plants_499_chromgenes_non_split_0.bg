@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = plants
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_plants_499_chromgenes_non_split.tfa
+#Path = 
+#
+
+#snf
+0.3299	0.2042	0.1638	0.3021	
+
+#oligo frequency 
+0.3299
+0.2042
+0.1638
+0.3021
+
+#transition matrix
+0.3299	0.2042	0.1638	0.3021	
+0.3299	0.2042	0.1638	0.3021	
+0.3299	0.2042	0.1638	0.3021	
+0.3299	0.2042	0.1638	0.3021	
+

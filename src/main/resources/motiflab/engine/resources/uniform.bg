@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = general
+#Sequences = 
+#Path = 
+#
+
+#snf
+0.25	0.25	0.25	0.25	
+
+#oligo frequency 
+0.25
+0.25
+0.25
+0.25
+
+#transition matrix
+0.25	0.25	0.25	0.25	
+0.25	0.25	0.25	0.25	
+0.25	0.25	0.25	0.25	
+0.25	0.25	0.25	0.25	
+

@@ -1,0 +1,223 @@
+body{
+    font-family: "Trebuchet MS", sans-serif;
+    font-size  : 13px;
+    font-weight: normal;
+    line-height: 1.4em;
+    font-style : normal;
+}
+
+
+h1 {
+    font-family: "Trebuchet MS", sans-serif;
+    font-size  : 24px;
+    font-weight: bold;
+    line-height: 1.4em;
+    font-style : normal;
+}
+
+h2 {
+    font-family: "Trebuchet MS", sans-serif;
+    font-size  : 20px;
+    font-weight: bold;
+    line-height: 1.4em;
+    font-style : normal;
+}
+
+.headline {
+    padding:8px 16px;
+    color:#fff;
+    text-shadow:1px 1px 1px #568F23;
+    border:1px solid #93CE37;
+    border-bottom:3px solid #9ED929;
+    background-color:#9DD929;
+    background:-webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.02, rgb(123,192,67)),
+	color-stop(0.51, rgb(139,198,66)),
+	color-stop(0.87, rgb(158,217,41))
+	);
+    background: -moz-linear-gradient(
+	center bottom,
+	rgb(123,192,67) 2%,
+	rgb(139,198,66) 51%,
+	rgb(158,217,41) 87%
+	);
+    -webkit-border-radius:8px;
+    -moz-border-radius:8px;
+    border-radius:8px;
+}
+
+.summary {
+    padding:20px 26px;
+    color:#fff;
+    font-size  : 14px;
+    text-shadow:1px 1px 1px #568F23;
+    border:1px solid #9DD929;
+    border-bottom:3px solid #9ED929;
+    background-color:#93CE37;
+    line-height: 1.4em;
+    /*
+    background:-webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0.02, rgb(123,192,67)),
+	color-stop(0.51, rgb(139,198,66)),
+	color-stop(0.87, rgb(158,217,41))
+	);
+    background: -moz-linear-gradient(
+	center bottom,
+	rgb(123,192,67) 2%,
+	rgb(139,198,66) 51%,
+	rgb(158,217,41) 87%
+	);
+	*/
+    -webkit-border-radius:8px;
+    -moz-border-radius:8px;
+    border-radius:8px;
+}
+
+.dataitem {
+    font-weight:bold;
+}
+
+.summary tbody td {
+    color:#000;
+    padding:4px 10px;
+    text-shadow:1px 1px 1px #fff;
+}
+
+.groupheader {
+
+}
+
+/* Sortable tables */
+
+
+table.sortable {
+    font-family: "Trebuchet MS", sans-serif;
+    font-size  : 12px;
+    font-weight: normal;
+    line-height: 1.4em;
+    font-style : normal;
+    border-collapse:separate;
+}
+
+	.sortable thead th {
+	    font-size: 16px;
+	    font-weight: bold;
+	    padding:8px 10px;
+	    color:#fff;
+	    text-shadow:1px 1px 1px #568F23;
+	    border:1px solid #93CE37;
+	    border-bottom:3px solid #9ED929;
+	    background-color:#9DD929;
+	    background:-webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0.02, rgb(123,192,67)),
+		color-stop(0.51, rgb(139,198,66)),
+		color-stop(0.87, rgb(158,217,41))
+		);
+	    background: -moz-linear-gradient(
+		center bottom,
+		rgb(123,192,67) 2%,
+		rgb(139,198,66) 51%,
+		rgb(158,217,41) 87%
+		);
+	    -webkit-border-top-left-radius:5px;
+	    -webkit-border-top-right-radius:5px;
+	    -moz-border-radius:5px 5px 0px 0px;
+	    border-top-left-radius:5px;
+	    border-top-right-radius:5px;
+	}
+
+	.sortable thead th:empty{
+	    background:transparent;
+	    border:none;
+	}
+
+	.sortable tfoot td{
+	    color: #9CD009;
+	    font-size:32px;
+	    text-align:center;
+	    padding:10px 0px;
+	    text-shadow:1px 1px 1px #444;
+	}
+
+	.sortable tfoot th{
+	    color:#666;
+	}
+
+	.sortable tbody td{
+	    padding:3px 10px;
+	    text-align:left;
+	    background-color:#DEF3CA;
+	    border: 1px solid #E7EFE0;
+	    -moz-border-radius:0px;
+	    -webkit-border-radius:0px;
+	    border-radius:0px;
+	    color:#555;
+	    text-shadow:1px 1px 1px #fff;
+	}
+
+
+
+/* These classes are used to color table cells */
+
+tbody td.verysignificant {
+   background-color:#FF0000;
+   text-align:right;
+}
+tbody td.significant {
+   background-color:#FF8888;
+   text-align:right;
+}
+tbody td.onlyintarget {
+   background-color:#FF0000;
+   text-align:right;
+}
+tbody td.overrepintarget {
+   background-color:#FF8888;
+   text-align:right;
+}
+tbody td.intarget {
+   background-color:#FF4444;
+   text-align:right;
+}
+tbody td.samerate {
+   background-color:#FFFF00;
+   text-align:right;
+}
+tbody td.onlyincontrol {
+   background-color:#00FF00;
+   text-align:right;
+}
+tbody td.overrepincontrol {
+   background-color:#88FF88;
+   text-align:right;
+}
+tbody td.incontrol {
+   background-color:#44FF44;
+   text-align:right;
+}
+tbody td.notpresent {
+   background-color:#FFFFFF;
+   text-align:right;
+}
+tbody td.num {
+   text-align:right;
+}
+tbody td.namecolumn {
+   font-weight: bold;
+}
+
+.num {
+   text-align:right;
+}
+
+
+

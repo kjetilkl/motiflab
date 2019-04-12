@@ -1,0 +1,25 @@
+<html>
+    <h1>GET protocol</h1>
+The GET protocol will retrieve data from a web server using the HTTP-GET protocol.<br>
+The protocol has two configurable settings: <b>Base URL</b> and <b>Parameters</b>.
+The <b>Base URL</b> should point to a CGI-script running on a web server that can
+return track data for a given track and genomic sequence segment.
+Some CGI-scripts will only serve data for a single fixed type of track (e.g. DNA or RepeatMasker regions)
+and a specific genome build.
+Other scripts may be configured to serve data for different track types and different genome builds,
+and the requested track and genome build are then normally specified as part of the <b>Parameters</b> setting.
+<br><br>
+When MotifLab contacts the HTTP server, the value of the <b>Parameters</b> setting will be passed on
+as a <i>query string</i> (hence, the complete URL used will be: &lt;Base URL&gt;?&lt;Parameters&gt; ).
+The <b>Parameters</b> setting will thus have to be set according to the
+requirements of the particular CGI-script. However, all CGI-scripts must be able
+able to recognize three parameters that specify respectively a <i>chromosome</i>,
+a <i>start coordinate</i> and an <i>end coordinate</i> of a genomic segment and the script should then
+only return data for this segment (start- and end-coordinates assume
+the chromosome starts at position 1 not 0). The three placeholder variables
+<b><tt>$CHROMOSOME</tt></b>, <b><tt>$START</tt></b> and <b><tt>$END</tt></b> must be included
+as part of the <b>Parameters</b>, and these placeholders
+will be replaced by an actual chromosome name, start coordinate and end coordinate when MotifLab
+contacts the server to obtain data for a sequence.
+
+</html>

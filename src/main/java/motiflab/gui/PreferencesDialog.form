@@ -1,0 +1,898 @@
+<?xml version="1.1" encoding="UTF-8" ?>
+
+<Form version="1.5" maxVersion="1.6" type="org.netbeans.modules.form.forminfo.JDialogFormInfo">
+  <Properties>
+    <Property name="defaultCloseOperation" type="int" value="2"/>
+    <Property name="title" type="java.lang.String" resourceKey="Form.title"/>
+    <Property name="name" type="java.lang.String" value="Form" noResource="true"/>
+  </Properties>
+  <SyntheticProperties>
+    <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+  </SyntheticProperties>
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="2"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,1,71,0,0,1,-4"/>
+  </AuxValues>
+
+  <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
+  <SubComponents>
+    <Container class="javax.swing.JPanel" name="buttonsPanel">
+      <Properties>
+        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[32767, 40]"/>
+        </Property>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[100, 40]"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="buttonsPanel" noResource="true"/>
+        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[100, 36]"/>
+        </Property>
+      </Properties>
+      <Constraints>
+        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
+          <BorderConstraints direction="Last"/>
+        </Constraint>
+      </Constraints>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+        <Property name="alignment" type="int" value="2"/>
+        <Property name="horizontalGap" type="int" value="8"/>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JButton" name="OKButton">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="motiflab.gui.PreferencesDialog" id="OKButtonPressed" methodName="OKButtonPressed"/>
+            </Property>
+            <Property name="text" type="java.lang.String" resourceKey="OKButton.text"/>
+            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[75, 27]"/>
+            </Property>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[75, 27]"/>
+            </Property>
+            <Property name="name" type="java.lang.String" value="OKButton" noResource="true"/>
+            <Property name="opaque" type="boolean" value="false"/>
+            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[75, 27]"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="applyButton">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="motiflab.gui.PreferencesDialog" id="applyButtonPressed" methodName="applyButtonPressed"/>
+            </Property>
+            <Property name="text" type="java.lang.String" resourceKey="applyButton.text"/>
+            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[75, 27]"/>
+            </Property>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[75, 27]"/>
+            </Property>
+            <Property name="name" type="java.lang.String" value="applyButton" noResource="true"/>
+            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[75, 27]"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="cancelButton">
+          <Properties>
+            <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+              <action class="motiflab.gui.PreferencesDialog" id="cancelButtonPressed" methodName="cancelButtonPressed"/>
+            </Property>
+            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[75, 27]"/>
+            </Property>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[75, 27]"/>
+            </Property>
+            <Property name="name" type="java.lang.String" value="cancelButton" noResource="true"/>
+            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[75, 27]"/>
+            </Property>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JTabbedPane" name="tabbedPane">
+      <Properties>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="org.netbeans.modules.form.compat2.border.BevelBorderInfo">
+            <BevelBorder/>
+          </Border>
+        </Property>
+        <Property name="name" type="java.lang.String" value="tabbedPane" noResource="true"/>
+      </Properties>
+      <Constraints>
+        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
+          <BorderConstraints direction="First"/>
+        </Constraint>
+      </Constraints>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout"/>
+      <SubComponents>
+        <Container class="javax.swing.JPanel" name="generalSettingsPanel">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="generalSettingsPanel" noResource="true"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="General">
+                <Property name="tabTitle" type="java.lang.String" resourceKey="generalSettingsPanel.TabConstraints.tabTitle"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+            <Property name="alignment" type="int" value="0"/>
+          </Layout>
+          <SubComponents>
+            <Container class="javax.swing.JPanel" name="generalSettingsInternalPanel">
+              <Properties>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                    <EmptyBorder bottom="10" left="10" right="10" top="20"/>
+                  </Border>
+                </Property>
+                <Property name="name" type="java.lang.String" value="generalSettingsInternalPanel" noResource="true"/>
+              </Properties>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
+                <Property name="columns" type="int" value="2"/>
+                <Property name="horizontalGap" type="int" value="20"/>
+                <Property name="rows" type="int" value="6"/>
+                <Property name="verticalGap" type="int" value="16"/>
+              </Layout>
+              <SubComponents>
+                <Component class="javax.swing.JLabel" name="concurrentThreadsLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="concurrentThreadsLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="concurrentThreadsLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JSpinner" name="concurrentThreadsSpinner">
+                  <Properties>
+                    <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                      <SpinnerModel initial="4" maximum="1000" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="concurrentThreadsSpinner" noResource="true"/>
+                    <Property name="requestFocusEnabled" type="boolean" value="false"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="maxConcurrentDownloadsLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="maxConcurrentDownloadsLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="maxConcurrentDownloadsLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JSpinner" name="maxConcurrentDownloadsSpinner">
+                  <Properties>
+                    <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                      <SpinnerModel initial="1" maximum="20" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="maxConcurrentDownloadsSpinner.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="maxConcurrentDownloadsSpinner" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="networkTimeoutLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="networkTimeoutLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="networkTimeoutLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JSpinner" name="networkTimeoutSpinner">
+                  <Properties>
+                    <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                      <SpinnerModel initial="25000" minimum="0" numberType="java.lang.Integer" stepSize="100" type="number"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="networkTimeoutSpinner" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="sequenceLengthLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="sequenceLengthLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="sequenceLengthLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JSpinner" name="maxSequenceLengthSpinner">
+                  <Properties>
+                    <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                      <SpinnerModel initial="0" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="maxSequenceLengthSpinner.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="maxSequenceLengthSpinner" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="autoCorrectSequenceNamesLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="autoCorrectSequenceNamesLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="autoCorrectSequenceNamesLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="autoCorrectSequenceNamesCheckbox">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="autoCorrectSequenceNamesCheckbox.text"/>
+                    <Property name="name" type="java.lang.String" value="autoCorrectSequenceNamesCheckbox" noResource="true"/>
+                  </Properties>
+                </Component>
+              </SubComponents>
+            </Container>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="guiSettingsPanel">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                <EmptyBorder bottom="10" left="10" right="10" top="20"/>
+              </Border>
+            </Property>
+            <Property name="name" type="java.lang.String" value="guiSettingsPanel" noResource="true"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="GUI">
+                <Property name="tabTitle" type="java.lang.String" resourceKey="guiSettingsPanel.TabConstraints.tabTitle"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+            <Property name="alignment" type="int" value="0"/>
+          </Layout>
+          <SubComponents>
+            <Container class="javax.swing.JPanel" name="guiSettingsInternalPanel">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="guiSettingsInternalPanel" noResource="true"/>
+              </Properties>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
+                <Property name="columns" type="int" value="2"/>
+                <Property name="horizontalGap" type="int" value="20"/>
+                <Property name="rows" type="int" value="5"/>
+                <Property name="verticalGap" type="int" value="16"/>
+              </Layout>
+              <SubComponents>
+                <Component class="javax.swing.JLabel" name="autoSaveSessionLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="autoSaveSessionLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="autoSaveSessionLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JComboBox" name="autoSaveSessionCombobox">
+                  <Properties>
+                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                      <StringArray count="4">
+                        <StringItem index="0" value="Never"/>
+                        <StringItem index="1" value="Always"/>
+                        <StringItem index="2" value="Ask"/>
+                        <StringItem index="3" value="Ask for File"/>
+                      </StringArray>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="autoSaveSessionCombobox.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="autoSaveSessionCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="notificationsLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="notificationsLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="notificationsLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JComboBox" name="notificationsLevelCombobox">
+                  <Properties>
+                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                      <StringArray count="4">
+                        <StringItem index="0" value="Item 1"/>
+                        <StringItem index="1" value="Item 2"/>
+                        <StringItem index="2" value="Item 3"/>
+                        <StringItem index="3" value="Item 4"/>
+                      </StringArray>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="notificationsLevelCombobox.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="notificationsLevelCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="antialiasModeLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="antialiasModeLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="antialiasModeLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JComboBox" name="antialiasModeCombobox">
+                  <Properties>
+                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                      <StringArray count="0"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="antialiasModeCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="TSSpositionLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="TSSpositionLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="TSSpositionLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JComboBox" name="TSSpositionCombobox">
+                  <Properties>
+                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                      <StringArray count="2">
+                        <StringItem index="0" value="+0"/>
+                        <StringItem index="1" value="+1"/>
+                      </StringArray>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="TSSpositionCombobox.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="TSSpositionCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="promptSaveLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="promptSaveLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="promptSaveLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="promptBeforeDiscardingCheckbox">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="promptBeforeDiscardingCheckbox.text"/>
+                    <Property name="name" type="java.lang.String" value="promptBeforeDiscardingCheckbox" noResource="true"/>
+                  </Properties>
+                </Component>
+              </SubComponents>
+            </Container>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="visualizationSettingsPanel">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="visualizationSettingsPanel" noResource="true"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Visualization">
+                <Property name="tabTitle" type="java.lang.String" resourceKey="visualizationSettingsPanel.TabConstraints.tabTitle"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+            <Property name="alignment" type="int" value="0"/>
+          </Layout>
+          <SubComponents>
+            <Container class="javax.swing.JPanel" name="vizualizationSettingsInternalPanel">
+              <Properties>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                    <EmptyBorder bottom="10" left="10" right="10" top="20"/>
+                  </Border>
+                </Property>
+                <Property name="name" type="java.lang.String" value="vizualizationSettingsInternalPanel" noResource="true"/>
+              </Properties>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
+                <Property name="columns" type="int" value="3"/>
+                <Property name="horizontalGap" type="int" value="20"/>
+                <Property name="rows" type="int" value="6"/>
+                <Property name="verticalGap" type="int" value="16"/>
+              </Layout>
+              <SubComponents>
+                <Component class="javax.swing.JLabel" name="sequenceWindowSizeLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="sequenceWindowSizeLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="sequenceWindowSizeLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JSpinner" name="sequenceWindowSizeSelector">
+                  <Properties>
+                    <Property name="name" type="java.lang.String" value="sequenceWindowSizeSelector" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="jLabel1">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="jLabel1.text"/>
+                    <Property name="name" type="java.lang.String" value="jLabel1" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="sequenceLabelSizeLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="sequenceLabelSizeLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="sequenceLabelSizeLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JSpinner" name="sequenceLabelSizeSelector">
+                  <Properties>
+                    <Property name="name" type="java.lang.String" value="sequenceLabelSizeSelector" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="scaleToFitLabelCheckbox">
+                  <Properties>
+                    <Property name="selected" type="boolean" value="true"/>
+                    <Property name="text" type="java.lang.String" resourceKey="scaleToFitLabelCheckbox.text"/>
+                    <Property name="name" type="java.lang.String" value="scaleToFitLabelCheckbox" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="scaleToFitComboboxAction"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JLabel" name="numericTracksLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="numericTracksLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="numericTracksLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JComboBox" name="numericTracksValueCombobox">
+                  <Properties>
+                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                      <StringArray count="0"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="numericTracksValueCombobox.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="numericTracksValueCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="jLabel4">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="jLabel4.text"/>
+                    <Property name="name" type="java.lang.String" value="jLabel4" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="jLabel3">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="jLabel3.text"/>
+                    <Property name="name" type="java.lang.String" value="jLabel3" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JSpinner" name="numericTrackSamplingCutoffCombobox">
+                  <Properties>
+                    <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                      <SpinnerModel initial="100" minimum="2" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="numericTrackSamplingCutoffCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JSpinner" name="numericTrackSamplingNumberCombobox">
+                  <Properties>
+                    <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                      <SpinnerModel initial="20" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="numericTrackSamplingNumberCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="backgroundcolorlabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="backgroundcolorlabel.text"/>
+                    <Property name="name" type="java.lang.String" value="backgroundcolorlabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JButton" name="backgroundcolorbutton">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="backgroundcolorbutton.text"/>
+                    <Property name="name" type="java.lang.String" value="backgroundcolorbutton" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="backgroundcolorbuttonpressed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JButton" name="resetbgcolorbutton">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="resetbgcolorbutton.text"/>
+                    <Property name="name" type="java.lang.String" value="resetbgcolorbutton" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resetbgcolorbuttonclicked"/>
+                  </Events>
+                </Component>
+              </SubComponents>
+            </Container>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="cacheSettingsPanel">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="cacheSettingsPanel" noResource="true"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Cache">
+                <Property name="tabTitle" type="java.lang.String" resourceKey="cacheSettingsPanel.TabConstraints.tabTitle"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+            <Property name="alignment" type="int" value="0"/>
+          </Layout>
+          <SubComponents>
+            <Container class="javax.swing.JPanel" name="cacheSettingsInternalPanel">
+              <Properties>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                    <EmptyBorder bottom="10" left="10" right="10" top="20"/>
+                  </Border>
+                </Property>
+                <Property name="name" type="java.lang.String" value="cacheSettingsInternalPanel" noResource="true"/>
+              </Properties>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
+                <Property name="columns" type="int" value="3"/>
+                <Property name="horizontalGap" type="int" value="20"/>
+                <Property name="rows" type="int" value="2"/>
+                <Property name="verticalGap" type="int" value="16"/>
+              </Layout>
+              <SubComponents>
+                <Component class="javax.swing.JLabel" name="cacheFeatureDataLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="cacheFeatureDataLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="cacheFeatureDataLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="cacheFeatureDataCheckbox">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="cacheFeatureDataCheckbox.text"/>
+                    <Property name="name" type="java.lang.String" value="cacheFeatureDataCheckbox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JButton" name="clearFeatureDataCacheButton">
+                  <Properties>
+                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                      <action class="motiflab.gui.PreferencesDialog" id="clearFeatureData" methodName="clearFeatureData"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="null" type="code"/>
+                    </Property>
+                    <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                      <Dimension value="[39, 23]"/>
+                    </Property>
+                    <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                      <Dimension value="[39, 23]"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="clearFeatureDataCacheButton" noResource="true"/>
+                    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                      <Dimension value="[39, 23]"/>
+                    </Property>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="cacheGeneIdDataLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="cacheGeneIdDataLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="cacheGeneIdDataLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="cacheGeneIDCheckbox">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="cacheGeneIDCheckbox.text"/>
+                    <Property name="name" type="java.lang.String" value="cacheGeneIDCheckbox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JButton" name="clearGeneIDCacheButton">
+                  <Properties>
+                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                      <action class="motiflab.gui.PreferencesDialog" id="clearGeneIDMappings" methodName="clearGeneIDMappings"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="null" type="code"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="clearGeneIDCacheButton" noResource="true"/>
+                  </Properties>
+                </Component>
+              </SubComponents>
+            </Container>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="protocolEditorPanel">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="protocolEditorPanel" noResource="true"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Protocol Editor">
+                <Property name="tabTitle" type="java.lang.String" resourceKey="protocolEditorPanel.TabConstraints.tabTitle"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
+          <SubComponents>
+            <Container class="javax.swing.JPanel" name="protocolEditorInternalPanel">
+              <Properties>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                    <EmptyBorder bottom="10" left="10" right="10" top="20"/>
+                  </Border>
+                </Property>
+                <Property name="name" type="java.lang.String" value="protocolEditorInternalPanel" noResource="true"/>
+              </Properties>
+
+              <Layout>
+                <DimensionLayout dim="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <EmptySpace min="0" pref="100" max="32767" attributes="0"/>
+                  </Group>
+                </DimensionLayout>
+                <DimensionLayout dim="1">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <EmptySpace min="0" pref="100" max="32767" attributes="0"/>
+                  </Group>
+                </DimensionLayout>
+              </Layout>
+            </Container>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="htmlSettingsPanel">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="htmlSettingsPanel" noResource="true"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="HTML">
+                <Property name="tabTitle" type="java.lang.String" resourceKey="htmlSettingsPanel.TabConstraints.tabTitle"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+            <Property name="alignment" type="int" value="0"/>
+          </Layout>
+          <SubComponents>
+            <Container class="javax.swing.JPanel" name="htmlSettingsInternalPanel">
+              <Properties>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                    <EmptyBorder bottom="10" left="10" right="10" top="20"/>
+                  </Border>
+                </Property>
+                <Property name="name" type="java.lang.String" value="htmlSettingsInternalPanel" noResource="true"/>
+              </Properties>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
+                <Property name="columns" type="int" value="3"/>
+                <Property name="horizontalGap" type="int" value="20"/>
+                <Property name="rows" type="int" value="3"/>
+                <Property name="verticalGap" type="int" value="16"/>
+              </Layout>
+              <SubComponents>
+                <Component class="javax.swing.JLabel" name="htmlSettingsJavascriptLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="htmlSettingsJavascriptLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="htmlSettingsJavascriptLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JComboBox" name="htmlSettingsJavascriptCombobox">
+                  <Properties>
+                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="new javax.swing.DefaultComboBoxModel(VisualizationSettings.HTML_SETTINGS)" type="code"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="htmlSettingsJavascriptCombobox.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="htmlSettingsJavascriptCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="htmlSettingsEmptyLabel1">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="htmlSettingsEmptyLabel1.text"/>
+                    <Property name="name" type="java.lang.String" value="htmlSettingsEmptyLabel1" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="htmlSettingsCSSLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="htmlSettingsCSSLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="htmlSettingsCSSLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JComboBox" name="htmlSettingsCSSCombobox">
+                  <Properties>
+                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="new javax.swing.DefaultComboBoxModel(VisualizationSettings.HTML_SETTINGS)" type="code"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="htmlSettingsCSSCombobox.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="htmlSettingsCSSCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="htmlSettingsEmptyLabel2">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="htmlSettingsEmptyLabel2.text"/>
+                    <Property name="name" type="java.lang.String" value="htmlSettingsEmptyLabel2" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JLabel" name="htmlSettingsStylesheetLabel">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="htmlSettingsStylesheetLabel.text"/>
+                    <Property name="name" type="java.lang.String" value="htmlSettingsStylesheetLabel" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JComboBox" name="htmlSettingsStylesheetCombobox">
+                  <Properties>
+                    <Property name="editable" type="boolean" value="true"/>
+                    <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                      <StringArray count="0"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="htmlSettingsStylesheetCombobox" noResource="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JButton" name="stylesheetBrowseButton">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="stylesheetBrowseButton.text"/>
+                    <Property name="name" type="java.lang.String" value="stylesheetBrowseButton" noResource="true"/>
+                  </Properties>
+                </Component>
+              </SubComponents>
+            </Container>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="otherSettingsPanel">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="otherSettingsPanel" noResource="true"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Other">
+                <Property name="tabTitle" type="java.lang.String" resourceKey="otherSettingsPanel.TabConstraints.tabTitle"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
+          <SubComponents>
+            <Container class="javax.swing.JPanel" name="jPanel1">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="jPanel1" noResource="true"/>
+              </Properties>
+              <Constraints>
+                <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
+                  <BorderConstraints direction="Center"/>
+                </Constraint>
+              </Constraints>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout">
+                <Property name="axis" type="int" value="1"/>
+              </Layout>
+              <SubComponents>
+                <Container class="javax.swing.JPanel" name="jPanel7">
+                  <Properties>
+                    <Property name="name" type="java.lang.String" value="jPanel7" noResource="true"/>
+                  </Properties>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
+                </Container>
+                <Container class="javax.swing.JPanel" name="jPanel4">
+                  <Properties>
+                    <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                      <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                        <EmptyBorder bottom="4" left="10" right="4" top="4"/>
+                      </Border>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="jPanel4" noResource="true"/>
+                  </Properties>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+                    <Property name="alignment" type="int" value="0"/>
+                  </Layout>
+                  <SubComponents>
+                    <Component class="javax.swing.JButton" name="editStartupScriptButton">
+                      <Properties>
+                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                          <action class="motiflab.gui.PreferencesDialog" id="editStartupScript" methodName="editStartupScript"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" resourceKey="editStartupScriptButton.text"/>
+                        <Property name="name" type="java.lang.String" value="editStartupScriptButton" noResource="true"/>
+                      </Properties>
+                    </Component>
+                  </SubComponents>
+                </Container>
+                <Container class="javax.swing.JPanel" name="jPanel5">
+                  <Properties>
+                    <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                      <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                        <EmptyBorder bottom="4" left="10" right="4" top="4"/>
+                      </Border>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="jPanel5" noResource="true"/>
+                  </Properties>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+                    <Property name="alignment" type="int" value="0"/>
+                  </Layout>
+                  <SubComponents>
+                    <Component class="javax.swing.JButton" name="viewDisplaySettingsButton">
+                      <Properties>
+                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                          <action class="motiflab.gui.PreferencesDialog" id="showDisplaySettingsDialog" methodName="showDisplaySettingsDialog"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" resourceKey="viewDisplaySettingsButton.text"/>
+                        <Property name="toolTipText" type="java.lang.String" resourceKey="viewDisplaySettingsButton.toolTipText"/>
+                        <Property name="name" type="java.lang.String" value="viewDisplaySettingsButton" noResource="true"/>
+                      </Properties>
+                    </Component>
+                  </SubComponents>
+                </Container>
+                <Container class="javax.swing.JPanel" name="jPanel2">
+                  <Properties>
+                    <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                      <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                        <EmptyBorder bottom="4" left="10" right="4" top="4"/>
+                      </Border>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="jPanel2" noResource="true"/>
+                  </Properties>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+                    <Property name="alignment" type="int" value="0"/>
+                  </Layout>
+                  <SubComponents>
+                    <Component class="javax.swing.JButton" name="jButton1">
+                      <Properties>
+                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                          <action class="motiflab.gui.PreferencesDialog" id="activateTransfacPRO" methodName="activateTransfacPRO"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" resourceKey="jButton1.text"/>
+                        <Property name="name" type="java.lang.String" value="jButton1" noResource="true"/>
+                      </Properties>
+                    </Component>
+                  </SubComponents>
+                </Container>
+                <Container class="javax.swing.JPanel" name="jPanel6">
+                  <Properties>
+                    <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                      <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                        <EmptyBorder bottom="4" left="10" right="4" top="4"/>
+                      </Border>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="jPanel6" noResource="true"/>
+                  </Properties>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout">
+                    <Property name="alignment" type="int" value="0"/>
+                  </Layout>
+                  <SubComponents>
+                    <Component class="javax.swing.JButton" name="jButton2">
+                      <Properties>
+                        <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                          <action class="motiflab.gui.PreferencesDialog" id="showSystemDirectory" methodName="showSystemDirectory"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" resourceKey="jButton2.text"/>
+                        <Property name="name" type="java.lang.String" value="jButton2" noResource="true"/>
+                      </Properties>
+                    </Component>
+                  </SubComponents>
+                </Container>
+                <Container class="javax.swing.JPanel" name="jPanel3">
+                  <Properties>
+                    <Property name="name" type="java.lang.String" value="jPanel3" noResource="true"/>
+                  </Properties>
+
+                  <Layout>
+                    <DimensionLayout dim="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <EmptySpace min="0" pref="499" max="32767" attributes="0"/>
+                      </Group>
+                    </DimensionLayout>
+                    <DimensionLayout dim="1">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <EmptySpace min="0" pref="65" max="32767" attributes="0"/>
+                      </Group>
+                    </DimensionLayout>
+                  </Layout>
+                </Container>
+                <Component class="javax.swing.Box$Filler" name="filler1">
+                  <Properties>
+                    <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                      <Dimension value="[0, 32767]"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="filler1" noResource="true"/>
+                  </Properties>
+                  <AuxValues>
+                    <AuxValue name="classDetails" type="java.lang.String" value="Box.Filler.VerticalGlue"/>
+                  </AuxValues>
+                </Component>
+              </SubComponents>
+            </Container>
+          </SubComponents>
+        </Container>
+      </SubComponents>
+    </Container>
+  </SubComponents>
+</Form>

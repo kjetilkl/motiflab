@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = salmonella
+#Sequences = /users/sista/thijs/matlab/IntergenicSalmo.tfa
+#Path = 
+#
+
+#snf
+0.2902	0.2096	0.2095	0.2907	
+
+#oligo frequency 
+0.2902
+0.2096
+0.2095
+0.2907
+
+#transition matrix
+0.2902	0.2096	0.2095	0.2907	
+0.2902	0.2096	0.2095	0.2907	
+0.2902	0.2096	0.2095	0.2907	
+0.2902	0.2096	0.2095	0.2907	
+

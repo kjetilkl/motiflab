@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 1
+#Organism = vertebrates
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_vertebrates_499_chromgenes_non_split.tfa
+#Path = 
+#
+
+#snf
+0.2659	0.2462	0.2373	0.2506	
+
+#oligo frequency 
+0.2659
+0.2462
+0.2373
+0.2506
+
+#transition matrix
+0.3209	0.1919	0.2596	0.2276	
+0.2850	0.2902	0.1540	0.2708	
+0.2469	0.2677	0.2823	0.2031	
+0.2068	0.2401	0.2530	0.3001	
+

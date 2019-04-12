@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 1
+#Organism = frog
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_xenopus_laevis_499_chromgenes_non_split.tfa
+#Path = 
+#
+
+#snf
+0.2664	0.2454	0.2368	0.2514	
+
+#oligo frequency 
+0.2664
+0.2454
+0.2368
+0.2514
+
+#transition matrix
+0.3208	0.1916	0.2590	0.2286	
+0.2862	0.2892	0.1533	0.2712	
+0.2467	0.2677	0.2818	0.2038	
+0.2080	0.2387	0.2526	0.3007	
+

@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = human
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_homo_sapiens_499_chromgenes_non_split.tfa
+#Path = 
+#
+
+#snf
+0.2570	0.2534	0.2465	0.2432	
+
+#oligo frequency 
+0.2570
+0.2534
+0.2465
+0.2432
+
+#transition matrix
+0.2570	0.2534	0.2465	0.2432	
+0.2570	0.2534	0.2465	0.2432	
+0.2570	0.2534	0.2465	0.2432	
+0.2570	0.2534	0.2465	0.2432	
+

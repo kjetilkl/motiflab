@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<program name="SimpleModuleSearcher" class="ModuleDiscovery">
+    <properties>
+      <author>Kjetil Klepper</author>
+      <contact>Kjetil Klepper (kjetil.klepper@ntnu.no)</contact>
+      <homepage>http://www.motiflab.org</homepage>
+      <description>
+          A primitive module discovery program that looks for tuples of motifs that co-occur in several sequences. 
+          The algorithm performs an iterative exhaustive search by first searching for single motifs that occur in at least N sequences.
+          Binding sites for the other motifs that are found in less than N sequences are then filtered out before the algorithm searches the remainding sites for pairs of motifs that occur in at least N sequences.
+          Pairs that meet the criteria are kept while the other sites are removed. The algorithm continues in this way searching for tuples with 3, 4, 5 etc. motifs until the user-specified module size is met.        
+          The algorithm potentially requires a lot of memory and could run out of memory if too many motif sites are retained in each iteration.
+          If you experience problems with memory running out, try using stricter search criterion, for instance using a smaller motif collection, a smaller module span or greater support requirement.
+      </description>
+    </properties>
+
+    <service type="bundled" location="motiflab.external.SimpleModuleSearcher"/>
+
+</program>

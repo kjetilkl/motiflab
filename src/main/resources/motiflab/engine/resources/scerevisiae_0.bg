@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = yeast
+#Sequences = /users/sista/thijs/scratch/Yeast/yeast_up800.tfa
+#Path = 
+#
+
+#snf
+0.3216	0.1826	0.1768	0.3190	
+
+#oligo frequency 
+0.3216
+0.1826
+0.1768
+0.3190
+
+#transition matrix
+0.3216	0.1826	0.1768	0.3190	
+0.3216	0.1826	0.1768	0.3190	
+0.3216	0.1826	0.1768	0.3190	
+0.3216	0.1826	0.1768	0.3190	
+

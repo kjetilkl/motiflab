@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 1
+#Organism = rat
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_rattus_norvegicus_499_chromgenes_non_split.tfa
+#Path = 
+#
+
+#snf
+0.2620	0.2492	0.2413	0.2476	
+
+#oligo frequency 
+0.2620
+0.2492
+0.2413
+0.2476
+
+#transition matrix
+0.3165	0.1937	0.2660	0.2238	
+0.2812	0.2932	0.1559	0.2698	
+0.2437	0.2702	0.2863	0.1998	
+0.2029	0.2430	0.2573	0.2968	
+

@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = mouse
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_mus_musculus_499_chromgenes_non_split.tfa
+#Path = 
+#
+
+#snf
+0.2566	0.2531	0.2474	0.2429	
+
+#oligo frequency 
+0.2566
+0.2531
+0.2474
+0.2429
+
+#transition matrix
+0.2566	0.2531	0.2474	0.2429	
+0.2566	0.2531	0.2474	0.2429	
+0.2566	0.2531	0.2474	0.2429	
+0.2566	0.2531	0.2474	0.2429	
+

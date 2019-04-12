@@ -1,0 +1,1704 @@
+<?xml version="1.1" encoding="UTF-8" ?>
+
+<Form version="1.5" maxVersion="1.6">
+  <NonVisualComponents>
+    <Container class="javax.swing.JPanel" name="topPanel">
+      <Properties>
+        <Property name="name" type="java.lang.String" value="topPanel" noResource="true"/>
+      </Properties>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
+      <SubComponents>
+        <Container class="javax.swing.JToolBar" name="Toolbar">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
+                <EtchetBorder/>
+              </Border>
+            </Property>
+            <Property name="floatable" type="boolean" value="false"/>
+            <Property name="rollover" type="boolean" value="true"/>
+            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[1224, 39]"/>
+            </Property>
+            <Property name="name" type="java.lang.String" value="Toolbar" noResource="true"/>
+            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+              <Dimension value="[15, 39]"/>
+            </Property>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
+              <BorderConstraints direction="First"/>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBoxLayout"/>
+          <SubComponents>
+            <Component class="javax.swing.JButton" name="newButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="newProtocol" methodName="newProtocol"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="newButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="openButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="openProtocol" methodName="openProtocol"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="openButton.text"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="openButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="saveButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="saveFile" methodName="saveFile"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="saveButton.text"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="saveButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="printButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="printActionMethod" methodName="printActionMethod"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="printButton.text"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="printButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="toolbarSeparator1">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolbarSeparator1" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="cutbutton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="getApplication().getContext().getActionMap().get(&quot;cut&quot;)" type="code"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="cutbutton.icon"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="cutbutton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="copybutton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="getApplication().getContext().getActionMap().get(&quot;copy&quot;)" type="code"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="copybutton.icon"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="copybutton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="pasteButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="getApplication().getContext().getActionMap().get(&quot;paste&quot;)" type="code"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" resourceKey="pasteButton.icon"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="pasteButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="undoButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="undo" methodName="undo"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="undoButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="redoButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="redo" methodName="redo"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="redoButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="toolbarSeparator2">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolbarSeparator2" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="sequenceButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showSequenceInputDialog" methodName="showSequenceInputDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey=""/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="sequenceButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="databaseButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showDatatrackDialog" methodName="showDatatrackDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey=""/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="databaseButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="toolbarSeparator3">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolbarSeparator3" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="selectionToolButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="selectionToolAction" methodName="selectionToolAction"/>
+                </Property>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="selectedToolButtonGroup"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="selectionToolButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="dragToolButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="handToolAction" methodName="handToolAction"/>
+                </Property>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="selectedToolButtonGroup"/>
+                </Property>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="dragToolButton.toolTipText"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="dragToolButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="drawToolButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="drawToolAction" methodName="drawToolAction"/>
+                </Property>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="selectedToolButtonGroup"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="drawToolButton.text"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="drawToolButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="zoomToolButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="zoomToolAction" methodName="zoomToolAction"/>
+                </Property>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="selectedToolButtonGroup"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="zoomToolButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JComboBox" name="zoomLevelCombobox">
+              <Properties>
+                <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="getModelForZoomLevelCombobox()" type="code"/>
+                </Property>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="name" type="java.lang.String" value="zoomLevelCombobox" noResource="true"/>
+                <Property name="renderer" type="javax.swing.ListCellRenderer" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="new ZoomLevelComboboxCellRenderer()" type="code"/>
+                </Property>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="zoomLevelCombobox.addActionListener(new ZoomLevelComboboxActionListener());"/>
+              </AuxValues>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="toolbarSeparator4">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolbarSeparator4" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="showSequenceBrowserButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showSequenceBrowser" methodName="showSequenceBrowser"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="showSequenceBrowserButton.text"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="showSequenceBrowserButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="showMotifBrowserButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showMotifBrowser" methodName="showMotifBrowser"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="showMotifBrowserButton.text"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="showMotifBrowserButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="showModuleBrowserButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showModuleBrowser" methodName="showModuleBrowser"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="showModuleBrowserButton.text"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="showModuleBrowserButton" noResource="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="toolbarSeparator5">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolbarSeparator5" noResource="true"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="recordButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="recordMode" methodName="recordMode"/>
+                </Property>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="recplaystopButtonGroup"/>
+                </Property>
+                <Property name="focusPainted" type="boolean" value="false"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="recordButton" noResource="true"/>
+                <Property name="rolloverEnabled" type="boolean" value="true"/>
+                <Property name="selectedIcon" type="javax.swing.Icon" resourceKey="recordButton.selectedIcon"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="executeButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="executeProtocol" methodName="executeProtocol"/>
+                </Property>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="recplaystopButtonGroup"/>
+                </Property>
+                <Property name="focusPainted" type="boolean" value="false"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="executeButton" noResource="true"/>
+                <Property name="rolloverEnabled" type="boolean" value="true"/>
+                <Property name="selectedIcon" type="javax.swing.Icon" resourceKey="executeButton.selectedIcon"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="stopButton">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="stopAction" methodName="stopAction"/>
+                </Property>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="recplaystopButtonGroup"/>
+                </Property>
+                <Property name="focusPainted" type="boolean" value="false"/>
+                <Property name="focusable" type="boolean" value="false"/>
+                <Property name="hideActionText" type="boolean" value="true"/>
+                <Property name="horizontalTextPosition" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="stopButton" noResource="true"/>
+                <Property name="rolloverEnabled" type="boolean" value="true"/>
+                <Property name="verticalTextPosition" type="int" value="3"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JToolBar$Separator" name="toolbarSeparator6">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolbarSeparator6" noResource="true"/>
+              </Properties>
+            </Component>
+            <Container class="javax.swing.JPanel" name="toolbarSearchPanel">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolbarSearchPanel" noResource="true"/>
+              </Properties>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
+            </Container>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="centerArea">
+          <Properties>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                <EmptyBorder bottom="3" left="3" right="3" top="3"/>
+              </Border>
+            </Property>
+            <Property name="name" type="java.lang.String" value="centerArea" noResource="true"/>
+          </Properties>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
+              <BorderConstraints direction="Center"/>
+            </Constraint>
+          </Constraints>
+
+          <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
+          <SubComponents>
+            <Container class="javax.swing.JSplitPane" name="horisontalSplitPane">
+              <Properties>
+                <Property name="orientation" type="int" value="0"/>
+                <Property name="name" type="java.lang.String" value="horisontalSplitPane" noResource="true"/>
+                <Property name="oneTouchExpandable" type="boolean" value="true"/>
+              </Properties>
+              <Constraints>
+                <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
+                  <BorderConstraints direction="Center"/>
+                </Constraint>
+              </Constraints>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout"/>
+              <SubComponents>
+                <Container class="javax.swing.JSplitPane" name="verticalSplitPane">
+                  <Properties>
+                    <Property name="name" type="java.lang.String" value="verticalSplitPane" noResource="true"/>
+                    <Property name="oneTouchExpandable" type="boolean" value="true"/>
+                  </Properties>
+                  <Constraints>
+                    <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">
+                      <JSplitPaneConstraints position="left"/>
+                    </Constraint>
+                  </Constraints>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout"/>
+                  <SubComponents>
+                    <Container class="javax.swing.JPanel" name="sidePanel">
+                      <Properties>
+                        <Property name="name" type="java.lang.String" value="sidePanel" noResource="true"/>
+                      </Properties>
+                      <Constraints>
+                        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">
+                          <JSplitPaneConstraints position="left"/>
+                        </Constraint>
+                      </Constraints>
+
+                      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
+                    </Container>
+                  </SubComponents>
+                </Container>
+                <Container class="javax.swing.JPanel" name="logTopPanel">
+                  <Properties>
+                    <Property name="name" type="java.lang.String" value="logTopPanel" noResource="true"/>
+                    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                      <Dimension value="[70, 52]"/>
+                    </Property>
+                  </Properties>
+                  <Constraints>
+                    <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">
+                      <JSplitPaneConstraints position="right"/>
+                    </Constraint>
+                  </Constraints>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
+                  <SubComponents>
+                    <Container class="javax.swing.JPanel" name="logLeftPanel">
+                      <Properties>
+                        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[30, 50]"/>
+                        </Property>
+                        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[30, 50]"/>
+                        </Property>
+                        <Property name="name" type="java.lang.String" value="logLeftPanel" noResource="true"/>
+                        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[30, 50]"/>
+                        </Property>
+                      </Properties>
+                      <Constraints>
+                        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
+                          <BorderConstraints direction="Before"/>
+                        </Constraint>
+                      </Constraints>
+
+                      <Layout>
+                        <DimensionLayout dim="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <EmptySpace min="0" pref="30" max="32767" attributes="0"/>
+                          </Group>
+                        </DimensionLayout>
+                        <DimensionLayout dim="1">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <EmptySpace min="0" pref="279" max="32767" attributes="0"/>
+                          </Group>
+                        </DimensionLayout>
+                      </Layout>
+                    </Container>
+                    <Container class="javax.swing.JPanel" name="logRightPanel">
+                      <Properties>
+                        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[26, 50]"/>
+                        </Property>
+                        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[26, 50]"/>
+                        </Property>
+                        <Property name="name" type="java.lang.String" value="logRightPanel" noResource="true"/>
+                        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[26, 50]"/>
+                        </Property>
+                      </Properties>
+                      <Constraints>
+                        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
+                          <BorderConstraints direction="After"/>
+                        </Constraint>
+                      </Constraints>
+
+                      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
+                      <SubComponents>
+                        <Component class="javax.swing.JLabel" name="logLevelIcon">
+                          <Properties>
+                            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                              <Connection code="new MiscIcons(MiscIcons.LOGGER_LEVEL)" type="code"/>
+                            </Property>
+                            <Property name="text" type="java.lang.String" resourceKey="logLevelIcon.text"/>
+                            <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                              <Connection code="getLoggerIconToolTipText()" type="code"/>
+                            </Property>
+                            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                              <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
+                                <EtchetBorder/>
+                              </Border>
+                            </Property>
+                            <Property name="name" type="java.lang.String" value="logLevelIcon" noResource="true"/>
+                          </Properties>
+                        </Component>
+                        <Component class="javax.swing.JLabel" name="clearLogLabel">
+                          <Properties>
+                            <Property name="icon" type="javax.swing.Icon" resourceKey="clearLogLabel.icon"/>
+                            <Property name="text" type="java.lang.String" resourceKey="clearLogLabel.text"/>
+                            <Property name="toolTipText" type="java.lang.String" resourceKey="clearLogLabel.toolTipText"/>
+                            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                              <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
+                                <EtchetBorder/>
+                              </Border>
+                            </Property>
+                            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                              <Dimension value="[20, 20]"/>
+                            </Property>
+                            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                              <Dimension value="[20, 20]"/>
+                            </Property>
+                            <Property name="name" type="java.lang.String" value="clearLogLabel" noResource="true"/>
+                            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                              <Dimension value="[20, 20]"/>
+                            </Property>
+                            <Property name="requestFocusEnabled" type="boolean" value="false"/>
+                          </Properties>
+                        </Component>
+                      </SubComponents>
+                    </Container>
+                    <Container class="javax.swing.JScrollPane" name="logScrollPane">
+                      <Properties>
+                        <Property name="name" type="java.lang.String" value="logScrollPane" noResource="true"/>
+                      </Properties>
+                      <Constraints>
+                        <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
+                          <BorderConstraints direction="Center"/>
+                        </Constraint>
+                      </Constraints>
+
+                      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+                      <SubComponents>
+                        <Component class="javax.swing.JTextPane" name="logPanel">
+                          <Properties>
+                            <Property name="editable" type="boolean" value="false"/>
+                            <Property name="name" type="java.lang.String" value="logPanel" noResource="true"/>
+                            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                              <Dimension value="[6, 30]"/>
+                            </Property>
+                          </Properties>
+                        </Component>
+                      </SubComponents>
+                    </Container>
+                  </SubComponents>
+                </Container>
+              </SubComponents>
+            </Container>
+          </SubComponents>
+        </Container>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JMenuBar" name="menuBar">
+      <Properties>
+        <Property name="name" type="java.lang.String" value="menuBar" noResource="true"/>
+      </Properties>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
+        <Property name="useNullLayout" type="boolean" value="true"/>
+      </Layout>
+      <SubComponents>
+        <Menu class="javax.swing.JMenu" name="fileMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="fileMenu.text"/>
+            <Property name="name" type="java.lang.String" value="fileMenu" noResource="true"/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+          </AuxValues>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="fileNewMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="newProtocol" methodName="newProtocol"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileNewMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileOpenMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="openProtocol" methodName="openProtocol"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileOpenMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileOpenFromURLMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="openProtocolFromURL" methodName="openProtocolFromURL"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="fileOpenFromURLMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="fileOpenFromURLMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <Menu class="javax.swing.JMenu" name="fileOpenRecentSubmenu">
+              <Properties>
+                <Property name="text" type="java.lang.String" resourceKey="fileOpenRecentSubmenu.text"/>
+                <Property name="enabled" type="boolean" value="false"/>
+                <Property name="name" type="java.lang.String" value="fileOpenRecentSubmenu" noResource="true"/>
+              </Properties>
+            </Menu>
+            <MenuItem class="javax.swing.JMenuItem" name="fileCloseMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="closefileActionMethod" methodName="closefileActionMethod"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileCloseMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JSeparator" name="fileMenuSeparator1">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="fileMenuSeparator1" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileSaveMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="saveFile" methodName="saveFile"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileSaveMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileSaveAsMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="saveAsActionMethod" methodName="saveAsActionMethod"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileSaveAsMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileSaveAllMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="saveAllActionMethod" methodName="saveAllActionMethod"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileSaveAllMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JSeparator" name="fileMenuSeparator2">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="fileMenuSeparator2" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileSaveSessionMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="saveSessionActionMethod" methodName="saveSessionActionMethod"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileSaveSessionMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileRestoreSessionMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="restoreSessionActionMethod" methodName="restoreSessionActionMethod"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileRestoreSessionMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileRestoreSessionFromURLMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="restoreSessionFromURLActionMethod" methodName="restoreSessionFromURLActionMethod"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="fileRestoreSessionFromURLMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="fileRestoreSessionFromURLMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <Menu class="javax.swing.JMenu" name="fileRestoreRecentSessionSubmenu">
+              <Properties>
+                <Property name="text" type="java.lang.String" resourceKey="fileRestoreRecentSessionSubmenu.text"/>
+                <Property name="enabled" type="boolean" value="false"/>
+                <Property name="name" type="java.lang.String" value="fileRestoreRecentSessionSubmenu" noResource="true"/>
+              </Properties>
+            </Menu>
+            <MenuItem class="javax.swing.JSeparator" name="fileMenuSeparator3">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="fileMenuSeparator3" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="filePrintMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="printActionMethod" methodName="printActionMethod"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="filePrintMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileSaveAsImageMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="saveAsImageMethod" methodName="saveAsImageMethod"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileSaveAsImageMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem1">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="saveAsIndividualImagesMethod" methodName="saveAsIndividualImagesMethod"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="jMenuItem1" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JSeparator" name="fileMenuSeparator4">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="fileMenuSeparator4" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileSaveAndExitMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="saveSessionAndExit" methodName="saveSessionAndExit"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="fileSaveAndExitMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="fileSaveAndExitMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="fileExitMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="org.jdesktop.application.Application" id="quit" methodName="quit"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="fileExitMenuItem" noResource="true"/>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+              </AuxValues>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="editMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="editMenu.text"/>
+            <Property name="actionCommand" type="java.lang.String" resourceKey="editMenu.actionCommand"/>
+            <Property name="name" type="java.lang.String" value="editMenu" noResource="true"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="cutMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="getApplication().getContext().getActionMap().get(&quot;cut&quot;)" type="code"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="cutMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="copyMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="getApplication().getContext().getActionMap().get(&quot;copy&quot;)" type="code"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="copyMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="pasteMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="getApplication().getContext().getActionMap().get(&quot;paste&quot;)" type="code"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="pasteMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JSeparator" name="editMenuSeparator1">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="editMenuSeparator1" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="undoMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="undo" methodName="undo"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="undoMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="redoMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="redo" methodName="redo"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="redoMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="editMenuSeparator2">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="editMenuSeparator2" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="findMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="findAction" methodName="findAction"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="findMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="findMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="replaceMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="replaceAction" methodName="replaceAction"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="replaceMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="replaceMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="viewMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="viewMenu.text"/>
+            <Property name="name" type="java.lang.String" value="viewMenu" noResource="true"/>
+          </Properties>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="dataMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="dataMenu.text"/>
+            <Property name="name" type="java.lang.String" value="dataMenu" noResource="true"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="addSequencesMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showSequenceInputDialog" methodName="showSequenceInputDialog"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="addSequencesMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="addSequencesFromFileMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showAddSequencesFromFileDialog" methodName="showAddSequencesFromFileDialog"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="addSequencesFromFileMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="addDataTracksMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showDatatrackDialog" methodName="showDatatrackDialog"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="addDataTracksMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <Menu class="javax.swing.JMenu" name="addNewDataItemMenu">
+              <Properties>
+                <Property name="text" type="java.lang.String" resourceKey="addNewDataItemMenu.text"/>
+                <Property name="name" type="java.lang.String" value="addNewDataItemMenu" noResource="true"/>
+              </Properties>
+              <SubComponents>
+                <MenuItem class="javax.swing.JMenuItem" name="addBackgroundMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addBackgroundMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addBackgroundMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addExpressionProfileMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addExpressionProfileMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addExpressionProfileMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addMotifMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addMotifMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addMotifMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addMotifCollectionMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addMotifCollectionMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addMotifCollectionMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addMotifPartitionMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addMotifPartitionMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addMotifPartitionMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addMotifMapMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addMotifMapMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addMotifMapMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addBackgroundFrequenciesMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addBackgroundFrequenciesMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addBackgroundFrequenciesMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addModuleMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addModuleMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addModuleMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addModuleCollectionMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addModuleCollectionMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addModuleCollectionMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="jMenuItem2">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="jMenuItem2.text"/>
+                    <Property name="name" type="java.lang.String" value="jMenuItem2" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addModuleMapMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addModuleMapMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addModuleMapMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="jMenuItem3">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="jMenuItem3.text"/>
+                    <Property name="name" type="java.lang.String" value="jMenuItem3" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addNumericVariableMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addNumericVariableMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addNumericVariableMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addPriorsGeneratorMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addPriorsGeneratorMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addPriorsGeneratorMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addSequenceCollectionMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addSequenceCollectionMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addSequenceCollectionMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addSequencePartitionMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addSequencePartitionMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addSequencePartitionMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addSequenceMapMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addSequenceMapMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addSequenceMapMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addNumericMapVariableMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addNumericMapVariableMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addNumericMapVariableMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="addTextVariableMenuItem">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" resourceKey="addTextVariableMenuItem.text"/>
+                    <Property name="name" type="java.lang.String" value="addTextVariableMenuItem" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addDataItemMenuHandler"/>
+                  </Events>
+                </MenuItem>
+              </SubComponents>
+            </Menu>
+            <MenuItem class="javax.swing.JMenuItem" name="importFromFileMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showLoadFromFileDialog" methodName="showLoadFromFileDialog"/>
+                </Property>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="importFromFileMenuItem.toolTipText"/>
+                <Property name="name" type="java.lang.String" value="importFromFileMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="favoritesMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showFavoritesDialog" methodName="showFavoritesDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="favoritesMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="favoritesMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JSeparator" name="dataMenuSeparator1">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="dataMenuSeparator1" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <Menu class="javax.swing.JMenu" name="clearDataSubmenu">
+              <Properties>
+                <Property name="text" type="java.lang.String" resourceKey="clearDataSubmenu.text"/>
+                <Property name="name" type="java.lang.String" value="clearDataSubmenu" noResource="true"/>
+              </Properties>
+              <SubComponents>
+                <MenuItem class="javax.swing.JMenuItem" name="clearSequencesAndFeaturesMenuItem">
+                  <Properties>
+                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                      <action class="motiflab.gui.MotifLabGUI" id="clearAllSequencesActionMethod" methodName="clearAllSequencesActionMethod"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" resourceKey="clearSequencesAndFeaturesMenuItem.text"/>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="clearSequencesAndFeaturesMenuItem.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="clearSequencesAndFeaturesMenuItem" noResource="true"/>
+                  </Properties>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="clearFeatureDataMenuItem">
+                  <Properties>
+                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                      <action class="motiflab.gui.MotifLabGUI" id="clearFeatureDataActionMethod" methodName="clearFeatureDataActionMethod"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" resourceKey="clearFeatureDataMenuItem.text"/>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="clearFeatureDataMenuItem.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="clearFeatureDataMenuItem" noResource="true"/>
+                  </Properties>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="clearMotifsAndModulesMenuItem">
+                  <Properties>
+                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                      <action class="motiflab.gui.MotifLabGUI" id="clearAllMotifsAndModulesActionMethod" methodName="clearAllMotifsAndModulesActionMethod"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" resourceKey="clearMotifsAndModulesMenuItem.text"/>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="clearMotifsAndModulesMenuItem.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="clearMotifsAndModulesMenuItem" noResource="true"/>
+                  </Properties>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="clearModulesMenuItem">
+                  <Properties>
+                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                      <action class="motiflab.gui.MotifLabGUI" id="clearAllModulesActionMethod" methodName="clearAllModulesActionMethod"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" resourceKey="clearModulesMenuItem.text"/>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="clearModulesMenuItem.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="clearModulesMenuItem" noResource="true"/>
+                  </Properties>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="jMenuItem4">
+                  <Properties>
+                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                      <action class="motiflab.gui.MotifLabGUI" id="clearSequenceRelatedDataMethod" methodName="clearSequenceRelatedDataMethod"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" resourceKey="jMenuItem4.text"/>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="jMenuItem4.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="jMenuItem4" noResource="true"/>
+                  </Properties>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="clearOtherDataMenuItem">
+                  <Properties>
+                    <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                      <action class="motiflab.gui.MotifLabGUI" id="clearOtherDataActionMethod" methodName="clearOtherDataActionMethod"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" resourceKey="clearOtherDataMenuItem.text"/>
+                    <Property name="toolTipText" type="java.lang.String" resourceKey="clearOtherDataMenuItem.toolTipText"/>
+                    <Property name="name" type="java.lang.String" value="clearOtherDataMenuItem" noResource="true"/>
+                  </Properties>
+                </MenuItem>
+              </SubComponents>
+            </Menu>
+            <MenuItem class="javax.swing.JMenuItem" name="clearAllDataMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="clearAllDataActionMethod" methodName="clearAllDataActionMethod"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="clearAllDataMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="clearAllDataMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="operationsMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="operationsMenu.text"/>
+            <Property name="name" type="java.lang.String" value="operationsMenu" noResource="true"/>
+          </Properties>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="protocolMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="protocolMenu.text"/>
+            <Property name="name" type="java.lang.String" value="protocolMenu" noResource="true"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="recordMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="recordMode" methodName="recordMode"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="recordMenuItem" noResource="true"/>
+                <Property name="selectedIcon" type="javax.swing.Icon" resourceKey="recordMenuItem.selectedIcon"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="executeMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="executeProtocol" methodName="executeProtocol"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="executeMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="stopMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="stopAction" methodName="stopAction"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="stopMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JSeparator" name="protocolMenuSeparator1">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="protocolMenuSeparator1" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="executeCurrentLineMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="executeCurrentProtocolLine" methodName="executeCurrentProtocolLine"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="executeCurrentLineMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="executeCurrentLineMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="executeFromCurrentLineMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="executeProtocolFromCurrentLine" methodName="executeProtocolFromCurrentLine"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="executeFromCurrentLineMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="executeFromCurrentLineMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="executeCurrentSelectionMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="executeCurrentProtocolSelection" methodName="executeCurrentProtocolSelection"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="executeCurrentSelectionMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="executeCurrentSelectionMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="commentSelectedLines">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="commentSelectedLinesInProtocol" methodName="commentSelectedLinesInProtocol"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="commentSelectedLines.text"/>
+                <Property name="name" type="java.lang.String" value="commentSelectedLines" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="uncommentSelectedLines">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="uncommentSelectedLinesInProtocol" methodName="uncommentSelectedLinesInProtocol"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="uncommentSelectedLines.text"/>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="uncommentSelectedLines.toolTipText"/>
+                <Property name="name" type="java.lang.String" value="uncommentSelectedLines" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="colorKeywordsMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="selectColorProtocol" methodName="selectColorProtocol"/>
+                </Property>
+                <Property name="selected" type="boolean" value="true"/>
+                <Property name="name" type="java.lang.String" value="colorKeywordsMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="protocolMenuSeparator2">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="protocolMenuSeparator2" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="macroEditorMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showMacroEditor" methodName="showMacroEditor"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="macroEditorMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="macroEditorMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="expandMacrosMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="expandMacrosInCurrentProtocol" methodName="expandMacrosInCurrentProtocol"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="expandMacrosMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="expandMacrosMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="protocolMenuSeparator3">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="protocolMenuSeparator3" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <Menu class="javax.swing.JMenu" name="changeProtocolSubmenu">
+              <Properties>
+                <Property name="text" type="java.lang.String" resourceKey="changeProtocolSubmenu.text"/>
+                <Property name="name" type="java.lang.String" value="changeProtocolSubmenu" noResource="true"/>
+              </Properties>
+            </Menu>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="toolsMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="toolsMenu.text"/>
+            <Property name="name" type="java.lang.String" value="toolsMenu" noResource="true"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="selectionToolMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="selectionToolAction" methodName="selectionToolAction"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="selectionToolMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="selectionToolMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="handToolMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="handToolAction" methodName="handToolAction"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="handToolMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="handToolMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="drawToolMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="drawToolAction" methodName="drawToolAction"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="drawToolMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="zoomToolMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="zoomToolAction" methodName="zoomToolAction"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="zoomToolMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="zoomToolMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JSeparator" name="toolsMenuSeparator1">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolsMenuSeparator1" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="motifBrowserMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showMotifBrowser" methodName="showMotifBrowser"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="motifBrowserMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="motifBrowserMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="moduleBrowserMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showModuleBrowser" methodName="showModuleBrowser"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="moduleBrowserMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="moduleBrowserMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="sequenceBrowserMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showSequenceBrowser" methodName="showSequenceBrowser"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="sequenceBrowserMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="sequenceBrowserMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="regionBrowserMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showRegionBrowser" methodName="showRegionBrowser"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="regionBrowserMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="regionBrowserMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="toolsMenuSeparator2">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolsMenuSeparator2" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="interactionFilterMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showInteractionsFilterDialog" methodName="showInteractionsFilterDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="interactionFilterMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="interactionFilterMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="PositionalDistributionViewerMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showPositionalDistributionViewerDialog" methodName="showPositionalDistributionViewerDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="PositionalDistributionViewerMenuItem.text"/>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="PositionalDistributionViewerMenuItem.toolTipText"/>
+                <Property name="name" type="java.lang.String" value="PositionalDistributionViewerMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="motifScoreFilterMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showMotifScoreFilterDialog" methodName="showMotifScoreFilterDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="motifScoreFilterMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="motifScoreFilterMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="toolsMenuSeparator3">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="toolsMenuSeparator3" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="cropSequencesMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showCropSequencesDialog" methodName="showCropSequencesDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="cropSequencesMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="cropSequencesMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="extendSequencesMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showExtendSequencesDialog" methodName="showExtendSequencesDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="extendSequencesMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="extendSequencesMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="sortSequencesToolMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showSortSequencesDialog" methodName="showSortSequencesDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="sortSequencesToolMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="sortSequencesToolMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="updateMotifsMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showAnnotateMotifsDialog" methodName="showAnnotateMotifsDialog"/>
+                </Property>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="updateMotifsMenuItem.toolTipText"/>
+                <Property name="name" type="java.lang.String" value="updateMotifsMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="configureMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="configureMenu.text"/>
+            <Property name="name" type="java.lang.String" value="configureMenu" noResource="true"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="configureDatatracksMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showConfigureDatatracksDialog" methodName="showConfigureDatatracksDialog"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="configureDatatracksMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="configureOrganismsAndIdentifiersMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showConfigureOrganismsAndIdentifiersDialog" methodName="showConfigureOrganismsAndIdentifiersDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="configureOrganismsAndIdentifiersMenuItem.text"/>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="configureOrganismsAndIdentifiersMenuItem.toolTipText"/>
+                <Property name="name" type="java.lang.String" value="configureOrganismsAndIdentifiersMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="externalProgramMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showConfigureExternalProgramsDialog" methodName="showConfigureExternalProgramsDialog"/>
+                </Property>
+                <Property name="toolTipText" type="java.lang.String" resourceKey="externalProgramMenuItem.toolTipText"/>
+                <Property name="name" type="java.lang.String" value="externalProgramMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="datarepositoriesMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showDataRepositoriesDialog" methodName="showDataRepositoriesDialog"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="datarepositoriesMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="pluginsMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showPluginsDialog" methodName="showPluginsDialog"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="pluginsMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="pluginsMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="optionsMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showOptionsDialog" methodName="showOptionsDialog"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="optionsMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="configureMenuSeparator1">
+              <Properties>
+                <Property name="name" type="java.lang.String" value="configureMenuSeparator1" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="installConfigFileMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="installConfigurationFile" methodName="installConfigurationFile"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="installConfigFileMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="installConfigFileMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="backupConfigurationMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="backupCurrentConfiguration" methodName="backupCurrentConfiguration"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="backupConfigurationMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="backupConfigurationMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="helpMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" resourceKey="helpMenu.text"/>
+            <Property name="name" type="java.lang.String" value="helpMenu" noResource="true"/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+          </AuxValues>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="helpMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="helpAction" methodName="helpAction"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="helpMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="welcomeMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showWelcomeScreen" methodName="showWelcomeScreen"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="welcomeMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="welcomeMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="quickTutorialMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="quickstartTutorialAction" methodName="quickstartTutorialAction"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="quickTutorialMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="quickTutorialMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="keyboardshortcutsMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showKeyboardShortcutsAction" methodName="showKeyboardShortcutsAction"/>
+                </Property>
+                <Property name="text" type="java.lang.String" resourceKey="keyboardshortcutsMenuItem.text"/>
+                <Property name="name" type="java.lang.String" value="keyboardshortcutsMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <Menu class="javax.swing.JMenu" name="exampleSessionsMenu">
+              <Properties>
+                <Property name="text" type="java.lang.String" resourceKey="exampleSessionsMenu.text"/>
+                <Property name="enabled" type="boolean" value="false"/>
+                <Property name="name" type="java.lang.String" value="exampleSessionsMenu" noResource="true"/>
+              </Properties>
+            </Menu>
+            <MenuItem class="javax.swing.JMenuItem" name="citationsMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showCitationDialog" methodName="showCitationDialog"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="citationsMenuItem" noResource="true"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="aboutMenuItem">
+              <Properties>
+                <Property name="action" type="javax.swing.Action" editor="org.netbeans.modules.swingapp.ActionEditor">
+                  <action class="motiflab.gui.MotifLabGUI" id="showAboutBox" methodName="showAboutBox"/>
+                </Property>
+                <Property name="name" type="java.lang.String" value="aboutMenuItem" noResource="true"/>
+              </Properties>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+              </AuxValues>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+      </SubComponents>
+    </Container>
+    <Container class="javax.swing.JPanel" name="statusPanel">
+      <Properties>
+        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[32767, 30]"/>
+        </Property>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[0, 30]"/>
+        </Property>
+        <Property name="name" type="java.lang.String" value="statusPanel" noResource="true"/>
+        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[2, 30]"/>
+        </Property>
+      </Properties>
+
+      <Layout>
+        <DimensionLayout dim="0">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Component id="statusPanelSeparator" alignment="0" pref="1293" max="32767" attributes="0"/>
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="statusMessageLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="1119" max="32767" attributes="0"/>
+                  <Component id="progressBar" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="statusAnimationLabel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+        <DimensionLayout dim="1">
+          <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <Component id="statusPanelSeparator" min="-2" pref="2" max="-2" attributes="0"/>
+                  <EmptySpace pref="9" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="statusMessageLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="statusAnimationLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="progressBar" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
+              </Group>
+          </Group>
+        </DimensionLayout>
+      </Layout>
+      <SubComponents>
+        <Component class="javax.swing.JSeparator" name="statusPanelSeparator">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="statusPanelSeparator" noResource="true"/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableLocal" type="java.lang.Boolean" value="true"/>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="0"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JLabel" name="statusMessageLabel">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="statusMessageLabel" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="statusAnimationLabel">
+          <Properties>
+            <Property name="horizontalAlignment" type="int" value="2"/>
+            <Property name="name" type="java.lang.String" value="statusAnimationLabel" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JProgressBar" name="progressBar">
+          <Properties>
+            <Property name="name" type="java.lang.String" value="progressBar" noResource="true"/>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Component class="javax.swing.ButtonGroup" name="selectedToolButtonGroup">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="recplaystopButtonGroup">
+    </Component>
+  </NonVisualComponents>
+  <Properties>
+    <Property name="component" type="javax.swing.JComponent" editor="org.netbeans.modules.form.ComponentChooserEditor">
+      <ComponentRef name="topPanel"/>
+    </Property>
+    <Property name="menuBar" type="javax.swing.JMenuBar" editor="org.netbeans.modules.form.ComponentChooserEditor">
+      <ComponentRef name="menuBar"/>
+    </Property>
+    <Property name="statusBar" type="javax.swing.JComponent" editor="org.netbeans.modules.form.ComponentChooserEditor">
+      <ComponentRef name="statusPanel"/>
+    </Property>
+    <Property name="toolBar" type="javax.swing.JToolBar" editor="org.netbeans.modules.form.ComponentChooserEditor">
+      <ComponentRef name="Toolbar"/>
+    </Property>
+  </Properties>
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="2"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+    <AuxValue name="designerSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,1,-105,0,0,5,13"/>
+  </AuxValues>
+</Form>

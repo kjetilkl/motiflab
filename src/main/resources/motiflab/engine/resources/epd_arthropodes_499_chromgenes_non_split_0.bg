@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = insects
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_arthropodes_499_chromgenes_non_split.tfa
+#Path = 
+#
+
+#snf
+0.3171	0.2051	0.1817	0.2961	
+
+#oligo frequency 
+0.3171
+0.2051
+0.1817
+0.2961
+
+#transition matrix
+0.3171	0.2051	0.1817	0.2961	
+0.3171	0.2051	0.1817	0.2961	
+0.3171	0.2051	0.1817	0.2961	
+0.3171	0.2051	0.1817	0.2961	
+

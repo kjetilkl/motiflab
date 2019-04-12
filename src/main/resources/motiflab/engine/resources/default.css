@@ -1,0 +1,16 @@
+table {border-collapse:collapse;}
+td {border-width:1px; border-style:solid; border-color:#000000; padding:3px; border-collapse:collapse;}
+th {border-width:1px; border-style:solid; border-color:#000000; padding:3px; border-collapse:collapse; background-color:#CCCCCC;}
+.dataitem {font-weight:bold;}
+td.verysignificant {background-color:#FF0000;text-align:right;}
+td.significant {background-color:#FF8888;text-align:right;}
+td.onlyintarget {background-color:#FF0000;text-align:right;}
+td.overrepintarget {background-color:#FF8888;text-align:right;}
+td.intarget {background-color:#FF4444;text-align:right;}
+td.samerate {background-color:#FFFF00;text-align:right;}
+td.onlyincontrol {background-color:#00FF00;text-align:right;}
+td.overrepincontrol {background-color:#88FF88;text-align:right;}
+td.incontrol {background-color:#44FF44;text-align:right;}
+td.notpresent {background-color:#FFFFFF;text-align:right;}
+td.num {text-align:right;}
+td.namecolumn {font-weight: bold;}

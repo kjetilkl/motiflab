@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<program name="SimpleModuleScanner" class="ModuleScanning">
+    <properties>
+      <author>Kjetil Klepper</author>
+      <contact>Kjetil Klepper (kjetil.klepper@ntnu.no)</contact>
+      <homepage>http://www.motiflab.org</homepage>
+      <description>A primitive module scanning program</description>
+    </properties>
+
+    <service type="bundled" location="motiflab.external.SimpleModuleScanner"/>
+
+</program>
+

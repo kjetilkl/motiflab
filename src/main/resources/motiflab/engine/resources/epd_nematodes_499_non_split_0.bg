@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = nematodes
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_nematodes_499_non_split.tfa
+#Path = 
+#
+
+#snf
+0.2955	0.2010	0.1958	0.3078	
+
+#oligo frequency 
+0.2955
+0.2010
+0.1958
+0.3078
+
+#transition matrix
+0.2955	0.2010	0.1958	0.3078	
+0.2955	0.2010	0.1958	0.3078	
+0.2955	0.2010	0.1958	0.3078	
+0.2955	0.2010	0.1958	0.3078	
+

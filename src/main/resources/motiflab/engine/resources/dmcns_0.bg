@@ -1,0 +1,17 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = unknown
+#Sequences = dmcns.tfa
+#Path = 
+#
+
+#snf
+0.279903	0.225148	0.223316	0.271633	
+
+#oligo frequency
+1
+
+#transition matrix
+0.279903	0.225148	0.223316	0.271633	
+

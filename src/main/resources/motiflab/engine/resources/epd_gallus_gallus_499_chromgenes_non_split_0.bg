@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = chicken
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_gallus_gallus_499_chromgenes_non_split.tfa
+#Path = 
+#
+
+#snf
+0.2635	0.2483	0.2399	0.2483	
+
+#oligo frequency 
+0.2635
+0.2483
+0.2399
+0.2483
+
+#transition matrix
+0.2635	0.2483	0.2399	0.2483	
+0.2635	0.2483	0.2399	0.2483	
+0.2635	0.2483	0.2399	0.2483	
+0.2635	0.2483	0.2399	0.2483	
+

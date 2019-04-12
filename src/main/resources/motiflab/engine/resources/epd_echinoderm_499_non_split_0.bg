@@ -1,0 +1,23 @@
+#INCLUSive Background Model v1.0
+#
+#Order = 0
+#Organism = echinoderm
+#Sequences = d:\sae\projects\sista.sequence\sequenceviewer\bgModels\epd_echinoderm_499_non_split.tfa
+#Path = 
+#
+
+#snf
+0.2929	0.2232	0.2010	0.2828	
+
+#oligo frequency 
+0.2929
+0.2232
+0.2010
+0.2828
+
+#transition matrix
+0.2929	0.2232	0.2010	0.2828	
+0.2929	0.2232	0.2010	0.2828	
+0.2929	0.2232	0.2010	0.2828	
+0.2929	0.2232	0.2010	0.2828	
+

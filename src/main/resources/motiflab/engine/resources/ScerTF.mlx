@@ -1,0 +1,3842 @@
+#MotifLabMotif   (inspired by INCLUSive Motif Model v1.0)
+#Collection=ScerTF
+#
+#ID = ABF1
+#Short = ABF1
+#Long = ARS-Binding Factor 1
+#Alias = YKL112W,SBF1,REB2,OBF1,BAF1
+#Interactions = BAS1,GCN4,HSF1,MBP1,PDR1,REB1,RPN4,STB1,STB3,SUM1,SWI4,SWI6
+#W = 15
+#Description = "DNA binding protein with possible chromatin-reorganizing activity involved in transcriptional activation, gene silencing, and DNA replication and repair"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003688,GO:0000978,GO:0001077,GO:0043565,GO:0044374,GO:0043565,GO:0006338,GO:0030466,GO:0006261,GO:0070911,GO:0000122,GO:0045944,GO:0000113,GO:0005634,GO:0003677,GO:0006260,GO:0006342,GO:0006338,GO:0006289,GO:0045944,GO:0000122,GO:0006357,GO:0019740,GO:0030435,GO:0007126,GO:0005840,GO:0005634,GO:0004674,GO:0051170,GO:0005087,GO:0006406
+0.231	0.132	0.119	0.518
+0.678	0.017	0.295	0.010
+0.006	0.012	0.004	0.978
+0.019	0.975	0.004	0.002
+0.830	0.004	0.160	0.006
+0.002	0.565	0.001	0.432
+0.054	0.113	0.059	0.774
+0.395	0.159	0.099	0.347
+0.156	0.191	0.048	0.605
+0.417	0.127	0.270	0.186
+0.224	0.267	0.116	0.393
+0.980	0.008	0.010	0.002
+0.002	0.982	0.008	0.008
+0.012	0.004	0.982	0.002
+0.459	0.105	0.198	0.238
+
+#ID = ABF2
+#Short = ABF2
+#Long = ARS-Binding Factor
+#Alias = YMR072W
+#W = 6
+#Description = "Mitochondrial DNA-binding protein involved in mitochondrial DNA replication and recombination, member of HMG1 DNA-binding protein family, activity may be regulated by protein kinase A phosphorylation"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0008301,GO:0090139,GO:0000002,GO:0000001,GO:0000262,GO:0042645,GO:0005739
+0.090	0.090	0.020	0.800
+0.010	0.970	0.010	0.010
+0.010	0.010	0.010	0.970
+0.970	0.010	0.010	0.010
+0.010	0.010	0.970	0.010
+0.940	0.020	0.020	0.020
+
+#ID = ACA1
+#Short = ACA1
+#Long = ATF/CREB Activator
+#Alias = YER045C
+#Interactions = GCN4,MSN2,MSN4,RTG3
+#W = 17
+#Description = "Basic leucine zipper (bZIP) transcription factor of the ATF/CREB family, may regulate transcription of genes involved in utilization of non-optimal carbon sources"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001077,GO:0043565,GO:0045944,GO:0005634
+0.920	0.010	0.060	0.010
+0.347	0.614	0.020	0.020
+0.170	0.220	0.160	0.450
+0.970	0.010	0.010	0.010
+0.010	0.010	0.960	0.020
+0.010	0.010	0.020	0.960
+0.210	0.130	0.650	0.010
+0.360	0.010	0.560	0.070
+0.460	0.130	0.040	0.370
+0.010	0.190	0.330	0.470
+0.020	0.436	0.089	0.455
+0.010	0.950	0.010	0.030
+0.861	0.010	0.119	0.010
+0.010	0.970	0.010	0.010
+0.060	0.540	0.360	0.040
+0.386	0.010	0.584	0.020
+0.470	0.040	0.350	0.140
+
+#ID = ACE2
+#Short = ACE2
+#Long = Activator of CUP1 Expression
+#Alias = YLR131C
+#W = 8
+#Description = "Transcription factor that activates expression of early G1-specific genes, localizes to daughter cell nuclei after cytokinesis and delays G1 progression in daughters, localization is regulated by phosphorylation, potential Cdc28p substrate"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000987,GO:0000982,GO:0043565,GO:2001043,GO:0000114,GO:0005829,GO:0005634
+0.743	0.124	0.132	0.001
+0.731	0.032	0.199	0.038
+0.001	0.804	0.027	0.168
+0.029	0.832	0.001	0.138
+0.548	0.361	0.017	0.074
+0.274	0.030	0.646	0.050
+0.112	0.524	0.066	0.298
+0.601	0.339	0.017	0.043
+
+#ID = ADR1
+#Short = ADR1
+#Long = Alcohol Dehydrogenase Regulator
+#Alias = YDR216W
+#W = 13
+#Description = "Carbon source-responsive zinc-finger transcription factor, required for transcription of the glucose-repressed gene ADH2, of peroxisomal protein genes, and of genes required for ethanol, glycerol, and fatty acid utilization"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001102,GO:0000978,GO:0000982,GO:0001190,GO:0001093,GO:0001094,GO:0043565,GO:0071400,GO:0006325,GO:0031936,GO:0007031,GO:0061425,GO:0032000,GO:0061424,GO:0045944,GO:0061410,GO:0034401,GO:0005634,GO:0001190,GO:0006366,GO:0045014,GO:0004022,GO:0019655,GO:0006071,GO:0006631,GO:0007031,GO:0003677,GO:0003700,GO:0005669,GO:0016568,GO:0004407,GO:0016584,GO:0004672,GO:0004722,GO:0000164,GO:0016310,GO:0005952
+0.574	0.307	0.020	0.099
+0.060	0.010	0.150	0.780
+0.050	0.110	0.800	0.040
+0.010	0.871	0.030	0.089
+0.520	0.010	0.430	0.040
+0.851	0.010	0.069	0.069
+0.297	0.584	0.099	0.020
+0.010	0.970	0.010	0.010
+0.010	0.208	0.010	0.772
+0.020	0.158	0.762	0.059
+0.020	0.010	0.080	0.890
+0.030	0.576	0.091	0.303
+0.505	0.337	0.010	0.149
+
+#ID = AFT1
+#Short = AFT1
+#Long = Activator of Ferrous Transport
+#Alias = YGL071W,RCS1
+#Interactions = MIG1,RSF2,SOK2
+#W = 9
+#Description = "Transcription factor involved in iron utilization and homeostasis, binds the consensus site PyPuCACCCPu and activates the expression of target genes in response to changes in iron availability"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000987,GO:0000982,GO:0043565,GO:0034087,GO:0045132,GO:0034758,GO:0045944,GO:0036086,GO:0005737,GO:0005634
+0.394	0.061	0.121	0.424
+0.370	0.130	0.110	0.390
+0.090	0.060	0.190	0.660
+0.040	0.010	0.940	0.010
+0.010	0.901	0.010	0.079
+0.970	0.010	0.010	0.010
+0.010	0.970	0.010	0.010
+0.030	0.950	0.010	0.010
+0.010	0.790	0.010	0.190
+
+#ID = AFT2
+#Short = AFT2
+#Long = Activator of Fe (iron) Transcription
+#Alias = YPL202C
+#Interactions = CAT8,FHL1,GSM1,MIG1,MIG3,RAP1,RSF2,SFP1,SUT1,TYE7
+#W = 8
+#Description = "Iron-regulated transcriptional activator, activates genes involved in intracellular iron use and required for iron homeostasis and resistance to oxidative stress, similar to Aft1p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:0006879,GO:0034599,GO:0045944,GO:0036086,GO:0005634,GO:0005739
+0.190	0.270	0.370	0.170
+0.290	0.030	0.600	0.080
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.010	0.020	0.010	0.960
+0.010	0.010	0.970	0.010
+0.010	0.386	0.010	0.594
+0.180	0.240	0.380	0.200
+
+#ID = ARG80
+#Short = ARG80
+#Long = ARGinine requiring
+#Alias = YMR042W,ARGRI,ARGR1
+#Interactions = BAS1,GCN4,RSF2
+#W = 12
+#Description = "Transcription factor involved in regulation of arginine-responsive genes, acts with Arg81p and Arg82p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000987,GO:0000982,GO:0045944,GO:1900079,GO:1900081,GO:0005634
+0.035	0.244	0.101	0.620
+0.031	0.086	0.088	0.795
+0.158	0.102	0.199	0.541
+0.074	0.564	0.133	0.229
+0.051	0.837	0.060	0.052
+0.229	0.168	0.355	0.248
+0.176	0.373	0.102	0.350
+0.360	0.322	0.296	0.023
+0.123	0.355	0.283	0.239
+0.199	0.147	0.326	0.328
+0.427	0.258	0.220	0.096
+0.029	0.024	0.929	0.018
+
+#ID = ARG81
+#Short = ARG81
+#Long = ARGinine requiring
+#Alias = YML099C,ARGRII,ARGR2
+#Interactions = CAT8,STB4
+#W = 8
+#Description = "Zinc-finger transcription factor of the Zn(2)-Cys(6) binuclear cluster domain type, involved in the regulation of arginine-responsive genes, acts with Arg80p and Arg82p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003712,GO:0006525,GO:0045955,GO:0005634
+0.300	0.060	0.420	0.220
+0.040	0.010	0.020	0.930
+0.080	0.010	0.900	0.010
+0.970	0.010	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.970	0.010	0.010
+0.320	0.320	0.020	0.340
+
+#ID = ARO80
+#Short = ARO80
+#Long = AROmatic amino acid requiring
+#Alias = YDR421W
+#W = 13
+#Description = "Zinc finger transcriptional activator of the Zn2Cys6 family, activates transcription of aromatic amino acid catabolic genes in the presence of aromatic amino acids"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001071,GO:0000981,GO:0043565,GO:0009074,GO:0045944,GO:0005634
+0.052	0.827	0.058	0.063
+0.091	0.044	0.833	0.032
+0.018	0.062	0.797	0.123
+0.243	0.223	0.100	0.434
+0.373	0.180	0.075	0.372
+0.569	0.137	0.170	0.124
+0.198	0.146	0.188	0.468
+0.085	0.339	0.187	0.388
+0.276	0.234	0.247	0.244
+0.212	0.028	0.208	0.552
+0.053	0.876	0.035	0.036
+0.026	0.151	0.748	0.075
+0.076	0.066	0.834	0.024
+
+#ID = ARR1
+#Short = ARR1
+#Long = ARsenicals Resistance
+#Alias = YPR199C,ACR1,YAP8
+#W = 10
+#Description = "Transcriptional activator of the basic leucine zipper (bZIP) family, required for transcription of genes involved in resistance to arsenic compounds"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0061395,GO:0061395,GO:0005737,GO:0005634
+0.214	0.127	0.556	0.103
+0.219	0.020	0.032	0.729
+0.172	0.077	0.054	0.697
+0.621	0.072	0.135	0.172
+0.107	0.746	0.119	0.028
+0.024	0.085	0.080	0.811
+0.754	0.110	0.070	0.066
+0.758	0.022	0.027	0.193
+0.156	0.233	0.281	0.330
+0.103	0.624	0.095	0.178
+
+#ID = ASG1
+#Short = ASG1
+#Long = Activator of Stress Genes
+#Alias = YIL130W
+#W = 15
+#Description = "Zinc cluster protein proposed to function as a transcriptional regulator involved in the stress response, null mutants have a respiratory deficiency, calcofluor white sensitivity and slightly increased cycloheximide resistance"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005634
+0.051	0.859	0.020	0.071
+0.020	0.890	0.080	0.010
+0.010	0.100	0.870	0.020
+0.050	0.070	0.840	0.040
+0.232	0.424	0.283	0.061
+0.263	0.505	0.061	0.172
+0.040	0.060	0.650	0.250
+0.480	0.070	0.220	0.230
+0.060	0.070	0.650	0.220
+0.350	0.060	0.080	0.510
+0.110	0.320	0.140	0.430
+0.040	0.840	0.070	0.050
+0.020	0.870	0.100	0.010
+0.010	0.080	0.890	0.020
+0.071	0.020	0.859	0.051
+
+#ID = ASH1
+#Short = ASH1
+#Long = Asymmetric Synthesis of HO
+#Alias = YKL185W
+#Interactions = MBP1,MCM1,SWI6
+#W = 10
+#Description = "Zinc-finger inhibitor of HO transcription, mRNA is localized and translated in the distal tip of anaphase cells, resulting in accumulation of Ash1p in daughter cell nuclei and inhibition of HO expression, potential Cdc28p substrate"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000987,GO:0001078,GO:2000134,GO:0031495,GO:0000122,GO:2000222,GO:0045944,GO:0005933,GO:0005634,GO:0033698,GO:0033698,GO:0070210,GO:0007533,GO:0007124,GO:0000118
+0.001	0.729	0.039	0.231
+0.001	0.960	0.001	0.038
+0.391	0.080	0.447	0.082
+0.376	0.189	0.342	0.093
+0.809	0.001	0.189	0.001
+0.006	0.048	0.037	0.909
+0.223	0.503	0.037	0.237
+0.505	0.002	0.311	0.182
+0.001	0.037	0.828	0.134
+0.015	0.002	0.851	0.132
+
+#ID = AZF1
+#Short = AZF1
+#Long = Asparagine-rich Zinc-Finger
+#Alias = YOR113W
+#W = 18
+#Description = "Zinc-finger transcription factor, involved in induction of CLN3 transcription in response to glucose, genetic and physical interactions indicate a possible role in mitochondrial transcription or genome maintenance"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:0071322,GO:0060237,GO:0006357,GO:0005634
+0.014	0.216	0.007	0.763
+0.332	0.064	0.022	0.582
+0.001	0.001	0.042	0.956
+0.001	0.001	0.001	0.997
+0.027	0.015	0.223	0.735
+0.180	0.549	0.049	0.222
+0.014	0.007	0.216	0.763
+0.111	0.015	0.181	0.693
+0.069	0.098	0.015	0.818
+0.069	0.181	0.015	0.735
+0.001	0.416	0.001	0.582
+0.152	0.764	0.015	0.069
+0.235	0.015	0.181	0.569
+0.250	0.001	0.500	0.250
+0.014	0.299	0.007	0.680
+0.001	0.125	0.292	0.582
+0.055	0.007	0.216	0.722
+0.042	0.540	0.001	0.417
+
+#ID = BAS1
+#Short = BAS1
+#Long = BASal
+#Alias = YKR099W
+#Interactions = ABF1,ARG80,GCN4,RTG3
+#W = 10
+#Description = "Myb-related transcription factor involved in regulating basal and induced expression of genes of the purine and histidine biosynthesis pathways, also involved in regulation of meiotic recombination at specific genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001046,GO:0001135,GO:0000981,GO:0043565,GO:0045944,GO:0005634,GO:0003700,GO:0000105,GO:0006144,GO:0006207
+0.033	0.006	0.051	0.911
+0.056	0.014	0.903	0.026
+0.920	0.003	0.038	0.038
+0.004	0.908	0.004	0.085
+0.004	0.035	0.004	0.958
+0.003	0.955	0.003	0.040
+0.017	0.268	0.244	0.472
+0.171	0.074	0.386	0.371
+0.208	0.227	0.303	0.262
+0.149	0.414	0.079	0.359
+
+#ID = CAD1
+#Short = CAD1
+#Long = CADmium resistance
+#Alias = YDR423C,YAP2
+#W = 10
+#Description = "AP-1-like basic leucine zipper (bZIP) transcriptional activator involved in stress responses, iron metabolism, and pleiotropic drug resistance, controls a set of genes involved in stabilizing proteins, binds consensus sequence TTACTAA"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001077,GO:0043565,GO:0071276,GO:0045944,GO:0036003,GO:0005737,GO:0005634
+0.811	0.116	0.042	0.032
+0.026	0.002	0.009	0.963
+0.007	0.008	0.005	0.979
+0.850	0.027	0.006	0.116
+0.159	0.155	0.664	0.022
+0.016	0.004	0.006	0.974
+0.834	0.147	0.006	0.012
+0.986	0.002	0.005	0.007
+0.004	0.006	0.607	0.383
+0.030	0.901	0.011	0.057
+
+#ID = CAT8
+#Short = CAT8
+#Long = CATabolite repression
+#Alias = YMR280C,MSP8,DIL1
+#Interactions = AFT2,ARG81,MIG3,PDR1,RSC3,RSF2,SKN7,STP1,YRM1
+#W = 6
+#Description = "Zinc cluster transcriptional activator necessary for derepression of a variety of genes under non-fermentative growth conditions, active after diauxic shift, binds carbon source responsive elements"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:0035948,GO:0035959,GO:0061414,GO:0005634,GO:0006094,GO:0006068,GO:0006097,GO:0045014,GO:0006468
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.650	0.130	0.210	0.010
+0.320	0.180	0.280	0.220
+
+#ID = CBF1
+#Short = CBF1
+#Long = Centromere Binding Factor
+#Alias = YJR060W,CPF1,CEP1
+#Interactions = GCN4,HMS1,INO2,MET32,MET4,YDR026C
+#W = 8
+#Description = "Helix-loop-helix protein that binds the motif CACRTG, which is present at several sites including MET gene promoters and centromere DNA element I (CDEI), required for nucleosome positioning at this motif, targets Isw1p to DNA"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0019237,GO:0001102,GO:0000978,GO:0001078,GO:0001077,GO:0001103,GO:0001076,GO:0043565,GO:0006338,GO:0007059,GO:0006021,GO:0009086,GO:0000122,GO:0045944,GO:2000303,GO:0061432,GO:0000103,GO:0000775,GO:0000776,GO:0005739,GO:0005634
+0.245	0.002	0.737	0.016
+0.029	0.003	0.081	0.887
+0.011	0.978	0.005	0.006
+0.985	0.001	0.012	0.002
+0.004	0.938	0.006	0.052
+0.018	0.018	0.961	0.003
+0.017	0.008	0.004	0.971
+0.001	0.007	0.984	0.008
+
+#ID = CEP3
+#Short = CEP3
+#Long = CEntromere Protein
+#Alias = YMR168C,CSL1,CBF3B,CBF3
+#Interactions = MIG3
+#W = 20
+#Description = "Essential kinetochore protein, component of the CBF3 complex that binds the CDEIII region of the centromere, contains an N-terminal Zn2Cys6 type zinc finger domain, a C-terminal acidic domain, and a putative coiled coil dimerization domain"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0019237,GO:0008301,GO:0043565,GO:0007094,GO:0000921,GO:0031518,GO:0000778
+0.090	0.180	0.580	0.150
+0.240	0.150	0.480	0.130
+0.232	0.434	0.061	0.273
+0.130	0.310	0.480	0.080
+0.410	0.150	0.210	0.230
+0.110	0.570	0.170	0.150
+0.030	0.366	0.089	0.515
+0.010	0.030	0.010	0.950
+0.010	0.960	0.020	0.010
+0.010	0.280	0.700	0.010
+0.010	0.010	0.970	0.010
+0.788	0.040	0.141	0.030
+0.890	0.010	0.030	0.070
+0.660	0.140	0.100	0.100
+0.210	0.320	0.110	0.360
+0.347	0.277	0.149	0.228
+0.120	0.160	0.190	0.530
+0.202	0.162	0.434	0.202
+0.420	0.110	0.300	0.170
+0.170	0.130	0.570	0.130
+
+#ID = CHA4
+#Short = CHA4
+#Long = Catabolism of Hydroxy Amino acids
+#Alias = YLR098C,SIL3,SIL2
+#W = 17
+#Description = "DNA binding transcriptional activator, mediates serine/threonine activation of the catabolic L-serine (L-threonine) deaminase (CHA1), Zinc-finger protein with Zn[2]-Cys[6] fungal-type binuclear cluster domain"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0009063,GO:0045893,GO:0005634
+0.041	0.808	0.079	0.072
+0.068	0.074	0.759	0.099
+0.117	0.102	0.760	0.021
+0.218	0.176	0.148	0.458
+0.109	0.169	0.311	0.412
+0.559	0.097	0.134	0.210
+0.194	0.305	0.165	0.336
+0.304	0.286	0.240	0.170
+0.363	0.205	0.191	0.241
+0.121	0.055	0.494	0.329
+0.348	0.192	0.227	0.232
+0.314	0.138	0.306	0.242
+0.155	0.255	0.339	0.251
+0.293	0.391	0.125	0.192
+0.158	0.483	0.219	0.140
+0.017	0.083	0.833	0.067
+0.561	0.166	0.084	0.189
+
+#ID = CIN5
+#Short = CIN5
+#Long = Chromosome INstability
+#Alias = YOR028C,YAP4,HAL6
+#Interactions = MIG3,PDR3,PDR8,YPR196W
+#W = 11
+#Description = "Basic leucine zipper (bZIP) transcription factor of the yAP-1 family, mediates pleiotropic drug resistance and salt tolerance, nuclearly localized under oxidative stress and sequestered in the cytoplasm by Lot6p under reducing conditions"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0070491,GO:0043565,GO:0043565,GO:0006972,GO:0042538,GO:0006357,GO:0042493,GO:0005737,GO:0005634
+0.558	0.255	0.107	0.080
+0.014	0.014	0.037	0.935
+0.011	0.010	0.118	0.861
+0.864	0.081	0.023	0.032
+0.041	0.614	0.125	0.220
+0.330	0.257	0.359	0.054
+0.025	0.021	0.044	0.910
+0.836	0.141	0.007	0.016
+0.924	0.036	0.022	0.018
+0.129	0.221	0.357	0.293
+0.156	0.629	0.153	0.062
+
+#ID = CRZ1
+#Short = CRZ1
+#Long = Calcineurin-Responsive Zinc finger
+#Alias = YNL027W,TCN1,HAL8
+#Interactions = STP1,SUT1
+#W = 7
+#Description = "Transcription factor that activates transcription of genes involved in stress response, nuclear localization is positively regulated by calcineurin-mediated dephosphorylation"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000987,GO:0001077,GO:0043565,GO:0019722,GO:0006038,GO:0030007,GO:0050801,GO:2001040,GO:0061423,GO:0045944,GO:0007329,GO:0061422,GO:0061400,GO:0061404,GO:0005737,GO:0005634
+0.046	0.046	0.867	0.041
+0.349	0.041	0.156	0.454
+0.011	0.011	0.967	0.011
+0.011	0.011	0.967	0.011
+0.011	0.967	0.011	0.011
+0.011	0.011	0.186	0.792
+0.166	0.096	0.572	0.166
+
+#ID = CST6
+#Short = CST6
+#Long = Chromosome STability
+#Alias = YIL036W,SHF1,ACA2
+#Interactions = SUT1,YER184C
+#W = 6
+#Description = "Basic leucine zipper (bZIP) transcription factor of the ATF/CREB family, proposed to be a regulator of oleate responsive genes, involved in utilization of non-optimal carbon sources and chromosome stability"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001077,GO:0043565,GO:0043565,GO:0071244,GO:0071400,GO:0006259,GO:0045944,GO:0061429,GO:0005634
+0.010	0.010	0.010	0.970
+0.010	0.010	0.910	0.070
+0.970	0.010	0.010	0.010
+0.010	0.970	0.010	0.010
+0.050	0.010	0.930	0.010
+0.010	0.010	0.010	0.970
+
+#ID = CUP2
+#Short = CUP2
+#Long = 
+#Alias = YGL166W,ACE1
+#W = 11
+#Description = "Copper-binding transcription factor, activates transcription of the metallothionein genes CUP1-1 and CUP1-2 in response to elevated copper concentrations"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0005507,GO:0001202,GO:0000978,GO:0006357,GO:0046688,GO:0005634
+0.001	0.776	0.001	0.222
+0.997	0.001	0.001	0.001
+0.001	0.001	0.997	0.001
+0.222	0.776	0.001	0.001
+0.666	0.001	0.332	0.001
+0.444	0.111	0.444	0.001
+0.997	0.001	0.001	0.001
+0.997	0.001	0.001	0.001
+0.776	0.001	0.222	0.001
+0.443	0.001	0.001	0.555
+0.222	0.001	0.776	0.001
+
+#ID = CUP9
+#Short = CUP9
+#Long = 
+#Alias = YPL177C
+#W = 11
+#Description = "Homeodomain-containing transcriptional repressor of PTR2, which encodes a major peptide transporter, imported peptides activate ubiquitin-dependent proteolysis, resulting in degradation of Cup9p and de-repression of PTR2 transcription"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001103,GO:0001133,GO:0043565,GO:0035955,GO:0035952,GO:0005634
+0.147	0.580	0.183	0.090
+0.102	0.567	0.098	0.233
+0.578	0.097	0.199	0.126
+0.057	0.064	0.128	0.751
+0.800	0.096	0.072	0.032
+0.270	0.485	0.094	0.150
+0.589	0.164	0.154	0.093
+0.054	0.339	0.154	0.453
+0.011	0.939	0.026	0.024
+0.881	0.030	0.077	0.012
+0.047	0.623	0.147	0.183
+
+#ID = DAL80
+#Short = DAL80
+#Long = Degradation of Allantoin
+#Alias = YKR034W,UGA43
+#Interactions = GAT1,GLN3,GZF3
+#W = 5
+#Description = "Negative regulator of genes in multiple nitrogen degradation pathways, expression is regulated by nitrogen levels and by Gln3p, member of the GATA-binding family, forms homodimers and heterodimers with Deh1p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0000981,GO:0043565,GO:0000122,GO:0090295,GO:0005634,GO:0001078,GO:0000122,GO:0045847,GO:0019740,GO:0006810,GO:0044248,GO:0006541,GO:0006536,GO:0006560,GO:0019627,GO:0006525,GO:0009448,GO:0000255,GO:0007039,GO:0090294,GO:0090295
+0.012	0.012	0.964	0.012
+0.964	0.012	0.012	0.012
+0.012	0.012	0.012	0.964
+0.964	0.012	0.012	0.012
+0.964	0.012	0.012	0.012
+
+#ID = DAL81
+#Short = DAL81
+#Long = Degradation of Allantoin
+#Alias = YIR023W,UGA35
+#W = 12
+#Description = "Positive regulator of genes in multiple nitrogen degradation pathways, contains DNA binding domain but does not appear to bind the dodecanucleotide sequence present in the promoter region of many genes involved in allantoin catabolism"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001128,GO:0001190,GO:0001135,GO:0009450,GO:0001080,GO:0019740,GO:0043419,GO:0005634
+0.030	0.010	0.100	0.860
+0.495	0.446	0.050	0.010
+0.010	0.010	0.110	0.870
+0.010	0.960	0.020	0.010
+0.010	0.010	0.010	0.970
+0.080	0.010	0.010	0.900
+0.703	0.010	0.228	0.059
+0.010	0.010	0.010	0.970
+0.010	0.970	0.010	0.010
+0.020	0.010	0.010	0.960
+0.111	0.576	0.273	0.040
+0.150	0.710	0.130	0.010
+
+#ID = DAL82
+#Short = DAL82
+#Long = Degradation of Allantoin
+#Alias = YNL314W
+#Interactions = IME1,PDR1,PHD1,UME6,YER184C
+#W = 14
+#Description = "Positive regulator of allophanate inducible genes, binds a dodecanucleotide sequence upstream of all genes that are induced by allophanate, contains an UISALL DNA-binding, a transcriptional activation, and a coiled-coil domain"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0003700,GO:0043565,GO:0000256,GO:0001080,GO:0005634
+0.010	0.693	0.248	0.050
+0.051	0.253	0.687	0.010
+0.770	0.010	0.010	0.210
+0.960	0.010	0.020	0.010
+0.920	0.060	0.010	0.010
+0.410	0.490	0.010	0.090
+0.020	0.079	0.396	0.505
+0.010	0.303	0.333	0.354
+0.010	0.010	0.970	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.960	0.020
+0.010	0.710	0.140	0.140
+0.490	0.080	0.030	0.400
+0.050	0.290	0.530	0.130
+
+#ID = DIG1
+#Short = DIG1
+#Long = Down-regulator of Invasive Growth
+#Alias = YPL049C,RST1
+#W = 8
+#Description = "Regulatory protein of unknown function, constitutively-expressed, involved in the regulation of mating-specific genes and the invasive growth pathway, required for MAP-kinase imposed repression, inhibits pheromone-responsive transcription"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008134,GO:0003677,GO:2000218,GO:2000221,GO:0046020,GO:0005634
+0.505	0.010	0.426	0.059
+0.590	0.080	0.320	0.010
+0.020	0.010	0.960	0.010
+0.960	0.020	0.010	0.010
+0.970	0.010	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.010	0.830	0.150
+0.010	0.416	0.079	0.495
+
+#ID = DOT6
+#Short = DOT6
+#Long = Disruptor Of Telomeric silencing
+#Alias = YER088C,PBF2
+#Interactions = EDS1,STB3,TOD6
+#W = 10
+#Description = "Protein involved in rRNA and ribosome biogenesis, binds polymerase A and C motif, subunit of the RPD3L histone deacetylase complex, similar to Tod6p, has chromatin specific SANT domain, involved in telomeric gene silencing and filamentation"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0043565,GO:0000183,GO:0006348,GO:0030447,GO:0006357,GO:0009826,GO:0005737,GO:0005634,GO:0033698,GO:0070210
+0.515	0.059	0.139	0.287
+0.080	0.420	0.390	0.110
+0.030	0.760	0.200	0.010
+0.010	0.051	0.081	0.859
+0.010	0.970	0.010	0.010
+0.950	0.010	0.010	0.030
+0.010	0.010	0.030	0.950
+0.010	0.950	0.010	0.030
+0.040	0.010	0.871	0.079
+0.220	0.580	0.180	0.020
+
+#ID = ECM22
+#Short = ECM22
+#Long = ExtraCellular Mutant
+#Alias = YLR228C
+#W = 13
+#Description = "Sterol regulatory element binding protein, regulates transcription of sterol biosynthetic genes, contains Zn[2]-Cys[6] binuclear cluster, homologous to Upc2p, relocates from intracellular membranes to perinuclear foci on sterol depletion"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:0035961,GO:0035969,GO:0016020,GO:0005634,GO:0048471
+0.059	0.525	0.129	0.287
+0.010	0.780	0.200	0.010
+0.010	0.030	0.949	0.010
+0.040	0.010	0.940	0.010
+0.242	0.020	0.717	0.020
+0.140	0.260	0.160	0.440
+0.228	0.297	0.347	0.129
+0.230	0.080	0.420	0.270
+0.350	0.420	0.110	0.120
+0.020	0.930	0.010	0.040
+0.010	0.040	0.940	0.010
+0.020	0.020	0.950	0.010
+0.920	0.010	0.050	0.020
+
+#ID = ECM23
+#Short = ECM23
+#Long = ExtraCellular Mutant
+#Alias = YPL021W,SRD2
+#W = 5
+#Description = "Non-essential protein of unconfirmed function, affects pre-rRNA processing, may act as a negative regulator of the transcription of genes involved in pseudohyphal growth, homologous to Srd1p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0043565,GO:0007124,GO:0005575
+0.720	0.110	0.100	0.070
+0.100	0.020	0.860	0.020
+0.970	0.010	0.010	0.010
+0.030	0.010	0.010	0.950
+0.010	0.890	0.030	0.070
+
+#ID = EDS1
+#Short = EDS1
+#Long = Expression Dependent on Slt2
+#Alias = YBR033W
+#Interactions = DOT6,HSF1,RGT1,STB3,TOD6
+#W = 7
+#Description = "Putative zinc cluster protein, YBR033W is not an essential gene"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005575
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.970	0.010	0.010	0.010
+0.743	0.010	0.010	0.238
+0.475	0.238	0.099	0.188
+0.970	0.010	0.010	0.010
+0.830	0.010	0.010	0.150
+
+#ID = ERT1
+#Short = ERT1
+#Long = Ethanol Regulator of Translation
+#Alias = YBR239C
+#W = 7
+#Description = "Transcriptional regulator of nonfermentable carbon utilization, GFP-fusion protein localizes to cytoplasm, nucleus, null mutation affects periodicity of transcriptional and metabolic oscillation, plays role in restricting Ty1 transposition"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005737,GO:0005634
+0.086	0.494	0.069	0.351
+0.013	0.963	0.014	0.010
+0.010	0.011	0.969	0.010
+0.014	0.010	0.967	0.010
+0.958	0.011	0.015	0.017
+0.955	0.012	0.021	0.012
+0.048	0.644	0.046	0.263
+
+#ID = FHL1
+#Short = FHL1
+#Long = Fork Head-Like
+#Alias = YPR104C,SPP42
+#Interactions = AFT2,RAP1,SFP1
+#W = 8
+#Description = "Regulator of ribosomal protein transcription, has forkhead associated domain that binds phosphorylated proteins, also has forkhead DNA-binding domain but does not bind DNA in vitro, suppresses RNA pol III and splicing factor prp4 mutants"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0070491,GO:0008134,GO:0043565,GO:0010688,GO:0060963,GO:0032545,GO:0000790,GO:0005730,GO:0005634,GO:0005666,GO:0006366,GO:0005665,GO:0060962,GO:0006356,GO:0003713,GO:0003712,GO:0031929,GO:0032545,GO:0005736
+0.050	0.099	0.832	0.020
+0.929	0.010	0.020	0.040
+0.010	0.970	0.010	0.010
+0.010	0.010	0.930	0.050
+0.010	0.970	0.010	0.010
+0.900	0.010	0.070	0.020
+0.650	0.210	0.050	0.090
+0.505	0.089	0.040	0.366
+
+#ID = FKH1
+#Short = FKH1
+#Long = ForK head Homolog
+#Alias = YIL131C
+#Interactions = MBP1,MCM1,NDD1,STB1,SWI4,SWI6
+#W = 9
+#Description = "Forkhead family transcription factor with a minor role in the expression of G2/M phase genes, negatively regulates transcriptional elongation, positive role in chromatin silencing at HML and HMR, regulates donor preference during switching"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0019237,GO:0000978,GO:0001078,GO:0001077,GO:0043565,GO:0071406,GO:0006338,GO:0007535,GO:0031124,GO:2000221,GO:0034244,GO:0060277,GO:0090419,GO:0090055,GO:0090282,GO:0006369,GO:0005634,GO:0003700,GO:0000086,GO:0045931,GO:0000114,GO:0000920,GO:0007114,GO:0007124,GO:0000117,GO:0007346,GO:0003713,GO:0006338,GO:0006338,GO:0006368,GO:0006369,GO:0030466,GO:0007535,GO:0007533,GO:0000085,GO:0000080,GO:0051726,GO:0007067,GO:0000910,GO:0007094
+0.130	0.010	0.850	0.010
+0.040	0.030	0.030	0.900
+0.740	0.240	0.010	0.010
+0.830	0.150	0.010	0.010
+0.970	0.010	0.010	0.010
+0.010	0.802	0.010	0.178
+0.890	0.040	0.060	0.010
+0.550	0.100	0.120	0.230
+0.200	0.170	0.540	0.090
+
+#ID = FKH2
+#Short = FKH2
+#Long = ForK head Homolog
+#Alias = YNL068C
+#Interactions = HCM1,MBP1,MCM1,NDD1,STB1,SWI4
+#W = 7
+#Description = "Forkhead family transcription factor with a major role in the expression of G2/M phase genes, positively regulates transcriptional elongation, negative role in chromatin silencing at HML and HMR, substrate of the Cdc28p/Clb5p kinase"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001085,GO:0001076,GO:0043565,GO:0006338,GO:0061186,GO:2000221,GO:0060277,GO:0090419,GO:0032968,GO:0090282,GO:0005634,GO:0003700,GO:0000086,GO:0000114,GO:0008301,GO:0003713,GO:0000785,GO:0006468,GO:0000920,GO:0007114,GO:0007124,GO:0000117,GO:0007346,GO:0006338,GO:0006368,GO:0006369,GO:0000115,GO:0006468,GO:0003713,GO:0051726,GO:0000082,GO:0000085,GO:0000087,GO:0007067,GO:0000910,GO:0007094
+0.130	0.010	0.850	0.010
+0.010	0.010	0.010	0.970
+0.970	0.010	0.010	0.010
+0.970	0.010	0.010	0.010
+0.970	0.010	0.010	0.010
+0.010	0.970	0.010	0.010
+0.970	0.010	0.010	0.010
+
+#ID = FZF1
+#Short = FZF1
+#Long = Five Zinc Fingers
+#Alias = YGL254W,SUL1,RSU1,NRC299
+#Interactions = SPT23
+#W = 6
+#Description = "Transcription factor involved in sulfite metabolism, sole identified regulatory target is SSU1, overexpression suppresses sulfite-sensitivity of many unrelated mutants due to hyperactivation of SSU1, contains five zinc fingers"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:0061426,GO:0005634,GO:0003700,GO:0006790,GO:0005886,GO:0000319,GO:0003677
+0.010	0.970	0.010	0.010
+0.010	0.010	0.010	0.970
+0.970	0.010	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.970	0.010	0.010
+0.970	0.010	0.010	0.010
+
+#ID = GAL4
+#Short = GAL4
+#Long = GALactose metabolism
+#Alias = YPL248C,GAL81
+#W = 18
+#Description = "DNA-binding transcription factor required for the activation of the GAL genes in response to galactose, repressed by Gal80p and activated by Gal3p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0001085,GO:0001133,GO:0043565,GO:0006012,GO:0000435,GO:0005634,GO:0003700,GO:0000435,GO:0006012,GO:0000977,GO:0042789,GO:0045944,GO:0060633,GO:0043433,GO:0005634,GO:0005737,GO:0000124,GO:0016592,GO:0045944,GO:0005838,GO:0000502,GO:0006513,GO:0042803,GO:0006468
+0.001	0.941	0.001	0.057
+0.001	0.015	0.983	0.001
+0.056	0.044	0.885	0.015
+0.642	0.126	0.101	0.131
+0.185	0.427	0.373	0.015
+0.199	0.142	0.186	0.472
+0.574	0.071	0.299	0.056
+0.142	0.569	0.218	0.071
+0.640	0.001	0.015	0.344
+0.116	0.367	0.316	0.201
+0.058	0.196	0.001	0.745
+0.060	0.181	0.472	0.287
+0.030	0.670	0.210	0.090
+0.186	0.426	0.187	0.201
+0.001	0.983	0.015	0.001
+0.001	0.997	0.001	0.001
+0.001	0.001	0.956	0.042
+0.572	0.095	0.178	0.155
+
+#ID = GAL80
+#Short = GAL80
+#Long = GALactose metabolism
+#Alias = YML051W
+#W = 17
+#Description = "Transcriptional regulator involved in the repression of GAL genes in the absence of galactose, inhibits transcriptional activation by Gal4p, inhibition relieved by Gal3p or Gal1p binding"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0019210,GO:0001102,GO:0006012,GO:0033673,GO:0043433,GO:0000122,GO:0005737,GO:0005634,GO:0000122,GO:0000409,GO:0003700,GO:0051220,GO:0005737,GO:0004335
+0.001	0.997	0.001	0.001
+0.001	0.001	0.997	0.001
+0.001	0.001	0.997	0.001
+0.546	0.248	0.205	0.001
+0.367	0.088	0.544	0.001
+0.181	0.184	0.385	0.249
+0.630	0.237	0.132	0.001
+0.001	0.386	0.086	0.527
+0.001	0.001	0.154	0.844
+0.001	0.426	0.572	0.001
+0.001	0.240	0.001	0.758
+0.107	0.564	0.328	0.001
+0.380	0.258	0.362	0.001
+0.001	0.200	0.081	0.719
+0.001	0.798	0.200	0.001
+0.001	0.997	0.001	0.001
+0.001	0.001	0.997	0.001
+
+#ID = GAT1
+#Short = GAT1
+#Long = 
+#Alias = YFL021W,MEP80,NIL1
+#Interactions = DAL80
+#W = 9
+#Description = "Transcriptional activator of genes involved in nitrogen catabolite repression, contains a GATA-1-type zinc finger DNA-binding motif, activity and localization regulated by nitrogen limitation and Ure2p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+0.010	0.460	0.240	0.290
+0.010	0.850	0.130	0.010
+0.010	0.010	0.010	0.970
+0.030	0.010	0.010	0.950
+0.970	0.010	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.970	0.010	0.010
+0.228	0.010	0.653	0.109
+0.020	0.317	0.426	0.238
+
+#ID = GAT3
+#Short = GAT3
+#Long = 
+#Alias = YLR013W
+#W = 8
+#Description = "Protein containing GATA family zinc finger motifs"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0003700,GO:0043565,GO:0006351,GO:0005634
+0.854	0.017	0.001	0.128
+0.002	0.002	0.001	0.995
+0.732	0.048	0.004	0.216
+0.750	0.060	0.117	0.073
+0.170	0.654	0.162	0.014
+0.814	0.001	0.001	0.184
+0.001	0.009	0.001	0.989
+0.019	0.001	0.979	0.001
+
+#ID = GAT4
+#Short = GAT4
+#Long = 
+#Alias = YIR013C
+#W = 11
+#Description = "Protein containing GATA family zinc finger motifs"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0006351,GO:0005634
+0.020	0.130	0.030	0.820
+0.840	0.010	0.140	0.010
+0.020	0.010	0.960	0.010
+0.910	0.010	0.010	0.070
+0.070	0.010	0.010	0.910
+0.010	0.960	0.010	0.020
+0.010	0.140	0.010	0.840
+0.820	0.030	0.130	0.020
+0.121	0.303	0.091	0.485
+0.370	0.100	0.110	0.420
+0.190	0.560	0.100	0.150
+
+#ID = GCN4
+#Short = GCN4
+#Long = General Control Nonderepressible
+#Alias = YEL009C,AAS101,ARG9,AAS3
+#Interactions = ABF1,ACA1,ARG80,BAS1,CBF1,LEU3,RSC3,RTG3,STB3,TYE7
+#W = 9
+#Description = "Basic leucine zipper (bZIP) transcriptional activator of amino acid biosynthetic genes in response to amino acid starvation, expression is tightly regulated at both the transcriptional and translational levels"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003682,GO:0001191,GO:0001190,GO:0001135,GO:0043565,GO:0003700,GO:0001084,GO:0043565,GO:0010691,GO:0000122,GO:0001080,GO:0045899,GO:0060261,GO:0005634,GO:0001190,GO:0003677
+0.547	0.059	0.363	0.031
+0.012	0.010	0.011	0.968
+0.011	0.026	0.889	0.075
+0.964	0.012	0.013	0.012
+0.009	0.657	0.323	0.010
+0.015	0.010	0.014	0.962
+0.073	0.891	0.024	0.013
+0.915	0.022	0.016	0.046
+0.038	0.352	0.060	0.550
+
+#ID = GCR1
+#Short = GCR1
+#Long = GlyColysis Regulation
+#Alias = YPL075W,LPF10
+#W = 9
+#Description = "Transcriptional activator of genes involved in glycolysis, DNA-binding protein that interacts and functions with the transcriptional activator Gcr2p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0000980,GO:0003705,GO:0000433,GO:0034728,GO:0060963,GO:0045944,GO:0072363,GO:0005635
+0.136	0.030	0.805	0.029
+0.055	0.031	0.828	0.086
+0.041	0.900	0.030	0.029
+0.103	0.029	0.029	0.839
+0.029	0.029	0.029	0.913
+0.029	0.911	0.031	0.029
+0.029	0.899	0.043	0.029
+0.566	0.038	0.034	0.362
+0.166	0.572	0.096	0.166
+
+#ID = GCR2
+#Short = GCR2
+#Long = GlyColysis Regulation
+#Alias = YNL199C
+#Interactions = TOD6
+#W = 7
+#Description = "Transcriptional activator of genes involved in glycolysis, interacts and functions with the DNA-binding protein Gcr1p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001102,GO:0001076,GO:0060963,GO:0045944,GO:0072363,GO:0005635,GO:0005634
+0.213	0.131	0.541	0.115
+0.001	0.997	0.001	0.001
+0.082	0.001	0.016	0.901
+0.001	0.001	0.001	0.997
+0.001	0.932	0.001	0.066
+0.001	0.967	0.016	0.016
+0.377	0.197	0.033	0.393
+
+#ID = GIS1
+#Short = GIS1
+#Long = GIg1-2 Suppressor
+#Alias = YDR096W
+#Interactions = GSM1,MIG1,MIG3,NHP10,NRG1,OAF1,PHD1,RDS2,RPH1,RSC3,RSF2,SKN7,SOK2,STP1,SUT1,UGA3,YDR026C,YER184C
+#W = 6
+#Description = "JmjC domain-containing histone demethylase, transcription factor involved in expression of genes during nutrient limitation and in negative regulation of DPP1 and PHR1, activity is modulated by limited proteasome-mediated proteolysis"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0051864,GO:0000978,GO:0001078,GO:0001077,GO:0043565,GO:0001300,GO:0016577,GO:0060275,GO:0000122,GO:0045944,GO:0071071,GO:0005634,GO:0005739,GO:0005634
+0.010	0.950	0.010	0.030
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.850	0.010	0.130
+0.010	0.010	0.010	0.970
+0.490	0.040	0.150	0.320
+
+#ID = GLN3
+#Short = GLN3
+#Long = GLutamiNe metabolism
+#Alias = YER040W
+#Interactions = DAL80
+#W = 9
+#Description = "Transcriptional activator of genes regulated by nitrogen catabolite repression (NCR), localization and activity regulated by quality of nitrogen source"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0003700,GO:0043565,GO:0001080,GO:0045944,GO:0005829,GO:0005634,GO:0001077,GO:0045944,GO:0045847,GO:0003677,GO:0019740,GO:0006995,GO:0005634,GO:0005829,GO:0051170,GO:0051168,GO:0016301,GO:0043433,GO:0051219,GO:0003714,GO:0042994,GO:0004721,GO:0004842,GO:0042493
+0.013	0.018	0.962	0.007
+0.910	0.016	0.067	0.007
+0.012	0.012	0.002	0.974
+0.788	0.005	0.056	0.151
+0.941	0.004	0.049	0.006
+0.033	0.083	0.859	0.025
+0.680	0.152	0.145	0.023
+0.285	0.092	0.132	0.491
+0.565	0.097	0.150	0.188
+
+#ID = GSM1
+#Short = GSM1
+#Long = Glucose Starvation Modulator
+#Alias = YJL103C
+#Interactions = AFT2,GIS1,MIG3,MSN2,MSN4,PDR3,PDR8,PHD1,RGM1,RGT1,RSC3,STP1,SUT1,SUT2,USV1,YPR196W
+#W = 5
+#Description = "Putative zinc cluster protein of unknown function, proposed to be involved in the regulation of energy metabolism, based on patterns of expression and sequence analysis"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0043565,GO:0006119,GO:0005575
+0.020	0.940	0.020	0.020
+0.010	0.970	0.010	0.010
+0.010	0.070	0.910	0.010
+0.050	0.010	0.930	0.010
+0.580	0.070	0.260	0.090
+
+#ID = GTS1
+#Short = GTS1
+#Long = Glycine Threonine Serine repeat protein
+#Alias = YGL181W,LSR1,FHT1
+#W = 6
+#Description = "Arf3p GTPase Activating Protein (GAP) that localizes to endocytic patches, gts1 mutations affect budding, cell size, heat tolerance, sporulation, life span, ultradian rhythms, localizes to nucleus and induces flocculation when overexpressed"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008060,GO:0070491,GO:0000989,GO:0006897,GO:0010512,GO:0045944,GO:0006357,GO:0007624,GO:0030479,GO:0005737,GO:0005634
+0.150	0.001	0.001	0.848
+0.997	0.001	0.001	0.001
+0.001	0.734	0.036	0.229
+0.001	0.975	0.001	0.023
+0.836	0.009	0.154	0.001
+0.988	0.001	0.010	0.001
+
+#ID = GZF3
+#Short = GZF3
+#Long = Gata Zinc Finger protein
+#Alias = YJL110C,NIL2,DEH1
+#Interactions = DAL80
+#W = 7
+#Description = "GATA zinc finger protein and Dal80p homolog that negatively regulates nitrogen catabolic gene expression by competing with Gat1p for GATA site binding, function requires a repressive carbon source, dimerizes with Dal80p and binds to Tor1p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0000981,GO:0043565,GO:0051457,GO:0000122,GO:0090295,GO:0005634
+0.180	0.390	0.020	0.410
+0.010	0.010	0.970	0.010
+0.970	0.010	0.010	0.010
+0.010	0.010	0.010	0.970
+0.970	0.010	0.010	0.010
+0.720	0.090	0.010	0.180
+0.040	0.370	0.580	0.010
+
+#ID = HAC1
+#Short = HAC1
+#Long = Homologous to Atf/Creb1
+#Alias = YFL031W,IRE15,ERN4
+#Interactions = PHO4,SWI6
+#W = 10
+#Description = "Basic leucine zipper (bZIP) transcription factor (ATF/CREB1 homolog) that regulates the unfolded protein response, via UPRE binding, and membrane biogenesis, ER stress-induced splicing pathway facilitates efficient Hac1p synthesis"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000981,GO:0043565,GO:0030968,GO:0010674,GO:0045944,GO:0006990,GO:0005634,GO:0000981,GO:0006986,GO:0006644
+0.794	0.001	0.001	0.204
+0.091	0.001	0.495	0.414
+0.152	0.001	0.846	0.001
+0.544	0.411	0.001	0.044
+0.001	0.997	0.001	0.001
+0.958	0.001	0.001	0.040
+0.001	0.997	0.001	0.001
+0.001	0.001	0.997	0.001
+0.152	0.001	0.001	0.846
+0.895	0.001	0.001	0.103
+
+#ID = HAL9
+#Short = HAL9
+#Long = HALotolerance
+#Alias = YOL089C
+#W = 18
+#Description = "Putative transcription factor containing a zinc finger, overexpression increases salt tolerance through increased expression of the ENA1 (Na+/Li+ extrusion pump) gene while gene disruption decreases both salt tolerance and ENA1 expression"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0045944,GO:0009651,GO:0005634,GO:0005739
+0.010	0.059	0.188	0.743
+0.040	0.910	0.040	0.010
+0.010	0.840	0.090	0.060
+0.010	0.030	0.899	0.061
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.130	0.310	0.430	0.130
+0.061	0.899	0.030	0.010
+0.060	0.090	0.840	0.010
+0.010	0.040	0.910	0.040
+0.743	0.188	0.059	0.010
+
+#ID = HAP1
+#Short = HAP1
+#Long = 
+#Alias = YLR256W,CYP1
+#Interactions = RSF2
+#W = 11
+#Description = "Zinc finger transcription factor involved in the complex regulation of gene expression in response to levels of heme and oxygen, the S288C sequence differs from other strain backgrounds due to a Ty1 insertion in the carboxy terminus"
+#Organisms = yeast (Saccharomyces cerevisiae)
+0.021	0.014	0.935	0.030
+0.017	0.261	0.710	0.012
+0.445	0.246	0.101	0.208
+0.462	0.097	0.265	0.176
+0.480	0.085	0.060	0.374
+0.042	0.065	0.039	0.853
+0.738	0.042	0.038	0.183
+0.138	0.143	0.072	0.647
+0.011	0.971	0.008	0.010
+0.040	0.043	0.891	0.026
+0.014	0.396	0.481	0.109
+
+#ID = HAP2
+#Short = HAP2
+#Long = 
+#Alias = YGL237C
+#Interactions = RDS1,RSC3,SUT1
+#W = 8
+#Description = "Subunit of the heme-activated, glucose-repressed Hap2p/3p/4p/5p CCAAT-binding complex, a transcriptional activator and global regulator of respiratory gene expression, contains sequences sufficient for both complex assembly and DNA binding"
+#Organisms = yeast (Saccharomyces cerevisiae)
+0.001	0.882	0.001	0.116
+0.053	0.945	0.001	0.001
+0.846	0.001	0.099	0.054
+0.997	0.001	0.001	0.001
+0.001	0.063	0.056	0.880
+0.142	0.297	0.365	0.197
+0.794	0.001	0.102	0.103
+0.358	0.164	0.375	0.103
+
+#ID = HAP3
+#Short = HAP3
+#Long = 
+#Alias = YBL021C
+#W = 14
+#Description = "Subunit of the heme-activated, glucose-repressed Hap2p/3p/4p/5p CCAAT-binding complex, a transcriptional activator and global regulator of respiratory gene expression, contains sequences contributing to both complex assembly and DNA binding"
+#Organisms = yeast (Saccharomyces cerevisiae)
+0.005	0.181	0.190	0.624
+0.120	0.675	0.098	0.107
+0.005	0.161	0.005	0.828
+0.032	0.304	0.502	0.163
+0.984	0.005	0.005	0.005
+0.005	0.005	0.005	0.984
+0.005	0.005	0.005	0.984
+0.005	0.005	0.984	0.005
+0.005	0.005	0.984	0.005
+0.005	0.484	0.005	0.505
+0.032	0.400	0.140	0.429
+0.260	0.379	0.332	0.030
+0.489	0.089	0.309	0.112
+0.359	0.089	0.442	0.111
+
+#ID = HAP4
+#Short = HAP4
+#Long = Heme Activator Protein
+#Alias = YKL109W
+#Interactions = RDS1,RSC3,SUT1
+#W = 9
+#Description = "Subunit of the heme-activated, glucose-repressed Hap2p/3p/4p/5p CCAAT-binding complex, a transcriptional activator and global regulator of respiratory gene expression, provides the principal activation function of the complex"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001102,GO:0001077,GO:0001076,GO:0000436,GO:0043457,GO:0016602
+0.279	0.103	0.532	0.086
+0.358	0.247	0.309	0.085
+0.055	0.852	0.041	0.052
+0.040	0.687	0.175	0.098
+0.909	0.024	0.038	0.029
+0.896	0.033	0.023	0.048
+0.077	0.064	0.071	0.788
+0.130	0.605	0.166	0.099
+0.905	0.025	0.040	0.030
+
+#ID = HAP5
+#Short = HAP5
+#Long = Heme Activator Protein
+#Alias = YOR358W
+#Interactions = SKN7,SUT1
+#W = 15
+#Description = "Subunit of the heme-activated, glucose-repressed Hap2/3/4/5 CCAAT-binding complex, a transcriptional activator and global regulator of respiratory gene expression, required for assembly and DNA binding activity of the complex"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0001077,GO:0003677,GO:0000436,GO:0043457,GO:0016602
+0.146	0.213	0.235	0.407
+0.046	0.443	0.488	0.022
+0.025	0.333	0.547	0.095
+0.181	0.249	0.471	0.099
+0.386	0.308	0.093	0.213
+0.029	0.144	0.288	0.539
+0.021	0.696	0.147	0.136
+0.001	0.159	0.001	0.839
+0.118	0.288	0.419	0.175
+0.997	0.001	0.001	0.001
+0.001	0.001	0.001	0.997
+0.001	0.001	0.056	0.942
+0.093	0.001	0.905	0.001
+0.085	0.117	0.736	0.062
+0.001	0.380	0.001	0.618
+
+#ID = HCM1
+#Short = HCM1
+#Long = High-Copy suppressor of Calmodulin
+#Alias = YCR065W
+#Interactions = FKH2
+#W = 7
+#Description = "Forkhead transcription factor that drives S-phase specific expression of genes involved in chromosome segregation, spindle dynamics, and budding, suppressor of calmodulin mutants with specific SPB assembly defects, telomere maintenance role"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0043565,GO:0034599,GO:0007005,GO:0045944,GO:0090418,GO:0051300,GO:0005737,GO:0000790,GO:0005634,GO:0003700,GO:0000115,GO:0007059,GO:0003774,GO:0000776,GO:0007064,GO:0030472,GO:0007114,GO:0001191,GO:0051300,GO:0005816,GO:0007094,GO:0007059,GO:0000114
+0.270	0.080	0.040	0.610
+0.660	0.320	0.010	0.010
+0.930	0.050	0.010	0.010
+0.970	0.010	0.010	0.010
+0.010	0.850	0.010	0.130
+0.940	0.020	0.020	0.020
+0.580	0.170	0.110	0.140
+
+#ID = HMRA2
+#Short = HMRA2
+#Long = Hidden Mat Right A
+#Alias = YCR096C,A2
+#Interactions = MCM1
+#W = 8
+#Description = "Silenced copy of a2 at HMR, similarity to Alpha2p, required along with a1p for inhibiting expression of the HO endonuclease in a/alpha HO/HO diploid cells with an active mating-type interconversion system"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005575
+0.060	0.670	0.060	0.210
+0.530	0.010	0.450	0.010
+0.040	0.010	0.010	0.940
+0.010	0.010	0.970	0.010
+0.010	0.010	0.010	0.970
+0.910	0.010	0.010	0.070
+0.870	0.020	0.020	0.090
+0.400	0.080	0.080	0.440
+
+#ID = HMS1
+#Short = HMS1
+#Long = High-copy Mep Suppressor
+#Alias = YOR032C
+#Interactions = CBF1,MIG1,NHP10,RSF2,SUT1
+#W = 10
+#Description = "Basic helix-loop-helix (bHLH) protein with similarity to myc-family transcription factors, overexpression confers hyperfilamentous growth and suppresses the pseudohyphal filamentation defect of a diploid mep1 mep2 homozygous null mutant"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0007124,GO:0005575
+0.067	0.168	0.709	0.056
+0.089	0.087	0.247	0.577
+0.021	0.211	0.693	0.075
+0.065	0.024	0.820	0.091
+0.143	0.112	0.437	0.308
+0.193	0.144	0.618	0.045
+0.049	0.053	0.094	0.804
+0.140	0.058	0.598	0.204
+0.588	0.146	0.015	0.251
+0.183	0.021	0.209	0.587
+
+#ID = HSF1
+#Short = HSF1
+#Long = Heat Shock transcription Factor
+#Alias = YGL073W,MAS3,EXA3
+#Interactions = ABF1,EDS1,XBP1
+#W = 15
+#Description = "Trimeric heat shock transcription factor, activates multiple genes in response to stresses that include hyperthermia, recognizes variable heat shock elements (HSEs) consisting of inverted NGAAN repeats, posttranslationally regulated"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0032007,GO:0006357,GO:0009408,GO:0006950,GO:0030474,GO:0005634,GO:0005739,GO:0003700,GO:0006355,GO:0006950,GO:0009408,GO:0006457,GO:0009636,GO:0006091,GO:0005975,GO:0031505,GO:0030474,GO:0015031,GO:0007049,GO:0004679,GO:0051260
+0.481	0.102	0.417	0.001
+0.013	0.001	0.985	0.001
+0.990	0.001	0.008	0.001
+0.911	0.005	0.054	0.030
+0.135	0.419	0.150	0.296
+0.185	0.374	0.261	0.179
+0.039	0.184	0.089	0.688
+0.064	0.252	0.002	0.682
+0.270	0.564	0.137	0.029
+0.089	0.191	0.013	0.707
+0.570	0.106	0.323	0.001
+0.001	0.001	0.997	0.001
+0.997	0.001	0.001	0.001
+0.969	0.001	0.029	0.001
+0.415	0.146	0.227	0.213
+
+#ID = IME1
+#Short = IME1
+#Long = Inducer of MEiosis
+#Alias = YJR094C
+#Interactions = DAL82,RSC3,RSC30,SUT1,YPR196W
+#W = 8
+#Description = "Master regulator of meiosis that is active only during meiotic events, activates transcription of early meiotic genes through interaction with Ume6p, degraded by the 26S proteasome following phosphorylation by Ime2p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000988,GO:0007124,GO:0040020,GO:0006357,GO:0005634
+0.001	0.997	0.001	0.001
+0.018	0.770	0.211	0.001
+0.001	0.001	0.997	0.001
+0.001	0.997	0.001	0.001
+0.001	0.631	0.257	0.111
+0.001	0.001	0.997	0.001
+0.997	0.001	0.001	0.001
+0.118	0.001	0.880	0.001
+
+#ID = INO2
+#Short = INO2
+#Long = INOsitol requiring
+#Alias = YDR123C,SCS1,DIE1
+#Interactions = CBF1,TYE7,YAP7
+#W = 8
+#Description = "Component of the heteromeric Ino2p/Ino4p basic helix-loop-helix transcription activator that binds inositol/choline-responsive elements (ICREs), required for derepression of phospholipid biosynthetic genes in response to inositol depletion"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001077,GO:0008654,GO:0045944,GO:0005634
+0.023	0.064	0.446	0.467
+0.015	0.967	0.003	0.015
+0.959	0.014	0.006	0.021
+0.025	0.773	0.131	0.071
+0.622	0.014	0.351	0.013
+0.003	0.006	0.009	0.982
+0.037	0.007	0.927	0.029
+0.038	0.758	0.150	0.054
+
+#ID = INO4
+#Short = INO4
+#Long = INOsitol requiring
+#Alias = YOL108C
+#W = 11
+#Description = "Transcription factor required for derepression of inositol-choline-regulated genes involved in phospholipid synthesis, forms a complex, with Ino2p, that binds the inositol-choline-responsive element through a basic helix-loop-helix domain"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0001077,GO:0008654,GO:0045944,GO:0005634
+0.244	0.210	0.515	0.031
+0.002	0.996	0.001	0.001
+0.879	0.057	0.015	0.049
+0.001	0.015	0.001	0.983
+0.061	0.001	0.937	0.001
+0.058	0.006	0.020	0.916
+0.001	0.001	0.997	0.001
+0.869	0.049	0.081	0.001
+0.951	0.001	0.047	0.001
+0.837	0.001	0.121	0.041
+0.670	0.001	0.126	0.203
+
+#ID = IXR1
+#Short = IXR1
+#Long = Intrastrand cross (X)-link Recognition
+#Alias = YKL032C,ORD1
+#W = 15
+#Description = "Protein that binds DNA containing intrastrand cross-links formed by cisplatin, contains two HMG (high mobility group box) domains, which confer the ability to bend cisplatin-modified DNA, mediates aerobic transcriptional repression of COX5b"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003684,GO:0043565,GO:0071456,GO:0006281,GO:0000122,GO:0000790
+0.997	0.001	0.001	0.001
+0.753	0.001	0.001	0.245
+0.433	0.001	0.377	0.189
+0.189	0.755	0.001	0.055
+0.378	0.620	0.001	0.001
+0.377	0.001	0.621	0.001
+0.189	0.001	0.566	0.244
+0.754	0.001	0.244	0.001
+0.754	0.001	0.001	0.244
+0.001	0.001	0.997	0.001
+0.001	0.997	0.001	0.001
+0.189	0.001	0.809	0.001
+0.056	0.001	0.942	0.001
+0.001	0.001	0.377	0.621
+0.001	0.001	0.809	0.189
+
+#ID = JHD1
+#Short = JHD1
+#Long = JmjC domain-containing Histone Demethylase
+#Alias = YER051W,KDM2,JHDM1
+#W = 6
+#Description = "JmjC domain family histone demethylase specific for H3-K36, similar to proteins found in human, mouse, drosophila, X. laevis, C. elegans, and S. pombe"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0051864,GO:0035064,GO:0016577,GO:0005575
+0.012	0.001	0.001	0.986
+0.004	0.001	0.001	0.994
+0.153	0.841	0.001	0.005
+0.005	0.001	0.841	0.153
+0.994	0.001	0.001	0.004
+0.986	0.001	0.001	0.012
+
+#ID = LEU3
+#Short = LEU3
+#Long = LEUcine biosynthesis
+#Alias = YLR451W
+#Interactions = GCN4
+#W = 10
+#Description = "Zinc-finger transcription factor that regulates genes involved in branched chain amino acid biosynthesis and ammonia assimilation, positively regulated by alpha-isopropylmalate, an intermediate in leucine biosynthesis"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001078,GO:0001077,GO:0043565,GO:0000122,GO:2001278,GO:0045944,GO:0005634,GO:0003700,GO:0009082,GO:0005634
+0.054	0.750	0.150	0.045
+0.019	0.919	0.035	0.027
+0.025	0.026	0.880	0.068
+0.048	0.040	0.793	0.118
+0.309	0.065	0.152	0.474
+0.729	0.057	0.072	0.143
+0.146	0.722	0.080	0.053
+0.048	0.894	0.031	0.026
+0.025	0.053	0.881	0.042
+0.034	0.036	0.898	0.032
+
+#ID = LYS14
+#Short = LYS14
+#Long = LYSine requiring
+#Alias = YDR034C
+#Interactions = NHP10,STB5,STE12
+#W = 9
+#Description = "Transcriptional activator involved in regulation of genes of the lysine biosynthesis pathway, requires 2-aminoadipate semialdehyde as co-inducer"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:2001196,GO:0045944,GO:0005634
+0.788	0.010	0.051	0.152
+0.940	0.010	0.010	0.040
+0.920	0.010	0.010	0.060
+0.010	0.010	0.010	0.970
+0.010	0.050	0.010	0.930
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.020	0.180	0.410	0.390
+
+#ID = MAC1
+#Short = MAC1
+#Long = Metal binding ACtivator
+#Alias = YMR021C,CUA1
+#W = 9
+#Description = "Copper-sensing transcription factor involved in regulation of genes required for high affinity copper transport"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001159,GO:0001077,GO:0006878,GO:0045732,GO:0045944,GO:0005634,GO:0003700,GO:0006355,GO:0006878,GO:0009267,GO:0045893,GO:0015088,GO:0016722,GO:0042542,GO:0004857,GO:0045333,GO:0009408,GO:0042542,GO:0046686,GO:0010043,GO:0010038,GO:0046677,GO:0042493,GO:0006826,GO:0015677,GO:0046688,GO:0006468,GO:0051457,GO:0005634,GO:0003677,GO:0008270,GO:0005507,GO:0042803,GO:0030163
+0.178	0.107	0.090	0.624
+0.275	0.181	0.133	0.411
+0.163	0.040	0.107	0.689
+0.133	0.043	0.090	0.734
+0.003	0.212	0.003	0.781
+0.070	0.048	0.780	0.101
+0.016	0.804	0.033	0.147
+0.013	0.075	0.184	0.728
+0.064	0.788	0.080	0.069
+
+#ID = MATA1
+#Short = MATA1
+#Long = 
+#Alias = MATA1,A1
+#W = 7
+#Description = "Expressed copy (at MATa) of a1, homeobox-domain protein that, along with alpha2, represses transcription of haploid-specific genes in diploid cells, a1 sequence is not present in SGD because the sequenced S288C strain is MATalpha, not MATa"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008301,GO:0003714,GO:0007532,GO:0005634,GO:0007532
+0.488	0.012	0.488	0.012
+0.012	0.964	0.012	0.012
+0.964	0.012	0.012	0.012
+0.012	0.964	0.012	0.012
+0.964	0.012	0.012	0.012
+0.964	0.012	0.012	0.012
+0.012	0.012	0.012	0.964
+
+#ID = MATA2
+#Short = MATA2
+#Long = 
+#Alias = MATA2,A2
+#W = 8
+#Description = "Protein of unknown function, identical to the C-terminal 119 amino acid residues of the MATalpha2 protein, a2 sequence is not present in SGD because the sequenced S288C strain is MATalpha, not MATa"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003674,GO:0008150,GO:0005575
+0.430	0.140	0.300	0.130
+0.270	0.060	0.230	0.440
+0.089	0.535	0.040	0.337
+0.490	0.060	0.410	0.040
+0.040	0.120	0.060	0.780
+0.030	0.010	0.950	0.010
+0.010	0.060	0.010	0.920
+0.550	0.170	0.010	0.270
+
+#ID = MATALPHA2
+#Short = MATALPHA2
+#Long = MATing type protein ALPHA
+#Alias = YCR039C,ALPHA2
+#W = 9
+#Description = "Homeobox-domain protein that, with Mcm1p, represses a-specific genes in haploids, acts with A1p to repress transcription of haploid-specific genes in diploids, one of two genes encoded by the MATalpha mating type cassette"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008301,GO:0043565,GO:0003714,GO:0043565,GO:0007535,GO:0007532,GO:0006357,GO:0005634,GO:0007532,GO:0007535
+0.997	0.001	0.001	0.001
+0.599	0.001	0.001	0.399
+0.100	0.001	0.100	0.799
+0.001	0.001	0.001	0.997
+0.997	0.001	0.001	0.001
+0.001	0.997	0.001	0.001
+0.997	0.001	0.001	0.001
+0.001	0.200	0.001	0.798
+0.100	0.001	0.898	0.001
+
+#ID = MBP1
+#Short = MBP1
+#Long = MluI-box Binding Protein
+#Alias = YDL056W
+#Interactions = ABF1,ASH1,FKH1,FKH2,MET28,NDD1,REB1,RTG3,STB1,STB2,STB3,SUM1,SUT1,SWI4,SWI6,YDR026C
+#W = 7
+#Description = "Transcription factor involved in regulation of cell cycle progression from G1 to S phase, forms a complex with Swi6p that binds to MluI cell cycle box regulatory element in promoters of DNA synthesis genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001077,GO:0043565,GO:0071931,GO:0030907,GO:0005634,GO:0030907
+0.677	0.056	0.091	0.176
+0.012	0.954	0.012	0.022
+0.039	0.009	0.946	0.006
+0.005	0.935	0.009	0.051
+0.018	0.030	0.934	0.018
+0.097	0.021	0.009	0.873
+0.041	0.558	0.069	0.332
+
+#ID = MCM1
+#Short = MCM1
+#Long = MiniChromosome Maintenance
+#Alias = YMR043W,FUN80
+#Interactions = ASH1,FKH1,FKH2,HMRA2,NDD1,SWI6
+#W = 16
+#Description = "Transcription factor involved in cell-type-specific transcription and pheromone response, plays a central role in the formation of both repressor and activator complexes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003688,GO:0001102,GO:0000978,GO:0001078,GO:0001077,GO:0044377,GO:0001103,GO:0001133,GO:0043565,GO:0006270,GO:0001198,GO:0000122,GO:0001197,GO:0045944,GO:0090282,GO:0000821,GO:0031494,GO:0000790
+0.078	0.126	0.014	0.782
+0.079	0.010	0.067	0.844
+0.148	0.085	0.092	0.675
+0.017	0.969	0.007	0.007
+0.001	0.981	0.001	0.017
+0.160	0.186	0.169	0.486
+0.807	0.040	0.108	0.045
+0.875	0.020	0.050	0.055
+0.406	0.041	0.025	0.528
+0.299	0.342	0.148	0.212
+0.356	0.068	0.424	0.152
+0.014	0.001	0.981	0.004
+0.019	0.013	0.938	0.030
+0.691	0.088	0.067	0.154
+0.798	0.100	0.023	0.079
+0.882	0.008	0.041	0.069
+
+#ID = MET28
+#Short = MET28
+#Long = METhionine requiring
+#Alias = YIR017C
+#Interactions = MBP1,STB1,STB5,SUM1,SUT1,SWI4,SWI6
+#W = 10
+#Description = "Basic leucine zipper (bZIP) transcriptional activator in the Cbf1p-Met4p-Met28p complex, participates in the regulation of sulfur metabolism"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001102,GO:0001077,GO:2000679,GO:0031335,GO:0006357,GO:0005634,GO:0003677,GO:0003700,GO:0042762,GO:0006790,GO:0000096,GO:0000097
+0.193	0.116	0.124	0.567
+0.092	0.098	0.024	0.786
+0.266	0.120	0.462	0.152
+0.415	0.042	0.384	0.159
+0.097	0.750	0.102	0.051
+0.046	0.097	0.816	0.041
+0.061	0.055	0.070	0.814
+0.052	0.562	0.144	0.242
+0.734	0.024	0.040	0.202
+0.061	0.456	0.145	0.338
+
+#ID = MET31
+#Short = MET31
+#Long = METhionine requiring
+#Alias = YPL038W
+#Interactions = MIG1,RPN4,STP3
+#W = 8
+#Description = "Zinc-finger DNA-binding protein, involved in transcriptional regulation of the methionine biosynthetic genes, similar to Met32p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000987,GO:0001133,GO:0043565,GO:0031335,GO:0006357,GO:0005737,GO:0005634,GO:0003677,GO:0006355,GO:0006790,GO:0003700,GO:0009086,GO:0000103,GO:0046686
+0.165	0.095	0.095	0.645
+0.015	0.010	0.965	0.010
+0.010	0.010	0.010	0.970
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.010	0.970	0.010	0.010
+0.060	0.010	0.755	0.175
+0.164	0.393	0.119	0.323
+
+#ID = MET32
+#Short = MET32
+#Long = METhionine requiring
+#Alias = YDR253C
+#Interactions = CBF1,MET4,PHO4,TYE7
+#W = 10
+#Description = "Zinc-finger DNA-binding protein, involved in transcriptional regulation of the methionine biosynthetic genes, similar to Met31p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000987,GO:0001102,GO:0001133,GO:0043565,GO:0007346,GO:0031335,GO:0006357,GO:0005737,GO:0005634,GO:0006351,GO:0003713,GO:0000097,GO:0003677,GO:0009086,GO:0000097,GO:0000122,GO:0045944,GO:0046686
+0.514	0.314	0.029	0.143
+0.912	0.001	0.001	0.086
+0.685	0.001	0.200	0.114
+0.029	0.629	0.171	0.171
+0.001	0.001	0.001	0.997
+0.001	0.001	0.997	0.001
+0.001	0.001	0.001	0.997
+0.001	0.001	0.997	0.001
+0.001	0.001	0.997	0.001
+0.001	0.912	0.001	0.086
+
+#ID = MET4
+#Short = MET4
+#Long = METhionine requiring
+#Alias = YNL103W
+#Interactions = CBF1,MET32,TYE7
+#W = 15
+#Description = "Leucine-zipper transcriptional activator, responsible for the regulation of the sulfur amino acid pathway, requires different combinations of the auxiliary factors Cbf1p, Met28p, Met31p and Met32p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003713,GO:0045944,GO:0046685,GO:0046686,GO:0000096,GO:0005634,GO:0003713,GO:0000097,GO:0006749,GO:0010038,GO:0003677,GO:0006357,GO:0016592,GO:0000124,GO:0000981,GO:0019005,GO:0043161
+0.696	0.001	0.302	0.001
+0.796	0.201	0.002	0.001
+0.696	0.203	0.101	0.001
+0.898	0.001	0.100	0.001
+0.603	0.001	0.001	0.395
+0.396	0.303	0.301	0.001
+0.001	0.001	0.001	0.997
+0.001	0.001	0.997	0.001
+0.001	0.001	0.295	0.703
+0.001	0.195	0.803	0.001
+0.103	0.101	0.795	0.001
+0.001	0.401	0.001	0.597
+0.001	0.001	0.997	0.001
+0.097	0.501	0.301	0.101
+0.101	0.597	0.001	0.301
+
+#ID = MGA1
+#Short = MGA1
+#Long = 
+#Alias = YGR249W
+#W = 7
+#Description = "Protein similar to heat shock transcription factor, multicopy suppressor of pseudohyphal growth defects of ammonium permease mutants"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0003700,GO:0043565,GO:0030447,GO:0005634
+0.068	0.071	0.079	0.782
+0.025	0.025	0.010	0.940
+0.192	0.739	0.043	0.026
+0.008	0.028	0.010	0.954
+0.933	0.011	0.034	0.022
+0.041	0.090	0.467	0.401
+0.910	0.052	0.017	0.021
+
+#ID = MIG1
+#Short = MIG1
+#Long = Multicopy Inhibitor of GAL gene expression
+#Alias = YGL035C,TDS22,SSN1,CAT4
+#Interactions = AFT1,AFT2,GIS1,HMS1,MET31,MIG3,MSN2,MSN4,NRG1,PDR1,PDR3,PDR8,RGM1,RGT1,RPH1,RSF2,STP1,STP2,SUT1,UME6,USV1
+#W = 12
+#Description = "Transcription factor involved in glucose repression, sequence specific DNA binding protein containing two Cys2His2 zinc finger motifs, regulated by the SNF1 kinase and the GLC7 phosphatase"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001078,GO:0043565,GO:0000433,GO:0045944,GO:0005737,GO:0005641,GO:0005634,GO:0005737,GO:0005634,GO:0043565,GO:0000433
+0.300	0.680	0.010	0.010
+0.030	0.040	0.030	0.900
+0.010	0.010	0.140	0.840
+0.830	0.010	0.040	0.120
+0.040	0.881	0.069	0.010
+0.010	0.929	0.051	0.010
+0.386	0.594	0.010	0.010
+0.010	0.970	0.010	0.010
+0.920	0.010	0.060	0.010
+0.050	0.930	0.010	0.010
+0.280	0.010	0.700	0.010
+0.337	0.129	0.525	0.010
+
+#ID = MIG2
+#Short = MIG2
+#Long = Multicopy Inhibitor of GAL gene expression
+#Alias = YGL209W,MLZ1
+#Interactions = RGM1,SUT1,USV1
+#W = 11
+#Description = "Protein containing zinc fingers, involved in repression, along with Mig1p, of SUC2 (invertase) expression by high levels of glucose, binds to Mig1p-binding sites in SUC2 promoter"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001078,GO:0043565,GO:0000433,GO:0045944,GO:0005634
+0.150	0.070	0.070	0.710
+0.720	0.060	0.180	0.040
+0.010	0.970	0.010	0.010
+0.010	0.940	0.010	0.040
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.230	0.010	0.750	0.010
+0.010	0.940	0.040	0.010
+0.890	0.010	0.090	0.010
+0.400	0.160	0.050	0.390
+0.210	0.070	0.020	0.700
+
+#ID = MIG3
+#Short = MIG3
+#Long = Multicopy Inhibitor of Growth
+#Alias = YER028C
+#Interactions = AFT2,CAT8,CEP3,CIN5,GIS1,GSM1,MIG1,MSN2,MSN4,NRG1,PDR1,PDR8,RGM1,RGT1,RPH1,RSF2,STB5,STP1,STP2,SUT1,SUT2,UME6,USV1,YER130C,YER184C,YPR196W,YRM1
+#W = 11
+#Description = "Probable transcriptional repressor involved in response to toxic agents such as hydroxyurea that inhibit ribonucleotide reductase, phosphorylation by Snf1p or the Mec1p pathway inactivates Mig3p, allowing induction of damage response genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001078,GO:0043565,GO:0034644,GO:0010768,GO:0006974,GO:0000790
+0.218	0.109	0.059	0.614
+0.750	0.100	0.110	0.040
+0.010	0.970	0.010	0.010
+0.010	0.950	0.010	0.030
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.210	0.010	0.770	0.010
+0.010	0.911	0.069	0.010
+0.840	0.020	0.130	0.010
+0.327	0.109	0.059	0.505
+0.250	0.100	0.020	0.630
+
+#ID = MOT2
+#Short = MOT2
+#Long = Modulator Of Transcription
+#Alias = YER068W,SIG1,NOT4
+#Interactions = XBP1
+#W = 12
+#Description = "Subunit of the CCR4-NOT complex, which has roles in transcription regulation, mRNA degradation, and post-transcriptional modifications, with Ubc4p, ubiquitinates nascent polypeptide-associated complex subunits and histone demethyase Jhd2p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0004842,GO:0043565,GO:0031087,GO:0032968,GO:0000209,GO:0016567,GO:0030015,GO:0005737
+0.686	0.001	0.001	0.312
+0.375	0.001	0.561	0.063
+0.001	0.001	0.997	0.001
+0.500	0.250	0.001	0.250
+0.873	0.063	0.063	0.001
+0.499	0.001	0.001	0.499
+0.001	0.997	0.001	0.001
+0.624	0.063	0.312	0.001
+0.749	0.001	0.001	0.250
+0.562	0.312	0.001	0.125
+0.997	0.001	0.001	0.001
+0.935	0.001	0.001	0.063
+
+#ID = MOT3
+#Short = MOT3
+#Long = Modifier of Transcription
+#Alias = YMR070W,ROX7
+#W = 6
+#Description = "Nuclear transcription factor with two Cys2-His2 zinc fingers, involved in repression of a subset of hypoxic genes by Rox1p, repression of several DAN/TIR genes during aerobic growth, and repression of ergosterol biosynthetic genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001102,GO:0000978,GO:0001103,GO:0071474,GO:0010895,GO:0000122,GO:0045944,GO:0005634,GO:0005634
+0.329	0.329	0.012	0.329
+0.964	0.012	0.012	0.012
+0.012	0.012	0.964	0.012
+0.012	0.012	0.964	0.012
+0.012	0.488	0.012	0.488
+0.964	0.012	0.012	0.012
+
+#ID = MSN1
+#Short = MSN1
+#Long = Multicopy suppressor of SNF1 mutation
+#Alias = YOL116W,PHD2,MSS10,HRB382,FUP1
+#W = 8
+#Description = "Transcriptional activator involved in regulation of invertase and glucoamylase expression, invasive growth and pseudohyphal differentiation, iron uptake, chromium accumulation, and response to osmotic stress, localizes to the nucleus"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:2000219,GO:2000222,GO:0035957,GO:0045944,GO:0061408,GO:0061404,GO:0097239,GO:0005634
+0.360	0.120	0.220	0.300
+0.160	0.010	0.770	0.060
+0.020	0.010	0.930	0.040
+0.960	0.020	0.010	0.010
+0.010	0.960	0.010	0.020
+0.832	0.020	0.040	0.109
+0.120	0.100	0.010	0.770
+0.323	0.101	0.152	0.424
+
+#ID = MSN2
+#Short = MSN2
+#Long = Multicopy suppressor of SNF1 mutation
+#Alias = YMR037C
+#Interactions = ACA1,GSM1,MIG1,MIG3,PHD1,RPH1,RSF2,SKN7,SUT1,YDR026C
+#W = 9
+#Description = "Transcriptional activator related to Msn4p, activated in stress conditions, which results in translocation from the cytoplasm to the nucleus, binds DNA at stress response elements of responsive genes, inducing gene expression"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000987,GO:0000982,GO:0043565,GO:0001324,GO:0071406,GO:0006338,GO:0061401,GO:0061402,GO:0061422,GO:0061412,GO:0061395,GO:0061411,GO:0061410,GO:0061409,GO:0061406,GO:0061408,GO:0061407,GO:0061405,GO:0061404,GO:0061403,GO:0097236,GO:0001302,GO:0005829,GO:0005634,GO:0003700,GO:0006950,GO:0043618,GO:0004672,GO:0005952,GO:0006468,GO:0004722,GO:0006470,GO:0005829,GO:0042994,GO:0005634,GO:0006611,GO:0006606,GO:0030163,GO:0004693
+0.683	0.184	0.001	0.132
+0.919	0.001	0.079	0.001
+0.001	0.001	0.972	0.026
+0.001	0.001	0.997	0.001
+0.026	0.001	0.789	0.184
+0.001	0.001	0.997	0.001
+0.001	0.525	0.237	0.237
+0.001	0.132	0.762	0.105
+0.211	0.001	0.683	0.105
+
+#ID = MSN4
+#Short = MSN4
+#Long = Multicopy suppressor of SNF1 mutation
+#Alias = YKL062W
+#Interactions = ACA1,GSM1,MIG1,MIG3,PHD1,RPH1,RSC3,RSF2,SKN7,STP1,SUT1,UGA3,YER184C
+#W = 7
+#Description = "Transcriptional activator related to Msn2p, activated in stress conditions, which results in translocation from the cytoplasm to the nucleus, binds DNA at stress response elements of responsive genes, inducing gene expression"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000987,GO:0000982,GO:0043565,GO:0001324,GO:0071468,GO:0006338,GO:0061401,GO:0061402,GO:0061422,GO:0061412,GO:0061395,GO:0061411,GO:0061410,GO:0061409,GO:0061406,GO:0061408,GO:0061407,GO:0061405,GO:0061404,GO:0061403,GO:0097236,GO:0001302,GO:0005829,GO:0005634,GO:0003700,GO:0006950,GO:0043618,GO:0004672,GO:0005952,GO:0006468,GO:0004722,GO:0006470,GO:0005829,GO:0042994,GO:0005634,GO:0006611,GO:0006606,GO:0030163,GO:0004693
+0.488	0.488	0.012	0.012
+0.964	0.012	0.012	0.012
+0.012	0.012	0.964	0.012
+0.012	0.012	0.964	0.012
+0.012	0.012	0.964	0.012
+0.012	0.012	0.964	0.012
+0.250	0.250	0.250	0.250
+
+#ID = NDD1
+#Short = NDD1
+#Long = Nuclear Division Defective
+#Alias = YOR372C
+#Interactions = FKH1,FKH2,MBP1,MCM1,SWI6
+#W = 13
+#Description = "Transcriptional activator essential for nuclear division, localized to the nucleus, essential component of the mechanism that activates the expression of a set of late-S-phase-specific genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003713,GO:0090282,GO:0005634
+0.142	0.116	0.079	0.663
+0.187	0.082	0.156	0.575
+0.211	0.156	0.130	0.503
+0.020	0.911	0.046	0.023
+0.006	0.967	0.007	0.020
+0.242	0.342	0.144	0.271
+0.682	0.089	0.196	0.033
+0.862	0.005	0.008	0.125
+0.435	0.013	0.005	0.547
+0.161	0.219	0.204	0.415
+0.315	0.136	0.354	0.195
+0.041	0.003	0.950	0.006
+0.019	0.024	0.937	0.020
+
+#ID = NDT80
+#Short = NDT80
+#Long = Non-DiTyrosine
+#Alias = YHR124W
+#W = 11
+#Description = ""
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0007126,GO:0006351,GO:0000228
+0.188	0.020	0.673	0.119
+0.444	0.485	0.040	0.030
+0.010	0.949	0.010	0.030
+0.931	0.010	0.050	0.010
+0.020	0.960	0.010	0.010
+0.960	0.010	0.010	0.020
+0.960	0.010	0.020	0.010
+0.940	0.010	0.010	0.040
+0.717	0.020	0.242	0.020
+0.500	0.180	0.080	0.240
+0.120	0.630	0.100	0.150
+
+#ID = NHP10
+#Short = NHP10
+#Long = Non-Histone Protein
+#Alias = YDL002C,HMO2
+#Interactions = GIS1,HMS1,LYS14,RGM1,RSC3,STP1,STP2,SUT1,USV1
+#W = 8
+#Description = "Protein related to mammalian high mobility group proteins, preferentially binds DNA ends, protecting them from exonucleatic cleavage, likely component of the chromatin-remodeling complex INO80 complex, proposed to be involved in DNA repair"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0045027,GO:0000404,GO:0006302,GO:0042766,GO:0031011,GO:0005634
+0.200	0.100	0.600	0.100
+0.080	0.760	0.080	0.080
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.663	0.079	0.178	0.079
+
+#ID = NHP6A
+#Short = NHP6A
+#Long = Non-Histone Protein
+#Alias = YPR052C
+#Interactions = STB5
+#W = 10
+#Description = "High-mobility group (HMG) protein that binds to and remodels nucleosomes, involved in recruiting FACT and other chromatin remodelling complexes to the chromosomes, functionally redundant with Nhp6Bp, homologous to mammalian HMGB1 and HMGB2"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008301,GO:0031491,GO:0043565,GO:0006338,GO:0034724,GO:0006298,GO:0051123,GO:0070898,GO:0032301,GO:0005634,GO:0006338,GO:0000788,GO:0003677,GO:0008301,GO:0035101,GO:0032301
+0.100	0.520	0.050	0.330
+0.340	0.130	0.070	0.460
+0.495	0.253	0.061	0.192
+0.111	0.020	0.010	0.859
+0.900	0.010	0.030	0.060
+0.130	0.030	0.010	0.830
+0.850	0.020	0.040	0.090
+0.060	0.040	0.030	0.870
+0.743	0.020	0.020	0.218
+0.650	0.030	0.150	0.170
+
+#ID = NHP6B
+#Short = NHP6B
+#Long = Non-Histone Protein
+#Alias = YBR089C-A,YBR090C-A
+#Interactions = STB5
+#W = 15
+#Description = "High-mobility group (HMG) protein that binds to and remodels nucleosomes, involved in recruiting FACT and other chromatin remodelling complexes to the chromosomes, functionally redundant with Nhp6Ap, homologous to mammalian HMGB1 and HMGB2"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008301,GO:0031491,GO:0043565,GO:0006338,GO:0070898,GO:0006366,GO:0005634,GO:0006338,GO:0000788,GO:0003677,GO:0008301,GO:0035101,GO:0032301
+0.139	0.109	0.109	0.644
+0.376	0.208	0.079	0.337
+0.198	0.317	0.109	0.376
+0.152	0.323	0.141	0.384
+0.390	0.070	0.030	0.510
+0.580	0.090	0.050	0.280
+0.168	0.069	0.020	0.743
+0.810	0.030	0.070	0.090
+0.090	0.070	0.030	0.810
+0.743	0.020	0.069	0.168
+0.280	0.050	0.090	0.580
+0.510	0.030	0.070	0.390
+0.460	0.100	0.120	0.320
+0.370	0.110	0.110	0.410
+0.470	0.080	0.340	0.110
+
+#ID = NRG1
+#Short = NRG1
+#Long = Negative Regulator of Glucose-repressed genes
+#Alias = YDR043C
+#Interactions = GIS1,MIG1,MIG3,RDR1,RGM1,RSC3,RSF2,USV1
+#W = 8
+#Description = "Transcriptional repressor that recruits the Cyc8p-Tup1p complex to promoters, mediates glucose repression and negatively regulates a variety of processes including filamentous growth and alkaline pH response"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001078,GO:0001103,GO:0001191,GO:0043565,GO:0042710,GO:0071475,GO:0071469,GO:0001403,GO:0000122,GO:0000433,GO:0097201,GO:0007124,GO:0005634
+0.186	0.018	0.785	0.010
+0.048	0.009	0.933	0.009
+0.861	0.014	0.026	0.100
+0.012	0.955	0.010	0.024
+0.009	0.972	0.009	0.009
+0.009	0.971	0.010	0.009
+0.011	0.057	0.045	0.888
+0.083	0.033	0.470	0.413
+
+#ID = NRG2
+#Short = NRG2
+#Long = Negative Regulator of Glucose-controlled genes
+#Alias = YBR066C
+#W = 8
+#Description = "Transcriptional repressor that mediates glucose repression and negatively regulates filamentous growth, has similarity to Nrg1p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0042710,GO:0071475,GO:0001403,GO:0000122,GO:0000433,GO:0007124,GO:0005634
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.200	0.060	0.080	0.660
+0.050	0.700	0.010	0.240
+0.010	0.465	0.267	0.257
+0.390	0.370	0.070	0.170
+0.810	0.030	0.150	0.010
+0.010	0.010	0.970	0.010
+
+#ID = OAF1
+#Short = OAF1
+#Long = Oleate-Activated transcription Factor
+#Alias = YAL051W,YAF1
+#Interactions = GIS1,PDR1,PDR8,RDS1,RGT1,STP1,SUT1,USV1,YPR196W
+#W = 9
+#Description = "Oleate-activated transcription factor, acts alone and as a heterodimer with Pip2p, activates genes involved in beta-oxidation of fatty acids and peroxisome organization and biogenesis"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0000978,GO:0001077,GO:0043565,GO:0071400,GO:0031940,GO:0032000,GO:0045944,GO:0005634
+0.120	0.030	0.030	0.820
+0.859	0.010	0.010	0.121
+0.480	0.020	0.050	0.450
+0.440	0.200	0.170	0.190
+0.010	0.182	0.081	0.727
+0.010	0.970	0.010	0.010
+0.010	0.950	0.030	0.010
+0.010	0.010	0.970	0.010
+0.650	0.020	0.260	0.070
+
+#ID = OPI1
+#Short = OPI1
+#Long = OverProducer of Inositol
+#Alias = YHL020C
+#Interactions = STP3
+#W = 10
+#Description = "Transcriptional regulator of a variety of genes, phosphorylation by protein kinase A stimulates Opi1p function in negative regulation of phospholipid biosynthetic genes, involved in telomere maintenance"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003714,GO:0030968,GO:0000122,GO:0008654,GO:0045944,GO:0005783,GO:0005635,GO:0031965,GO:0005654,GO:0005634
+0.188	0.238	0.545	0.030
+0.050	0.010	0.802	0.139
+0.139	0.010	0.089	0.762
+0.090	0.010	0.010	0.890
+0.040	0.900	0.050	0.010
+0.426	0.010	0.554	0.010
+0.910	0.070	0.010	0.010
+0.440	0.160	0.170	0.230
+0.010	0.317	0.020	0.653
+0.100	0.770	0.100	0.030
+
+#ID = ORC1
+#Short = ORC1
+#Long = Origin Recognition Complex
+#Alias = YML065W
+#W = 17
+#Description = "Largest subunit of the origin recognition complex, which directs DNA replication by binding to replication origins and is also involved in transcriptional silencing, exhibits ATPase activity"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0005524,GO:0016887,GO:0003682,GO:0003688,GO:0030466,GO:0006270,GO:0006267,GO:0031261,GO:0005664,GO:0005634,GO:0005656,GO:0005664,GO:0003677,GO:0006260,GO:0003688,GO:0007049,GO:0006270,GO:0005656,GO:0042555,GO:0006267,GO:0000084,GO:0006468,GO:0004693,GO:0030466,GO:0005524,GO:0016887
+0.303	0.152	0.001	0.544
+0.212	0.001	0.091	0.696
+0.091	0.001	0.001	0.907
+0.212	0.001	0.091	0.696
+0.030	0.001	0.001	0.968
+0.030	0.001	0.001	0.968
+0.030	0.061	0.001	0.908
+0.877	0.001	0.001	0.121
+0.091	0.121	0.001	0.787
+0.333	0.030	0.424	0.212
+0.001	0.030	0.001	0.968
+0.091	0.030	0.001	0.878
+0.001	0.001	0.001	0.997
+0.544	0.001	0.001	0.454
+0.001	0.152	0.544	0.303
+0.001	0.001	0.212	0.786
+0.061	0.121	0.001	0.817
+
+#ID = PDR1
+#Short = PDR1
+#Long = Pleiotropic Drug Resistance
+#Alias = YGL013C,TPE3,TPE1,TIL1,SMR2,NRA2,CYH3,BOR2,ANT1,AMY1
+#Interactions = ABF1,CAT8,DAL82,MIG1,MIG3,OAF1,RSC3,RSC30,RSF2,SUT1,YRM1
+#W = 11
+#Description = "Zinc cluster protein that is a master regulator involved in recruiting other zinc cluster proteins to pleiotropic drug response elements (PDREs) to fine tune the regulation of multidrug resistance genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001077,GO:0043565,GO:2001040,GO:0045944,GO:0005634,GO:0003700,GO:0042493,GO:0042803,GO:0046982,GO:0042626,GO:0015149,GO:0030148,GO:0031930
+0.135	0.699	0.063	0.103
+0.052	0.639	0.167	0.142
+0.020	0.002	0.898	0.080
+0.003	0.930	0.064	0.003
+0.003	0.977	0.002	0.018
+0.180	0.002	0.698	0.120
+0.810	0.002	0.185	0.003
+0.918	0.048	0.031	0.003
+0.434	0.002	0.031	0.533
+0.671	0.110	0.216	0.003
+0.643	0.075	0.090	0.192
+
+#ID = PDR3
+#Short = PDR3
+#Long = Pleiotropic Drug Resistance
+#Alias = YBL005W,TPE2,AMY2
+#Interactions = CIN5,GSM1,MIG1,PDR8,RGT1,SUT1,YER184C
+#W = 7
+#Description = ""
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001077,GO:2001040,GO:0045944,GO:0005634,GO:0005737,GO:0005634,GO:0003700,GO:0042493,GO:0042803,GO:0046982,GO:0042626,GO:0015149,GO:0030148,GO:0031930
+0.187	0.087	0.098	0.628
+0.126	0.791	0.060	0.023
+0.196	0.280	0.072	0.451
+0.060	0.053	0.818	0.069
+0.034	0.842	0.062	0.062
+0.024	0.118	0.732	0.126
+0.036	0.040	0.884	0.040
+
+#ID = PDR8
+#Short = PDR8
+#Long = Pleiotropic Drug Resistance
+#Alias = YLR266C
+#Interactions = CIN5,GSM1,MIG1,MIG3,OAF1,PDR3,STB5,STP1,SUT1,YER184C,YPR196W
+#W = 7
+#Description = "Transcription factor, targets include ATP-binding cassette (ABC) transporters, major facilitator superfamily transporters, and other genes involved in the pleiotropic drug resistance (PDR) phenomenon"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0000981,GO:0043565,GO:0036003,GO:0005634
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.970	0.010	0.010	0.010
+0.080	0.080	0.830	0.010
+0.970	0.010	0.010	0.010
+0.130	0.060	0.060	0.750
+
+#ID = PHD1
+#Short = PHD1
+#Long = PseudoHyphal Determinant
+#Alias = YKL043W
+#Interactions = DAL82,GIS1,GSM1,MSN2,MSN4,RDS1,SKN7,SUT1,USV1,YER184C
+#W = 8
+#Description = "Transcriptional activator that enhances pseudohyphal growth, regulates expression of FLO11, an adhesin required for pseudohyphal filament formation, similar to StuA, an A. nidulans developmental regulator, potential Cdc28p substrate"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0045944,GO:0007124,GO:0005634
+0.065	0.563	0.291	0.080
+0.490	0.330	0.125	0.055
+0.010	0.070	0.010	0.910
+0.010	0.010	0.970	0.010
+0.010	0.965	0.010	0.015
+0.935	0.010	0.045	0.010
+0.045	0.125	0.280	0.550
+0.260	0.470	0.170	0.100
+
+#ID = PHO2
+#Short = PHO2
+#Long = PHOsphate metabolism
+#Alias = YDL106C,phoB,GRF10,BAS2
+#W = 13
+#Description = "Homeobox transcription factor, regulatory targets include genes involved in phosphate metabolism, binds cooperatively with Pho4p to the PHO5 promoter, phosphorylation of Pho2p facilitates interaction with Pho4p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:0006338,GO:0000105,GO:0043388,GO:0045937,GO:0045944,GO:0009113,GO:0005634,GO:0003700,GO:0009113,GO:0000105,GO:0016036,GO:0016036,GO:0004693
+0.500	0.040	0.070	0.390
+0.061	0.222	0.131	0.586
+0.198	0.020	0.010	0.772
+0.770	0.020	0.010	0.200
+0.800	0.010	0.010	0.180
+0.180	0.010	0.010	0.800
+0.200	0.010	0.020	0.770
+0.772	0.010	0.020	0.198
+0.586	0.131	0.222	0.061
+0.300	0.110	0.130	0.460
+0.140	0.180	0.430	0.250
+0.150	0.320	0.380	0.150
+0.140	0.180	0.550	0.130
+
+#ID = PHO4
+#Short = PHO4
+#Long = PHOsphate metabolism
+#Alias = YFR034C,phoD
+#Interactions = HAC1,MET32
+#W = 8
+#Description = "Basic helix-loop-helix (bHLH) transcription factor of the myc-family, binds cooperatively with Pho2p to the PHO5 promoter, function is regulated by phosphorylation at multiple sites and by phosphate availability"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0003700,GO:0043565,GO:0016036,GO:0006338,GO:0006796,GO:0045937,GO:0045944,GO:0005737,GO:0005634,GO:0003700,GO:0016036,GO:0005737,GO:0004861,GO:0005634
+0.126	0.214	0.568	0.092
+0.091	0.881	0.020	0.008
+0.975	0.008	0.012	0.005
+0.024	0.854	0.067	0.055
+0.037	0.020	0.920	0.023
+0.009	0.015	0.009	0.967
+0.060	0.005	0.918	0.017
+0.078	0.256	0.647	0.019
+
+#ID = PIP2
+#Short = PIP2
+#Long = Peroxisome Induction Pathway
+#Alias = YOR363C,OAF2
+#W = 18
+#Description = "Autoregulatory oleate-specific transcriptional activator of peroxisome proliferation, contains Zn(2)-Cys(6) cluster domain, forms heterodimer with Oaf1p, binds oleate response elements (OREs), activates beta-oxidation genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0071400,GO:0032000,GO:0045944,GO:0005634,GO:0016021
+0.010	0.347	0.426	0.218
+0.180	0.340	0.190	0.290
+0.010	0.970	0.010	0.010
+0.960	0.010	0.020	0.010
+0.970	0.010	0.010	0.010
+0.300	0.010	0.090	0.600
+0.370	0.310	0.020	0.300
+0.050	0.810	0.130	0.010
+0.060	0.280	0.360	0.300
+0.030	0.730	0.130	0.110
+0.460	0.500	0.010	0.030
+0.170	0.010	0.600	0.220
+0.010	0.010	0.970	0.010
+0.010	0.970	0.010	0.010
+0.010	0.960	0.010	0.020
+0.360	0.100	0.030	0.510
+0.530	0.010	0.340	0.120
+0.119	0.010	0.426	0.446
+
+#ID = PPR1
+#Short = PPR1
+#Long = Pyrimidine Pathway Regulation
+#Alias = YLR014C
+#W = 14
+#Description = "Zinc finger transcription factor containing a Zn(2)-Cys(6) binuclear cluster domain, positively regulates transcription of genes involved in uracil biosynthesis, activity may be modulated by interaction with Tup1p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0000981,GO:0008270,GO:0045944,GO:0005634
+0.050	0.010	0.010	0.930
+0.010	0.010	0.099	0.881
+0.564	0.010	0.416	0.010
+0.970	0.010	0.010	0.010
+0.939	0.020	0.010	0.030
+0.010	0.010	0.970	0.010
+0.010	0.350	0.010	0.630
+0.350	0.330	0.010	0.310
+0.010	0.970	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.890	0.010	0.090
+0.290	0.010	0.480	0.220
+0.080	0.010	0.230	0.680
+0.010	0.010	0.800	0.180
+
+#ID = PUT3
+#Short = PUT3
+#Long = Proline UTilization
+#Alias = YKL015W
+#W = 16
+#Description = "Transcriptional activator of proline utilization genes, constitutively binds PUT1 and PUT2 promoter sequences and undergoes a conformational change to form the active state, has a Zn(2)-Cys(6) binuclear cluster domain"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:2001158,GO:0045944,GO:0005634,GO:0006412,GO:0010133,GO:0005739,GO:0004657,GO:0003842,GO:0001077,GO:0045944,GO:0003700,GO:0003677
+0.045	0.781	0.109	0.065
+0.168	0.068	0.649	0.115
+0.021	0.086	0.859	0.034
+0.178	0.201	0.367	0.255
+0.446	0.163	0.162	0.228
+0.513	0.179	0.168	0.140
+0.105	0.335	0.461	0.099
+0.060	0.892	0.018	0.030
+0.026	0.649	0.278	0.047
+0.403	0.369	0.077	0.152
+0.387	0.337	0.066	0.210
+0.179	0.299	0.126	0.396
+0.077	0.498	0.235	0.191
+0.046	0.658	0.183	0.113
+0.035	0.869	0.038	0.058
+0.080	0.086	0.748	0.086
+
+#ID = RAP1
+#Short = RAP1
+#Long = Repressor Activator Protein
+#Alias = YNL216W,TUF1,TBA1,GRF1
+#Interactions = AFT2,FHL1,SFP1
+#W = 13
+#Description = "DNA-binding protein involved in either activation or repression of transcription, depending on binding site context, also binds telomere sequences and plays a role in telomeric position effect (silencing) and telomere structure"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0008301,GO:0043565,GO:0003700,GO:0042162,GO:0043565,GO:0006342,GO:0006348,GO:0031848,GO:0007004,GO:0000781,GO:0005635,GO:0000783,GO:0000723,GO:0006342,GO:0045944,GO:0003677
+0.617	0.097	0.201	0.085
+0.070	0.882	0.047	0.001
+0.886	0.050	0.041	0.023
+0.004	0.680	0.009	0.307
+0.003	0.992	0.001	0.004
+0.011	0.945	0.004	0.040
+0.593	0.017	0.346	0.044
+0.087	0.149	0.058	0.706
+0.753	0.033	0.178	0.036
+0.044	0.931	0.013	0.012
+0.855	0.142	0.002	0.001
+0.011	0.412	0.021	0.556
+0.126	0.548	0.036	0.290
+
+#ID = RDR1
+#Short = RDR1
+#Long = Repressor of Drug Resistance
+#Alias = YOR380W
+#Interactions = NRG1,RSC3,STB1
+#W = 7
+#Description = "Transcriptional repressor involved in the control of multidrug resistance, negatively regulates expression of the PDR5 gene, member of the Gal4p family of zinc cluster proteins"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0009410,GO:0005634
+0.020	0.100	0.810	0.070
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.810	0.020	0.160	0.010
+0.340	0.010	0.020	0.630
+0.790	0.070	0.110	0.030
+
+#ID = RDS1
+#Short = RDS1
+#Long = 
+#Alias = YCR106W
+#Interactions = HAP2,HAP4,OAF1,PHD1,STB1,SWI4
+#W = 8
+#Description = "Zinc cluster transcription factor involved in conferring resistance to cycloheximide"
+#Organisms = yeast (Saccharomyces cerevisiae)
+0.010	0.010	0.180	0.800
+0.010	0.970	0.010	0.010
+0.010	0.050	0.930	0.010
+0.010	0.020	0.960	0.010
+0.010	0.960	0.020	0.010
+0.010	0.930	0.050	0.010
+0.010	0.010	0.970	0.010
+0.800	0.180	0.010	0.010
+
+#ID = RDS2
+#Short = RDS2
+#Long = Regulator of Drug Sensitivity
+#Alias = YPL133C
+#Interactions = GIS1,RGM1,STB4,STB5,USV1
+#W = 5
+#Description = "Zinc cluster transcriptional activator involved in conferring resistance to ketoconazole"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:0071466,GO:0061415,GO:0035948,GO:0045944,GO:0061414,GO:0005634,GO:0005737,GO:0005634
+0.052	0.438	0.054	0.456
+0.024	0.904	0.051	0.021
+0.001	0.982	0.016	0.001
+0.001	0.014	0.953	0.032
+0.689	0.107	0.079	0.125
+
+#ID = REB1
+#Short = REB1
+#Long = RNA polymerase I Enhancer Binding protein
+#Alias = YBR049C,GRF2
+#Interactions = ABF1,MBP1,STB3,SWI4,SWI6
+#W = 9
+#Description = "RNA polymerase I enhancer binding protein, DNA binding protein which binds to genes transcribed by both RNA polymerase I and RNA polymerase II, required for termination of RNA polymerase I transcription"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0006357,GO:0006363,GO:0005654
+0.300	0.100	0.500	0.100
+0.010	0.010	0.010	0.970
+0.010	0.010	0.010	0.970
+0.970	0.010	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.590	0.390
+0.150	0.150	0.550	0.150
+
+#ID = REI1
+#Short = REI1
+#Long = REquired for Isotropic bud growth
+#Alias = YBR267W
+#W = 7
+#Description = "Cytoplasmic pre-60S factor, required for the correct recycling of shuttling factors Alb1, Arx1 and Tif6 at the end of the ribosomal large subunit biogenesis, involved in bud growth in the mitotic signaling network"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0007117,GO:0000278,GO:0006913,GO:0042273,GO:0005737,GO:0022625,GO:0030687,GO:0005737
+0.010	0.930	0.010	0.050
+0.050	0.930	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.010	0.930	0.050
+0.560	0.080	0.230	0.130
+
+#ID = RFX1
+#Short = RFX1
+#Long = 
+#Alias = YLR176C,CRT1
+#W = 14
+#Description = "Major transcriptional repressor of DNA-damage-regulated genes, recruits repressors Tup1p and Cyc8p to their promoters, involved in DNA damage and replication checkpoint pathway, similar to a family of mammalian DNA binding RFX1-4 proteins"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0043565,GO:0000122,GO:0045944,GO:0005737,GO:0005634
+0.025	0.074	0.875	0.026
+0.050	0.001	0.001	0.948
+0.114	0.108	0.050	0.728
+0.086	0.063	0.801	0.050
+0.001	0.414	0.073	0.512
+0.050	0.810	0.001	0.139
+0.886	0.075	0.038	0.001
+0.037	0.037	0.100	0.826
+0.262	0.001	0.648	0.089
+0.012	0.026	0.887	0.075
+0.114	0.459	0.112	0.315
+0.755	0.001	0.144	0.100
+0.875	0.025	0.050	0.050
+0.102	0.634	0.075	0.189
+
+#ID = RGM1
+#Short = RGM1
+#Long = 
+#Alias = YMR182C
+#Interactions = GSM1,MIG1,MIG2,MIG3,NHP10,NRG1,RDS2,RPH1,RSC3,RSF2,SKN7,SOK2,STP1,SUT1,UGA3,YDR026C,YER184C
+#W = 13
+#Description = "Putative transcriptional repressor with proline-rich zinc fingers, overproduction impairs cell growth"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0000122,GO:0005634
+0.010	0.880	0.100	0.010
+0.010	0.713	0.267	0.010
+0.350	0.590	0.010	0.050
+0.010	0.970	0.010	0.010
+0.020	0.010	0.960	0.010
+0.970	0.010	0.010	0.010
+0.099	0.782	0.109	0.010
+0.495	0.010	0.485	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.520	0.060	0.410	0.010
+0.069	0.337	0.584	0.010
+0.040	0.770	0.070	0.120
+
+#ID = RGT1
+#Short = RGT1
+#Long = Restores Glucose Transport
+#Alias = YKL038W
+#Interactions = EDS1,GSM1,MIG1,MIG3,OAF1,PDR3,SUT1,YPR196W
+#W = 10
+#Description = "Glucose-responsive transcription factor that regulates expression of several glucose transporter (HXT) genes in response to glucose, binds to promoters and acts both as a transcriptional activator and repressor"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0000978,GO:0001077,GO:0001191,GO:0043565,GO:0006006,GO:0015758,GO:0000122,GO:0045944,GO:0046324,GO:0005634
+0.001	0.416	0.582	0.001
+0.001	0.417	0.083	0.500
+0.001	0.915	0.001	0.083
+0.001	0.001	0.997	0.001
+0.001	0.001	0.997	0.001
+0.997	0.001	0.001	0.001
+0.748	0.001	0.001	0.250
+0.915	0.001	0.001	0.083
+0.997	0.001	0.001	0.001
+0.997	0.001	0.001	0.001
+
+#ID = RIM101
+#Short = RIM101
+#Long = Regulator of IME2
+#Alias = YHL027W,RIM1
+#W = 7
+#Description = "Transcriptional repressor involved in response to pH and in cell wall construction, required for alkaline pH-stimulated haploid invasive growth and sporulation, activated by proteolytic processing, similar to A. nidulans PacC"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001078,GO:0043565,GO:0030437,GO:0000917,GO:0071454,GO:0009272,GO:0007126,GO:0000122,GO:0045944,GO:0009268,GO:0005634
+0.012	0.012	0.012	0.964
+0.012	0.012	0.964	0.012
+0.012	0.964	0.012	0.012
+0.012	0.964	0.012	0.012
+0.964	0.012	0.012	0.012
+0.964	0.012	0.012	0.012
+0.012	0.012	0.964	0.012
+
+#ID = RLM1
+#Short = RLM1
+#Long = Resistance to Lethality of MKK1P386 overexpression
+#Alias = YPL089C
+#W = 11
+#Description = "MADS-box transcription factor, component of the protein kinase C-mediated MAP kinase pathway involved in the maintenance of cell integrity, phosphorylated and activated by the MAP-kinase Slt2p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008301,GO:0000982,GO:0043565,GO:0045944,GO:0036003,GO:0007165,GO:0005634
+0.090	0.055	0.138	0.718
+0.021	0.935	0.028	0.015
+0.012	0.029	0.012	0.948
+0.905	0.028	0.017	0.050
+0.368	0.024	0.012	0.595
+0.545	0.024	0.015	0.417
+0.574	0.018	0.011	0.396
+0.728	0.011	0.011	0.249
+0.025	0.015	0.011	0.949
+0.952	0.012	0.024	0.012
+0.051	0.034	0.863	0.051
+
+#ID = RME1
+#Short = RME1
+#Long = Regulator of MEiosis
+#Alias = YGR044C,CSP1
+#W = 10
+#Description = "Zinc finger protein involved in control of meiosis, prevents meiosis by repressing IME1 expression and promotes mitosis by activating CLN2 expression, directly repressed by a1-alpha2 regulator, mediates cell type control of sporulation"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0000981,GO:0045835,GO:0051038,GO:0000122,GO:0036095,GO:0045944,GO:0071931,GO:0005634
+0.001	0.180	0.003	0.816
+0.121	0.324	0.120	0.436
+0.119	0.338	0.171	0.371
+0.989	0.001	0.009	0.001
+0.743	0.001	0.100	0.156
+0.860	0.107	0.001	0.032
+0.187	0.001	0.811	0.001
+0.227	0.001	0.763	0.009
+0.580	0.141	0.126	0.153
+0.790	0.002	0.075	0.133
+
+#ID = ROX1
+#Short = ROX1
+#Long = Regulation by OXygen
+#Alias = YPR065W,REO1
+#W = 8
+#Description = "Heme-dependent repressor of hypoxic genes, contains an HMG domain that is responsible for DNA bending activity"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008301,GO:0001078,GO:0001135,GO:0043565,GO:0043565,GO:0000122,GO:0097201,GO:0000790
+0.950	0.010	0.010	0.030
+0.010	0.880	0.060	0.050
+0.950	0.020	0.010	0.020
+0.960	0.010	0.010	0.020
+0.110	0.010	0.010	0.870
+0.556	0.101	0.222	0.121
+0.260	0.280	0.390	0.070
+0.253	0.333	0.283	0.131
+
+#ID = RPH1
+#Short = RPH1
+#Long = Regulator of PHR1
+#Alias = YER169W,KDM4
+#Interactions = GIS1,MIG1,MIG3,MSN2,MSN4,RGM1,RSF2,SUT1,USV1,YER184C
+#W = 9
+#Description = "JmjC domain-containing histone demethylase which can specifically demethylate H3K36 tri- and dimethyl modification states, transcriptional repressor of PHR1, Rph1p phosphorylation during DNA damage is under control of the MEC1-RAD53 pathway"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0051864,GO:0032454,GO:0001078,GO:0043565,GO:0043565,GO:0016577,GO:0000122,GO:0005634
+0.206	0.504	0.105	0.184
+0.710	0.086	0.086	0.119
+0.010	0.961	0.010	0.019
+0.408	0.550	0.032	0.010
+0.010	0.953	0.028	0.010
+0.245	0.592	0.136	0.027
+0.032	0.236	0.010	0.722
+0.399	0.010	0.424	0.167
+0.459	0.328	0.044	0.170
+
+#ID = RPN4
+#Short = RPN4
+#Long = Regulatory Particle Non-ATPase
+#Alias = YDL020C,UFD5,SON1
+#Interactions = ABF1,MET31,SUT1,YDR026C
+#W = 9
+#Description = "Transcription factor that stimulates expression of proteasome genes, Rpn4p levels are in turn regulated by the 26S proteasome in a negative feedback control mechanism, RPN4 is transcriptionally regulated by various stress responses"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:0000122,GO:0032436,GO:0045944,GO:0036003,GO:0006282,GO:0000122,GO:0097201,GO:0045944,GO:0061395,GO:0036003,GO:0005634
+0.214	0.007	0.728	0.051
+0.009	0.013	0.960	0.018
+0.030	0.026	0.025	0.919
+0.010	0.017	0.966	0.007
+0.009	0.012	0.971	0.009
+0.014	0.974	0.007	0.005
+0.683	0.013	0.284	0.021
+0.909	0.007	0.007	0.077
+0.699	0.133	0.060	0.109
+
+#ID = RSC3
+#Short = RSC3
+#Long = Remodel the Structure of Chromatin
+#Alias = YDR303C
+#Interactions = CAT8,GCN4,GIS1,GSM1,HAP2,HAP4,IME1,MSN4,NHP10,NRG1,PDR1,RDR1,RGM1,RTG3,SKN7,STP1,SUT1,UME6,USV1,YER184C
+#W = 5
+#Description = "Component of the RSC chromatin remodeling complex, essential gene required for maintenance of proper ploidy and regulation of ribosomal protein genes and the cell wall/stress response, highly similar to Rsc30p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0008094,GO:0043565,GO:0043044,GO:0000082,GO:0000086,GO:0006337,GO:0016584,GO:0051726,GO:0033262,GO:0006355,GO:0006368,GO:0016586,GO:0005634
+0.010	0.900	0.050	0.040
+0.010	0.010	0.970	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.060	0.560	0.180	0.200
+
+#ID = RSC30
+#Short = RSC30
+#Long = Remodel the Structure of Chromatin
+#Alias = YHR056C
+#Interactions = IME1,PDR1,STP1,UME6
+#W = 7
+#Description = "Component of the RSC chromatin remodeling complex, non-essential gene required for regulation of ribosomal protein genes and the cell wall/stress response, highly similar to Rsc3p, null mutants are osmosensitive"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0008094,GO:0043565,GO:0043044,GO:0006303,GO:0006337,GO:0006355,GO:0006368,GO:0016586
+0.150	0.380	0.460	0.010
+0.010	0.900	0.080	0.010
+0.010	0.080	0.900	0.010
+0.010	0.900	0.080	0.010
+0.010	0.010	0.970	0.010
+0.010	0.830	0.150	0.010
+0.010	0.300	0.680	0.010
+
+#ID = RSF2
+#Short = RSF2
+#Long = ReSpiration Factor
+#Alias = YJR127C,ZMS1
+#Interactions = AFT1,AFT2,ARG80,CAT8,GIS1,HAP1,HMS1,MIG1,MIG3,MSN2,MSN4,NRG1,PDR1,RGM1,RPH1,STP1,STP2,SUT1,UME6,USV1,YER130C
+#W = 7
+#Description = "Zinc-finger protein involved in transcriptional control of both nuclear and mitochondrial genes, many of which specify products required for glycerol-based growth, respiration, and other functions"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0006355,GO:0005634
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.190	0.040	0.530	0.240
+0.050	0.850	0.050	0.050
+0.500	0.100	0.100	0.300
+
+#ID = RTG1
+#Short = RTG1
+#Long = ReTroGrade regulation
+#Alias = YOL067C
+#W = 12
+#Description = "Transcription factor (bHLH) involved in interorganelle communication between mitochondria, peroxisomes, and nucleus"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000981,GO:0071400,GO:0031930,GO:0045944,GO:0005737,GO:0005634
+0.010	0.140	0.840	0.010
+0.890	0.010	0.040	0.060
+0.010	0.040	0.010	0.939
+0.010	0.733	0.248	0.010
+0.300	0.010	0.680	0.010
+0.119	0.020	0.257	0.604
+0.890	0.070	0.030	0.010
+0.040	0.010	0.010	0.940
+0.010	0.158	0.822	0.010
+0.717	0.091	0.152	0.040
+0.030	0.010	0.080	0.880
+0.911	0.010	0.010	0.069
+
+#ID = RTG3
+#Short = RTG3
+#Long = ReTroGrade regulation
+#Alias = YBL103C
+#Interactions = ACA1,BAS1,GCN4,MBP1,RSC3,STB5,SWI4,SWI6
+#W = 8
+#Description = "Basic helix-loop-helix-leucine zipper (bHLH/Zip) transcription factor that forms a complex with another bHLH/Zip protein, Rtg1p, to activate the retrograde (RTG) and TOR pathways"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001085,GO:0000981,GO:0043565,GO:0071400,GO:0031930,GO:0000422,GO:0045944,GO:0042991,GO:0005737,GO:0005634
+0.620	0.052	0.259	0.069
+0.001	0.001	0.001	0.997
+0.001	0.001	0.997	0.001
+0.997	0.001	0.001	0.001
+0.001	0.997	0.001	0.001
+0.103	0.069	0.310	0.518
+0.224	0.758	0.001	0.017
+0.448	0.121	0.190	0.241
+
+#ID = SFL1
+#Short = SFL1
+#Long = Suppressor gene for FLocculation
+#Alias = YOR140W
+#W = 15
+#Description = "Transcriptional repressor and activator, involved in repression of flocculation-related genes, and activation of stress responsive genes, negatively regulated by cAMP-dependent protein kinase A subunit Tpk2p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001103,GO:0001133,GO:0043565,GO:0016458,GO:2000218,GO:2000221,GO:0000122,GO:0045944,GO:0005634,GO:0000122,GO:0000501,GO:0009986,GO:0007124,GO:0001403,GO:0003700,GO:0003677,GO:0004691,GO:0006468,GO:0000122,GO:0046983,GO:0001103,GO:0006351,GO:0016591,GO:0019933
+0.730	0.030	0.120	0.120
+0.129	0.178	0.109	0.584
+0.500	0.260	0.230	0.010
+0.020	0.010	0.960	0.010
+0.950	0.020	0.010	0.020
+0.960	0.010	0.020	0.010
+0.020	0.050	0.810	0.120
+0.614	0.129	0.218	0.040
+0.600	0.130	0.040	0.230
+0.540	0.220	0.050	0.190
+0.257	0.158	0.149	0.436
+0.490	0.100	0.220	0.190
+0.430	0.070	0.100	0.400
+0.370	0.120	0.150	0.360
+0.410	0.120	0.070	0.400
+
+#ID = SFP1
+#Short = SFP1
+#Long = Split Finger Protein
+#Alias = YLR403W
+#Interactions = AFT2,FHL1,RAP1
+#W = 12
+#Description = "Transcription factor that controls expression of ribosome biogenesis genes in response to nutrients and stress, regulates G2/M transitions during mitotic cell cycle and DNA-damage response, modulates cell size, regulated by TORC1 and Mrs6p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0008361,GO:0042254,GO:0006383,GO:0005737,GO:0005634
+0.535	0.040	0.343	0.081
+0.788	0.071	0.071	0.071
+0.891	0.040	0.050	0.020
+0.900	0.010	0.050	0.040
+0.860	0.010	0.040	0.090
+0.540	0.030	0.020	0.410
+0.090	0.040	0.010	0.860
+0.040	0.050	0.010	0.900
+0.020	0.050	0.040	0.891
+0.071	0.071	0.071	0.788
+0.129	0.406	0.089	0.376
+0.081	0.354	0.101	0.465
+
+#ID = SIP4
+#Short = SIP4
+#Long = SNF1-Interacting Protein
+#Alias = YJL089W
+#W = 13
+#Description = "C6 zinc cluster transcriptional activator that binds to the carbon source-responsive element (CSRE) of gluconeogenic genes, involved in the positive regulation of gluconeogenesis, regulated by Snf1p protein kinase, localized to the nucleus"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:2000218,GO:0045722,GO:0035948,GO:0061414,GO:0005634
+0.005	0.960	0.005	0.030
+0.005	0.003	0.905	0.087
+0.011	0.006	0.812	0.171
+0.263	0.231	0.120	0.386
+0.007	0.231	0.023	0.739
+0.032	0.193	0.423	0.352
+0.717	0.013	0.003	0.267
+0.904	0.004	0.003	0.089
+0.057	0.087	0.003	0.853
+0.008	0.013	0.962	0.017
+0.088	0.003	0.904	0.005
+0.767	0.005	0.223	0.005
+0.475	0.206	0.306	0.014
+
+#ID = SKN7
+#Short = SKN7
+#Long = Suppressor of Kre Null
+#Alias = YHR206W,POS9,BRY1
+#Interactions = CAT8,GIS1,HAP5,MSN2,MSN4,PHD1,RGM1,RSC3,SOK2,STB1,SWI4,USV1,YRM1
+#W = 12
+#Description = "Nuclear response regulator and transcription factor, part of a branched two-component signaling system, required for optimal induction of heat-shock genes in response to oxidative stress, involved in osmoregulation"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0000156,GO:0043565,GO:0008361,GO:0043619,GO:0006970,GO:0000304,GO:0006351,GO:0005634
+0.520	0.110	0.260	0.110
+0.530	0.150	0.240	0.080
+0.240	0.020	0.660	0.080
+0.130	0.010	0.850	0.010
+0.010	0.376	0.267	0.347
+0.010	0.970	0.010	0.010
+0.010	0.380	0.280	0.330
+0.330	0.490	0.170	0.010
+0.010	0.010	0.960	0.020
+0.606	0.111	0.242	0.040
+0.170	0.580	0.010	0.240
+0.080	0.700	0.170	0.050
+
+#ID = SKO1
+#Short = SKO1
+#Long = Suppressor of Kinase Overexpression
+#Alias = YNL167C,ACR1
+#Interactions = SUM1
+#W = 8
+#Description = "Basic leucine zipper (bZIP) transcription factor of the ATF/CREB family, forms a complex with Tup1p and Ssn6p to both activate and repress transcription, cytosolic and nuclear protein involved in osmotic and oxidative stress responses"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0051019,GO:0000978,GO:0001078,GO:0001077,GO:0001103,GO:0001191,GO:0001133,GO:0000122,GO:0061393,GO:0005829,GO:0005634
+0.089	0.199	0.016	0.696
+0.938	0.001	0.045	0.016
+0.001	0.943	0.001	0.055
+0.111	0.002	0.886	0.001
+0.092	0.060	0.001	0.847
+0.113	0.885	0.001	0.001
+0.945	0.001	0.053	0.001
+0.211	0.152	0.088	0.549
+
+#ID = SMP1
+#Short = SMP1
+#Long = Second MEF2-like Protein 1
+#Alias = YBR182C
+#W = 10
+#Description = "Putative transcription factor involved in regulating the response to osmotic stress, member of the MADS-box family of transcription factors"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008301,GO:0043565,GO:0003700,GO:0043565,GO:0061393,GO:0005737,GO:0005634
+0.364	0.529	0.063	0.044
+0.003	0.019	0.002	0.976
+0.959	0.022	0.011	0.008
+0.092	0.191	0.056	0.661
+0.426	0.135	0.161	0.278
+0.251	0.153	0.118	0.479
+0.324	0.090	0.097	0.489
+0.009	0.073	0.058	0.860
+0.975	0.004	0.018	0.003
+0.009	0.058	0.531	0.402
+
+#ID = SNF1
+#Short = SNF1
+#Long = Sucrose NonFermenting
+#Alias = YDR477W,PAS14,HAF3,GLC2,CCR1,CAT1
+#W = 17
+#Description = "AMP-activated serine/threonine protein kinase found in a complex containing Snf4p and members of the Sip1p/Sip2p/Gal83p family, required for transcription of glucose-repressed genes, thermotolerance, sporulation, and peroxisome biogenesis"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0004679,GO:0042710,GO:0007155,GO:0006995,GO:0001403,GO:0017148,GO:0045722,GO:0006468,GO:0007124,GO:0006109,GO:0001302,GO:0007165,GO:0031588,GO:0005737,GO:0000324,GO:0005641,GO:0005634,GO:0005739,GO:0006357,GO:0006109,GO:0004674,GO:0006417,GO:0005979,GO:0046890,GO:0006950,GO:0009651,GO:0009408,GO:0004722,GO:0030437,GO:0005777,GO:0007569
+0.001	0.997	0.001	0.001
+0.001	0.997	0.001	0.001
+0.001	0.001	0.997	0.001
+0.499	0.001	0.499	0.001
+0.001	0.001	0.997	0.001
+0.499	0.001	0.499	0.001
+0.997	0.001	0.001	0.001
+0.001	0.001	0.001	0.997
+0.001	0.997	0.001	0.001
+0.001	0.001	0.997	0.001
+0.997	0.001	0.001	0.001
+0.997	0.001	0.001	0.001
+0.001	0.997	0.001	0.001
+0.001	0.499	0.001	0.499
+0.001	0.997	0.001	0.001
+0.001	0.001	0.997	0.001
+0.001	0.001	0.997	0.001
+
+#ID = SNT2
+#Short = SNT2
+#Long = 
+#Alias = YGL131C
+#W = 15
+#Description = "DNA binding protein with similarity to the S. pombe Snt2 protein, computational analysis suggests a role in regulation of expression of genes encoding amine transporters"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0008150,GO:0005737,GO:0005634,GO:0070211
+0.446	0.099	0.099	0.356
+0.162	0.088	0.088	0.662
+0.036	0.001	0.962	0.001
+0.570	0.081	0.313	0.036
+0.001	0.001	0.001	0.997
+0.997	0.001	0.001	0.001
+0.001	0.001	0.997	0.001
+0.001	0.997	0.001	0.001
+0.001	0.001	0.997	0.001
+0.001	0.997	0.001	0.001
+0.001	0.997	0.001	0.001
+0.326	0.011	0.627	0.036
+0.208	0.349	0.088	0.356
+0.333	0.190	0.167	0.310
+0.185	0.360	0.099	0.356
+
+#ID = SOK2
+#Short = SOK2
+#Long = Suppressor Of Kinase
+#Alias = YMR016C
+#Interactions = AFT1,GIS1,RGM1,SKN7,USV1
+#W = 8
+#Description = "Nuclear protein that plays a regulatory role in the cyclic AMP (cAMP)-dependent protein kinase (PKA) signal transduction pathway, negatively regulates pseudohyphal differentiation, homologous to several transcription factors"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0007124,GO:0005634
+0.083	0.190	0.108	0.619
+0.035	0.005	0.946	0.014
+0.040	0.947	0.005	0.008
+0.853	0.005	0.134	0.008
+0.037	0.080	0.743	0.140
+0.153	0.233	0.503	0.111
+0.407	0.213	0.198	0.182
+0.558	0.122	0.157	0.163
+
+#ID = SPT15
+#Short = SPT15
+#Long = SuPpressor of Ty
+#Alias = YER148W,TBP,TBP1,BTF1
+#W = 11
+#Description = "TATA-binding protein, general transcription factor that interacts with other factors to form the preinitiation complex at promoters, essential for viability"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003682,GO:0008301,GO:0001179,GO:0001186,GO:0001102,GO:0000979,GO:0001016,GO:0001075,GO:0001026,GO:0043565,GO:0051123,GO:0070898,GO:0042790,GO:0070893,GO:0005634,GO:0070860,GO:0000500,GO:0005669,GO:0000126,GO:0003700,GO:0006351,GO:0003899,GO:0000120,GO:0005669,GO:0000126,GO:0005736,GO:0005665,GO:0005666,GO:0003677,GO:0000500,GO:0000124,GO:0000127,GO:0008301,GO:0042803,GO:0006355,GO:0016592,GO:0006360,GO:0005669,GO:0006366,GO:0006366,GO:0045944,GO:0051123,GO:0005672,GO:0000126,GO:0005666,GO:0000127,GO:0032197,GO:0016408
+0.440	0.120	0.001	0.440
+0.080	0.120	0.001	0.799
+0.120	0.001	0.001	0.878
+0.040	0.001	0.001	0.958
+0.958	0.040	0.001	0.001
+0.080	0.001	0.001	0.918
+0.997	0.001	0.001	0.001
+0.001	0.200	0.001	0.798
+0.679	0.040	0.280	0.001
+0.240	0.240	0.040	0.480
+0.160	0.120	0.160	0.560
+
+#ID = SPT2
+#Short = SPT2
+#Long = SuPpressor of Ty's
+#Alias = YER161C,EXA1,SIN1
+#W = 11
+#Description = "Protein involved in negative regulation of transcription, required for RNA polyadenylation, exhibits regulated interactions with both histones and SWI-SNF components, has similarity to mammalian HMG1 proteins"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0000217,GO:0006325,GO:0000122,GO:0043631,GO:0006368,GO:0005634
+0.056	0.526	0.001	0.417
+0.417	0.581	0.001	0.001
+0.167	0.001	0.056	0.777
+0.028	0.001	0.943	0.028
+0.112	0.001	0.001	0.886
+0.584	0.332	0.028	0.056
+0.001	0.001	0.139	0.859
+0.056	0.360	0.001	0.583
+0.112	0.139	0.111	0.639
+0.997	0.001	0.001	0.001
+0.445	0.138	0.001	0.417
+
+#ID = SPT23
+#Short = SPT23
+#Long = SuPpressor of Ty
+#Alias = YKL020C
+#Interactions = FZF1
+#W = 8
+#Description = "ER membrane protein involved in regulation of OLE1 transcription, acts with homolog Mga2p, inactive ER form dimerizes and one subunit is then activated by ubiquitin/proteasome-dependent processing followed by nuclear targeting"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0070417,GO:0030466,GO:0045944,GO:0036083,GO:0030176,GO:0005634
+0.594	0.001	0.404	0.001
+0.988	0.001	0.010	0.001
+0.883	0.001	0.084	0.032
+0.835	0.001	0.001	0.163
+0.029	0.129	0.002	0.840
+0.004	0.464	0.230	0.301
+0.677	0.132	0.070	0.121
+0.965	0.001	0.033	0.001
+
+#ID = SRD1
+#Short = SRD1
+#Long = 
+#Alias = YCR018C
+#W = 9
+#Description = "Protein involved in the processing of pre-rRNA to mature rRNA, contains a C2/C2 zinc finger motif, srd1 mutation suppresses defects caused by the rrp1-1 mutation"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0006364,GO:0005737,GO:0005634
+0.720	0.010	0.260	0.010
+0.020	0.010	0.960	0.010
+0.970	0.010	0.010	0.010
+0.050	0.010	0.010	0.930
+0.010	0.970	0.010	0.010
+0.010	0.020	0.010	0.960
+0.930	0.040	0.020	0.010
+0.010	0.960	0.010	0.020
+0.650	0.080	0.190	0.080
+
+#ID = STB1
+#Short = STB1
+#Long = Sin Three Binding protein
+#Alias = YNL309W
+#Interactions = ABF1,FKH1,FKH2,MBP1,MET28,RDR1,RDS1,SKN7,STB2,STB3,SUT1,SWI4,SWI6
+#W = 10
+#Description = "Protein with a role in regulation of MBF-specific transcription at Start, phosphorylated by Cln-Cdc28p kinases in vitro, unphosphorylated form binds Swi6p and binding is required for Stb1p function, expression is cell-cycle regulated"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0008134,GO:0000989,GO:0031496,GO:0000083,GO:0030907,GO:0033309,GO:0070822,GO:0005737,GO:0005634
+0.539	0.199	0.229	0.033
+0.597	0.012	0.315	0.076
+0.683	0.050	0.114	0.153
+0.043	0.811	0.055	0.091
+0.062	0.019	0.905	0.014
+0.080	0.876	0.020	0.024
+0.133	0.243	0.548	0.076
+0.861	0.028	0.089	0.022
+0.739	0.081	0.076	0.104
+0.558	0.107	0.099	0.236
+
+#ID = STB2
+#Short = STB2
+#Long = Sin Three Binding protein
+#Alias = YMR053C
+#Interactions = MBP1,STB1,STB3,SWI4,SWI6
+#W = 8
+#Description = "Protein that interacts with Sin3p in a two-hybrid assay and is part of a large protein complex with Sin3p and Stb1p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003674,GO:0008150,GO:0070822
+0.029	0.941	0.001	0.029
+0.001	0.001	0.997	0.001
+0.001	0.264	0.734	0.001
+0.001	0.001	0.939	0.059
+0.059	0.088	0.001	0.852
+0.939	0.001	0.001	0.059
+0.852	0.059	0.088	0.001
+0.353	0.265	0.235	0.147
+
+#ID = STB3
+#Short = STB3
+#Long = Sin Three Binding protein
+#Alias = YDR169C
+#Interactions = ABF1,DOT6,EDS1,GCN4,MBP1,REB1,STB1,STB2,SWI4,SWI6,TOD6,XBP1
+#W = 17
+#Description = "Ribosomal RNA processing element (RRPE)-binding protein involved in the glucose-induced transition from quiescence to growth, restricted to nucleus in quiescent cells, released into cytoplasm after glucose repletion, binds Sin3p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0043565,GO:0000432,GO:0005737,GO:0005634,GO:0005737
+0.099	0.168	0.545	0.188
+0.170	0.170	0.200	0.460
+0.180	0.420	0.060	0.340
+0.190	0.380	0.110	0.320
+0.510	0.060	0.190	0.240
+0.550	0.120	0.150	0.180
+0.772	0.040	0.069	0.119
+0.500	0.030	0.030	0.440
+0.100	0.010	0.010	0.880
+0.050	0.010	0.010	0.930
+0.010	0.010	0.010	0.970
+0.010	0.010	0.020	0.960
+0.010	0.060	0.020	0.910
+0.010	0.970	0.010	0.010
+0.950	0.010	0.030	0.010
+0.150	0.590	0.080	0.180
+0.130	0.120	0.140	0.610
+
+#ID = STB4
+#Short = STB4
+#Long = Sin Three Binding protein
+#Alias = YMR019W
+#Interactions = ARG81,RDS2,SUT2
+#W = 9
+#Description = "Protein that binds Sin3p in a two-hybrid assay, contains a Zn(II)2Cys6 zinc finger domain characteristic of DNA-binding proteins, computational analysis suggests a role in regulation of expression of genes encoding transporters"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0003677,GO:0043565,GO:0008150,GO:0005634
+0.001	0.079	0.001	0.919
+0.116	0.812	0.068	0.004
+0.106	0.001	0.889	0.004
+0.446	0.001	0.552	0.001
+0.001	0.284	0.001	0.714
+0.001	0.997	0.001	0.001
+0.001	0.997	0.001	0.001
+0.001	0.001	0.997	0.001
+0.965	0.001	0.033	0.001
+
+#ID = STB5
+#Short = STB5
+#Long = Sin Three Binding protein
+#Alias = YHR178W
+#Interactions = LYS14,MET28,MIG3,NHP6A,NHP6B,PDR8,RDS2,RTG3
+#W = 10
+#Description = "Transcription factor, involved in regulating multidrug resistance and oxidative stress response, forms a heterodimer with Pdr1p, contains a Zn(II)2Cys6 zinc finger domain that interacts with a pleiotropic drug resistance element in vitro"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0043619,GO:0009410,GO:0006351,GO:0005634
+0.042	0.892	0.005	0.061
+0.040	0.063	0.887	0.010
+0.058	0.005	0.929	0.008
+0.353	0.083	0.087	0.477
+0.044	0.255	0.668	0.033
+0.124	0.056	0.021	0.799
+0.015	0.008	0.034	0.943
+0.927	0.005	0.005	0.063
+0.165	0.080	0.040	0.715
+0.567	0.063	0.169	0.201
+
+#ID = STE12
+#Short = STE12
+#Long = STErile
+#Alias = YHR084W
+#Interactions = LYS14
+#W = 7
+#Description = "Transcription factor that is activated by a MAP kinase signaling cascade, activates genes involved in mating or pseudohyphal/invasive growth pathways, cooperates with Tec1p transcription factor to regulate genes specific for invasive growth"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0000747,GO:0001403,GO:0046020,GO:0007329,GO:0007124,GO:0005654,GO:0005634,GO:0000750,GO:0007329,GO:0006468,GO:0003700,GO:0007124,GO:0001403
+0.010	0.010	0.010	0.970
+0.010	0.010	0.970	0.010
+0.970	0.010	0.010	0.010
+0.970	0.010	0.010	0.010
+0.970	0.010	0.010	0.010
+0.010	0.970	0.010	0.010
+0.800	0.030	0.140	0.030
+
+#ID = STP1
+#Short = STP1
+#Long = Species-specific tRNA Processing
+#Alias = YDR463W,SSY2,BAP1
+#Interactions = CAT8,CRZ1,GIS1,GSM1,MIG1,MIG3,MSN4,NHP10,OAF1,PDR8,RGM1,RSC3,RSC30,RSF2,SUM1,SUT1,THI2,USV1,YER184C
+#W = 8
+#Description = "Transcription factor, undergoes proteolytic processing by SPS (Ssy1p-Ptr3p-Ssy5p)-sensor component Ssy5p in response to extracellular amino acids, activates transcription of amino acid permease genes and may have a role in tRNA processing"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0045944,GO:0045893,GO:0006388,GO:0005737,GO:0005634,GO:0005886
+0.043	0.304	0.130	0.523
+0.303	0.001	0.695	0.001
+0.001	0.997	0.001	0.001
+0.001	0.001	0.955	0.043
+0.087	0.001	0.911	0.001
+0.001	0.997	0.001	0.001
+0.043	0.001	0.435	0.521
+0.043	0.348	0.261	0.348
+
+#ID = STP2
+#Short = STP2
+#Long = protein with similarity to Stp1p
+#Alias = YHR006W
+#Interactions = MIG1,MIG3,NHP10,RSF2,SUT1
+#W = 9
+#Description = "Transcription factor, activated by proteolytic processing in response to signals from the SPS sensor system for external amino acids, activates transcription of amino acid permease genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0043565,GO:0045944,GO:0005737,GO:0005634
+0.240	0.110	0.570	0.080
+0.110	0.010	0.830	0.050
+0.030	0.646	0.010	0.313
+0.010	0.010	0.970	0.010
+0.010	0.830	0.150	0.010
+0.010	0.850	0.130	0.010
+0.010	0.010	0.950	0.030
+0.010	0.520	0.010	0.460
+0.620	0.010	0.340	0.030
+
+#ID = STP3
+#Short = STP3
+#Long = protein with similarity to Stp1p
+#Alias = YLR375W
+#Interactions = MET31,OPI1
+#W = 6
+#Description = "Zinc-finger protein of unknown function, possibly involved in pre-tRNA splicing and in uptake of branched-chain amino acids"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0043565,GO:0008150,GO:0005634
+0.010	0.010	0.010	0.970
+0.970	0.010	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.630	0.180	0.180
+
+#ID = STP4
+#Short = STP4
+#Long = protein with similarity to Stp1p
+#Alias = YDL048C
+#W = 8
+#Description = "Protein containing a Kruppel-type zinc-finger domain, has similarity to Stp1p, Stp2p, and Stp3p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005737,GO:0005739,GO:0005634
+0.190	0.110	0.550	0.150
+0.400	0.290	0.240	0.070
+0.010	0.010	0.010	0.970
+0.970	0.010	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.720	0.170	0.100
+
+#ID = SUM1
+#Short = SUM1
+#Long = SUppresor of Mar1-1
+#Alias = YDR310C
+#Interactions = ABF1,MBP1,MET28,SKO1,STP1
+#W = 11
+#Description = "Transcriptional repressor required for mitotic repression of middle sporulation-specific genes, also acts as general replication initiation factor, involved in telomere maintenance, chromatin silencing, regulated by pachytene checkpoint"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003688,GO:0000978,GO:0001078,GO:0043565,GO:0030466,GO:0006270,GO:0010944,GO:0007070,GO:0005634
+0.391	0.052	0.556	0.001
+0.004	0.487	0.001	0.508
+0.001	0.001	0.997	0.001
+0.428	0.008	0.008	0.556
+0.001	0.987	0.010	0.002
+0.920	0.018	0.060	0.002
+0.003	0.518	0.459	0.020
+0.479	0.119	0.009	0.392
+0.988	0.009	0.002	0.001
+0.972	0.020	0.003	0.005
+0.528	0.046	0.052	0.374
+
+#ID = SUT1
+#Short = SUT1
+#Long = 
+#Alias = YGL162W
+#Interactions = AFT2,CRZ1,CST6,GIS1,GSM1,HAP2,HAP4,HAP5,HMS1,IME1,MBP1,MET28,MIG1,MIG2,MIG3,MSN2,MSN4,NHP10,OAF1,PDR1,PDR3,PDR8,PHD1,RGM1,RGT1,RPH1,RPN4,RSC3,RSF2,STB1,STP1,STP2,SWI4,UME6,USV1,YER130C,YER184C
+#W = 10
+#Description = "Transcription factor of the Zn[II]2Cys6 family involved in sterol uptake, involved in induction of hypoxic gene expression"
+#Organisms = yeast (Saccharomyces cerevisiae)
+0.097	0.142	0.617	0.144
+0.044	0.730	0.182	0.044
+0.021	0.402	0.568	0.009
+0.009	0.026	0.956	0.009
+0.070	0.308	0.583	0.039
+0.086	0.164	0.698	0.052
+0.198	0.345	0.324	0.133
+0.268	0.478	0.181	0.073
+0.136	0.263	0.544	0.057
+0.090	0.029	0.847	0.034
+
+#ID = SUT2
+#Short = SUT2
+#Long = 
+#Alias = YPR009W
+#Interactions = GSM1,MIG3,STB4,YER184C
+#W = 10
+#Description = "Putative transcription factor, multicopy suppressor of mutations that cause low activity of the cAMP/protein kinase A pathway, highly similar to Sut1p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001103,GO:0043565,GO:0035969,GO:0005634
+0.520	0.090	0.290	0.100
+0.940	0.010	0.010	0.040
+0.960	0.010	0.010	0.020
+0.010	0.700	0.280	0.010
+0.010	0.020	0.010	0.960
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.790	0.020	0.170	0.020
+0.520	0.080	0.260	0.140
+
+#ID = SWI4
+#Short = SWI4
+#Long = SWItching deficient
+#Alias = YER111C,ART1
+#Interactions = ABF1,FKH1,FKH2,MBP1,MET28,RDS1,REB1,RTG3,SKN7,STB1,STB2,STB3,SUT1,SWI6
+#W = 9
+#Description = "DNA binding component of the SBF complex (Swi4p-Swi6p), a transcriptional activator that in concert with MBF (Mbp1-Swi6p) regulates late G1-specific transcription of targets including cyclins and genes required for DNA synthesis and repair"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001077,GO:0043565,GO:0061408,GO:0071931,GO:0000790,GO:0033309
+0.504	0.181	0.136	0.179
+0.047	0.922	0.025	0.006
+0.351	0.001	0.643	0.005
+0.039	0.907	0.016	0.038
+0.041	0.067	0.860	0.032
+0.864	0.001	0.092	0.043
+0.975	0.001	0.023	0.001
+0.965	0.018	0.002	0.015
+0.437	0.113	0.178	0.272
+
+#ID = SWI5
+#Short = SWI5
+#Long = SWItching deficient
+#Alias = YDR146C
+#W = 7
+#Description = "Transcription factor that activates transcription of genes expressed at the M/G1 phase boundary and in G1 phase, localization to the nucleus occurs during G1 and appears to be regulated by phosphorylation by Cdc28p kinase"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0036033,GO:0000980,GO:0001133,GO:0043565,GO:0031496,GO:0007074,GO:0000114,GO:0005737,GO:0005634,GO:0045944,GO:0000216,GO:0000080,GO:0000085,GO:0006468,GO:0005634
+0.080	0.080	0.230	0.610
+0.010	0.010	0.970	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.040	0.040	0.270	0.650
+
+#ID = SWI6
+#Short = SWI6
+#Long = SWItching deficient
+#Alias = YLR182W,SDS11,PSL8
+#Interactions = ABF1,ASH1,FKH1,HAC1,MBP1,MCM1,MET28,NDD1,REB1,RTG3,STB1,STB2,STB3,SWI4,YDR026C
+#W = 6
+#Description = "Transcription cofactor, forms complexes with DNA-binding proteins Swi4p and Mbp1p to regulate transcription at the G1/S transition, involved in meiotic gene expression, localization regulated by phosphorylation, potential Cdc28p substrate"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001105,GO:0010845,GO:0045944,GO:0061408,GO:0071931,GO:0005737,GO:0030907,GO:0005634,GO:0033309
+0.335	0.034	0.567	0.064
+0.884	0.017	0.087	0.012
+0.019	0.899	0.001	0.081
+0.226	0.001	0.772	0.001
+0.001	0.981	0.001	0.017
+0.170	0.001	0.828	0.001
+
+#ID = TBF1
+#Short = TBF1
+#Long = TTAGGG repeat-Binding Factor
+#Alias = YPL128C,LPI16
+#Interactions = TYE7
+#W = 8
+#Description = "Telobox-containing general regulatory factor, binds to TTAGGG repeats within subtelomeric anti-silencing regions (STARs) and possibly throughout the genome and mediates their insulating capacity by blocking silent chromatin propagation"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043035,GO:0000978,GO:0000982,GO:0042162,GO:0043565,GO:0031936,GO:0032211,GO:0001015,GO:0010833,GO:0000784,GO:0005634
+0.950	0.010	0.010	0.030
+0.693	0.010	0.287	0.010
+0.030	0.950	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.020	0.010	0.960
+0.960	0.010	0.020	0.010
+0.830	0.010	0.060	0.100
+
+#ID = TBS1
+#Short = TBS1
+#Long = ThiaBendazole Sensitive
+#Alias = YBR150C
+#W = 10
+#Description = "Putative protein of unknown function, the authentic, non-tagged protein is detected in highly purified mitochondria in high-throughput studies"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005737,GO:0005739,GO:0005634
+0.141	0.232	0.556	0.071
+0.010	0.960	0.010	0.020
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.900	0.040	0.030	0.030
+0.030	0.030	0.040	0.900
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.020	0.010	0.960	0.010
+0.040	0.624	0.089	0.248
+
+#ID = TEA1
+#Short = TEA1
+#Long = Ty Enhancer Activator
+#Alias = YOR337W
+#W = 19
+#Description = "Ty1 enhancer activator required for full levels of Ty enhancer-mediated transcription, C6 zinc cluster DNA-binding protein"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0043565,GO:0006351,GO:0005634
+0.230	0.140	0.040	0.590
+0.160	0.420	0.230	0.190
+0.050	0.010	0.020	0.920
+0.020	0.130	0.530	0.320
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.030	0.950	0.010
+0.500	0.080	0.270	0.150
+0.921	0.030	0.030	0.020
+0.650	0.030	0.040	0.280
+0.020	0.010	0.010	0.960
+0.020	0.010	0.010	0.960
+0.970	0.010	0.010	0.010
+0.960	0.010	0.010	0.020
+0.424	0.121	0.081	0.374
+0.320	0.130	0.120	0.430
+0.790	0.090	0.030	0.090
+0.180	0.390	0.170	0.260
+0.010	0.970	0.010	0.010
+
+#ID = TEC1
+#Short = TEC1
+#Long = Transposon Enhancement Control
+#Alias = YBR083W,ROC1
+#Interactions = UPC2,YER130C
+#W = 8
+#Description = "Transcription factor required for full Ty1 expression, Ty1-mediated gene activation, and haploid invasive and diploid pseudohyphal growth, TEA/ATTS DNA-binding domain family member"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0001135,GO:0043565,GO:0001300,GO:0001403,GO:0036003,GO:0010527,GO:0007124,GO:0005634
+0.745	0.025	0.220	0.010
+0.090	0.890	0.010	0.010
+0.960	0.010	0.020	0.010
+0.010	0.010	0.010	0.970
+0.040	0.010	0.010	0.940
+0.010	0.945	0.020	0.025
+0.010	0.440	0.045	0.505
+0.055	0.358	0.025	0.562
+
+#ID = THI2
+#Short = THI2
+#Long = THIamine metabolism
+#Alias = YBR240C,phoF,PHO6
+#Interactions = STP1
+#W = 16
+#Description = "Zinc finger protein of the Zn(II)2Cys6 type, probable transcriptional activator of thiamine biosynthetic genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001102,GO:0001190,GO:0045944,GO:0009228,GO:0005634
+0.242	0.088	0.508	0.162
+0.037	0.001	0.961	0.001
+0.537	0.294	0.001	0.168
+0.997	0.001	0.001	0.001
+0.911	0.020	0.001	0.068
+0.020	0.815	0.031	0.134
+0.001	0.429	0.037	0.533
+0.077	0.436	0.365	0.121
+0.319	0.040	0.001	0.640
+0.590	0.001	0.001	0.408
+0.959	0.001	0.020	0.020
+0.001	0.001	0.997	0.001
+0.978	0.001	0.020	0.001
+0.506	0.020	0.473	0.001
+0.114	0.822	0.020	0.044
+0.251	0.271	0.001	0.477
+
+#ID = THO2
+#Short = THO2
+#Long = suppressor of the Transcriptional defect of Hpr1 by Overexpression
+#Alias = YNL139C,RLR1,LDB5,ZRG13
+#W = 12
+#Description = "Subunit of the THO complex, which is required for efficient transcription elongation and involved in transcriptional elongation-associated recombination, required for LacZ RNA expression from certain plasmids"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003676,GO:0003677,GO:0006310,GO:0031124,GO:0006406,GO:0006368,GO:0006283,GO:0000446,GO:0005634,GO:0000445
+0.874	0.083	0.001	0.042
+0.001	0.001	0.001	0.997
+0.083	0.001	0.001	0.915
+0.167	0.001	0.001	0.831
+0.208	0.001	0.001	0.790
+0.001	0.956	0.001	0.042
+0.208	0.125	0.083	0.584
+0.208	0.083	0.083	0.626
+0.042	0.874	0.001	0.083
+0.333	0.001	0.125	0.541
+0.001	0.001	0.001	0.997
+0.292	0.167	0.001	0.540
+
+#ID = TOD6
+#Short = TOD6
+#Long = Twin Of Dot6p
+#Alias = YBL054W,PBF1
+#Interactions = DOT6,EDS1,GCR2,STB3
+#W = 10
+#Description = "PAC motif binding protein involved in rRNA and ribosome biogenesis, subunit of the RPD3L histone deacetylase complex, Myb-like HTH transcription factor, similar to Dot6p, hypophosphorylated by rapamycin treatment in a Sch9p-dependent manne"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0043565,GO:0006357,GO:0005737,GO:0005634,GO:0033698,GO:0070210
+0.650	0.050	0.100	0.200
+0.069	0.396	0.436	0.099
+0.020	0.780	0.190	0.010
+0.010	0.030	0.050	0.910
+0.010	0.970	0.010	0.010
+0.960	0.010	0.010	0.020
+0.010	0.010	0.020	0.960
+0.010	0.960	0.010	0.020
+0.050	0.020	0.870	0.060
+0.139	0.653	0.188	0.020
+
+#ID = TOS8
+#Short = TOS8
+#Long = Target Of Sbf
+#Alias = YGL096W
+#W = 6
+#Description = "Homeodomain-containing protein and putative transcription factor found associated with chromatin, target of SBF transcription factor, induced during meiosis and under cell-damaging conditions, similar to Cup9p transcription factor"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003682,GO:0043565,GO:0008150,GO:0000790
+0.010	0.160	0.010	0.820
+0.010	0.010	0.970	0.010
+0.010	0.010	0.010	0.970
+0.010	0.970	0.010	0.010
+0.970	0.010	0.010	0.010
+0.640	0.070	0.070	0.220
+
+#ID = TYE7
+#Short = TYE7
+#Long = Ty-mediated Expression
+#Alias = YOR344C,SGC1
+#Interactions = AFT2,GCN4,INO2,MET32,MET4,TBF1
+#W = 10
+#Description = "Serine-rich protein that contains a basic-helix-loop-helix (bHLH) DNA binding motif, binds E-boxes of glycolytic genes and contributes to their activation, may function as a transcriptional activator in Ty1-mediated gene expression"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0045821,GO:0006351,GO:0000790,GO:0005634
+0.598	0.067	0.291	0.045
+0.044	0.139	0.047	0.771
+0.010	0.957	0.016	0.016
+0.890	0.012	0.042	0.055
+0.017	0.849	0.114	0.020
+0.051	0.228	0.704	0.018
+0.068	0.106	0.013	0.812
+0.019	0.102	0.871	0.009
+0.821	0.031	0.095	0.053
+0.051	0.445	0.110	0.394
+
+#ID = UGA3
+#Short = UGA3
+#Long = Utilization of GAba
+#Alias = YDL170W
+#Interactions = GIS1,MSN4,RGM1
+#W = 10
+#Description = "Transcriptional activator necessary for gamma-aminobutyrate (GABA)-dependent induction of GABA genes (such as UGA1, UGA2, UGA4), zinc-finger transcription factor of the Zn(2)-Cys(6) binuclear cluster domain type, localized to the nucleus"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0001010,GO:0043565,GO:0009450,GO:0001080,GO:0019740,GO:0005634
+0.042	0.704	0.082	0.172
+0.200	0.709	0.037	0.054
+0.055	0.150	0.582	0.213
+0.408	0.071	0.467	0.054
+0.743	0.058	0.150	0.049
+0.584	0.104	0.234	0.078
+0.106	0.327	0.469	0.098
+0.335	0.518	0.033	0.114
+0.030	0.020	0.833	0.117
+0.042	0.050	0.861	0.047
+
+#ID = UME1
+#Short = UME1
+#Long = Unscheduled Meiotic gene Expression
+#Alias = YPL139C,WTM3
+#W = 11
+#Description = "Negative regulator of meiosis, required for repression of a subset of meiotic genes during vegetative growth, binding of histone deacetylase Rpd3p required for activity, contains a NEE box and a WD repeat motif, homologous with Wtm1p, Wtm2p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003714,GO:0031939,GO:0016479,GO:0045944,GO:0061408,GO:0040020,GO:0005634,GO:0033698,GO:0032221,GO:0033698,GO:0070210
+0.868	0.007	0.114	0.011
+0.796	0.007	0.007	0.190
+0.011	0.007	0.542	0.440
+0.011	0.007	0.971	0.011
+0.797	0.007	0.185	0.011
+0.975	0.007	0.007	0.011
+0.975	0.007	0.007	0.011
+0.404	0.221	0.185	0.190
+0.011	0.007	0.614	0.368
+0.404	0.007	0.007	0.582
+0.975	0.007	0.007	0.011
+
+#ID = UME6
+#Short = UME6
+#Long = Unscheduled Meiotic gene Expression
+#Alias = YDR207C,RIM16,NIM2,CAR80
+#Interactions = DAL82,MIG1,MIG3,RSC3,RSC30,RSF2,SUT1,YPR196W
+#W = 12
+#Description = "Key transcriptional regulator of early meiotic genes, binds URS1 upstream regulatory sequence, couples metabolic responses to nutritional cues with initiation and progression of meiosis, forms complex with Ime1p, and also with Sin3p-Rpd3p"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0070491,GO:0000978,GO:0001078,GO:0000989,GO:0043565,GO:0034389,GO:0010674,GO:0007070,GO:0001081,GO:0006656,GO:0006659,GO:0045836,GO:0010673,GO:0007124,GO:0009847,GO:0033698,GO:0033698,GO:0070210,GO:0007068,GO:0003677
+0.378	0.076	0.064	0.483
+0.318	0.013	0.007	0.662
+0.001	0.004	0.001	0.994
+0.811	0.002	0.001	0.186
+0.046	0.014	0.934	0.006
+0.001	0.997	0.001	0.001
+0.001	0.997	0.001	0.001
+0.015	0.001	0.983	0.001
+0.001	0.996	0.001	0.002
+0.001	0.802	0.047	0.150
+0.110	0.251	0.617	0.022
+0.842	0.005	0.107	0.046
+
+#ID = UPC2
+#Short = UPC2
+#Long = UPtake Control
+#Alias = YDR213W,MOX4
+#Interactions = TEC1
+#W = 12
+#Description = "Sterol regulatory element binding protein, induces transcription of sterol biosynthetic genes and of DAN/TIR gene products, Ecm22p homolog, relocates from intracellular membranes to perinuclear foci on sterol depletion"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0001077,GO:0071456,GO:0035961,GO:0035969,GO:0045944,GO:0016020,GO:0005634,GO:0048471,GO:0005737
+0.610	0.010	0.370	0.010
+0.010	0.386	0.010	0.594
+0.010	0.149	0.010	0.832
+0.020	0.010	0.960	0.010
+0.950	0.010	0.010	0.030
+0.010	0.970	0.010	0.010
+0.010	0.950	0.010	0.030
+0.010	0.010	0.010	0.970
+0.010	0.040	0.940	0.010
+0.010	0.178	0.743	0.069
+0.040	0.010	0.010	0.940
+0.010	0.450	0.260	0.280
+
+#ID = URC2
+#Short = URC2
+#Long = URacil Catabolism
+#Alias = YDR520C,RRT4
+#W = 11
+#Description = "Putative Zn(II)2Cys6 motif containing transcription factor, non-essential gene identified in a screen for mutants with increased levels of rDNA transcription, similar to S. kluyveri Urc2p involved in uracil catabolism"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0006212,GO:0005737,GO:0005634
+0.162	0.088	0.123	0.627
+0.036	0.924	0.001	0.039
+0.072	0.036	0.107	0.785
+0.001	0.959	0.004	0.036
+0.001	0.997	0.001	0.001
+0.001	0.001	0.997	0.001
+0.107	0.072	0.820	0.001
+0.001	0.997	0.001	0.001
+0.001	0.001	0.994	0.004
+0.162	0.088	0.588	0.162
+0.662	0.088	0.088	0.162
+
+#ID = USV1
+#Short = USV1
+#Long = Up in StarVation
+#Alias = YPL230W,NSF1
+#Interactions = GSM1,MIG1,MIG2,MIG3,NHP10,NRG1,OAF1,PHD1,RDS2,RPH1,RSC3,RSF2,SKN7,SOK2,STP1,SUT1,YDR026C,YER184C
+#W = 5
+#Description = "Putative transcription factor containing a C2H2 zinc finger, mutation affects transcriptional regulation of genes involved in growth on non-fermentable carbon sources, response to salt stress and cell wall biosynthesis"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0000436,GO:0061416,GO:0005634
+0.970	0.010	0.010	0.010
+0.200	0.010	0.780	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+
+#ID = WAR1
+#Short = WAR1
+#Long = Weak Acid Resistance
+#Alias = YML076C
+#W = 12
+#Description = "Homodimeric Zn2Cys6 zinc finger transcription factor, binds to a weak acid response element to induce transcription of PDR12 and FUN34, encoding an acid transporter and a putative ammonia transporter, respectively"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0001101,GO:0005634,GO:0005739
+0.010	0.069	0.050	0.871
+0.010	0.050	0.110	0.830
+0.242	0.020	0.727	0.010
+0.960	0.010	0.020	0.010
+0.089	0.673	0.010	0.228
+0.120	0.010	0.150	0.720
+0.406	0.010	0.079	0.505
+0.120	0.010	0.860	0.010
+0.340	0.120	0.290	0.250
+0.525	0.356	0.089	0.030
+0.040	0.792	0.010	0.158
+0.178	0.673	0.109	0.040
+
+#ID = XBP1
+#Short = XBP1
+#Long = XhoI site-Binding Protein
+#Alias = YIL101C
+#Interactions = HSF1,MOT2,STB3
+#W = 10
+#Description = "Transcriptional repressor that binds to promoter sequences of the cyclin genes, CYS3, and SMF2, expression is induced by stress or starvation during mitosis, and late in meiosis, member of the Swi4p/Mbp1p family, potential Cdc28p substrate"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0006950,GO:0005634
+0.010	0.140	0.690	0.160
+0.050	0.630	0.010	0.310
+0.030	0.010	0.010	0.950
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.850	0.010	0.010	0.130
+0.150	0.010	0.830	0.010
+0.300	0.010	0.680	0.010
+0.810	0.160	0.010	0.020
+0.290	0.080	0.030	0.600
+
+#ID = YAP1
+#Short = YAP1
+#Long = Yeast AP-1
+#Alias = YML007W,SNQ3,PAR1
+#W = 11
+#Description = "Basic leucine zipper (bZIP) transcription factor required for oxidative stress tolerance, activated by H2O2 through the multistep formation of disulfide bonds and transit from the cytoplasm to the nucleus, mediates resistance to cadmium"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003700,GO:0043565,GO:0043619,GO:0042493,GO:0009408,GO:0010038,GO:0000304,GO:0061395,GO:0005737,GO:0005634,GO:0005737,GO:0005634,GO:0003700,GO:0006979,GO:0043619,GO:0006611,GO:0004791,GO:0015036
+0.032	0.288	0.053	0.627
+0.009	0.057	0.590	0.344
+0.001	0.900	0.037	0.062
+0.001	0.001	0.001	0.997
+0.001	0.001	0.454	0.544
+0.933	0.003	0.055	0.009
+0.003	0.949	0.039	0.009
+0.152	0.001	0.007	0.840
+0.994	0.001	0.004	0.001
+0.981	0.006	0.004	0.009
+0.131	0.001	0.262	0.606
+
+#ID = YAP3
+#Short = YAP3
+#Long = 
+#Alias = YHL009C
+#W = 7
+#Description = "Basic leucine zipper (bZIP) transcription factor"
+#Organisms = yeast (Saccharomyces cerevisiae)
+0.089	0.069	0.132	0.710
+0.015	0.166	0.030	0.789
+0.630	0.215	0.086	0.069
+0.011	0.914	0.063	0.012
+0.011	0.238	0.073	0.678
+0.801	0.045	0.036	0.118
+0.692	0.150	0.059	0.099
+
+#ID = YAP5
+#Short = YAP5
+#Long = Yeast AP-1
+#Alias = YIR018W
+#W = 11
+#Description = "Basic leucine zipper (bZIP) transcription factor"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000981,GO:0031939,GO:0000122,GO:0045944,GO:0010723,GO:0000790,GO:0005634
+0.024	0.544	0.407	0.025
+0.034	0.185	0.248	0.533
+0.366	0.264	0.007	0.364
+0.002	0.010	0.544	0.444
+0.382	0.148	0.465	0.005
+0.004	0.974	0.015	0.007
+0.007	0.036	0.044	0.913
+0.699	0.266	0.018	0.017
+0.945	0.020	0.006	0.029
+0.025	0.167	0.784	0.024
+0.010	0.969	0.013	0.008
+
+#ID = YAP6
+#Short = YAP6
+#Long = Yeast homolog of AP-1
+#Alias = YDR259C,HAL7
+#W = 10
+#Description = "Putative basic leucine zipper (bZIP) transcription factor, overexpression increases sodium and lithium tolerance, computational analysis suggests a role in regulation of expression of genes involved in carbohydrate metabolism"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000981,GO:0001010,GO:0043565,GO:0000122,GO:0045944,GO:0005634
+0.102	0.067	0.086	0.745
+0.009	0.020	0.017	0.956
+0.889	0.036	0.038	0.037
+0.005	0.834	0.020	0.143
+0.424	0.031	0.536	0.009
+0.035	0.075	0.055	0.834
+0.885	0.068	0.022	0.026
+0.734	0.052	0.044	0.171
+0.323	0.217	0.224	0.236
+0.151	0.657	0.074	0.118
+
+#ID = YAP7
+#Short = YAP7
+#Long = Yeast AP-1
+#Alias = YOL028C
+#Interactions = INO2
+#W = 10
+#Description = "Putative basic leucine zipper (bZIP) transcription factor"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0045944,GO:0005634
+0.064	0.062	0.661	0.213
+0.403	0.564	0.017	0.017
+0.017	0.010	0.012	0.962
+0.008	0.020	0.229	0.743
+0.972	0.008	0.014	0.008
+0.014	0.767	0.105	0.113
+0.021	0.016	0.009	0.954
+0.802	0.180	0.011	0.007
+0.964	0.008	0.012	0.017
+0.088	0.021	0.229	0.661
+
+#ID = YDR026C
+#Short = YDR026C
+#Long = NTS1 SIlencing protein 1
+#Interactions = CBF1,GIS1,MBP1,MSN2,RGM1,RPN4,SWI6,USV1
+#W = 10
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0003677,GO:0000183,GO:1900008,GO:0005730,GO:0033553,GO:0005730,GO:0005840
+0.091	0.001	0.144	0.764
+0.001	0.001	0.022	0.976
+0.001	0.055	0.001	0.943
+0.997	0.001	0.001	0.001
+0.001	0.997	0.001	0.001
+0.001	0.997	0.001	0.001
+0.064	0.934	0.001	0.001
+0.001	0.001	0.997	0.001
+0.027	0.001	0.971	0.001
+0.384	0.415	0.058	0.143
+
+#ID = YER130C
+#Short = YER130C
+#Long = Cousin of Msn2
+#Interactions = MIG3,RSF2,SUT1,TEC1
+#W = 7
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005575
+0.010	0.960	0.010	0.020
+0.010	0.890	0.010	0.090
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.010	0.970
+0.590	0.010	0.080	0.320
+0.210	0.010	0.040	0.740
+
+#ID = YER184C
+#Short = YER184C
+#Long = 
+#Interactions = CST6,DAL82,GIS1,MIG3,MSN4,PDR3,PDR8,PHD1,RGM1,RPH1,RSC3,STP1,SUT1,SUT2,USV1
+#W = 6
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005575
+0.020	0.170	0.100	0.710
+0.010	0.760	0.150	0.080
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.680	0.300	0.010	0.010
+
+#ID = YGR067C
+#Short = YGR067C
+#Long = 
+#W = 6
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005575
+0.091	0.055	0.784	0.070
+0.227	0.339	0.055	0.378
+0.057	0.049	0.858	0.036
+0.089	0.051	0.859	0.001
+0.120	0.023	0.829	0.028
+0.152	0.051	0.733	0.064
+
+#ID = YHP1
+#Short = YHP1
+#Long = Yeast Homeo-Protein
+#Alias = YDR451C
+#W = 6
+#Description = "One of two homeobox transcriptional repressors (see also Yox1p), that bind to Mcm1p and to early cell cycle box (ECB) elements of cell cycle regulated genes, thereby restricting ECB-mediated transcription to the M/G1 interval"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000977,GO:0001191,GO:0000122,GO:0060277,GO:0000790,GO:0005634
+0.012	0.012	0.012	0.964
+0.964	0.012	0.012	0.012
+0.964	0.012	0.012	0.012
+0.012	0.012	0.012	0.964
+0.012	0.012	0.012	0.964
+0.012	0.012	0.964	0.012
+
+#ID = YKL222C
+#Short = YKL222C
+#Long = 
+#W = 11
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0072686,GO:0005634,GO:0005840
+0.480	0.250	0.230	0.040
+0.525	0.178	0.287	0.010
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.830	0.010	0.150	0.010
+0.490	0.050	0.430	0.030
+0.760	0.030	0.020	0.190
+0.110	0.020	0.010	0.860
+0.590	0.080	0.040	0.290
+0.600	0.110	0.170	0.120
+
+#ID = YLL054C
+#Short = YLL054C
+#Long = 
+#W = 18
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000981,GO:0043565,GO:0008150,GO:0005575
+0.020	0.120	0.110	0.750
+0.030	0.910	0.020	0.040
+0.010	0.810	0.160	0.020
+0.020	0.040	0.930	0.010
+0.202	0.253	0.192	0.354
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.250	0.250	0.250	0.250
+0.010	0.930	0.040	0.020
+0.020	0.160	0.810	0.010
+0.040	0.020	0.910	0.030
+0.750	0.110	0.120	0.020
+
+#ID = YLR278C
+#Short = YLR278C
+#Long = 
+#W = 7
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005634
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.940	0.010	0.040	0.010
+0.040	0.140	0.810	0.010
+0.230	0.020	0.050	0.700
+0.270	0.050	0.050	0.630
+
+#ID = YML081W
+#Short = YML081W
+#Long = Topoisomerase I Damage Affected
+#W = 6
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0043565,GO:0008150,GO:0005634
+0.194	0.718	0.019	0.069
+0.034	0.825	0.001	0.140
+0.001	0.956	0.001	0.042
+0.064	0.899	0.001	0.036
+0.286	0.019	0.397	0.297
+0.075	0.801	0.037	0.087
+
+#ID = YNR063W
+#Short = YNR063W
+#Long = 
+#W = 8
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005575
+0.079	0.079	0.178	0.663
+0.010	0.970	0.010	0.010
+0.010	0.010	0.970	0.010
+0.010	0.010	0.970	0.010
+0.970	0.010	0.010	0.010
+0.100	0.010	0.790	0.100
+0.880	0.010	0.010	0.100
+0.320	0.030	0.030	0.620
+
+#ID = YOX1
+#Short = YOX1
+#Long = Yeast homeobOX
+#Alias = YML027W
+#W = 8
+#Description = "Homeodomain-containing transcriptional repressor, binds to Mcm1p and to early cell cycle boxes (ECBs) in the promoters of cell cycle-regulated genes expressed in M/G1 phase, expression is cell cycle-regulated, potential Cdc28p substrate"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000977,GO:0001191,GO:0043565,GO:0060277,GO:0000790,GO:0005634
+0.010	0.250	0.070	0.670
+0.010	0.010	0.010	0.970
+0.970	0.010	0.010	0.010
+0.970	0.010	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.010	0.010	0.970
+0.610	0.030	0.150	0.210
+0.550	0.130	0.130	0.190
+
+#ID = YPR013C
+#Short = YPR013C
+#Long = Changed Mutation Rate
+#W = 11
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005575
+0.550	0.080	0.240	0.130
+0.440	0.210	0.230	0.120
+0.010	0.525	0.010	0.455
+0.010	0.010	0.970	0.010
+0.010	0.020	0.010	0.960
+0.960	0.020	0.010	0.010
+0.710	0.010	0.270	0.010
+0.970	0.010	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.970	0.010	0.010
+0.640	0.300	0.020	0.040
+
+#ID = YPR015C
+#Short = YPR015C
+#Long = 
+#W = 16
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005575
+0.080	0.240	0.140	0.540
+0.160	0.200	0.340	0.300
+0.384	0.172	0.172	0.273
+0.376	0.238	0.139	0.248
+0.273	0.051	0.465	0.212
+0.550	0.170	0.240	0.040
+0.020	0.743	0.020	0.218
+0.010	0.010	0.970	0.010
+0.010	0.020	0.010	0.960
+0.970	0.010	0.010	0.010
+0.870	0.010	0.110	0.010
+0.970	0.010	0.010	0.010
+0.010	0.010	0.010	0.970
+0.010	0.970	0.010	0.010
+0.327	0.574	0.059	0.040
+0.090	0.220	0.080	0.610
+
+#ID = YPR022C
+#Short = YPR022C
+#Long = 
+#W = 6
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0008150,GO:0005737,GO:0005634
+0.149	0.644	0.010	0.198
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.010	0.970	0.010	0.010
+0.970	0.010	0.010	0.010
+0.010	0.970	0.010	0.010
+
+#ID = YPR196W
+#Short = YPR196W
+#Long = 
+#Interactions = CIN5,GSM1,IME1,MIG3,OAF1,PDR8,RGT1,UME6
+#W = 9
+#Description = "Function Unknown"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0043565,GO:0006355,GO:0005575
+0.600	0.010	0.260	0.130
+0.310	0.010	0.010	0.670
+0.170	0.010	0.010	0.810
+0.240	0.040	0.020	0.700
+0.170	0.440	0.110	0.280
+0.120	0.320	0.070	0.490
+0.010	0.910	0.070	0.010
+0.010	0.970	0.010	0.010
+0.030	0.010	0.910	0.050
+
+#ID = YRM1
+#Short = YRM1
+#Long = Yeast Reveromycin resistance Modulator
+#Alias = YOR172W
+#Interactions = CAT8,MIG3,PDR1,SKN7
+#W = 21
+#Description = "Zn2-Cys6 zinc-finger transcription factor that activates genes involved in multidrug resistance, paralog of Yrr1p, acting on an overlapping set of target genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0001071,GO:0043565,GO:0006357,GO:0005737,GO:0005634
+0.089	0.525	0.287	0.099
+0.485	0.089	0.218	0.208
+0.150	0.330	0.190	0.330
+0.280	0.250	0.180	0.290
+0.270	0.440	0.150	0.140
+0.380	0.150	0.440	0.030
+0.061	0.768	0.101	0.071
+0.080	0.030	0.840	0.050
+0.030	0.020	0.889	0.061
+0.690	0.050	0.200	0.060
+0.606	0.030	0.152	0.212
+0.790	0.050	0.050	0.110
+0.220	0.030	0.050	0.700
+0.620	0.020	0.120	0.240
+0.580	0.170	0.130	0.120
+0.240	0.210	0.390	0.160
+0.320	0.120	0.300	0.260
+0.222	0.475	0.162	0.141
+0.188	0.248	0.436	0.129
+0.070	0.100	0.590	0.240
+0.307	0.139	0.069	0.485
+
+#ID = YRR1
+#Short = YRR1
+#Long = Yeast Reveromycin-A Resistant
+#Alias = YOR162C,PDR2
+#W = 12
+#Description = "Zn2-Cys6 zinc-finger transcription factor that activates genes involved in multidrug resistance, paralog of Yrm1p, acting on an overlapping set of target genes"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000978,GO:0000981,GO:0043565,GO:0045944,GO:0043619,GO:0005634
+0.001	0.001	0.053	0.945
+0.211	0.105	0.001	0.683
+0.263	0.053	0.001	0.683
+0.001	0.158	0.001	0.840
+0.053	0.053	0.893	0.001
+0.053	0.001	0.001	0.945
+0.001	0.105	0.001	0.893
+0.945	0.001	0.001	0.053
+0.001	0.945	0.001	0.053
+0.001	0.736	0.262	0.001
+0.001	0.997	0.001	0.001
+0.315	0.001	0.631	0.053
+
+#ID = ZAP1
+#Short = ZAP1
+#Long = Zinc-responsive Activator Protein
+#Alias = YJL056C,ZRG10
+#W = 14
+#Description = "Zinc-regulated transcription factor, binds to zinc-responsive promoters to induce transcription of certain genes in presence of zinc, represses other genes in low zinc, regulates its own transcription, contains seven zinc-finger domains"
+#Organisms = yeast (Saccharomyces cerevisiae)
+#GO = GO:0000977,GO:0000981,GO:0008270,GO:0045944,GO:0034225,GO:0005634
+0.997	0.001	0.001	0.001
+0.001	0.997	0.001	0.001
+0.001	0.997	0.001	0.001
+0.001	0.798	0.001	0.200
+0.001	0.001	0.001	0.997
+0.400	0.400	0.001	0.200
+0.997	0.001	0.001	0.001
+0.997	0.001	0.001	0.001
+0.001	0.001	0.997	0.001
+0.001	0.001	0.997	0.001
+0.001	0.001	0.001	0.997
+0.065	0.235	0.035	0.665
+0.400	0.200	0.400	0.001
+0.001	0.001	0.001	0.997
