@@ -60,7 +60,7 @@ MotifLab can also be run as a command-line tool without a graphical user interfa
 In this case you must supply a protocol file that describes the operations to be performed and a file defining which sequences to run the analysis on (unless these are specified in the protocol itself).
 
 ```
-java -jar MotifLab-2.0.jar -cli -p <protocol_file> \[-s <sequence_file>\]
+java -jar MotifLab-2.0.jar -cli -p <protocol_file> [-s <sequence_file>]
 ```
 
 ## Authors
