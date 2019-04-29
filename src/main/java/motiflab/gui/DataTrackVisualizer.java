@@ -609,7 +609,7 @@ public abstract class DataTrackVisualizer extends JComponent implements MouseInp
     public abstract void describeBaseForTooltip(int genomicCoordinate,int shownOrientation, StringBuilder buffer);    
     
     public String getPositionString(int genomicCoordinate) {
-          String description=""+genomicCoordinate;
+          String description=""+MotifLabEngine.groupDigitsInNumber(genomicCoordinate);
           if (TSS>=0) {
               int relative=(geneOrientation==VisualizationSettings.DIRECT)?genomicCoordinate-TSS:TSS-genomicCoordinate;
               int relativeTSS=0;

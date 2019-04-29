@@ -142,7 +142,7 @@ public class DataPanelCellRenderer extends JPanel implements ListCellRenderer  {
             typedescription+=", Motif track";
             name.setFont(boldfont);
         } else if (dataobject instanceof RegionDataset && ((RegionDataset)dataobject).isNestedTrack()) {
-            typedescription+=", Linked track";
+            typedescription+=", Nested track";
             name.setFont(italicfont);            
         } else name.setFont(font);
         this.setToolTipText(trackName+"    [ "+typedescription+" ]");

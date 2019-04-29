@@ -33,6 +33,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import motiflab.engine.data.*;
 import motiflab.engine.operations.*;
@@ -112,14 +113,13 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     private HashMap<String,OutputDataDependency> sharedOutputDependencies=null; // key is sharedID
     private ArrayList<MotifComparator> motifcomparators=null;
     private int uniqueCounter=0; // used to create work directories
-    private static NaturalOrderComparator naturalordercomparator=new NaturalOrderComparator();
     private ArrayList<PropertyChangeListener> clientListeners=null; // components can register to know if the client changes
-    private WeakHashMap<URLClassLoader,Boolean> pluginClassLoaders=null; // this is used to retrieve classloaders
+    private WeakHashMap<URLClassLoader,Boolean> pluginClassLoaders=null; // this is used to retrieve classloaders    
+    private TaskRunner taskRunner=null;
     
     private static Random randomNumberGenerator = new Random();
-    private TaskRunner taskRunner=null;
-    private static MotifLabEngine engine=null;    
-    
+    private static NaturalOrderComparator naturalordercomparator=new NaturalOrderComparator();     
+    private static MotifLabEngine engine=null;       
     
     public static MotifLabEngine getEngine() {     
         if (engine==null) engine=new MotifLabEngine();      
@@ -280,17 +280,22 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         return new SimpleDateFormat("yyyy-MM-dd").format(releaseDate);
     }       
     
-    /** Compares this this version of MotifLab to the given versionString
-     *  Returns 0 if the versions are identical
-     *  Returns 1 if this MotifLab version is newer compared to the given version
-     *  Returns -1 if the given version is newer compared to this version of MotifLab
+    /** Compares to "version strings". The strings can contain numbers separated by dots.  E.g. "2", "2.1" or "2.0.12". 
+     *  Negative numbers are allowed and these will be considered to be smaller (i.e. "older") than positive numbers. E.g. "2.1" is a newer version than "2.-1". 
+     *  @param version1 The first version string 
+     *  @param version2 The second version string
+     *  @return
+     *  Returns 0 if the version strings are identical
+     *  Returns 1 if the first version string refers to a "newer version" compared to the second version string
+     *  Returns -1 if the second version string refers to a "newer version" compared to the first version string
      *  @throws NumberFormatException if the version number (this or provided) is not in a proper format
      *  i.e. [ddd(.ddd)*] where 'ddd' is an integer.
      */
-    public static int compareVersions(String versionString) throws NumberFormatException {
-        if (version.equals(versionString)) return 0;
-        String[] thisVersionString=version.split("\\.");
-        String[] otherVersionString=versionString.split("\\.");
+    public static int compareVersions(String version1, String version2) throws NumberFormatException {
+        if (version1==null || version2==null) throw new NumberFormatException("Version string is NULL");
+        if (version1.equals(version2)) return 0;
+        String[] thisVersionString=version1.split("\\.");
+        String[] otherVersionString=version2.split("\\.");
         int[] thisVersion=new int[thisVersionString.length];
         int[] otherVersion=new int[otherVersionString.length];
         for (int i=0;i<thisVersionString.length;i++) {
@@ -304,13 +309,24 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             if (thisVersion[i]>otherVersion[i]) return 1;
             if (thisVersion[i]<otherVersion[i]) return -1;
         }
-        // so far all the major and minor version numbers are equal but one should have more numbers than the other
+        // so far all the major and minor version numbers are equal but one could have more numbers than the other
         if (thisVersion.length>otherVersion.length && thisVersion[thisVersion.length-1]>0) return 1; // this version could be "1.1.13" whereas the other is "1.1"  (however, check also for negative numbers in last position!)
         if (thisVersion.length>otherVersion.length && thisVersion[thisVersion.length-1]<0) return -1; // sort 2.0.-8 before 2.0
         if (thisVersion.length<otherVersion.length && otherVersion[otherVersion.length-1]>0) return -1;
         if (thisVersion.length<otherVersion.length && otherVersion[otherVersion.length-1]<0) return 1;
         return 0;
     }    
+    
+    /** Compares this version of MotifLab to the given versionString
+     *  Returns 0 if the versions are identical
+     *  Returns 1 if this MotifLab version is newer compared to the given version
+     *  Returns -1 if the given version is newer compared to this version of MotifLab
+     *  @throws NumberFormatException if the version number (this or provided) is not in a proper format
+     *  i.e. [ddd(.ddd)*] where 'ddd' is an integer.
+     */
+    public static int compareVersions(String versionString) throws NumberFormatException {
+        return compareVersions(version, versionString);
+    }       
     
     
 
@@ -2671,83 +2687,21 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             }            
         }
         // -------- Manually imported plugins below this line. This is just for rapid testing -------------------------    
-        
-//        try {
-//            motiflab.plugins.EnhancerHighlighter plug=new motiflab.plugins.EnhancerHighlighter();
-//            plug.initializePlugin(this);
-//            HashMap<String,Object> meta=new HashMap<String, Object>();
-//            meta.put("name",plug.getPluginName());
-//            meta.put("type","Tool");
-//            meta.put("version","1.0");
-//            meta.put("description","xxx");
-//            meta.put("_plugin",plug);
-//            meta.put("pluginDirectory","\\\\home.ansatt.ntnu.no\\kjetikl\\Application Data\\BiGR-NTNU\\MotifLab\\plugins\\Enhancer_Highlighter");
-//            registerPlugin(plug,meta);
-//        } catch (Exception e) {
-//            logMessage("Enhancer Highlighter Plugin error: "+e.toString());
-//        }          
-        
-//        // ### NeLS Plugin ###
-//        try {
-//            motiflab.plugins.NeLS_repository nels=new motiflab.plugins.NeLS_repository();
-//            nels.initializePlugin(this);
-//            HashMap<String,Object> meta=new HashMap<String, Object>();
-//            meta.put("name",nels.getPluginName());
-//            meta.put("type","Data Repository");
-//            meta.put("version","1.0");
-//            meta.put("description","Provides access to NeLS Storage");
-//            meta.put("_plugin",nels);
-//            // meta.put("pluginDirectory",nels);
-//            registerPlugin(nels,meta);
-//        } catch (Exception e) {
-//            logMessage("NeLS Plugin error: "+e.toString());
-//        }   
-        
+                         
         // ### Test Plugin ###
 //        try {
-//            motiflab.plugins.SequenceReviewer pluginsr=new motiflab.plugins.SequenceReviewer();
-//            pluginsr.initializePlugin(this);
-//            HashMap<String,Object> meta=new HashMap<String, Object>();
-//            meta.put("name",pluginsr.getPluginName());
-//            meta.put("type","Tool");
-//            meta.put("version","1.0");
-//            meta.put("description","Sequence Reviewer");
-//            meta.put("_plugin",pluginsr);
-//            registerPlugin(pluginsr,meta);
-//        } catch (Exception e) {
-//            logMessage("Plugin error: "+e.toString());
-//        }  
-        
-//        try {
-//            motiflab.plugins.Bookmarks plugin=new motiflab.plugins.Bookmarks();
+//            motiflab.plugins.TestPlugin plugin=new motiflab.plugins.TestPlugin();
 //            plugin.initializePlugin(this);
 //            HashMap<String,Object> meta=new HashMap<String, Object>();
 //            meta.put("name",plugin.getPluginName());
 //            meta.put("type","Tool");
 //            meta.put("version","1.0");
-//            meta.put("description","Bookmarks");
-//            meta.put("_plugin",plugin);
+//            meta.put("description","Test Plugin");
+//            meta.put("_plugin",pluginsr);
 //            registerPlugin(plugin,meta);
 //        } catch (Exception e) {
 //            logMessage("Plugin error: "+e.toString());
-//        }         
-//        
-//        
-//        try {
-//            motiflab.plugins.EnhancerHighlighter plug=new motiflab.plugins.EnhancerHighlighter();
-//            plug.initializePlugin(this);
-//            HashMap<String,Object> meta=new HashMap<String, Object>();
-//            meta.put("name",plug.getPluginName());
-//            meta.put("type","Tool");
-//            meta.put("version","1.0");
-//            meta.put("description","xxx");
-//            meta.put("_plugin",plug);
-//            meta.put("pluginDirectory","\\\\home.ansatt.ntnu.no\\kjetikl\\Application Data\\BiGR-NTNU\\MotifLab\\plugins\\Enhancer_Highlighter");
-//            registerPlugin(plug,meta);
-//        } catch (Exception e) {
-//            logMessage("Enhancer Highlighter Plugin error: "+e.toString());
-//        }  
-        
+//        }             
                  
     }         
     

@@ -86,10 +86,10 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
                           Color color=settings.getFeatureColor(region.getType());
                           buffer.append("<font color=\"");
                           buffer.append(VisualizationSettings.convertColorToHTMLrepresentation(color));
-                          buffer.append("\">&#9632;</font> ");
+                          buffer.append("\">&#9632;</font> <b>");
                       }
                       buffer.append(type);
-                      buffer.append("&nbsp;&nbsp;[");
+                      buffer.append("</b>&nbsp;&nbsp;[");
                       buffer.append(orientation);
                       buffer.append("]&nbsp;&nbsp;");
                       buffer.append(region.getLength());

@@ -495,7 +495,11 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
         } catch (SystemError e) {
             throw new ExecutionError(e.getMessage());
         }
-        Plugin plugin=engine.getPlugin(pluginName);
+        if (metadata.containsKey("motiflab_version")) {
+            String requiredVersion=metadata.get("motiflab_version").toString();          
+            if (MotifLabEngine.compareVersions(requiredVersion)<0) throw new ExecutionError("This plugin requires version "+requiredVersion+" or higher of MotifLab");
+        }
+        Plugin plugin=engine.getPlugin(pluginName); // check if there already exists a plugin with the same name
         if (plugin!=null) { // 
             int option=JOptionPane.showConfirmDialog(rootPane, "A plugin with the same name is already registered (\""+pluginName+"\").\nDo you want to replace the current version?", "Replace plug-in", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (option==JOptionPane.YES_OPTION) {

@@ -3866,7 +3866,27 @@ public class VisualizationSettings implements ListDataListener, ExtendedDataList
             settings.remove(key);
         }
     }   
-    
+     /**
+     * This method goes through all settings and clears those that contain
+     * the specified key string as a substring of their key.
+     * (Eg: if subkey="zoom" then settings with keys such as "zoom", "sequencename.zoom" 
+     * and "kazoom" will be removed.)
+     * @param subkey
+     * @param caseinsensitive If TRUE then the comparison will be case insensitive
+     */    
+    public void clearAllSettingsFor(String subkey, boolean caseinsensitive) {
+        if (!caseinsensitive) {clearAllSettingsFor(subkey);return;}
+        subkey=subkey.toLowerCase();
+        Set<String> keys=settings.keySet();
+        ArrayList<String> toDelete=new ArrayList<String>();
+        for (String key:keys) {
+            if (key.toLowerCase().indexOf(subkey)>0) toDelete.add(key);
+        }
+        for (String key:toDelete) {
+            settings.remove(key);
+        }
+    }      
+           
     public void debug() { // prints all settings to log.         
         ArrayList<String> keys=new ArrayList<String>(settings.keySet());
         Collections.sort(keys);

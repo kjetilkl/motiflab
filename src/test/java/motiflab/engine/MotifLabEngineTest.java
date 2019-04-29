@@ -193,6 +193,38 @@ public class MotifLabEngineTest {
 //        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
+    
+    /**
+     * Test of compareVersions method, of class MotifLabEngine.
+     */
+    @Test
+    public void testCompareVersions_2args() {
+        System.out.println("compareVersions_2args");
+        assertEquals(MotifLabEngine.compareVersions("2.0","2.0"), 0);
+        assertEquals(MotifLabEngine.compareVersions("2.0","2.0.0"), 0);
+        
+        assertEquals(MotifLabEngine.compareVersions("3","2"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("3","2.0"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("3.0","2.0"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("3.0","2"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("2.1","2.0"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0.1","2.0"), 1);  
+        assertEquals(MotifLabEngine.compareVersions("2.0.1","2.0.0"), 1);         
+        assertEquals(MotifLabEngine.compareVersions("2.0.1","2.0.0.1"), 1);   
+        assertEquals(MotifLabEngine.compareVersions("2.0.-1","2.0.0"), -1);         
+        assertEquals(MotifLabEngine.compareVersions("2.0.-1","2"), -1);   
+        
+        assertEquals(MotifLabEngine.compareVersions("2","3"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0","3"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0","3.0"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2","3.0"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0","2.1"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0","2.0.1"), -1);  
+        assertEquals(MotifLabEngine.compareVersions("2.0.0","2.0.1"), -1);         
+        assertEquals(MotifLabEngine.compareVersions("2.0.0.1","2.0.1"), -1);   
+        assertEquals(MotifLabEngine.compareVersions("2.0.0","2.0.-1"), 1);         
+        assertEquals(MotifLabEngine.compareVersions("2","2.0.-1"), 1);                        
+    }    
 //
 //    /**
 //     * Test of executeProtocolTask method, of class MotifLabEngine.

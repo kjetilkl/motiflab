@@ -12,8 +12,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import javax.swing.JToolTip;
-import motiflab.engine.MotifLabEngine;
-import motiflab.engine.data.Data;
 import motiflab.engine.data.Module;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.RegionSequenceData;
@@ -60,7 +58,7 @@ public abstract class DataTrackVisualizer_RegionAbstract extends DataTrackVisual
     protected static int shadowOffset=3;   
     protected static Color shadowColor=new Color(0,0,0,32); // This is translucent gray use for drawing region shadows in close up       
     private static Color glowColor=new Color(240,210,0,70); // an additional glow color used for extra emphasis around the current region 
-    protected static int regionspacing=2; // minimum horizontal spacing between regions (in bp) when packing regions. The 2 bp will make room for triangles outside the boxes to indicate strand orientation
+    protected int regionspacing=2; // minimum horizontal spacing between regions (in bp) when packing regions. The 2 bp will make room for triangles outside the boxes to indicate strand orientation
     protected boolean cropAtSequenceEdges=true;
     
     private Rectangle rectangle=new Rectangle(); // a reusable rectangle object       
@@ -151,7 +149,8 @@ public abstract class DataTrackVisualizer_RegionAbstract extends DataTrackVisual
             useExpandedRegionHeight=(int)Math.round(((double)expandedRegionHeight/(double)originalHeight)*(double)height);
             useRowSpacing=(int)Math.round(((double)rowSpacing/(double)originalHeight)*(double)height);
             useExpandedTopMargin=(int)Math.round(((double)expanded_track_margin/(double)originalHeight)*(double)height);    
-        }        
+        }  
+        if (useExpandedRegionHeight<1) useExpandedRegionHeight=1;
         int top=useExpandedTopMargin+graphicsYoffset;
         if (row>0) top+=(useExpandedRegionHeight+useRowSpacing)*row;
         int bottom=top+useExpandedRegionHeight-1;
@@ -252,7 +251,8 @@ public abstract class DataTrackVisualizer_RegionAbstract extends DataTrackVisual
             useExpandedRegionHeight=(int)Math.round(((double)expandedRegionHeight/(double)originalHeight)*(double)height);
             useRowSpacing=(int)Math.round(((double)rowSpacing/(double)originalHeight)*(double)height);
             useExpandedTopMargin=(int)Math.round(((double)expanded_track_margin/(double)originalHeight)*(double)height);    
-        }        
+        }     
+        if (useExpandedRegionHeight<1) useExpandedRegionHeight=1;
         Rectangle clip=graphics.getClipBounds(); // this should already have been set to the portion of the DTV that is visible on the screen
         int clipTop=clip.y-clipRectMargin;
         int clipBottom=clip.y+clip.height+clipRectMargin;
@@ -589,8 +589,8 @@ public abstract class DataTrackVisualizer_RegionAbstract extends DataTrackVisual
             Integer thickEnd   = (Integer)region.getPropertyAsType("thickEnd", Integer.class);
             int[] thickRange=(thickStart!=null && thickEnd!=null)?getScreenCoordinateRangeFromGenomic(thickStart, thickEnd, graphicsXoffset):null; // this does not have to account for orientation :-)         
             ArrayList<Region> nestedRegions=region.getNestedRegions(false);        
-            for (Region nestedregion:nestedRegions) { //       
-                if (!settings.isRegionTypeVisible(nestedregion.getType())) continue;                                      
+            for (Region nestedregion:nestedRegions) { //  
+                if (!settings.isRegionTypeVisible(nestedregion.getType())) continue;                
                 if (filterNested && filter!=null && !filter.shouldVisualizeRegion(nestedregion)) continue; // 
                 nestedRegionBounds = determineNestedRegionBounds(nestedregion, graphicsXoffset, bounds, nestedRegionBounds); // the Y-placement of this nested region should be within the parent!! (using same Y-bounds as the parent)
                 if (nestedRegionBounds.x+nestedRegionBounds.width<0 || nestedRegionBounds.x>sequenceWindowWidth+10) continue; // this nested region is outside of X-bounds
