@@ -729,7 +729,7 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
        int start=settings.getSequenceViewPortStart(sequenceName);
        int end=settings.getSequenceViewPortEnd(sequenceName);
        String posString=start+"-"+end;
-       String newString = JOptionPane.showInputDialog("Enter new viewport coordinates", posString);              
+       String newString = JOptionPane.showInputDialog("Enter new viewport coordinates for "+sequenceName, posString);              
        if (newString==null) return;
        boolean TSSrelative=false; // To Do: Allow specification of relative (or TSS/TES-relative) coordinates as an alternative to just genomic coordinates
        boolean TESrelative=false;

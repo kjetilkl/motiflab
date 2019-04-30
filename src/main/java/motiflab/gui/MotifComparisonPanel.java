@@ -137,6 +137,7 @@ public class MotifComparisonPanel extends JPanel {
     private void initComponents() {
         this.setLayout(new BorderLayout());
         searchBox=motifsPanel.getSearchField();
+        searchBox.doNotFilterItem(targetMotif);
         progressbar=new JProgressBar();
         progressbar.setPreferredSize(new Dimension(40,20));
         comparisonSettingsPanel.add(new JLabel("      Compare using  "));

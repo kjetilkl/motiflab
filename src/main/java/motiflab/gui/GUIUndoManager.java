@@ -51,7 +51,7 @@ public class GUIUndoManager extends UndoManager implements UndoableEditListener 
         openfiles=new HashSet<java.io.Closeable>();
         try {
            File localStorage=context.getLocalStorage().getDirectory();
-           if (localStorage!=null) cacheDirectoryFullPath=localStorage.getAbsolutePath()+File.separator+cacheDirectoryName;
+           if (localStorage!=null) cacheDirectoryFullPath=localStorage.getAbsolutePath()+File.separator+"currentsession"+File.separator+cacheDirectoryName;
            if (cacheDirectoryFullPath!=null) {
                File dir=new File(cacheDirectoryFullPath);
                if (!dir.mkdirs()) throw new IOException("Unable to create cache directory on local disc => "+cacheDirectoryFullPath);

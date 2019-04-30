@@ -260,6 +260,16 @@ public class Graph {
     public void drawBoundingBox() {
         g.drawRect(translateX, translateY, graphwidth, graphheight);
     }
+    
+    /** Fills the background of the graph with the specified color
+     *  @param background The color to use for the background
+     */
+    public void drawBackground(Color background) {
+        Color current=g.getColor();
+        g.setColor(background);
+        g.fillRect(translateX, translateY, graphwidth, graphheight);
+        g.setColor(current);
+    }    
    
     /**
      * Draws an X-axis with sensible ticks within the range minX to maxX

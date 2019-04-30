@@ -595,7 +595,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
      * when the process exits.
      */
     public String getTempDirectory() {
-        return motiflabDirectoryPath+File.separator+ManagementFactory.getRuntimeMXBean().getName();
+        return motiflabDirectoryPath+File.separator+"currentsession"+File.separator+ManagementFactory.getRuntimeMXBean().getName();
     }
 
     /** 

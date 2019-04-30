@@ -233,8 +233,6 @@ public abstract class DataSource implements Cloneable {
      * accessing the server for this DataSource. The number is based on the time 
      * of last access (as registered by the a call to notifyDataSourceAccess())
      * and the "delay" property for this DataSource
-     * @param updateTimestamp If this flag is set to true, the "last accessed" timestamp associated with
-     *        the server will be set to the end of the returned waiting period
      */
     
     public synchronized int getServerTimeslot() {
