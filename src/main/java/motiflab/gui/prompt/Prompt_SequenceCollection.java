@@ -13,12 +13,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -26,18 +23,13 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.border.BevelBorder;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.task.OperationTask;
 import motiflab.engine.SystemError;
@@ -49,11 +41,9 @@ import motiflab.engine.ParameterSettings;
 import motiflab.engine.operations.Operation_new;
 import motiflab.engine.protocol.DataTypeTable;
 import motiflab.engine.protocol.StandardOperationParser_statistic;
-import motiflab.gui.ColorMenu;
-import motiflab.gui.GenericSequenceBrowserPanel;
-import motiflab.gui.GenericSequenceBrowserPanelContextMenu;
 import motiflab.gui.LoadFromFilePanel;
 import motiflab.gui.MotifLabGUI;
+import motiflab.gui.SequenceBrowserPanel;
 import motiflab.gui.SimpleDataPanelIcon;
 import motiflab.gui.operationdialog.OperationDialog_statistic;
 
@@ -63,7 +53,8 @@ import motiflab.gui.operationdialog.OperationDialog_statistic;
  */
 public class Prompt_SequenceCollection extends Prompt {
 
-    private JPanel manualEntryPanel;
+    // private JPanel manualEntryPanel;
+    private SequenceBrowserPanel manualSelectionPanel;
     private JPanel parseListPanel;
     private JPanel fromPropertyPanel;    
     private JPanel fromMapPanel;
@@ -93,8 +84,6 @@ public class Prompt_SequenceCollection extends Prompt {
     private JLabel includedInCollectionLabel=null;
     private JTable table=null; // manual selection table (obtained from sequenceBrowser)
 
-    private GenericSequenceBrowserPanel sequenceBrowser=null;
-    private ContextMenu contextMenu;
     boolean isDefaultCollection=false;
     
     private boolean showExisting;
@@ -123,13 +112,10 @@ public class Prompt_SequenceCollection extends Prompt {
         SimpleDataPanelIcon icon=new SimpleDataPanelIcon(20, 20, SimpleDataPanelIcon.SEQUENCE_COLLECTION_ICON,SimpleDataPanelIcon.NO_BORDER,gui.getVisualizationSettings());
         icon.setBackgroundColor(Color.WHITE);
         setDataItemIcon(icon, true);
-        setupManualEntryPanel();
-        manualEntryPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createBevelBorder(BevelBorder.RAISED),
-            BorderFactory.createEmptyBorder(6,6,8,6)
-        ));        
+        manualSelectionPanel=new SequenceBrowserPanel(gui, collection, modal, false);
+        manualSelectionPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));     
         if (isDefaultCollection) {
-            setMainPanel(manualEntryPanel);
+            setMainPanel(manualSelectionPanel);
             setDataEditable(false);
         } else {
             setupImportModelPanel();
@@ -138,7 +124,7 @@ public class Prompt_SequenceCollection extends Prompt {
             setupFromMapPanel();
             setupFromStatisticPanel();
             tabbedPanel=new JTabbedPane();
-            tabbedPanel.addTab("Manual Entry", manualEntryPanel);
+            tabbedPanel.addTab("Manual Entry", manualSelectionPanel);
             tabbedPanel.addTab("From List", parseListPanel);
             tabbedPanel.addTab("From Property", fromPropertyPanel);             
             tabbedPanel.addTab("From Map", fromMapPanel);
@@ -155,9 +141,8 @@ public class Prompt_SequenceCollection extends Prompt {
             internal.add(tabbedPanel);
             setMainPanel(internal);
         }
-        updateCountLabelText();
         if (showExisting) {
-           if (!isDefaultCollection) tabbedPanel.setSelectedComponent(manualEntryPanel);
+           if (!isDefaultCollection) tabbedPanel.setSelectedComponent(manualSelectionPanel); // if the default collection is show there will be no tabs, only the manualSelectionPanel
            focusOKButton();
         }
         pack();        
@@ -174,100 +159,6 @@ public class Prompt_SequenceCollection extends Prompt {
         else super.setDataEditable(editable);
     }
     
-    private void setupManualEntryPanel() {
-        SequenceCollection dataset=engine.getDefaultSequenceCollection();
-        int size=dataset.getNumberofSequences();
-        Object[][] rowData=new Object[dataset.size()][2];
-        for (int i=0;i<size;i++) {
-            Sequence sequence=dataset.getSequenceByIndex(i, engine);
-            rowData[i][1]=sequence;
-            rowData[i][0]=collection.contains(sequence.getName());
-        }
-        DefaultTableModel model = new DefaultTableModel(rowData, new String[]{" ","Sequence"}) {
-            @Override
-            public Class<?> getColumnClass(int column) {
-                if (column==0) return Boolean.class; 
-                else return Sequence.class;
-            }
-            @Override
-            public boolean isCellEditable(int row, int column) {// only the first boolean column is editable
-                return (column==0 && isDataEditable());
-            }
-        };
-        manualEntryPanel=new JPanel(new BorderLayout());
-        sequenceBrowser=new GenericSequenceBrowserPanel(gui, model, isModal); //
-        sequenceBrowser.disableContextMenu();
-        contextMenu=new ContextMenu(sequenceBrowser);        
-        table=sequenceBrowser.getTable();                
-        table.getTableHeader().setReorderingAllowed(false);          
-        TableColumn column=table.getColumnModel().getColumn(0);
-        column.setPreferredWidth(22);
-        column.setMinWidth(22);
-        column.setMaxWidth(22);        
-        manualEntryPanel.add(sequenceBrowser);
-        table.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode()==KeyEvent.VK_SPACE && isDataEditable()) {     
-                    DefaultTableModel model=(DefaultTableModel)table.getModel();
-                    int[] rows=table.getSelectedRows();
-                    int checkedRows=0;
-                    for (int row:rows) {
-                        if ((Boolean)model.getValueAt(table.convertRowIndexToModel(row),0)) checkedRows++;
-                    }
-                    Boolean doCheck=Boolean.TRUE;
-                    if (checkedRows==rows.length) doCheck=Boolean.FALSE;
-                    for (int row:rows) {
-                        model.setValueAt(doCheck,table.convertRowIndexToModel(row),0);
-                    }
-                    updateCountLabelText();
-                }
-            }
-        });
-        table.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent evt) {}
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                if (evt.isPopupTrigger()) {
-                    int row = table.rowAtPoint(evt.getPoint()); //
-                    if (row>=0 && !table.isRowSelected(row)) table.getSelectionModel().setSelectionInterval(row, row);                                          
-                    if (table.getSelectedRowCount()>0) showContextMenu(evt);  
-                }             
-            }
-            @Override
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                updateCountLabelText(); // this will recount the number of sequence in the collection when checkboxes are clicked 
-                if (evt.isPopupTrigger()) {
-                    int row = table.rowAtPoint(evt.getPoint()); //
-                    if (row>=0 && !table.isRowSelected(row)) table.getSelectionModel().setSelectionInterval(row, row);                                          
-                    if (table.getSelectedRowCount()>0) showContextMenu(evt);  
-                }
-            }
-        });
-        table.getRowSorter().toggleSortOrder(1); // sort first alphabetically by sequence name
-        table.getRowSorter().toggleSortOrder(0); // then divide into included/excluded from collection
-        table.getRowSorter().toggleSortOrder(0); // (included on top)
-        includedInCollectionLabel=new JLabel(" ");
-        sequenceBrowser.getControlsPanel().add(new JLabel("    "));
-        sequenceBrowser.getControlsPanel().add(includedInCollectionLabel);
-    }
-    
-    /** Returns the number of motifs currently selected under Manual Entry tab*/
-    private int countSelectedMotifs() {
-         int selected=0;
-         DefaultTableModel model=(DefaultTableModel)table.getModel();
-         for (int i=0;i<model.getRowCount();i++) {
-             if ((Boolean)model.getValueAt(i,0)) selected++;
-         }           
-         return selected;
-    }
-    /** Updates the label displaying counts (shown, selected and total) in the manual selection tab*/
-    private void updateCountLabelText() {
-        DefaultTableModel model=(DefaultTableModel)table.getModel();
-        int total=model.getRowCount();
-        int count=countSelectedMotifs();
-        includedInCollectionLabel.setText("Included:  "+count+" of "+total+"   ("+(total-count)+" remaining)");
-    }
 
     private void setupImportModelPanel() {
         ArrayList<DataFormat> dataformats=engine.getDataInputFormats(SequenceCollection.class);
@@ -611,11 +502,8 @@ public class Prompt_SequenceCollection extends Prompt {
                 JOptionPane.showMessageDialog(this, "An "+errorType+"  error occurred while importing Sequence Collection from file:\n"+exceptionText+e.getMessage(),"Import Error",JOptionPane.ERROR_MESSAGE);
                 return false;
             }
-        } else if (tabbedPanel.getSelectedComponent()==manualEntryPanel) {
-            collection.clearAll(engine);
-            for (int i=0;i<table.getRowCount();i++) {
-                if ((Boolean)table.getValueAt(i,0)) collection.addSequence((Sequence)table.getValueAt(i,1));
-            }
+        } else if (tabbedPanel.getSelectedComponent()==manualSelectionPanel) {
+            manualSelectionPanel.updateSequenceCollection();
         } else if (tabbedPanel.getSelectedComponent()==fromMapPanel) {
             String mapName=(String)fromMapSelection.getSelectedItem();
             if (mapName!=null && !mapName.isEmpty()) {
@@ -729,103 +617,5 @@ public class Prompt_SequenceCollection extends Prompt {
     public void setData(Data newdata) {
        if (newdata instanceof SequenceCollection) collection=(SequenceCollection)newdata; 
     }     
-    
-    private void showContextMenu(java.awt.event.MouseEvent evt) {
-        contextMenu.updateMenu();  
-        contextMenu.show(evt.getComponent(), evt.getX(),evt.getY());
-    }  
-
-private class ContextMenu extends GenericSequenceBrowserPanelContextMenu implements ActionListener {
-     JMenuItem includeSelected=new JMenuItem("Include Selected Sequences");
-     JMenuItem includeMarked=new JMenuItem("Include Marked Sequences");     
-     JMenuItem includeAll=new JMenuItem("Include All Sequences");
-     JMenuItem excludeSelected=new JMenuItem("Exclude Selected Sequences");
-     JMenuItem excludeMarked=new JMenuItem("Exclude Marked Sequences");     
-     JMenuItem excludeAll=new JMenuItem("Exclude All Sequences");
-     JMenuItem invertCollection=new JMenuItem("Invert Collection");
-     ColorMenu colorMenu;
-     String oldname=null;
      
-    public ContextMenu(GenericSequenceBrowserPanel panel) {
-         super(panel,false);
-         if (!isDefaultCollection) {
-             includeSelected.addActionListener(this);
-             includeMarked.addActionListener(this);
-             includeAll.addActionListener(this);
-             excludeSelected.addActionListener(this);
-             excludeMarked.addActionListener(this);
-             excludeAll.addActionListener(this);
-             invertCollection.addActionListener(this);
-             this.add(new JSeparator(),0);
-             this.add(invertCollection,0);
-             this.add(excludeAll,0);    
-             this.add(excludeMarked,0);               
-             this.add(excludeSelected,0);
-             this.add(includeAll,0);
-             this.add(includeMarked,0);  
-             this.add(includeSelected,0);  
-         }
-     }
-     
-    
-     @Override
-     public void actionPerformed(ActionEvent e) {
-         String cmd=e.getActionCommand();
-         if (cmd.equals(includeSelected.getActionCommand())) {
-             int[] rows=table.getSelectedRows();
-             TableModel model=table.getModel();
-             for (int row:rows) {
-                 int modelrow=table.convertRowIndexToModel(row);
-                 model.setValueAt(true, modelrow, 0);
-             }
-         } else if (cmd.equals(includeAll.getActionCommand())) {
-             TableModel model=table.getModel();
-             for (int i=0;i<model.getRowCount();i++) {
-                 model.setValueAt(true, i, 0);
-             }
-         } else if (cmd.equals(includeMarked.getActionCommand())) {
-             HashSet<String> marked=gui.getVisualizationSettings().getMarkedSequences();            
-             TableModel model=table.getModel();
-             int seqCol=sequenceBrowser.getSequenceColumn();
-             for (int i=0;i<model.getRowCount();i++) {
-                 Object seq=model.getValueAt(i, seqCol);
-                 if (seq instanceof Sequence) {
-                    if (marked.contains(((Sequence)seq).getName())) model.setValueAt(true, i, 0);
-                 }
-             }
-         } else if (cmd.equals(excludeSelected.getActionCommand())) {
-             int[] rows=table.getSelectedRows();
-             TableModel model=table.getModel();
-             for (int row:rows) {
-                 int modelrow=table.convertRowIndexToModel(row);
-                 model.setValueAt(false, modelrow, 0);
-             }
-         } else if (cmd.equals(excludeMarked.getActionCommand())) {
-             HashSet<String> marked=gui.getVisualizationSettings().getMarkedSequences();            
-             TableModel model=table.getModel();
-             int seqCol=sequenceBrowser.getSequenceColumn();
-             for (int i=0;i<model.getRowCount();i++) {
-                 Object seq=model.getValueAt(i, seqCol);
-                 if (seq instanceof Sequence) {
-                    if (marked.contains(((Sequence)seq).getName())) model.setValueAt(false, i, 0);
-                 }
-             }           
-         } else if (cmd.equals(excludeAll.getActionCommand())) {
-             TableModel model=table.getModel();
-             for (int i=0;i<model.getRowCount();i++) {
-                 model.setValueAt(false, i, 0);
-             }
-         } else if (cmd.equals(invertCollection.getActionCommand())) {
-             TableModel model=table.getModel();             
-             for (int i=0;i<model.getRowCount();i++) {
-                 boolean checked=(Boolean)model.getValueAt(i,0);
-                 model.setValueAt(!checked, i, 0);
-             }
-         } 
-         updateCountLabelText();
-         table.repaint();
-     }
-            
- }  // end class ContextMenu    
-    
 }

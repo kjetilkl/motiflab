@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -51,12 +53,15 @@ import motiflab.engine.data.SequencePartition;
  * @author kjetikl
  */
 public class SequenceBrowserPanel extends JPanel implements DataListener {
+    static Boolean showOnlyMembersDefault=Boolean.TRUE;    
+    
     private JTable manualSelectionTable;
     private DefaultTableColumnModel columnModel;
     private JTextField filterTextfield;
     private JComboBox filterOperator;
     private JLabel numberOfSequencesShowingLabel;
     private Filter filter;
+    private JCheckBox showOnlyCollectionMembersCheckbox;    
     private ManualSelectionTableModel model;
     private ManualSelectionContextMenu manualSelectionContextMenu;
     private MotifLabGUI gui;
@@ -66,13 +71,17 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
     private String[] columnHeaders=new String[] {" ","Sequence","Filter"}; // the name of the Filter column will be changed later on 
     private String[] filterColumnHeaders=null; //n
     private HashMap<String,Class> filterPropertyClass=null;
-    private boolean isModal=false;
     private MiscIcons markedSequenceIcon;
+    private boolean isModal=false;
+    private boolean isSelectionEditable=true;
 
     private static final int SELECTED_COLUMN=0;
     private static final int SEQUENCE_COLUMN=1;
     private static final int FILTER_COLUMN=2;    
-    // private static final int LOGO_COLUMN=3;    
+    // private static final int LOGO_COLUMN=3;
+    
+    private static ImageIcon blackbullet;
+    private static ImageIcon greenbullet;    
 
     public SequenceBrowserPanel(MotifLabGUI gui, SequenceCollection sequencecollection, boolean modal, boolean allowCreateCollection) {
         super();
@@ -80,11 +89,20 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
         this.engine=gui.getEngine();
         this.sequencecollection=sequencecollection;
         this.isModal=modal;
+        this.isSelectionEditable=(sequencecollection!=null && !sequencecollection.getName().equals(engine.getDefaultSequenceCollectionName()));
         markedSequenceIcon=new MiscIcons(MiscIcons.BULLET_MARK, Color.RED);
+        if (SequenceBrowserPanel.blackbullet==null) {
+            java.net.URL greenBulletURL=getClass().getResource("resources/icons/greenbullet.png");
+            java.net.URL blackBulletURL=getClass().getResource("resources/icons/blackbullet.png");
+            SequenceBrowserPanel.blackbullet=new ImageIcon(blackBulletURL); 
+            SequenceBrowserPanel.greenbullet=new ImageIcon(greenBulletURL);     
+        }        
         setupManualEntryPanel(allowCreateCollection);
         if (sequencecollection==null) {
               columnModel.getColumn(SELECTED_COLUMN).setCellRenderer(new FeatureColorCellRenderer(gui));
-        } else ((javax.swing.JComponent)manualSelectionTable.getDefaultRenderer(Boolean.class)).setOpaque(true); // fixes alternating background bug for checkbox renderers in Nimbus
+        } else {
+            ((javax.swing.JComponent)manualSelectionTable.getDefaultRenderer(Boolean.class)).setOpaque(true); // fixes alternating background bug for checkbox renderers in Nimbus
+        } 
     }
     
     private void setupFilterColumns() {
@@ -114,16 +132,7 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
             col.setHeaderValue(model.getColumnName(i));
             columnModel.addColumn(col);
         }
-        manualSelectionTable=new JTable(model,columnModel) {
-//            @Override
-//            public JToolTip createToolTip() {
-//                if (customTooltip==null) {
-//                    customTooltip=new SingleMotifTooltip(gui.getVisualizationSettings());
-//                    customTooltip.setComponent(this);
-//                }
-//                return customTooltip;
-//            }
-        };
+        manualSelectionTable=new JTable(model,columnModel);
         manualSelectionTable.setAutoCreateRowSorter(true);
         manualSelectionTable.getTableHeader().setReorderingAllowed(false);
         manualSelectionTable.setRowHeight(18);
@@ -134,11 +143,19 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
         this.setLayout(new BorderLayout());
         this.add(manualSelectionScrollPane,BorderLayout.CENTER);
         JPanel filterPanel=new JPanel(new FlowLayout(FlowLayout.LEADING));
-        filterPanel.add(new JLabel("Filter "));
         final JComboBox filterCombobox=new JComboBox(filterColumnHeaders);
         filterTextfield=new JTextField(12);                  
         filterOperator = new JComboBox(new String[]{"=","<>","<","<=",">=",">"});   
         numberOfSequencesShowingLabel = new JLabel();
+        if (this.sequencecollection!=null) {
+            showOnlyCollectionMembersCheckbox=new JCheckBox();  
+            showOnlyCollectionMembersCheckbox.setSelectedIcon(greenbullet);
+            showOnlyCollectionMembersCheckbox.setIcon(blackbullet);     
+            showOnlyCollectionMembersCheckbox.setRolloverEnabled(false); // colors should not change on rollover                     
+            showOnlyCollectionMembersCheckbox.setToolTipText("Click to toggle between showing only sequences included in the collection (green) or all sequences (black)");
+            filterPanel.add(showOnlyCollectionMembersCheckbox);
+        }       
+        filterPanel.add(new JLabel("  Filter "));        
         filterPanel.add(filterCombobox);
         filterPanel.add(filterOperator);
         filterPanel.add(filterTextfield);
@@ -152,7 +169,8 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
         ((TableRowSorter)manualSelectionTable.getRowSorter()).setComparator(SEQUENCE_COLUMN, sorter);
         manualSelectionTable.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode()==KeyEvent.VK_SPACE && sequencecollection!=null) {
+                if (e.getKeyCode()==KeyEvent.VK_SPACE && sequencecollection!=null) { // toggle selections in 
+                    if (!isSelectionEditable) return;
                     int[] rows=manualSelectionTable.getSelectedRows();
                     int checkedRows=0;
                     for (int row:rows) {
@@ -164,7 +182,7 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
                         model.setValueAt(doCheck,manualSelectionTable.convertRowIndexToModel(row),0);
                     }
                     updateCountLabelText();
-                } else if ((e.getKeyCode()==KeyEvent.VK_SPACE && sequencecollection==null) || e.getKeyCode()==KeyEvent.VK_V) {
+                } else if ((e.getKeyCode()==KeyEvent.VK_SPACE && sequencecollection==null) || e.getKeyCode()==KeyEvent.VK_V) { // toggle visibility
                     int[] rows=manualSelectionTable.getSelectedRows();
                     int visibleRows=0;
                     for (int row:rows) {
@@ -266,7 +284,21 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
                 ((TableRowSorter)manualSelectionTable.getRowSorter()).sort();
             }
         });        
-        manualSelectionContextMenu=new ManualSelectionContextMenu(sequencecollection!=null, allowCreateCollection);
+        
+        if (showOnlyCollectionMembersCheckbox!=null) {
+            showOnlyCollectionMembersCheckbox.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    boolean showOnlyMembers=showOnlyCollectionMembersCheckbox.isSelected(); 
+                    filter.showOnlyCollectionMembers=showOnlyMembers;
+                    showOnlyMembersDefault=showOnlyMembers;
+                    filter.updateFilter();
+                    ((TableRowSorter)manualSelectionTable.getRowSorter()).sort();
+                    updateCountLabelText();           
+                }
+            });
+        }        
+        manualSelectionContextMenu=new ManualSelectionContextMenu(sequencecollection!=null && isSelectionEditable, allowCreateCollection); // note that engine.isDefaultSequenceCollection(sq) does not work since the collection could be a COPY of the default collection but with the same name
         manualSelectionTable.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -317,8 +349,12 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
                manualSelectionTable.getRowSorter().toggleSortOrder(SELECTED_COLUMN); // show checked first - must sort twice to get checked on top
             }
         }          
-        updateCountLabelText();
-        filterCombobox.setSelectedItem(initialFilterChoice);       
+        filterCombobox.setSelectedItem(initialFilterChoice);        
+        if (showOnlyCollectionMembersCheckbox!=null) {
+            boolean defaultValue=(sequencecollection.isEmpty())?false:showOnlyMembersDefault;
+            if (defaultValue==true) showOnlyCollectionMembersCheckbox.doClick(); // the doClick is necessary to update the filter, setSelected() is not enough       
+        }           
+        updateCountLabelText();       
     } // end setupManualEntryPanel()
 
 
@@ -441,7 +477,7 @@ private class ManualSelectionTableModel extends AbstractTableModel {
     
     @Override    
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-	return (columnIndex==0 && sequencecollection!=null);
+	return (isSelectionEditable && columnIndex==0 && sequencecollection!=null);
     }
     
     private String getFilterColumn() {return filterColumn;}
@@ -963,7 +999,6 @@ private class FeatureColorCellRenderer extends DefaultTableCellRenderer {
         String sequencename=sequence.getName();
         selectedicon.setForegroundColor(settings.getSequenceLabelColor(sequencename));
         selectedicon.setBorderColor((settings.isSequenceVisible(sequencename))?Color.BLACK:Color.LIGHT_GRAY);
-        // if (customTooltip!=null) setToolTipText(sequence.getName());
         setText(null);  
         return this;
     }
@@ -973,12 +1008,17 @@ private class FeatureColorCellRenderer extends DefaultTableCellRenderer {
 private class Filter extends RowFilter<Object,Object> {
     String filterString;
     String[][] structuredStringFilter=null;
+    boolean showOnlyCollectionMembers=false;    
         
     @Override
     public boolean include(Entry<? extends Object, ? extends Object> entry) {
-     if (filterString==null) return true;
+     if (filterString==null && !showOnlyCollectionMembers) return true; // no filtering at all applied 
      ManualSelectionTableModel model= (ManualSelectionTableModel) entry.getModel();
      int row = ((Integer)entry.getIdentifier()).intValue();
+     if (showOnlyCollectionMembers) {
+         Object value=model.getValueAt(row,SELECTED_COLUMN);
+         if (value instanceof Boolean && !((Boolean)value)) return false; // do not show if not in collection
+     }      
      String comparator=(String)filterOperator.getSelectedItem();
      Object value=model.getValueAt(row,FILTER_COLUMN);
      String filterColumn=model.getFilterColumn();
@@ -990,6 +1030,7 @@ private class Filter extends RowFilter<Object,Object> {
             else numeric=((Double)value).doubleValue();
             Double filterNumber = Double.parseDouble(filterString);
                  if (comparator.equals("="))  return numeric==filterNumber;
+            else if (comparator.equals("~"))  return numeric==filterNumber;
             else if (comparator.equals("<>")) return numeric!=filterNumber;
             else if (comparator.equals("<"))  return numeric<filterNumber;
             else if (comparator.equals("<=")) return numeric<=filterNumber;
@@ -999,7 +1040,7 @@ private class Filter extends RowFilter<Object,Object> {
              //System.err.println(e.getClass().getSimpleName()+":"+e.getMessage());
              return false;
          }
-    } else if (filterColumn.equals("somespecial value")) { // This is just an example if you need to expand later for specific properties
+    } else if (filterColumn.equals("somespecial value")) { // This is just an example in case you need to expand this later for specific properties
          boolean showContains=(comparator.equals("=") || comparator.equals("<=") || comparator.equals(">="));
 //         if (value==null) return !showContains;
 //         Sequence sequence=(Sequence)model.getValueAt(row,1);
@@ -1048,7 +1089,7 @@ private class Filter extends RowFilter<Object,Object> {
      * at the inner level (AND)
      */
    private boolean advancedStringContains(String value) {       
-       if (structuredStringFilter==null) return value.contains(filterString);
+       if (structuredStringFilter==null) return (filterString==null)?true:value.contains(filterString);
        for (int i=0;i<structuredStringFilter.length;i++) { // for each OR-level
            String[] ands=structuredStringFilter[i]; // must match all entries in this         
            if (ands!=null && ands.length>0) {
