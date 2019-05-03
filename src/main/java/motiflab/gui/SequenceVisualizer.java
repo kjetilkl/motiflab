@@ -1208,8 +1208,8 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
            int end=selectionPane.getSelectionEndPosition();
            int selectedbases=settings.countSelectedBasesInSequence(sequenceName, start, end, e.isShiftDown(), !e.isAltDown(), true);
            String statusmsg;
-           if (end-start==0) statusmsg="Selected 1 base [chr"+datasequence.getChromosome()+":"+start+"]. Total = "+selectedbases+" bp";
-           else statusmsg="Selected "+(end-start+1)+" bases  [chr"+datasequence.getChromosome()+":"+start+"-"+end+"]. Total = "+selectedbases+" bp";
+           if (end-start==0) statusmsg="Selected 1 base [chr"+datasequence.getChromosome()+":"+start+"]. Total = "+MotifLabEngine.groupDigitsInNumber(selectedbases)+" bp";
+           else statusmsg="Selected "+(MotifLabEngine.groupDigitsInNumber(end-start+1))+" bases  [chr"+datasequence.getChromosome()+":"+start+"-"+end+"]. Total = "+MotifLabEngine.groupDigitsInNumber(selectedbases)+" bp";
            gui.statusMessage(statusmsg);
            //setToolTipText((end-start==0)?"1 bp":((end-start+1)+" bp"));  // this did not work...                     
        }
