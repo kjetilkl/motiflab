@@ -228,6 +228,7 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
                gui.getFrame().setCursor(Cursor.getDefaultCursor());
                menu.show(e.getComponent(), e.getX(),e.getY());
            }
+           gui.getFrame().setCursor(Cursor.getDefaultCursor());
        }
     }
     
@@ -241,6 +242,7 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
     }
 
     protected void showPrompt(Data data) {
+        gui.getFrame().setCursor(Cursor.getDefaultCursor());
         gui.getMotifsPanel().showPrompt(data, false, false); // showPrompt in MotifsPanel will show different prompt depending on whether the Data object is a Motif or a Module
     }
 
