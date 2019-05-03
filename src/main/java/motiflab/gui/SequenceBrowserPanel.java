@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -145,7 +146,7 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
         JPanel filterPanel=new JPanel(new FlowLayout(FlowLayout.LEADING));
         final JComboBox filterCombobox=new JComboBox(filterColumnHeaders);
         filterTextfield=new JTextField(12);                  
-        filterOperator = new JComboBox(new String[]{"=","<>","<","<=",">=",">"});   
+        filterOperator = new JComboBox(new String[]{"~","!~","=","<>","<","<=",">=",">"}); // matching, not matching, equals, not equals, smaller than...    
         numberOfSequencesShowingLabel = new JLabel();
         if (this.sequencecollection!=null) {
             showOnlyCollectionMembersCheckbox=new JCheckBox();  
@@ -275,7 +276,15 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
                 updateCountLabelText();
             }
         });        
-        filterOperator.setSelectedIndex(0);         
+        filterOperator.setSelectedIndex(0);   
+        filterOperator.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                filter.updateFilter();
+                ((TableRowSorter)manualSelectionTable.getRowSorter()).sort();
+                updateCountLabelText();
+            }
+        });          
         filterCombobox.setSelectedIndex(0);
         filterCombobox.addActionListener(new ActionListener() {
             @Override
@@ -421,7 +430,9 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
     /** Updates the label displaying counts (shown, selected and total) in the manual selection tab*/
     private void updateCountLabelText() {
         int total=model.getRowCount();
-        if (sequencecollection!=null) numberOfSequencesShowingLabel.setText("<html>Matching: "+manualSelectionTable.getRowCount()+" of "+total+"<br>Included: "+countSelectedSequences()+" of "+total+"</html>");
+        int included = countSelectedSequences();
+        int matchingAgainst = (showOnlyMembersDefault)?included:total;
+        if (sequencecollection!=null) numberOfSequencesShowingLabel.setText("<html>Matching: "+manualSelectionTable.getRowCount()+" of "+matchingAgainst+"<br>Included: "+included+" of "+total+"</html>");
         else numberOfSequencesShowingLabel.setText("<html>Matching: "+manualSelectionTable.getRowCount()+" of "+total+"</html>");
     }
 
@@ -1032,6 +1043,7 @@ private class Filter extends RowFilter<Object,Object> {
                  if (comparator.equals("="))  return numeric==filterNumber;
             else if (comparator.equals("~"))  return numeric==filterNumber;
             else if (comparator.equals("<>")) return numeric!=filterNumber;
+            else if (comparator.equals("!~")) return numeric!=filterNumber;            
             else if (comparator.equals("<"))  return numeric<filterNumber;
             else if (comparator.equals("<=")) return numeric<=filterNumber;
             else if (comparator.equals(">"))  return numeric>filterNumber;
@@ -1040,26 +1052,17 @@ private class Filter extends RowFilter<Object,Object> {
              //System.err.println(e.getClass().getSimpleName()+":"+e.getMessage());
              return false;
          }
-    } else if (filterColumn.equals("somespecial value")) { // This is just an example in case you need to expand this later for specific properties
-         boolean showContains=(comparator.equals("=") || comparator.equals("<=") || comparator.equals(">="));
-//         if (value==null) return !showContains;
-//         Sequence sequence=(Sequence)model.getValueAt(row,1);
-//         String motifname=(sequence.getShortName()+", "+sequence.getLongName()).toLowerCase();
-         boolean contains=false;
-//         if (filterString.contains("|") || filterString.contains(",")) {
-//             String[] parts=filterString.split(",|\\|");
-//             for (String part:parts) {
-//                if (part.isEmpty()) continue;
-//                if (motifname.contains(part)) {contains=true;break;}
-//             }
-//         } else contains=motifname.contains(filterString);
-         return ((showContains && contains) || (!showContains && !contains));         
-     } else { // other textual properties. These are only compared with "equals" or "not equals", not by alphabetical sorting
-         boolean showContains=(comparator.equals("=") || comparator.equals("<=") || comparator.equals(">=")); // Use "equals" comparison if operator contains the "=" sign
-         if (value==null) return !showContains;
-         String textvalue=value.toString().toLowerCase();
-         boolean contains=advancedStringContains(textvalue);
-         return ((showContains && contains) || (!showContains && !contains));       
+    } else { // other textual properties (or properties that can be converted to text. These are only compared with "equals" or "not equals", not by alphabetical sorting
+         boolean showContains=(comparator.equals("=") || comparator.equals("~") || comparator.equals("<=") || comparator.equals(">="));
+         if (value==null) return !showContains; // the motif has no value for this property
+         String textvalue;
+         if (value instanceof List) textvalue=MotifLabEngine.splice((List)value, ",");
+         else textvalue=value.toString().toLowerCase();
+         if (structuredStringFilter!=null && (comparator.equals("!~") || comparator.equals("<>"))) { 
+             // we have a boolean expression with a negating comparator. Instead of doing a complex deMorgan transform of the expression, we switch the comparator and negate the result instead 
+             return !advancedStringMatches(textvalue,(comparator.equals("!~")?"~":"=")); // change comparator to the non-negated counterpart
+         } 
+         return advancedStringMatches(textvalue,comparator);      
      }
      return false;
   }   
@@ -1067,7 +1070,10 @@ private class Filter extends RowFilter<Object,Object> {
     public void updateFilter() {
        filterString=filterTextfield.getText();   
        if (filterString!=null) filterString=filterString.trim().toLowerCase();
-       if (filterString.isEmpty()) filterString=null;
+       if (filterString.isEmpty()) {
+           filterString=null;
+           structuredStringFilter=null;
+       }
        else {
           if (filterString.indexOf('|')<0 && filterString.indexOf(',')<0 && filterString.indexOf('&')<0) {structuredStringFilter=null;return;} // not a boolean search
           else {
@@ -1081,25 +1087,47 @@ private class Filter extends RowFilter<Object,Object> {
        }
     }
     
-   /** The 'value' is checked against a set of filters and a value of TRUE is
-     * returned if the value satisfies the filters. 
-     * The filter (which is global) is a 2D list of Strings. 
-     * To return TRUE, the 'value' must match either of the filters at the outer level (OR).
-     * To match a filter at the outer level the 'value' must match all of the filters 
-     * at the inner level (AND)
-     */
-   private boolean advancedStringContains(String value) {       
-       if (structuredStringFilter==null) return (filterString==null)?true:value.contains(filterString);
-       for (int i=0;i<structuredStringFilter.length;i++) { // for each OR-level
-           String[] ands=structuredStringFilter[i]; // must match all entries in this         
-           if (ands!=null && ands.length>0) {
-              int matches=0;
-              for (String string:ands) if (string.isEmpty() || value.contains(string)) matches++;
-              if (matches==ands.length) return true; // matching all AND entries 
-           }
+  /** The 'value' is checked against a set of filters and a value of TRUE is
+    * returned if the value satisfies the filters according to the chosen comparator 
+    * The filter (which is global to this method) is a 2D list of Strings, e.g: [ [X and X and X] or [X] or [X and X] ]
+    * To return TRUE, the 'value' must match either of the filters at the outer level (OR).
+    * To match a filter at the outer level the 'value' must match all of the filters at the inner level (AND)
+    */   
+    private boolean advancedStringMatches(String value, String comparator) {         
+        if (structuredStringFilter==null) return (filterString==null)?true:stringMatches(value,filterString,comparator);
+        for (int i=0;i<structuredStringFilter.length;i++) { // for each OR-level
+            String[] ands=structuredStringFilter[i]; // must match all entries in this         
+            if (ands!=null && ands.length>0) {
+               int matches=0;
+               for (String string:ands) if (string.isEmpty() || stringMatches(value,string,comparator)) matches++;
+               if (matches==ands.length) return true; // matching all AND entries 
+            }
+        }
+        return false;
+    }     
+   
+   /**
+    * Returns TRUE if the relationship between the value and the target matches according to the comparator
+    * Both value and target are expected to be in lowercase (unless they are NULL)
+    * @param value
+    * @param target
+    * @param operator
+    * @return 
+    */
+   private boolean stringMatches(String value, String target, String comparator) {
+       if (value==null || target==null) return false; // ?!
+       switch(comparator) {
+           case "=" : return value.equalsIgnoreCase(target);
+           case "<>": return !value.equalsIgnoreCase(target);
+           case "~" : return value.contains(target);
+           case "!~": return !value.contains(target);
+           case "<" : return value.compareTo(target)<0;
+           case ">" : return value.compareTo(target)>0;
+           case "<=": return value.compareTo(target)<=0;
+           case ">=": return value.compareTo(target)>=0;                          
        }
        return false;
-   }    
+   }   
     
 } // end class Filter    
 
