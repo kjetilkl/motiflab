@@ -23,9 +23,10 @@ import motiflab.engine.datasource.ExtendedFileSystemView;
 public class MotifLabFileChooser extends JFileChooser {
     
     public MotifLabFileChooser(File directory, MotifLabEngine engine) {
-        super(ExtendedFileSystemView.getFileSystemView(engine.getDataRepositories()));
-        ExtendedFileSystemView newfilesystem=(ExtendedFileSystemView)getFileSystemView();
-        this.setFileView(newfilesystem.getFileView()); // this fixes the icons      
+        // --- I experienced problems with the ExtendedFileSystemView in Windows10 (only the Desktop was showing, but not other drives), so I disabled it ---
+        // super(ExtendedFileSystemView.getFileSystemView(engine.getDataRepositories()));
+        // ExtendedFileSystemView newfilesystem=(ExtendedFileSystemView)getFileSystemView();
+        // this.setFileView(newfilesystem.getFileView()); // this fixes the icons      
         this.setCurrentDirectory(directory);
         // add possibility to delete files by pressing the DELETE key
         sun.swing.FilePane filepane=(sun.swing.FilePane)findComponent(this,sun.swing.FilePane.class);
