@@ -3196,7 +3196,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                         log.insertString(pos, msg+"\n", null);
                         if (useColorsInLog) {
                             javax.swing.text.StyleContext sc = javax.swing.text.StyleContext.getDefaultStyleContext();
-                            javax.swing.text.AttributeSet aset = sc.addAttribute(javax.swing.text.SimpleAttributeSet.EMPTY, javax.swing.text.StyleConstants.Foreground, (msg.startsWith("NOTE:"))?Color.ORANGE:Color.RED);
+                            javax.swing.text.AttributeSet aset = sc.addAttribute(javax.swing.text.SimpleAttributeSet.EMPTY, javax.swing.text.StyleConstants.Foreground, Color.RED);
                             log.setCharacterAttributes(pos,msg.length(),aset, false);                                
                         }
                    } catch (Exception e) {System.err.println("ERROR: Unable to write message in LogPanel: '"+msg+"'");}
@@ -3220,9 +3220,12 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                         StyledDocument log=logPanel.getStyledDocument();
                         int pos=log.getLength();
                         log.insertString(pos, msg+"\n", null);
-                        if (useColorsInLog && (msg.startsWith("NOTE:") || msg.contains("ERROR:"))) {
+                        if (useColorsInLog && (msg.startsWith("NOTE:") || msg.contains("WARNING:") || msg.contains("Warning:") || msg.contains("ERROR:") || msg.contains("Error:"))) {
+                            Color usecolor=Color.RED;
+                            if (msg.startsWith("NOTE:")) usecolor=Color.BLUE;
+                            else if (msg.contains("WARNING:") || msg.contains("Warning:")) usecolor=Color.MAGENTA;
                             javax.swing.text.StyleContext sc = javax.swing.text.StyleContext.getDefaultStyleContext();
-                            javax.swing.text.AttributeSet aset = sc.addAttribute(javax.swing.text.SimpleAttributeSet.EMPTY, javax.swing.text.StyleConstants.Foreground, (msg.startsWith("NOTE:"))?Color.ORANGE:Color.RED);
+                            javax.swing.text.AttributeSet aset = sc.addAttribute(javax.swing.text.SimpleAttributeSet.EMPTY, javax.swing.text.StyleConstants.Foreground, usecolor);
                             log.setCharacterAttributes(pos,msg.length(),aset, false);       
                         }                                            
                    } catch (Exception e) {System.err.println("ERROR: Unable to write message in LogPanel: '"+msg+"'");}
