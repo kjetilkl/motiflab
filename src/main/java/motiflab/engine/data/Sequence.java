@@ -130,7 +130,7 @@ public final class Sequence extends Data implements BasicDataType {
         tooltip.append(")<br>Sequence at ");
         tooltip.append(getRegionAsStringForPresentation());
         tooltip.append("&nbsp;&nbsp;&nbsp;&nbsp;(");
-        tooltip.append(getSize());
+        tooltip.append(MotifLabEngine.groupDigitsInNumber(getSize()));
         tooltip.append(" bp)");
         String genename=getGeneName();
         if (genename==null) {
