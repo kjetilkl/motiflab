@@ -220,6 +220,7 @@ public final class MotifLabGUI extends FrameView implements MotifLabClient, Data
     private String autoSaveSessionSetting="Never";
     private int loggerLevel=2; // 1=show only errors, 2=show normal messages, 3=show execution log, 4=show every status update
     private int stackDumpLevel=0; // 0=no stack dumps, 1=stack dump critical errors, 2=stack dump all errors
+    private boolean useColorsInLog=true;
 
     private final static NumberFormat normalNumberFormat=NumberFormat.getInstance();
     private final static NumberFormat scientificNumberFormat=new DecimalFormat("0.#####E0");
@@ -3191,7 +3192,13 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
               public void run() {
                    try {
                         StyledDocument log=logPanel.getStyledDocument();
-                        log.insertString(log.getLength(), msg+"\n", null);
+                        int pos=log.getLength();
+                        log.insertString(pos, msg+"\n", null);
+                        if (useColorsInLog) {
+                            javax.swing.text.StyleContext sc = javax.swing.text.StyleContext.getDefaultStyleContext();
+                            javax.swing.text.AttributeSet aset = sc.addAttribute(javax.swing.text.SimpleAttributeSet.EMPTY, javax.swing.text.StyleConstants.Foreground, (msg.startsWith("NOTE:"))?Color.ORANGE:Color.RED);
+                            log.setCharacterAttributes(pos,msg.length(),aset, false);                                
+                        }
                    } catch (Exception e) {System.err.println("ERROR: Unable to write message in LogPanel: '"+msg+"'");}
               } // end run()
           }; // end Runnable
@@ -3211,7 +3218,13 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
              public void run() {
                    try {
                         StyledDocument log=logPanel.getStyledDocument();
-                        log.insertString(log.getLength(), msg+"\n", null);
+                        int pos=log.getLength();
+                        log.insertString(pos, msg+"\n", null);
+                        if (useColorsInLog && (msg.startsWith("NOTE:") || msg.contains("ERROR:"))) {
+                            javax.swing.text.StyleContext sc = javax.swing.text.StyleContext.getDefaultStyleContext();
+                            javax.swing.text.AttributeSet aset = sc.addAttribute(javax.swing.text.SimpleAttributeSet.EMPTY, javax.swing.text.StyleConstants.Foreground, (msg.startsWith("NOTE:"))?Color.ORANGE:Color.RED);
+                            log.setCharacterAttributes(pos,msg.length(),aset, false);       
+                        }                                            
                    } catch (Exception e) {System.err.println("ERROR: Unable to write message in LogPanel: '"+msg+"'");}
              } // end run()
           }; // end Runnable
