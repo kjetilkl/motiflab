@@ -125,13 +125,15 @@ public class DataFormat_DRIMust extends DataFormat {
            int count=0;
            if (input.isEmpty()) return collection; // no motifs found
            ArrayList<String> sites=null;
+           int lineNumber=0;
            for (String line:input) {
+               lineNumber++;
                if (line.matches("mHG score = N.+")) { // marks start of motif
-                    if (sites!=null) throw new ParseError("Unexpected motif header found");
+                    if (sites!=null) throw new ParseError("Unexpected motif header found", lineNumber);
                     else sites=new ArrayList<String>();
                }
                if (line.matches("^[AGCT]+$")) {
-                   if (sites==null) throw new ParseError("Motif header not found");
+                   if (sites==null) throw new ParseError("Motif header not found", lineNumber);
                    else sites.add(line);
                }                      
                if (line.matches("motif\\s+mHG_score\\s+corrected_score.+")) { // Marks end of motif 
@@ -143,7 +145,7 @@ public class DataFormat_DRIMust extends DataFormat {
                       double[][] matrix=Motif.getPWMfromSites(sequences);
                       newMotif.setMatrix(matrix);
                    } catch (SystemError e) {
-                       throw new ParseError(e.getMessage());
+                       throw new ParseError(e.getMessage(), lineNumber);
                    }
                    collection.addMotifToPayload(newMotif);
                    sites=null;
@@ -179,6 +181,7 @@ public class DataFormat_DRIMust extends DataFormat {
           int count=1;
           String motiftype="motif"+count;
           for (int i=0;i<input.size();i++) {
+               int lineNumber=i+1;
                String line=input.get(i);
                if (line.startsWith("******")) { // separator between motifs
                    count++;
@@ -189,13 +192,13 @@ public class DataFormat_DRIMust extends DataFormat {
                        String inSet=matcher.group(7);
                        if (inSet!=null && inSet.equals("not_in_target_set")) continue; // skip those that are not marked as "in_target_set" (these were not included in the PWM)
                        String bindingpattern=matcher.group(1);
-                       int sequenceIndex=getIntegerNumber(matcher.group(2)); // 
+                       int sequenceIndex=getIntegerNumber(matcher.group(2), lineNumber); // 
                        String strandString=matcher.group(3);
                        int strand=Region.INDETERMINED;
                        if (strandString.equals("+")) strand=Region.DIRECT;
                        else if (strandString.equals("-")) strand=Region.REVERSE;
-                       int startPos=getIntegerNumber(matcher.group(4)); // this is 0-offset
-                       int endPos=getIntegerNumber(matcher.group(5)); // this is 0-offset
+                       int startPos=getIntegerNumber(matcher.group(4), lineNumber); // this is 0-offset
+                       int endPos=getIntegerNumber(matcher.group(5), lineNumber); // this is 0-offset
                        
                        if (strand==Region.REVERSE) bindingpattern=MotifLabEngine.reverseSequence(bindingpattern);
                        RegionSequenceData regionsequence=sequenceList.get(sequenceIndex);
@@ -210,11 +213,11 @@ public class DataFormat_DRIMust extends DataFormat {
     }             
     
     
-    private int getIntegerNumber(String string) throws ParseError{
+    private int getIntegerNumber(String string, int lineNumber) throws ParseError{
         try {
            return Integer.parseInt(string); 
         } catch (NumberFormatException e) {
-            throw new ParseError("Unable to parse expected integer number: "+string);
+            throw new ParseError("Unable to parse expected integer number: "+string, lineNumber);
         }
     }
 }

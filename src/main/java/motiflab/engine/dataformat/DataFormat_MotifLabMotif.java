@@ -377,7 +377,7 @@ public class DataFormat_MotifLabMotif extends DataFormat {
         if (target==null) target=new MotifCollection("MotifCollection");
         int first=0; int last=0; int size=input.size();
         if (size<1) return target; //throw new ParseError("Empty input for MotifCollection");
-        if (!(input.get(0).startsWith("#MotifLabMotif") || input.get(0).startsWith("#PriorsEditorMotif"))) throw new ParseError("Unrecognized header for MotifLab Motif format: "+input.get(0));
+        if (!(input.get(0).startsWith("#MotifLabMotif") || input.get(0).startsWith("#PriorsEditorMotif"))) throw new ParseError("Unrecognized header for MotifLab Motif format: "+input.get(0), 1);
         int count=0;
         for (int i=1;i<size;i++) { // 
             String line=input.get(i).trim();

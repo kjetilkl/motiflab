@@ -224,17 +224,18 @@ public class DataFormat_Consensus extends DataFormat {
     
     private DNASequenceData parseSingleSequenceInput(ArrayList<String> input, DNASequenceData target, String useorientation) throws ParseError, InterruptedException {
         String line=input.get(0);
+        int linenumber=1;
 
         String[] parts=getHeaderAndSequence(line);
-        if (parts==null) throw new ParseError("Unable to parse line: "+line);
+        if (parts==null) throw new ParseError("Unable to parse line: "+line, linenumber);
         String header=parts[0];
         String buffer=parts[1];
         Object[] headerparts=getSequenceInfoFromHeader(header);
-        if (headerparts==null) throw new ParseError("Unable to parse header: "+header);   
+        if (headerparts==null) throw new ParseError("Unable to parse header: "+header, linenumber);   
         String targetName=(String)headerparts[0];      
-        if (targetName==null) throw new ParseError("Unable to extract sequence name from header: "+line);
+        if (targetName==null) throw new ParseError("Unable to extract sequence name from header: "+line, linenumber);
         if (targetName.equals(target.getSequenceName())) {
-            if (buffer.length()!=target.getSize()) throw new ParseError("Length of Consensus sequence for "+target.getSequenceName()+" ("+buffer.length()+" bp) does not match expected length ("+target.getSize()+" bp)");
+            if (buffer.length()!=target.getSize()) throw new ParseError("Length of Consensus sequence for "+target.getSequenceName()+" ("+buffer.length()+" bp) does not match expected length ("+target.getSize()+" bp)", linenumber);
             if (useorientation.equals("Reverse") || ((useorientation.equals("Relative")||useorientation.equals("From Sequence")||useorientation.equals("From Gene")) && target.getStrandOrientation()==Sequence.REVERSE)) buffer=MotifLabEngine.reverseSequence(buffer);
             for (int i=0;i<buffer.length();i++) {
                 target.setValueAtRelativePosition(i, buffer.charAt(i));
@@ -245,26 +246,26 @@ public class DataFormat_Consensus extends DataFormat {
     
 
     private DNASequenceDataset parseMultipleSequenceInput(ArrayList<String> input, DNASequenceDataset target, String useorientation, ExecutableTask task) throws ParseError, InterruptedException {
-        int lines=0;
+        int lineNumber=0;
         for (String line:input) {
             line=line.trim();
-            if (line.isEmpty()) continue;            
-            lines++;
-            if (lines%3==0) { // yield every 3 sequences (arbitrary choice)
+            lineNumber++;
+            if (line.isEmpty()) continue;                       
+            if (lineNumber%3==0) { // yield every 3 sequences (arbitrary choice)
               if (task!=null) task.checkExecutionLock(); // checks to see if this task should suspend execution
               if (Thread.interrupted() || (task!=null && task.getStatus().equals(ExecutableTask.ABORTED))) throw new InterruptedException();                
             }   
             String[] parts=getHeaderAndSequence(line);
-            if (parts==null) throw new ParseError("Unable to parse line: "+line);
+            if (parts==null) throw new ParseError("Unable to parse line: "+line, lineNumber);
             String header=parts[0];
             String buffer=parts[1];           
             Object[] headerparts=getSequenceInfoFromHeader(header);
-            if (headerparts==null) throw new ParseError("Unable to parse header: "+header);   
+            if (headerparts==null) throw new ParseError("Unable to parse header: "+header, lineNumber);   
             String targetName=(String)headerparts[0];      
-            if (targetName==null) throw new ParseError("Unable to extract sequence name from header: "+line);
+            if (targetName==null) throw new ParseError("Unable to extract sequence name from header: "+line, lineNumber);
             DNASequenceData targetseq=(DNASequenceData)target.getSequenceByName(targetName);
             if (targetseq==null) continue; // unknown sequence            
-            if (buffer.length()!=targetseq.getSize()) throw new ParseError("Length of Consensus sequence for '"+targetName+"' ("+buffer.length()+" bp) does not match expected length ("+targetseq.getSize()+" bp)");
+            if (buffer.length()!=targetseq.getSize()) throw new ParseError("Length of Consensus sequence for '"+targetName+"' ("+buffer.length()+" bp) does not match expected length ("+targetseq.getSize()+" bp)", lineNumber);
             if (useorientation.equals("Reverse") || ((useorientation.equals("Relative")||useorientation.equals("From Sequence")||useorientation.equals("From Gene")) && targetseq.getStrandOrientation()==Sequence.REVERSE)) buffer=MotifLabEngine.reverseSequence(buffer);
             for (int i=0;i<buffer.length();i++) {
                 targetseq.setValueAtRelativePosition(i, buffer.charAt(i));
@@ -273,106 +274,6 @@ public class DataFormat_Consensus extends DataFormat {
         return target;
     }    
 
-//    private SequenceCollection parseInputAsSequenceCollection(ArrayList<String> input, SequenceCollection target, ParameterSettings settings, ExecutableTask task) throws ParseError, InterruptedException {
-//         DNASequenceDataset dnaset=parseNewSequenceDatasetFromFASTA(input, "temp", settings, false);
-//         return engine.extractSequencesFromFeatureDataset(dnaset, target);
-//    }
-//    /** 
-//     * This will parse and return a DNASequenceDataset without any existing Sequence objects to match the read data against
-//     * @param rename If TRUE the method will rename any sequences which does not have legal names.
-//     *               Illegal character in the sequencename will be replaced by underscores, e.g. "YMR173W-A" will be renamed to "YMR173W_A"
-//     */
-//    public DNASequenceDataset parseNewSequenceDatasetFromFASTA(ArrayList<String> input, String datasetname, ParameterSettings settings, boolean rename) throws ParseError, InterruptedException {
-//        if (input.size()<1) throw new ParseError("Empty input document");
-//        String headerline=input.get(0);
-//        if (!(headerline.startsWith(">"))) throw new ParseError("Unrecognized header for FASTA format: "+headerline);       
-//        String useorientation;
-//        if (settings!=null) {
-//           try {
-//              Parameter[] defaults=getParameters();
-//              useorientation=(String)settings.getResolvedParameter(PARAMETER_STRAND_ORIENTATION,defaults,engine);          
-//           } catch (Exception ex) {
-//              throw new ParseError("An error occurred during parsing:"+ex.getMessage());
-//           }
-//        } else {
-//            useorientation=(String)getDefaultValueForParameter(PARAMETER_STRAND_ORIENTATION);
-//        }
-//        DNASequenceDataset target=new DNASequenceDataset(datasetname);
-//        int first=-1; int last=0; int size=input.size();
-//        ArrayList<int[]> startandstop=new ArrayList<int[]>();
-//        for (int i=0;i<size;i++) {
-//            String line=input.get(i).trim();
-//            if (line.startsWith(">")) {
-//                if (first<0) {
-//                    first=i;
-//                } else {
-//                    last=i;
-//                    startandstop.add(new int[]{first,last});
-//                    first=i;
-//                    last=0;
-//                }
-//            }
-//        }
-//        if (first>=0) {
-//            startandstop.add(new int[]{first,size});
-//        }
-//        int counter=0;
-//        if (first<0) return target; // sequence not found in file
-//        for (int[] pair:startandstop) {
-//            int start=pair[0]; int end=pair[1];
-//            if (end<=start+1) continue; // no sequence?
-//            counter++;
-//            Object[] info=getSequenceInfoFromHeader(input.get(start));
-//            String sequencename=(String)info[0];
-//            if (sequencename.indexOf(' ')>0) {
-//                sequencename=sequencename.substring(0,sequencename.indexOf(' '));
-//            }
-//            //if (sequencename==null) throw new ParseError("Unable to extract sequence name from header: "+input.get(start));
-//            if (sequencename==null) sequencename="Sequence"+counter;
-//            else {
-//                if (sequencename.matches(".*[^a-zA-Z_0-9].*") && rename) { // sequencename contains illegal characters
-//                    if (engine.autoCorrectSequenceNames()) {
-//                        String newsequencename=MotifLabEngine.convertToLegalName(sequencename);
-//                        engine.logMessage("NOTE: sequence '"+sequencename+"' was renamed to '"+newsequencename+"'");
-//                        sequencename=newsequencename;                        
-//                    } else throw new ParseError("The sequence name '"+sequencename+"' contains illegal characters. Note that it is possible to turn on auto-correct from the Config->Options menu.");
-//                }
-//                String error=engine.checkSequenceNameValidity(sequencename, false);
-//                if (error!=null) throw new ParseError("Invalid name for sequence '"+sequencename+"' : "+error);
-//            }
-//            if (target.getSequenceByName(sequencename)!=null) throw new ParseError("The file contains multiple sequences named '"+sequencename+"'");
-//            int expectedlength=0;
-//            if (info[2]!=null && info[3]!=null) {
-//                int seqend=(Integer)info[3];
-//                int seqstart=(Integer)info[2];
-//                expectedlength=seqend-seqstart+1;
-//            }
-//            int sequenceOrientation=Sequence.DIRECT;
-//            if  (info[4]!=null) sequenceOrientation=(Integer)info[4];
-//            StringBuilder complete=new StringBuilder();
-//            for (int j=start+1;j<end;j++) complete.append(input.get(j).trim());
-//            if (expectedlength>0 && expectedlength!=complete.length()) throw new ParseError("Length of Consensus sequence for "+sequencename+" ("+complete.length()+" bp) does not match expected length ("+expectedlength+" bp)");
-//            if (useorientation.equals("Reverse") || ((useorientation.equals("Relative")||useorientation.equals("From Sequence")||useorientation.equals("From Gene")) && sequenceOrientation==Sequence.REVERSE)) complete=MotifLabEngine.reverseSequence(complete);
-//            char[] buffer=new char[complete.length()];
-//            for (int  i=0;i<complete.length();i++) {
-//                buffer[i]=complete.charAt(i);
-//            } 
-//            int startPos=1;
-//            int endPos=complete.length();
-//            String chromosome="?";
-//            int orientation=Sequence.DIRECT;
-//            
-//            if (info[1]!=null) chromosome=(String)info[1]; 
-//            if (info[2]!=null) startPos=(Integer)info[2]; 
-//            if (info[2]!=null && info[3]!=null) endPos=(Integer)info[3]; 
-//            if (info[4]!=null) orientation=(Integer)info[4]; 
-//            DNASequenceData seq=new DNASequenceData(sequencename, sequencename, chromosome, startPos, endPos, null, null, orientation, buffer);
-//            if (info[5]!=null) seq.setTemporaryOrganism((Integer)info[5]);
-//            if (info[6]!=null) seq.setTemporaryBuild((String)info[6]);
-//            target.addSequence(seq);            
-//        }
-//        return target;
-//    }        
     
     private String[] getHeaderAndSequence(String inputstring) {
         Pattern pattern=Pattern.compile("^(.*?\\S)\\s+\\\\(\\w+)\\\\");

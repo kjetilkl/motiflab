@@ -111,13 +111,15 @@ public class DataFormat_MDscan extends DataFormat {
            double[][] matrix=null; // first is position, second is base (4)
            Pattern motifheader=Pattern.compile("Motif (\\d+): Wid (\\d+); Score ([0-9\\.]+); Sites (\\d+); Con (\\w+); RCon (\\w+)");
            Pattern matrixline=Pattern.compile("(\\d+)\\s+([0-9\\.]+)\\s+([0-9\\.]+)\\s+([0-9\\.]+)\\s+([0-9\\.]+)\\s+\\w\\s+\\w\\s+\\w\\s+\\w");
+           int lineNumber=0;
            try {
                for (String line:input) {
+                   lineNumber++;
                    if (line.startsWith("Motif")) {
                        Matcher matcher=motifheader.matcher(line);  
                        if (matcher.matches()) {
                            if (motifnumber>0) { // register previous motif                               
-                               if (motifsize!=found) throw new ParseError("Expected "+motifsize+" matrix lines for motif#"+motifnumber+" but found only "+found);
+                               if (motifsize!=found) throw new ParseError("Expected "+motifsize+" matrix lines for motif#"+motifnumber+" but found only "+found, lineNumber);
                                Motif newMotif=new Motif("motif_"+motifnumber);
                                newMotif.setMatrix(matrix);
                                collection.addMotifToPayload(newMotif);
@@ -140,7 +142,7 @@ public class DataFormat_MDscan extends DataFormat {
                        }
                    }               
                }
-           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage());}
+           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage(), lineNumber);}
            // add last motif
            if (motifsize!=found) throw new ParseError("Expected "+motifsize+" matrix lines for motif#"+motifnumber+" but found only "+found);
            else { // register previous motif
@@ -164,18 +166,20 @@ public class DataFormat_MDscan extends DataFormat {
            int found=0;
            Pattern motifheader=Pattern.compile("Motif (\\d+): Wid (\\d+); Score ([0-9\\.]+); Sites (\\d+); Con (\\w+); RCon (\\w+)");
            Pattern siteline=Pattern.compile(">(\\S+)\\s+Len\\s+\\d+\\s+Site\\s+\\S+\\s+([rf])\\s+(\\d+)");
+           int lineNumber=0;
            try {
                for (int i=0;i<input.size()-1;i++) {
                    String line=input.get(i);
+                   lineNumber++;
                    if (line.startsWith("Motif")) {
                        Matcher matcher=motifheader.matcher(line);  
                        if (matcher.matches()) {
-                           if (motifnumber>0 && sites!=found) throw new ParseError("Expected "+sites+" sites for motif#"+motifnumber+" but found only "+found);
+                           if (motifnumber>0 && sites!=found) throw new ParseError("Expected "+sites+" sites for motif#"+motifnumber+" but found only "+found, lineNumber);
                            motifnumber=Integer.parseInt(matcher.group(1));
                            motifsize=Integer.parseInt(matcher.group(2));
                            sites=Integer.parseInt(matcher.group(4));
                            found=0;
-                       } else throw new ParseError("Unable to parse line according to expectations:\n"+line);
+                       } else throw new ParseError("Unable to parse line according to expectations:\n"+line, lineNumber);
                    } else if (line.startsWith(">")) {
                        Matcher matcher=siteline.matcher(line);  
                        if (matcher.matches()) {
@@ -193,10 +197,10 @@ public class DataFormat_MDscan extends DataFormat {
                            if (orientation==Region.REVERSE) bindingpattern=MotifLabEngine.reverseSequence(bindingpattern);
                            newsite.setProperty("sequence", bindingpattern); //
                            sequence.addRegion(newsite);                           
-                       } else throw new ParseError("Unable to parse line according to expectations:\n"+line);
+                       } else throw new ParseError("Unable to parse line according to expectations:\n"+line, lineNumber);
                    }               
                }
-           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage());}
+           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage(), lineNumber);}
 
           if (sites!=found) throw new ParseError("Expected "+sites+" sites for motif#"+motifnumber+" but found only "+found);
           return regiondataset;

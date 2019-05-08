@@ -240,12 +240,14 @@ public class DataFormat_Priority extends DataFormat {
         int last=input.size();
         int first=-1;
         int i=0;
+        int lineNumber=0;
         for (String line:input) {
+            lineNumber++;
             if (line.startsWith(">")) {
                 String targetName=getSequenceNameFromHeader(line);
-                if (targetName==null) throw new ParseError("Unable to extract sequence name from header: "+line);
+                if (targetName==null) throw new ParseError("Unable to extract sequence name from header: "+line, lineNumber);
                 String error=engine.checkSequenceNameValidity(targetName, false);
-                if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+targetName+"' : "+error);                  
+                if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+targetName+"' : "+error, lineNumber);                  
                 if (targetName.equals(target.getSequenceName())) first=i;
                 else {
                     if (first<0) continue; // sequence not found yet

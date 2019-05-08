@@ -446,8 +446,8 @@ public class DataFormat_GFF extends DataFormat {
             }            
             if (line.startsWith("#") || line.isEmpty()) continue; // GFF comment line
             HashMap<String,Object> map=null;
-            if (formatString!=null) map=parseSingleLineFromPattern(line,formatString);
-            else map=parseSingleLineInStandardFormat(line);
+            if (formatString!=null) map=parseSingleLineFromPattern(line,formatString, count);
+            else map=parseSingleLineInStandardFormat(line, count);
             // check that start<=end in the map. Else assume reverse strand
             if (map.get("START") instanceof Integer && map.get("END") instanceof Integer) {
                 int start=(Integer)map.get("START");
@@ -469,8 +469,8 @@ public class DataFormat_GFF extends DataFormat {
             RegionSequenceData targetSequence=null;
             // is this region a modulemotif site? If so, add it to its parent module site
             if (includeModuleMotifs && motiformodule!=null && motiformodule.equalsIgnoreCase("motif")) {
-                if (moduleID==null || moduleID.isEmpty()) throw new ParseError("Missing 'module_identifier' attribute for motif site");
-                if (modulemotifname==null || modulemotifname.isEmpty()) throw new ParseError("Missing 'module_motif' attribute for motif site");
+                if (moduleID==null || moduleID.isEmpty()) throw new ParseError("Missing 'module_identifier' attribute for motif site", count);
+                if (modulemotifname==null || modulemotifname.isEmpty()) throw new ParseError("Missing 'module_motif' attribute for motif site", count);
                 Region moduleregion=modules.get(moduleID);
                 if (moduleregion!=null) addRegionToTarget(moduleregion, map, offsetString, relativeoffset, orientation);
                 // else throw new ParseError("Unrecognized module_identifier: " + moduleID + ". (note that module sites must be listed before their constituent motif sites");
@@ -628,10 +628,10 @@ public class DataFormat_GFF extends DataFormat {
     }
     
     /** parses a single line in a GFF-file and returns a HashMap with the different properties (with values as strings!) according to the capturing groups in the formatString */
-    private HashMap<String,Object> parseSingleLineInStandardFormat(String line) throws ParseError {
+    private HashMap<String,Object> parseSingleLineInStandardFormat(String line, int lineNumber) throws ParseError {
         HashMap<String,Object> result=new HashMap<String,Object>();
         String[] fields=line.split("\t");
-        if (fields.length<8) throw new ParseError("Expected at least 8 fields per line in GFF-format. Got "+fields.length+":\n"+line);
+        if (fields.length<8) throw new ParseError("Expected at least 8 fields per line in GFF-format. Got "+fields.length+":\n"+line, lineNumber);
         // engine.logMessage("Parsed standard: "+line+" =>"+fields[0]);
         result.put("SEQUENCENAME",fields[0]);
         result.put("FEATURE",fields[1]);
@@ -639,20 +639,20 @@ public class DataFormat_GFF extends DataFormat {
         result.put("SOURCE",fields[1]); // this is correct
         try {
             result.put("START",Integer.parseInt(fields[3]));        
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage(), lineNumber);}
         try {
             result.put("END",Integer.parseInt(fields[4]));        
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage(), lineNumber);}
         try {
             result.put("SCORE",Double.parseDouble(fields[5]));        
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage(), lineNumber);}
         
         result.put("STRAND",fields[6]);
         if (fields.length>=9) {
             String[] attributes=fields[8].split(";");
             for (String attribute:attributes) {
                 String[] pair=attribute.split("=",2);
-                if (pair.length!=2) throw new ParseError("Attribute not in recognized 'key=value' format: "+attribute); 
+                if (pair.length!=2) throw new ParseError("Attribute not in recognized 'key=value' format: "+attribute, lineNumber); 
                 String key=pair[0].trim();
                 if (key.equalsIgnoreCase("type")) key="TYPE";
                 String value=pair[1].trim();
@@ -664,7 +664,7 @@ public class DataFormat_GFF extends DataFormat {
     }
 
     /** parses a single line in a GFF-file and returns a HashMap with the different properties according to the capturing groups in the formatString */
-    private HashMap<String,Object> parseSingleLineFromPattern(String line, String formatString) throws ParseError {
+    private HashMap<String,Object> parseSingleLineFromPattern(String line, String formatString, int lineNumber) throws ParseError {
         HashMap<String,Object> result=new HashMap<String,Object>();
         //engine.logMessage("Parsed pattern: "+line);
         Pattern pattern=Pattern.compile("\\{(.+?)\\}"); // previously: compile("\\{([A-Z]+)\\}")
@@ -683,14 +683,14 @@ public class DataFormat_GFF extends DataFormat {
                String matchString=matcher.group(i);
                Object value;
                if (field.equals("START") || field.equals("END")) {
-                   try {value=Integer.parseInt(matchString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for "+field+": "+e.getMessage());}
+                   try {value=Integer.parseInt(matchString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for "+field+": "+e.getMessage(), lineNumber);}
                } else if (field.equals("SCORE")) {
-                   try {value=Double.parseDouble(matchString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for "+field+": "+e.getMessage());}           
+                   try {value=Double.parseDouble(matchString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for "+field+": "+e.getMessage(), lineNumber);}           
                } else value=getMotifPropertyValue(matchString);
                result.put(field,value);
                //engine.logMessage("  "+field+" => "+value.toString());
            } 
-        } else throw new ParseError("Unable to parse GFF line: "+line);
+        } else throw new ParseError("Unable to parse GFF line: "+line, lineNumber);
 
         return result;
     }

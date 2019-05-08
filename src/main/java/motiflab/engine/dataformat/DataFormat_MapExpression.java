@@ -179,7 +179,9 @@ public class DataFormat_MapExpression extends DataFormat {
         if (key_group==value_group) throw new ParseError("The '"+KEY_GROUP+"' parameter can not have the same value as the '"+VALUE_GROUP+"' parameter");
         
         Pattern pattern=Pattern.compile(expression);
+        int lineNumber=0;
         for (String line:input) {
+            lineNumber++;
             //if (line.startsWith("#")) continue; // skip comment lines
             line=line.trim();
             Matcher matcher=pattern.matcher(line);
@@ -192,7 +194,7 @@ public class DataFormat_MapExpression extends DataFormat {
                      if (target instanceof SequenceNumericMap) {
                         key=convertIllegalSequenceNamesIfNecessary(key, false);
                         String error=engine.checkSequenceNameValidity(key, false);
-                        if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+key+"' : "+error);                              
+                        if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+key+"' : "+error, lineNumber);                              
                      }                                                
                      ((DataMap)target).setValueFromString(key,valueString);
                 }

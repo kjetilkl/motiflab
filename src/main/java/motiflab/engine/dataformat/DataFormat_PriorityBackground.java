@@ -76,7 +76,7 @@ public class DataFormat_PriorityBackground extends DataFormat {
             String string=input.get(i);
             try {
                 values[i]=Double.parseDouble(string);
-            } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numerical value: "+string);}
+            } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numerical value: "+string, i+1);}
         }       
         BackgroundModel model=BackgroundModel.convertPlainFormatToBackground(values);
         model.rename(target.getName()); // the new model returned from the conversion above is called "temporary"

@@ -318,21 +318,21 @@ public class DataFormat_BED extends DataFormat {
             }
             if (count==1 && formatFromHeader) {
                 if (line.startsWith("#")) line=line.substring(1).trim();
-                else throw new ParseError("No header found on first line of BED file");
+                else throw new ParseError("No header found on first line of BED file", count);
                 if (line.contains("\t")) format=line.split("\\t");
                 else if (line.contains(",")) format=line.split("\\s*,\\s*");
-                else throw new ParseError("Header in BED file does not contain TAB or comma-separated fields");
-                if (!line.matches(".*\\b(?i:chr(omosome)?)\\b.*")) throw new ParseError("Missing required 'chromosome' field in header");             
-                if (!line.matches(".*\\b(?i:start)\\b.*")) throw new ParseError("Missing required 'start' field in header");             
-                if (!line.matches(".*\\b(?i:end)\\b.*")) throw new ParseError("Missing required 'end' field in header");             
+                else throw new ParseError("Header in BED file does not contain TAB or comma-separated fields", count);
+                if (!line.matches(".*\\b(?i:chr(omosome)?)\\b.*")) throw new ParseError("Missing required 'chromosome' field in header", count);             
+                if (!line.matches(".*\\b(?i:start)\\b.*")) throw new ParseError("Missing required 'start' field in header", count);             
+                if (!line.matches(".*\\b(?i:end)\\b.*")) throw new ParseError("Missing required 'end' field in header", count);             
                 continue;
             }
             else if (line.startsWith("#") || line.isEmpty()) continue; // assume comment line
             HashMap<String,Object> map=parseSingleLine(line,startpos,exclusiveEnd, format);
             String regionchromosome=(String)map.get("CHROMOSOME");
-            if (regionchromosome==null) throw new ParseError("Unable to parse coordinates for region. Missing chromosome");
-            if (!(map.containsKey("START"))) throw new ParseError("Unable to parse coordinates for region. Missing START position");
-            if (!(map.containsKey("END"))) throw new ParseError("Unable to parse coordinates for region. Missing END position");
+            if (regionchromosome==null) throw new ParseError("Unable to parse coordinates for region. Missing chromosome", count);
+            if (!(map.containsKey("START"))) throw new ParseError("Unable to parse coordinates for region. Missing START position", count);
+            if (!(map.containsKey("END"))) throw new ParseError("Unable to parse coordinates for region. Missing END position", count);
             int regionstart=(Integer)map.get("START"); // These should now be 1-indexed and end-inclusive (like GFF-coordinates)
             int regionend=(Integer)map.get("END");     // These should now be 1-indexed and end-inclusive (like GFF-coordinates)
             RegionSequenceData targetSequence=null;
@@ -340,17 +340,17 @@ public class DataFormat_BED extends DataFormat {
                targetSequence=(RegionSequenceData)target;
                if (!targetSequence.getChromosome().equals(regionchromosome)) continue;
                if (regionstart>targetSequence.getRegionEnd() || regionend<targetSequence.getRegionStart()) continue;
-               addRegionToTarget(targetSequence,map);
+               addRegionToTarget(targetSequence,map,count);
             } else if (target instanceof RegionDataset) { // add region to all applicable sequences (those that cover the genomic region)
                 ArrayList<FeatureSequenceData> sequences=((RegionDataset)target).getAllSequences();
                 for (FeatureSequenceData seq:sequences) {
                     targetSequence=(RegionSequenceData)seq;
                     if (!targetSequence.getChromosome().equals(regionchromosome)) continue;
                     if (regionstart>targetSequence.getRegionEnd() || regionend<targetSequence.getRegionStart()) continue;
-                    addRegionToTarget(targetSequence,map);
+                    addRegionToTarget(targetSequence,map,count);
                 }
             } else if (target instanceof DataSegment) {
-                addRegionToTarget(target,map);
+                addRegionToTarget(target,map,count);
             } else if (target instanceof SequenceCollection) {
                  String type=(String)map.get("TYPE");
                  String annotatedOrientation=(String)map.get("STRAND"); // the orientation in the BED file
@@ -366,7 +366,7 @@ public class DataFormat_BED extends DataFormat {
                         String newsequencename=MotifLabEngine.convertToLegalSequenceName(sequencename);
                         sequence.rename(newsequencename);                                 
                      }                      
-                     if (sequence.getSize()>engine.getMaxSequenceLength()) throw new ParseError("Warning: Size of sequence '"+sequencename+"' exceeds preset maximum ("+engine.getMaxSequenceLength()+" bp)");
+                     if (sequence.getSize()>engine.getMaxSequenceLength()) throw new ParseError("Warning: Size of sequence '"+sequencename+"' exceeds preset maximum ("+engine.getMaxSequenceLength()+" bp)", count);
                      else ((SequenceCollection)target).addSequenceToPayload(sequence);
                  }
                  // add additional user-defined properties
@@ -377,25 +377,25 @@ public class DataFormat_BED extends DataFormat {
                      ) continue; // these should already be set
                      // sequence.setPropertyValue(key,value); // this should be implemented somehow!
                  }
-            } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for BED dataformat: "+target.getClass().getSimpleName());
+            } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for BED dataformat: "+target.getClass().getSimpleName(), count);
         }        
         return target;
     }
 
 
-    private void addRegionToTarget(Object target, HashMap<String,Object> map) throws ParseError {
+    private void addRegionToTarget(Object target, HashMap<String,Object> map, int linenumber) throws ParseError {
         int start=0, end=0; // these are offset relative to the start of the parent sequence or segment
         int targetStart=0;
         if (target instanceof RegionSequenceData) {
             targetStart=((RegionSequenceData)target).getRegionStart();
         } else if (target instanceof DataSegment) {
             targetStart=((DataSegment)target).getSegmentStart();
-        } else throw new ParseError("Target object neither RegionSequenceData nor DataSegment in DataFormat_BED.addRegionToTarget():"+target.toString());
+        } else throw new ParseError("Target object neither RegionSequenceData nor DataSegment in DataFormat_BED.addRegionToTarget():"+target.toString(),linenumber);
         Object startValue=map.get("START");
-        if (startValue==null) throw new ParseError("Missing 'start' coordinate");
+        if (startValue==null) throw new ParseError("Missing 'start' coordinate",linenumber);
         if (startValue instanceof Integer) start=(Integer)startValue;        
         Object endValue=map.get("END");
-        if (startValue==null) throw new ParseError("Missing 'end' coordinate");
+        if (startValue==null) throw new ParseError("Missing 'end' coordinate",linenumber);
         if (endValue instanceof Integer) end=(Integer)endValue;
         double score=0;
         Object scoreValue=map.get("SCORE");

@@ -170,7 +170,9 @@ public class DataFormat_Jaspar extends DataFormat {
        String organisms=null;
        if (target==null) target=new Motif("unknown");
        String[] matrixlines=new String[4];
+       int lineNumber=0;
        for (String line:input) {
+           lineNumber++;
            line=line.trim();
            if (line.isEmpty()) continue;
            else if (line.startsWith(">")) {
@@ -223,7 +225,7 @@ public class DataFormat_Jaspar extends DataFormat {
         int first=-1; int last=0; int size=input.size();
         if (size<1) return target; // throw new ParseError("Empty input for MotifCollection");
         String headerline=input.get(0);
-        if (!(headerline.startsWith("#") || headerline.startsWith(">"))) throw new ParseError("Unrecognized header for Jaspar motif format: "+headerline);
+        if (!(headerline.startsWith("#") || headerline.startsWith(">"))) throw new ParseError("Unrecognized header for Jaspar motif format: "+headerline,1);
         int count=0;
         for (int i=0;i<size;i++) {
             String line=input.get(i).trim();

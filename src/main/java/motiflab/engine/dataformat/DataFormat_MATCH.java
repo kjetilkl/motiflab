@@ -351,9 +351,9 @@ public class DataFormat_MATCH extends DataFormat {
                 sequenceName=line.substring("Inspecting sequence ID".length());
                 sequenceName=sequenceName.trim();
             } else {
-                HashMap<String,Object> map=parseSingleLineInStandardFormat(line, sequenceName, pattern, useMatrixScore);
+                HashMap<String,Object> map=parseSingleLineInStandardFormat(line, sequenceName, pattern, useMatrixScore, count);
                 if (map==null) continue; // not a TFBS line. Ignore it
-                if (sequenceName==null) throw new ParseError("MATCH Format Error: Encountered TFBS line before Sequence line");
+                if (sequenceName==null) throw new ParseError("MATCH Format Error: Encountered TFBS line before Sequence line", count);
                 RegionSequenceData targetSequence=null;
                 //System.err.println("Parsed line: sequenceName="+sequenceName);
                 if (target instanceof RegionSequenceData) {
@@ -448,7 +448,7 @@ public class DataFormat_MATCH extends DataFormat {
 
 
     /** parses a single line in a MATCH-file and returns a HashMap with the different properties according to the capturing groups in the formatString */
-    private HashMap<String,Object> parseSingleLineInStandardFormat(String line, String sequenceName, Pattern pattern, boolean useMatrixScore) throws ParseError {
+    private HashMap<String,Object> parseSingleLineInStandardFormat(String line, String sequenceName, Pattern pattern, boolean useMatrixScore, int lineNumber) throws ParseError {
         Matcher matcher=pattern.matcher(line);
         if (matcher.find()) {
            //for (int i=0;i<=matcher.groupCount();i++) System.err.println("Group["+i+"]=>"+matcher.group(i));
@@ -469,13 +469,13 @@ public class DataFormat_MATCH extends DataFormat {
             
             try {
                 start=Integer.parseInt(startString);
-            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage());}
+            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage(), lineNumber);}
             try {
                 matrixscore=Double.parseDouble(matrixScoreString);
-            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage());}
+            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage(), lineNumber);}
             try {
                 corescore=Double.parseDouble(coreScoreString);
-            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage());}
+            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage(), lineNumber);}
 
             int end=0;
             int motifsize=sequenceMatchString.length();

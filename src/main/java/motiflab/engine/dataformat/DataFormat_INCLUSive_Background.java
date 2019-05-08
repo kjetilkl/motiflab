@@ -73,9 +73,10 @@ public class DataFormat_INCLUSive_Background extends DataFormat {
         int organism=0;
         if (target==null) target=new BackgroundModel("Background");
         if (input.isEmpty()) throw new ParseError("Empty input document");
-        if (!input.get(0).startsWith("#INCLUSive Background Model")) throw new ParseError("Unknown header for INCLUSive Background Model format: "+input.get(0));
+        if (!input.get(0).startsWith("#INCLUSive Background Model")) throw new ParseError("Unknown header for INCLUSive Background Model format: "+input.get(0),1);
         if (input.size()<=1) throw new ParseError("No background model data in input document");
         for (int i=1;i<input.size();i++) {
+            int lineNumber=i+1;
             String line=input.get(i).trim().toLowerCase();
                  if (line.isEmpty()) continue;
             else if (line.startsWith("#snf")) current=snfSegment;
@@ -86,7 +87,7 @@ public class DataFormat_INCLUSive_Background extends DataFormat {
                 try {
                    String orderText=split[1].trim();
                    order=Integer.parseInt(orderText);
-                } catch (Exception e) {throw new ParseError("Unable to parse expected numeric value for Model order: "+line);}
+                } catch (Exception e) {throw new ParseError("Unable to parse expected numeric value for Model order: "+line, lineNumber);}
             }
             else if (line.startsWith("#organism")) {
                 String[] split=line.split("=");
@@ -96,7 +97,7 @@ public class DataFormat_INCLUSive_Background extends DataFormat {
                 }
             }
             else if (!line.startsWith("#")) {
-                if (current==null) throw new ParseError("Unexpected line in input: "+line);
+                if (current==null) throw new ParseError("Unexpected line in input: "+line, lineNumber);
                 current.add(line);
             }           
         }

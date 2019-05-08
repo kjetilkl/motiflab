@@ -217,7 +217,7 @@ public class DataFormat_ModuleSearcher extends DataFormat {
                Thread.yield();
             }
             if (line.startsWith("#") || line.isEmpty()) continue; // GFF comment line
-            HashMap<String,Object> singleMotifSiteMap=parseSingleLineInStandardFormat(line);
+            HashMap<String,Object> singleMotifSiteMap=parseSingleLineInStandardFormat(line, count);
             String sequenceName=(String)singleMotifSiteMap.get("SEQUENCENAME");
             String moduleName=(String)singleMotifSiteMap.get("MODULE");
             String motifName=(String)singleMotifSiteMap.get("MOTIF");
@@ -336,23 +336,23 @@ public class DataFormat_ModuleSearcher extends DataFormat {
 
 
     /** parses a single line in a GFF-file and returns a HashMap with the different properties (with values as strings!) according to the capturing groups in the formatString */
-    private HashMap<String,Object> parseSingleLineInStandardFormat(String line) throws ParseError {
+    private HashMap<String,Object> parseSingleLineInStandardFormat(String line, int lineNumber) throws ParseError {
         HashMap<String,Object> result=new HashMap<String,Object>();
         String[] fields=line.split("\t");
-        if (fields.length!=9) throw new ParseError("Expected 9 fields per line in ModuleSearcher-format. Got "+fields.length+":\n"+line);
+        if (fields.length!=9) throw new ParseError("Expected 9 fields per line in ModuleSearcher-format. Got "+fields.length+":\n"+line, lineNumber);
         //System.err.println("Parsed standard: "+line+" =>"+fields[0]);
         result.put("SEQUENCENAME",fields[0]);
         result.put("FEATURE",fields[1]);
         result.put("SOURCE",fields[1]); // this is correct
         try {
             result.put("START",Integer.parseInt(fields[3]));
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage(), lineNumber);}
         try {
             result.put("END",Integer.parseInt(fields[4]));
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage(), lineNumber);}
         try {
             result.put("SCORE",Double.parseDouble(fields[5]));
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage(), lineNumber);}
 
         result.put("STRAND",fields[6]);
         String module="unknown";

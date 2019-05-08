@@ -135,25 +135,25 @@ public class DataFormat_ClusterBuster extends DataFormat {
                 totalclusters++;
                 singlemotifsread=false;
                 String[] elements=line.split(" ");
-                if (elements.length!=4) throw new ParseError("Unable to parse location-entry in ClusterBuster-format: '"+line+"'");
+                if (elements.length!=4) throw new ParseError("Unable to parse location-entry in ClusterBuster-format: '"+line+"'", count);
                 try {
                   currentClusterStart=Integer.parseInt(elements[1]);    
                   currentClusterStart--; // the positions are 1-indexed
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric start position in ClusterBuster-format: '"+line+"'");}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric start position in ClusterBuster-format: '"+line+"'", count);}
                 try {
                   currentClusterEnd=Integer.parseInt(elements[3]);
                   currentClusterEnd--; // the positions are 1-indexed
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric end position in ClusterBuster-format: '"+line+"'");}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric end position in ClusterBuster-format: '"+line+"'", count);}
             } else if (line.startsWith("Score:")) {
                 String[] elements=line.split(" ");
                 if (elements.length!=2) throw new ParseError("Unable to parse score-entry in ClusterBuster-format: '"+line+"'");
                 try {
                   currentClusterScore=Double.parseDouble(elements[1]);
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric score-value in ClusterBuster-format: '"+line+"'");}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric score-value in ClusterBuster-format: '"+line+"'", count);}
             } else if (line.indexOf('\t')>=0) { // Single motif line (only these contains tabulated data)
                 singlemotifsread=true;
                 String[] elements=line.split("\t");
-                if (elements.length!=6) throw new ParseError("Expected 6 columns of data for single motifs in ClusterBuster-format: '"+line+"'");
+                if (elements.length!=6) throw new ParseError("Expected 6 columns of data for single motifs in ClusterBuster-format: '"+line+"'", count);
                 String motifname=elements[0];
                 int motifstart=0;
                 int motifend=0;
@@ -161,14 +161,14 @@ public class DataFormat_ClusterBuster extends DataFormat {
                 try {
                   motifstart=Integer.parseInt(elements[1]);
                   motifstart--; // the positions are 1-indexed
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric start position for motif in ClusterBuster-format: '"+line+"'");}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric start position for motif in ClusterBuster-format: '"+line+"'", count);}
                 try {
                   motifend=Integer.parseInt(elements[2]);
                   motifend--;  // the positions are 1-indexed
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric end position for motif in ClusterBuster-format: '"+line+"'");}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric end position for motif in ClusterBuster-format: '"+line+"'", count);}
                 try {
                   motifscore=Double.parseDouble(elements[4]);
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric score for motif in ClusterBuster-format: '"+line+"'");}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric score for motif in ClusterBuster-format: '"+line+"'", count);}
                 int orientation=(elements[3].equals("-"))?Module.REVERSE:Module.DIRECT;
                 Region motifregion=new Region(null, motifstart, motifend, motifname, motifscore, orientation);
                 singlemotifs.add(motifregion);

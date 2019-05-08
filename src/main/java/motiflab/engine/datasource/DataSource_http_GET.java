@@ -21,6 +21,7 @@ import motiflab.engine.data.DNASequenceDataset;
 import motiflab.engine.data.DataSegment;
 import motiflab.engine.data.NumericDataset;
 import motiflab.engine.data.RegionDataset;
+import motiflab.engine.protocol.ParseError;
 
 /**
  * A DataSource objects that retrieves data using a simple HTTP "GET" request to obtain a
@@ -174,7 +175,30 @@ public class DataSource_http_GET extends DataSource {
         int waitperiod=getServerTimeslot();
         if (waitperiod>0) {Thread.sleep(waitperiod);} // this can throw InterruptedException
         ArrayList<String> page=getPage(url, timeout,task);
-        if (dataformat!=null) dataformat.parseInput(page,segment,dataformatSettings, task);
+        if (dataformat!=null) {
+            try {
+                dataformat.parseInput(page,segment,dataformatSettings, task);
+            } catch (ParseError e) {
+                // check if this could have been caused by something besides a format error.
+                // for instance a "Reached output limit of 100000 data values" error which 
+                int line=e.getLineNumber();
+                if (line>0) { // this means the line number is reported. Output a few lines around the offending line to the log to provide context (low priority)
+                    line--; // subtract 1 since line numbers start at 1          
+                    int context=5;
+                    int first=line-context; if (first<0) first=0;
+                    int last=line+context; if (last>=page.size()) last=page.size()-1;
+                    dataloader.getEngine().logMessage("----------------------------------------------------------------------------------------------------------------", 5);                    
+                    dataloader.getEngine().logMessage("   Unparsable content from URL: "+url, 5);
+                    dataloader.getEngine().logMessage(" ", 5);
+                    for (int i=first;i<=last;i++) {
+                        String contextLine=page.get(i);
+                        dataloader.getEngine().logMessage("   [ "+(i+1)+((i==line)?" * ":"   ")+"]:      "+contextLine, 5);
+                    } 
+                    dataloader.getEngine().logMessage("----------------------------------------------------------------------------------------------------------------", 5);                      
+                } 
+                throw(e);
+            }
+        }
         return segment;
     }
     

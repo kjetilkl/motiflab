@@ -305,7 +305,7 @@ public abstract class DataFormat implements ParameterExporter, Comparable {
                 inputaslist.add(line);
             }
         } catch (IOException e) { 
-            throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage());
+            throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage(), ((Long)lines).intValue());
         } finally {
             try {
                 if (inputStream!=null) inputStream.close();
@@ -349,7 +349,7 @@ public abstract class DataFormat implements ParameterExporter, Comparable {
                 inputaslist.add(line);
             }
         } catch (IOException e) {
-            throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage());
+            throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage(), ((Long)lines).intValue());
         } finally {
             try {
                 if (inputStream!=null) inputStream.close();

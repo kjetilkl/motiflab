@@ -112,20 +112,22 @@ public class DataFormat_BioProspector extends DataFormat {
            Pattern motifheader=Pattern.compile("Motif #(\\d+):.+");
            Pattern motifinfoheader=Pattern.compile("Width \\((\\d+),.+MotifScore ([0-9\\.]+); Sites (\\d+)");
            Pattern matrixline=Pattern.compile("(\\d+)\\s+([0-9\\.]+)\\s+([0-9\\.]+)\\s+([0-9\\.]+)\\s+([0-9\\.]+)\\s+\\w\\s+\\w\\s+\\w\\s+\\w");
+           int linenumber=0;
            try {
                for (String line:input) {
+                   linenumber++;
                    if (line.startsWith("Motif")) {
                        Matcher matcher=motifheader.matcher(line);
                        if (matcher.matches()) {
                            if (motifnumber>0) { // register previous motif
-                               if (motifsize!=found) throw new ParseError("Expected "+motifsize+" matrix lines for motif#"+motifnumber+" but found only "+found);
+                               if (motifsize!=found) throw new ParseError("Expected "+motifsize+" matrix lines for motif#"+motifnumber+" but found only "+found, linenumber);
                                Motif newMotif=new Motif("motif_"+motifnumber);
                                newMotif.setMatrix(matrix);
                                collection.addMotifToPayload(newMotif);
                                found=0;
                            }
                            motifnumber=Integer.parseInt(matcher.group(1));
-                       } else throw new ParseError("(#1) Unable to parse line according to expectations:\n"+line);
+                       } else throw new ParseError("(#1) Unable to parse line according to expectations:\n"+line, linenumber);
                    } else if (line.startsWith("Width")) {
                        Matcher matcher=motifinfoheader.matcher(line);
                        if (matcher.matches()) {
@@ -145,7 +147,7 @@ public class DataFormat_BioProspector extends DataFormat {
                        }
                    }
                }
-           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage());}
+           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage(), linenumber);}
            // add last motif
            if (motifsize!=found) throw new ParseError("Expected "+motifsize+" matrix lines for motif#"+motifnumber+" but found only "+found);
            else { // register previous motif
@@ -170,21 +172,23 @@ public class DataFormat_BioProspector extends DataFormat {
            Pattern motifheader=Pattern.compile("Motif #(\\d+):.+");
            Pattern motifinfoheader=Pattern.compile("Width \\((\\d+),.+MotifScore ([0-9\\.]+); Sites (\\d+)");
            Pattern siteline=Pattern.compile(">(\\S+)\\s+len\\s+\\d+\\s+site\\s+\\S+\\s+([rf])\\s+(\\d+)");
+           int linenumber=0;
            try {
                for (int i=0;i<input.size()-1;i++) {
+                   linenumber++;
                    String line=input.get(i);
                    if (line.startsWith("Motif")) {
                        Matcher matcher=motifheader.matcher(line);
                        if (matcher.matches()) {
                            found=0;
                            motifnumber=Integer.parseInt(matcher.group(1));
-                       } else throw new ParseError("(#1) Unable to parse line according to expectations:\n"+line);
+                       } else throw new ParseError("(#1) Unable to parse line according to expectations:\n"+line, linenumber);
                    } else if (line.startsWith("Width")) {
                        Matcher matcher=motifinfoheader.matcher(line);
                        if (matcher.matches()) {
                            motifsize=Integer.parseInt(matcher.group(1));
                            sites=Integer.parseInt(matcher.group(3));
-                       } else throw new ParseError("(#3) Unable to parse line according to expectations:\n"+line);
+                       } else throw new ParseError("(#3) Unable to parse line according to expectations:\n"+line, linenumber);
                    } else if (line.startsWith(">")) {
                        Matcher matcher=siteline.matcher(line);
                        if (matcher.matches()) {
@@ -208,10 +212,10 @@ public class DataFormat_BioProspector extends DataFormat {
                            if (orientation==Region.REVERSE) bindingpattern=MotifLabEngine.reverseSequence(bindingpattern);
                            newsite.setProperty("sequence", bindingpattern); //
                            sequence.addRegion(newsite);
-                       } else throw new ParseError("(#4) Unable to parse line according to expectations:\n"+line);
+                       } else throw new ParseError("(#4) Unable to parse line according to expectations:\n"+line, linenumber);
                    }
                }
-           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage());}
+           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage(), linenumber);}
 
           if (sites!=found) throw new ParseError("Expected "+sites+" sites for motif#"+motifnumber+" but found only "+found);
           return regiondataset;

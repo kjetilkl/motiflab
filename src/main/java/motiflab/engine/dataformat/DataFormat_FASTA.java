@@ -267,7 +267,7 @@ public class DataFormat_FASTA extends DataFormat implements DNASequenceParser {
         setupofDNADataset((DNASequenceDataset)target);
         if (input.size()<1) return target; // throw new ParseError("Empty input");
         String headerline=input.get(0);
-        if (!(headerline.startsWith(">"))) throw new ParseError("Unrecognized header for FASTA format: "+headerline);       
+        if (!(headerline.startsWith(">"))) throw new ParseError("Unrecognized header for FASTA format: "+headerline, 1);       
         String orientation;
         boolean convertUracil=false;
         if (settings!=null) {
@@ -294,13 +294,15 @@ public class DataFormat_FASTA extends DataFormat implements DNASequenceParser {
         int first=-1; // index of the header line of the target sequence
         int last=input.size(); // index of the header line of the first sequence after the target (or the last line if the target sequence is the last in the file)    
         int i=-1;
+        int lineNumber=0;
         for (String line:input) {
-            i++;            
+            i++;           
+            lineNumber++;
             if (line.startsWith(">")) {
                 String targetName=getSequenceNameFromHeader(line);               
-                if (targetName==null) throw new ParseError("Unable to extract sequence name from header: "+line);                
+                if (targetName==null) throw new ParseError("Unable to extract sequence name from header: "+line, lineNumber);                
                 String error=engine.checkSequenceNameValidity(targetName, false);
-                if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+targetName+"' : "+error);
+                if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+targetName+"' : "+error, lineNumber);
                 if (targetName.equals(target.getSequenceName())) first=i; // this is the index of the header line
                 else {
                     if (first<0) continue; // sequence not found yet
@@ -363,9 +365,9 @@ public class DataFormat_FASTA extends DataFormat implements DNASequenceParser {
             int start=pair[0]; int end=pair[1];
             if (end<=start+1) continue; // no sequence?
             String sequencename=getSequenceNameFromHeader(input.get(start));
-            if (sequencename==null) throw new ParseError("Unable to extract sequence name from header: "+input.get(start));
+            if (sequencename==null) throw new ParseError("Unable to extract sequence name from header: "+input.get(start), start+1);
             String error=engine.checkSequenceNameValidity(sequencename, false);
-            if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+sequencename+"' : "+error);                    
+            if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+sequencename+"' : "+error, start+1);                    
             DNASequenceData seq=(DNASequenceData)target.getSequenceByName(sequencename);
             if (seq==null) continue; // unknown sequence
             StringBuilder buffer=new StringBuilder();
@@ -394,7 +396,7 @@ public class DataFormat_FASTA extends DataFormat implements DNASequenceParser {
     public DNASequenceDataset parseDNASequenceDataset(ArrayList<String> input, String datasetname, ParameterSettings settings) throws ParseError, InterruptedException {
         if (input.size()<1) throw new ParseError("Empty input document");
         String headerline=input.get(0);
-        if (!(headerline.startsWith(">"))) throw new ParseError("Unrecognized header for FASTA format: "+headerline);       
+        if (!(headerline.startsWith(">"))) throw new ParseError("Unrecognized header for FASTA format: "+headerline, 1);       
         String useorientation;
         boolean convertUracil=false;
         int startIndex=-1;

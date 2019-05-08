@@ -192,8 +192,10 @@ public class DataFormat_Weeder extends DataFormat {
            Pattern sequenceLookupPattern=Pattern.compile("^Sequence\\s+(\\d+)\\s+:\\s>([a-zA-Z_0-9.+-]+)");
            Pattern motifheader=Pattern.compile("^([AaCcGgTt]+)");
            Pattern siteline=Pattern.compile("^\\s*(\\d+)\\s+([\\+\\-])\\s+\\[?([AaCcGgTt]+)\\]?\\s+(\\d+)\\s+\\(([\\d\\.]+)\\)\\s*");
+           int lineNumber=0;
            try {
               for (int inputpos=0;inputpos<input.size();inputpos++) {
+                    lineNumber++;
                     String line=input.get(inputpos);
                     Matcher matcher;
                     matcher=motifheader.matcher(line);
@@ -210,7 +212,7 @@ public class DataFormat_Weeder extends DataFormat {
                             matcher=siteline.matcher(line);
                             if (matcher.matches()) {                                 
                                  String sequenceName=sequenceNameLookup.get(matcher.group(1));
-                                 if (sequenceName==null) throw new ParseError("No name found for sequence #"+matcher.group(1));
+                                 if (sequenceName==null) throw new ParseError("No name found for sequence #"+matcher.group(1), lineNumber);
                                  String orientationString=matcher.group(2);
                                  int orientation=(orientationString.equals("+"))?Region.DIRECT:Region.REVERSE;
                                  String bindingpattern=matcher.group(3);       
@@ -227,7 +229,7 @@ public class DataFormat_Weeder extends DataFormat {
                         }                      
                     } // end parse single line
                } // end for each line
-           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage());}
+           } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+e.getMessage(), lineNumber);}
           return regiondataset;
        } else throw new ParseError("Unknown returntype: "+returntype);
     }         
