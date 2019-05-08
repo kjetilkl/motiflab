@@ -2520,6 +2520,7 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
         private int yoffsetViewPort=rulerHeight+19;
         private int yoffsetZoomLevel=rulerHeight+31;
         private int yoffsetButtons=rulerHeight+34;
+        private String viewPortString="";
         
         public InfoPanel() {
             super();           
@@ -2736,14 +2737,15 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
             if (condensedmode) yoffsetViewBox+=rulerHeight; // reset offset
             if (!condensedmode) {
                 //draw ViewPort coordinates
-                String viewPortString;
                 g.setColor(Color.black);
-                if (orientation==VisualizationSettings.DIRECT) {viewPortString=getChromosomeString()+viewPortStart+"\u2192"+viewPortEnd;}
-                else {viewPortString=getChromosomeString()+viewPortEnd+"\u2190"+viewPortStart;}
+                if (orientation==VisualizationSettings.DIRECT) {viewPortString=getChromosomeString()+MotifLabEngine.groupDigitsInNumber(viewPortStart)+"\u2192"+MotifLabEngine.groupDigitsInNumber(viewPortEnd);}
+                else {viewPortString=getChromosomeString()+MotifLabEngine.groupDigitsInNumber(viewPortEnd)+"\u2190"+MotifLabEngine.groupDigitsInNumber(viewPortStart);}
                 g.setFont(font);
                 if (settings.useTextAntialiasing()) ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, MotifLabGUI.ANTIALIAS_MODE);
                 g.drawString(viewPortString, xoffset, yoffsetViewPort);
-
+                int viewPortStringWidth=getFontMetrics(getFont()).stringWidth(viewPortString);
+                if (viewPortStringWidth<150) viewPortStringWidth=150;
+                size.width=viewPortStringWidth;
                  //draw Zoom level
                 String zoomString;
                 if (scale>=0.01) { // zoom level above 1%. Round down to nearest integer
