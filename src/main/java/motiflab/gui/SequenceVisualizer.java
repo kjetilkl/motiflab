@@ -373,6 +373,7 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
     /** Returns the rendered width of the sequence name associated with this visualizer
      */
     public int getRenderedLabelWidth() {
+        // if ("no lanel in front") return 20; else return namelabel.getWidth();
         return namelabel.getWidth();
     }
     
@@ -1946,6 +1947,8 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
         
         @Override
         public void paintComponent(Graphics g) { // paint SequenceLabel
+            int align=settings.getSequenceLabelAlignment();
+            if (align==SwingConstants.TRAILING) return; // the label should not be painted here
             //super.paintComponent(g); // draws the text on the label            
             java.awt.Font font=getFont();
             java.awt.Rectangle bounds=font.getStringBounds(sequenceName, ((Graphics2D)g).getFontRenderContext()).getBounds();
@@ -1953,7 +1956,6 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
             if (sequenceNameWidth<20) sequenceNameWidth=20; // just to have a minimum
             int labelwidth=getWidth()-(labelLeftMargin+10); // 10 is just a "right margin"
             int arrowWidth=(sequenceNameWidth<labelwidth)?sequenceNameWidth:labelwidth;
-            int align=settings.getSequenceLabelAlignment();
             int y=0;
                  if (align==SwingConstants.TOP) y=((condensedmode)?1:rulerHeight)+9;//+bounds.height/2;
             else if (align==SwingConstants.CENTER) { // "middle" alignment

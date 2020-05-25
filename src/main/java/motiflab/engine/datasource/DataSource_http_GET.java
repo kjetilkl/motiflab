@@ -38,6 +38,8 @@ import motiflab.engine.protocol.ParseError;
  */
 public class DataSource_http_GET extends DataSource {
 
+    public static final String PROTOCOL_NAME="GET";    
+    
     private String baseURL;
     private String parameterStringTemplate; // template for the "query" part of the URL
  
@@ -58,19 +60,24 @@ public class DataSource_http_GET extends DataSource {
     
     public DataSource_http_GET(DataTrack datatrack, int organism, String genomebuild,String dataFormatName) {
         super(datatrack,organism, genomebuild, dataFormatName);       
-    }    
+    }   
+    
+    private DataSource_http_GET() {
+    
+    }
+    
+    public static DataSource_http_GET getTemplateInstance() {
+        return new DataSource_http_GET();
+    }
        
     @Override
     public Class[] getSupportedData() {
         return new Class[]{DNASequenceDataset.class,RegionDataset.class,NumericDataset.class};
     } 
-    
-    public static boolean supportsFeatureDataType(Class type) {
-        return (type==DNASequenceDataset.class || type==RegionDataset.class || type==NumericDataset.class);
-    }    
+      
     
     @Override
-    public void initializeDataSourceFromMap(HashMap<String,Object> map) throws SystemError{
+    public void initializeDataSourceFromMap(HashMap<String,Object> map) throws SystemError {
         if (!map.containsKey("URL")) throw new SystemError("Missing parameter: URL");
         if (!map.containsKey("Parameter")) throw new SystemError("Missing parameter: Parameter");        
         this.baseURL=map.get("URL").toString();
@@ -134,7 +141,7 @@ public class DataSource_http_GET extends DataSource {
     }       
     
     @Override
-    public String getProtocol() {return HTTP_GET;}    
+    public String getProtocol() {return PROTOCOL_NAME;}    
     
     public String getParameter() {
         return parameterStringTemplate;
@@ -153,6 +160,11 @@ public class DataSource_http_GET extends DataSource {
     public boolean useCache() {
         return true;
     }
+    
+    @Override
+    public boolean usesStandardDataFormat() {
+        return true;
+    }      
     
     @Override
     public DataSegment loadDataSegment(DataSegment segment, ExecutableTask task) throws Exception {
@@ -243,7 +255,7 @@ public class DataSource_http_GET extends DataSource {
     public org.w3c.dom.Element getXMLrepresentation(org.w3c.dom.Document document) {
         org.w3c.dom.Element element = super.getXMLrepresentation(document);
         org.w3c.dom.Element protocol=document.createElement("Protocol");
-        protocol.setAttribute("type", HTTP_GET);
+        protocol.setAttribute("type", PROTOCOL_NAME);
         org.w3c.dom.Element url=document.createElement("URL");
         url.setTextContent(baseURL);
         org.w3c.dom.Element parameter=document.createElement("Parameter");

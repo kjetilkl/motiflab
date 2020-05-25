@@ -175,7 +175,7 @@ public class DataLoader {
     }    
     
     /**
-     * Returns an array containing all datatracks that are availble to the system
+     * Returns an array containing all datatracks that are available to the system
      * (according to a list of predefined datasets)
      * @return
      */

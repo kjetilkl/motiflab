@@ -32,6 +32,9 @@ import motiflab.engine.data.RegionDataset;
  */
 public class DataSource_FileServer extends DataSource {
     
+    public static final String PROTOCOL_NAME="FILE";    
+    
+    
     private String filepath=""; // For "single-file" sources this should point directly to the file. For split-files, it should point to the directory.
     private int segmentsize=0; // Legacy setting. The size of each segment file (in bp). If the size is 0, the filepath should point directly to a single (unsplit) file. If the size is larger than 0 the filepath should point to a directory containing split-segment files.
         
@@ -46,7 +49,12 @@ public class DataSource_FileServer extends DataSource {
         this.filepath="";
         this.segmentsize=0;
     }      
+
+    private DataSource_FileServer() {}
     
+    public static DataSource_FileServer getTemplateInstance() {
+        return new DataSource_FileServer();
+    }       
     
     
     @Override
@@ -97,7 +105,7 @@ public class DataSource_FileServer extends DataSource {
 
     @Override
     public String getProtocol() {
-        return FILE_SERVER;
+        return PROTOCOL_NAME;
     }
     
     @Override
@@ -105,9 +113,9 @@ public class DataSource_FileServer extends DataSource {
         return new Class[]{DNASequenceDataset.class,RegionDataset.class,NumericDataset.class};
     }     
     
-    public static boolean supportsFeatureDataType(Class type) {
-        return (type==DNASequenceDataset.class || type==RegionDataset.class || type==NumericDataset.class);
-    }    
+//    public static boolean supportsFeatureDataType(Class type) {
+//        return (type==DNASequenceDataset.class || type==RegionDataset.class || type==NumericDataset.class);
+//    }    
 
     @Override
     public String getServerAddress() {
@@ -138,10 +146,15 @@ public class DataSource_FileServer extends DataSource {
     }    
 
     @Override
+    public boolean usesStandardDataFormat() {
+        return true;
+    }      
+    
+    @Override
     public org.w3c.dom.Element getXMLrepresentation(org.w3c.dom.Document document) {
         org.w3c.dom.Element element = super.getXMLrepresentation(document);
         org.w3c.dom.Element protocol=document.createElement("Protocol");
-        protocol.setAttribute("type", FILE_SERVER);
+        protocol.setAttribute("type", PROTOCOL_NAME);
         org.w3c.dom.Element file=document.createElement("Filepath");
         file.setTextContent(filepath);
         protocol.appendChild(file);

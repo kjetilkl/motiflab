@@ -28,8 +28,9 @@ public class SequenceLabelContextMenu extends JPopupMenu  {
     private static final String DISPLAY="Display";
     private static final String SET_COLOR="Set Label Color";
     private static final String ALIGN_MENU="Align Labels";
-    private static final String ALIGN_TOP="Top";
-    private static final String ALIGN_MIDDLE="Middle";
+    private static final String ALIGN_FRONT_TOP="Top";
+    private static final String ALIGN_FRONT_MIDDLE="Middle";
+    private static final String ALIGN_BEHIND="Behind";    
     private static final String MARK_SEQUENCE="Mark Sequence";    
     private static final String REMOVE_MARK="Remove Mark";    
     private static final String REMOVE_ALL_MARKS="Clear All Marks";    
@@ -69,8 +70,9 @@ public class SequenceLabelContextMenu extends JPopupMenu  {
             
             int alignment=gui.getVisualizationSettings().getSequenceLabelAlignment();            
             JMenu alignMenu=new JMenu(ALIGN_MENU);
-            JCheckBoxMenuItem alignTopMenuItem=new JCheckBoxMenuItem(ALIGN_TOP, alignment==SwingConstants.TOP);
-            JCheckBoxMenuItem alignMiddleMenuItem=new JCheckBoxMenuItem(ALIGN_MIDDLE, alignment==SwingConstants.CENTER);
+            JCheckBoxMenuItem alignTopMenuItem=new JCheckBoxMenuItem(ALIGN_FRONT_TOP, alignment==SwingConstants.TOP);
+            JCheckBoxMenuItem alignMiddleMenuItem=new JCheckBoxMenuItem(ALIGN_FRONT_MIDDLE, alignment==SwingConstants.CENTER);
+            //JCheckBoxMenuItem alignBehindMenuItem=new JCheckBoxMenuItem(ALIGN_BEHIND, alignment==SwingConstants.TRAILING);            
             
             JMenuItem hideSequenceMenuItem=new JMenuItem(HIDE_SEQUENCE);
             JMenuItem hideOthersMenuItem=new JMenuItem(SHOW_ONLY_THIS_SEQUENCE);
@@ -88,6 +90,7 @@ public class SequenceLabelContextMenu extends JPopupMenu  {
             
             alignMenu.add(alignTopMenuItem);
             alignMenu.add(alignMiddleMenuItem);
+            //alignMenu.add(alignBehindMenuItem); // functionality for this option has not been implemented           
             
             JMenuItem displayMenuItem=new JMenuItem(DISPLAY+" "+sequenceName);
             displayMenuItem.addActionListener(menuItemListener);    
@@ -119,10 +122,12 @@ public class SequenceLabelContextMenu extends JPopupMenu  {
            @Override
            public void actionPerformed(ActionEvent e) {
                //gui.debugMessage("Selected "+e.getActionCommand());                   
-                       if (e.getActionCommand().equals(ALIGN_TOP)) {
+                       if (e.getActionCommand().equals(ALIGN_FRONT_TOP)) {
                        gui.getVisualizationSettings().setSequenceLabelAlignment(SwingConstants.TOP);
-                } else if (e.getActionCommand().equals(ALIGN_MIDDLE)) {
+                } else if (e.getActionCommand().equals(ALIGN_FRONT_MIDDLE)) {
                        gui.getVisualizationSettings().setSequenceLabelAlignment(SwingConstants.CENTER);
+                } else if (e.getActionCommand().equals(ALIGN_BEHIND)) {
+                       gui.getVisualizationSettings().setSequenceLabelAlignment(SwingConstants.TRAILING);
                 } else if (e.getActionCommand().equals(MARK_SEQUENCE)) {
                        gui.getVisualizationSettings().setSequenceMarked(sequenceName, true);
                        sequenceVisualizer.repaint();

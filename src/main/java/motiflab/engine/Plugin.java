@@ -22,7 +22,7 @@
  * The plugin itself (i.e. the class implementing this interface) is stored under the special property name "_plugin", or it can alternatively be obtained with engine.getPlugin(pluginName).
  *  
  * The plugin ZIP-file can also contain other resources that the plugin needs, such as e.g. images. These can most easily be obtained as resources using a syntax such as this:
- *  ImageIcon pluginIcon=new ImageIcon(YourPluginClass.class.getResource("filename.png"));
+ * ImageIcon pluginIcon=new ImageIcon(YourPluginClass.class.getResource("filename.png"));
  * 
  * If you need to get access directly to the plugin's directory, you can obtain the path via the metadata property "pluginDirectory" (which is set automatically by MotifLab).
  *

@@ -27,17 +27,19 @@ import motiflab.engine.data.NumericDataset;
  */
 public class DataSource_DAS extends DataSource {
 
+    public static final String PROTOCOL_NAME="DAS";
+    
     private String baseURL;
     private String featurename; // template
  
     /**
      * Creates a new instance of DataSource_DAS based on the given arguments
-     * @param name
+     * @param datatrack
      * @param organism
+     * @param genomebuild
      * @param baseURL
      * @param dataFormatName
-     * @param delay
-     * @param parameterStringTemplate
+     * @param featurename
      */
     public DataSource_DAS(DataTrack datatrack, int organism, String genomebuild, String baseURL, String dataFormatName, String featurename) {
         super(datatrack,organism,genomebuild,dataFormatName);
@@ -47,6 +49,13 @@ public class DataSource_DAS extends DataSource {
     
     public DataSource_DAS(DataTrack datatrack, int organism, String genomebuild,String dataFormatName) {
         super(datatrack,organism, genomebuild, dataFormatName);       
+    }   
+    
+   
+    private DataSource_DAS() {}
+    
+    public static DataSource_DAS getTemplateInstance() {
+        return new DataSource_DAS();
     }    
         
     @Override
@@ -54,9 +63,9 @@ public class DataSource_DAS extends DataSource {
         return new Class[]{DNASequenceDataset.class,RegionDataset.class};
     }   
     
-    public static boolean supportsFeatureDataType(Class type) {
-        return (type==DNASequenceDataset.class || type==RegionDataset.class);
-    }
+//    public static boolean supportsFeatureDataType(Class type) {
+//        return (type==DNASequenceDataset.class || type==RegionDataset.class);
+//    }
     
     @Override    
     public void initializeDataSourceFromMap(HashMap<String,Object> map) throws SystemError {
@@ -122,7 +131,7 @@ public class DataSource_DAS extends DataSource {
     }    
     
     @Override
-    public String getProtocol() {return DAS_SERVER;}
+    public String getProtocol() {return PROTOCOL_NAME;}
   
     public String getFeature() {
         return featurename;
@@ -140,6 +149,11 @@ public class DataSource_DAS extends DataSource {
     @Override
     public boolean useCache() {
         return true;
+    }    
+    
+    @Override
+    public boolean usesStandardDataFormat() {
+        return false;
     }    
     
     @Override
@@ -192,7 +206,7 @@ public class DataSource_DAS extends DataSource {
     public org.w3c.dom.Element getXMLrepresentation(org.w3c.dom.Document document) {
         org.w3c.dom.Element element = super.getXMLrepresentation(document);
         org.w3c.dom.Element protocol=document.createElement("Protocol");
-        protocol.setAttribute("type", DAS_SERVER);
+        protocol.setAttribute("type", PROTOCOL_NAME);
         org.w3c.dom.Element url=document.createElement("URL");
         url.setTextContent(baseURL);
         protocol.appendChild(url);

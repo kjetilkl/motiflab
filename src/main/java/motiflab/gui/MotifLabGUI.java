@@ -4278,6 +4278,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
 
 
     @Action
+    @Deprecated
     public void activateTransfacPROaction() {
         getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         ActivateTransfacProDialog dialog=new ActivateTransfacProDialog(this);

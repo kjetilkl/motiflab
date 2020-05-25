@@ -146,6 +146,9 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
      */
     public void initialize() {
         logMessage("Initializing MotifLab");
+        importPlugins(new String[]{"type:DataSource","load:early"}, null);  //   
+        //loadEarlyTestPlugins(); // only for debugging!! This line can safely be removed
+        initializeDataSourceTypes();
         setupDataLoader();
         geneIDResolver=new GeneIDResolver(this);        
         geneIDResolver.setUseCache(preferences.getBoolean(PREFERENCES_USE_CACHE_GENE_ID_MAPPING, true));
@@ -175,6 +178,20 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         });        
     }
     
+    /**
+     * Registers templates for all Data Source types (i.e. data source protocols) as MotifLab Resources
+     */
+    private void initializeDataSourceTypes() {
+        registerResource(motiflab.engine.datasource.DataSource_http_GET.getTemplateInstance());
+        registerResource(motiflab.engine.datasource.DataSource_DAS.getTemplateInstance());
+        registerResource(motiflab.engine.datasource.DataSource_FileServer.getTemplateInstance());
+        registerResource(motiflab.engine.datasource.DataSource_SQL.getTemplateInstance());
+        registerResource(motiflab.engine.datasource.DataSource_VOID.getTemplateInstance());     
+    }
+    
+    /**
+     * Sets up the Data Loader an imports the current track configuration
+     */
     private void setupDataLoader() {
         dataLoader=new DataLoader(this);  
         try {
@@ -207,7 +224,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         importPredefinedMotifCollections(); // import information about predefined motif collections   
         importExternalPrograms(); // import external programs         
         importDataRepositories();         
-        importPlugins();  //         
+        importPlugins(null, new String[]{"type:DataSource", "load:early"});  // Data Sources and "early" plugins should already have been imported, so skip them here...     
+        // loadLateTestPlugins(); // only for debugging!! This line can safely be removed        
     }
 
     private static Date getCorrectDate(int year, int month, int day) {
@@ -1780,11 +1798,11 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         if (string.equalsIgnoreCase("false") || string.equalsIgnoreCase("no")) return Boolean.FALSE;
         try {
            int value=Integer.parseInt(string);
-           return new Integer(value);
+           return value;
         } catch (NumberFormatException e) {}
         try {
            double value=Double.parseDouble(string);
-           return new Double(value);
+           return value;
         } catch (NumberFormatException e) {} 
         return string;
     }
@@ -2641,8 +2659,21 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         
     }
     
+    /** Imports all plugins */
+    public void importPlugins() {
+        importPlugins(null,null);
+    }
     
-    public void importPlugins() {                         
+    /** Imports plugins
+     * This method can be called multiple times, but the same plugins should not be imported more than once.
+     * Two different lists can be optionally be provided as arguments. The first is a whitelist and, if it is defined,
+     * only plugins in this list will be imported. The second is a blacklist. If this is defined then all plugins except
+     * the ones in this list will be imported. The entries in the lists can refer to plugins on the form "meta-attribute:value".
+     * For instance "type:Tool", "type:DataSource" or "load:early" (if meta-attribute is omitted, it will default to "type". E.g. "Operation" equals "type:Operation")
+     * @param processPlugins If defined (not null), plugins will only be imported if their "type" is in this list
+     * @param skipPlugins    If defined (not null), plugins will NOT be imported if their "type" is in this list
+     */
+    public void importPlugins(String[] processPlugins, String[] skipPlugins) {    
         File plugindir=new File(getPluginsDirectory());
         File[] allFiles=plugindir.listFiles();
         if (allFiles.length>0) logMessage("Importing Plugins"); 
@@ -2653,7 +2684,11 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             Plugin plugin=null;
             try {
                 metadata=readPluginMetaDataFromDirectory(dir); 
-                if (metadata.containsKey("client")) { } // I thought it would be nice to have a "client" property (e.g. "client=motiflab.gui.MotifLabGUI") which can specify which clients a plugin is meant to be used with so as to avoid loading unnecessary plugins, but sadly the client is not yet defined at this point...
+                // if (metadata.containsKey("client")) { } // I thought it would be nice to have a "client" property (e.g. "client=motiflab.gui.MotifLabGUI") which can specify which clients a plugin is meant to be used with so as to avoid loading unnecessary plugins, but sadly the client is not yet defined at this point...
+                // Skip plugin unless it satisfies the inclusion/exclusion criteria
+                if (processPlugins!=null && !matchesPluginCritera(processPlugins, metadata)) continue; // this plugin is not in the "process" list
+                if (skipPlugins!=null && matchesPluginCritera(skipPlugins, metadata)) continue; // this plugin is on the "skip" list                   
+                 
                 plugin=instantiatePluginFromDirectory(dir);
             } catch (SystemError e) {
                 logMessage("  - Plugin \""+dir.getAbsolutePath()+"\" : CRITICAL ERROR => "+e.getMessage()+". The plugin will not be activated.");  
@@ -2685,25 +2720,57 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                 List<String> sublist=pluginsOK.subList(i, end);
                 logMessage(" - "+MotifLabEngine.splice(sublist,", "));
             }            
+        }           
+                 
+    }     
+
+    /** Returns TRUE if the plugin metadata matches at least one of the given criteria
+     *  @param critera A non-null list of critera on the form "attribute:value" (if only the value is provided, the attribute will default to "type"
+     *  @param pluginMetaData
+     */
+    private boolean matchesPluginCritera(String[] criteria, HashMap<String, Object> pluginMetaData) {
+        for (String criterion:criteria) {
+            String attribute="type";
+            String value="Tool";
+            if (criterion.contains(":")) {String[] parts=criterion.split(":"); attribute=parts[0];value=parts[1];}
+            else {value=criterion;}
+            String pluginAttributeValue=(pluginMetaData.containsKey(attribute))?pluginMetaData.get(attribute).toString():"";
+            if (value.equalsIgnoreCase(pluginAttributeValue)) return true;
         }
-        // -------- Manually imported plugins below this line. This is just for rapid testing -------------------------    
-                         
-        // ### Test Plugin ###
+        return false;
+    }    
+    
+    private void loadEarlyTestPlugins() { // this will manually import plugins. This is just for rapid development and testing!      
 //        try {
-//            motiflab.plugins.TestPlugin plugin=new motiflab.plugins.TestPlugin();
+//            motiflab.plugins.Test_Plugin plugin=new motiflab.plugins.Test_Plugin();
 //            plugin.initializePlugin(this);
 //            HashMap<String,Object> meta=new HashMap<String, Object>();
 //            meta.put("name",plugin.getPluginName());
 //            meta.put("type","Tool");
 //            meta.put("version","1.0");
-//            meta.put("description","Test Plugin");
-//            meta.put("_plugin",pluginsr);
+//            meta.put("description","lorem ipsum");
+//            meta.put("_plugin",plugin);
 //            registerPlugin(plugin,meta);
 //        } catch (Exception e) {
 //            logMessage("Plugin error: "+e.toString());
-//        }             
-                 
-    }         
+//        }      
+    }
+    
+    private void loadLateTestPlugins() { // this will manually import plugins. This is just for rapid development and testing!                       
+//        try {
+//            motiflab.plugins.Test_Plugin plugin=new motiflab.plugins.Test_Plugin();
+//            plugin.initializePlugin(this);
+//            HashMap<String,Object> meta=new HashMap<String, Object>();
+//            meta.put("name",plugin.getPluginName());
+//            meta.put("type","Tool");
+//            meta.put("version","1.0");
+//            meta.put("description","lorem ipsum");
+//            meta.put("_plugin",plugin);
+//            registerPlugin(plugin,meta);
+//        } catch (Exception e) {
+//            logMessage("Plugin error: "+e.toString());
+//        }                 
+    }    
     
     /** Load all the classes within the provided JAR file and return the (first and hopefully only) class which implements the Plugin interface 
      *  The method will also add all JAR-files residing beneath a lib/ directory to the class loader, so that they can be loaded when required
@@ -2894,8 +2961,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         String pluginDir=dir.toString();
         plugins.remove(plugin.getPluginName()); // unregister the plugin with the engine
         plugin.uninstallPlugin(this); // signal to the plugin to clean up after itself and detach from the engine and client
-        plugin=null; // release
-        if (classLoader instanceof URLClassLoader) {
+        plugin=null; // release the reference
+        if (classLoader instanceof URLClassLoader) { // Note: Removing the classes completely could cause problems if they still are referenced somewhere. Is it really necessary?
             try {
                 ((URLClassLoader)classLoader).close(); // necessary to release the file lock on the JAR-files
                 classLoader=null;
@@ -4420,7 +4487,7 @@ public javax.swing.Icon getResourceIcon(String name, String typename) {
 }  
 
 /**
- * Returns a resource object for the resource registered under the given name
+ * Returns a resource instance object for the resource registered under the given name
  * or null if no resource with that name has been registered
  * @param name The name of a resource
  * @param typename The "type name" of the resource (if it has one), or null/empty  * 
@@ -5780,6 +5847,80 @@ public void removeAllResources() {
         }
         return prefix+numberAsString+buffer;
     }
+    
+    /**
+     * Breaks up a long text string by replacing some of the spaces with linebreak characters.
+     * Note that the string must contain spaces at sufficient intervals for this to work well.
+     * If no spaces are found, the last word on the new line will be forcibly split up with hyphens (in non-optimal places)
+     * @param line The original line of text
+     * @param maxlength The maximum number of characters on each line. This is a hard limit!
+     * @param linebreak The string to insert in order to introduce a linebreak. This could be e.g. \n or <br> depending on the context
+     * @return The original string with linebreaks introduced
+     */
+    public static String breakLine(String line, int maxlength, String linebreak) {
+        StringBuilder newline=new StringBuilder();
+        if (line.length()<=maxlength) return line; // no need to break it at all
+        boolean done=false;
+        int lastbreak=0;
+        int pos=maxlength;
+        int startpoint=pos;  
+        while (!done) {
+            //System.err.println("   breakLine: new iteration. Last break="+lastbreak+", pos="+pos+", startpoint="+startpoint+"  maxlength="+maxlength);            
+            while (pos>lastbreak && line.charAt(pos)!=' ') {
+                pos--;
+            }
+            //System.err.println("   breakLine: - new pos = "+pos);
+            // the pos pointer should now either be at a space or have been backtracked to the previous breakpoint
+            if (pos==lastbreak) { // did not find a space by backtracking. Insert hyphen at end of line
+                pos=startpoint-1; // reset to "full line" but subtract 1 to make room for hyphen
+                newline.append(line.substring(lastbreak, pos)); 
+                newline.append("-");             
+                newline.append(linebreak);        
+            } else if (line.charAt(pos)==' ') { // found a space
+                newline.append(line.substring(lastbreak, pos));
+                newline.append(linebreak);
+                pos++; // skip past the space
+            }
+            if (pos+maxlength>=line.length()) { // rest of text is smaller than maxlength. Just add the rest and we are done
+                //System.err.println("   breakLine: adding rest of string. line length="+line.length()+".   Pos+max="+(pos+maxlength));
+                // the pos pointer should now either be at a space o                
+                newline.append(line.substring(pos));
+                done=true;
+            } else {
+                lastbreak=pos; // this should be 
+                startpoint=pos+maxlength;
+                pos=startpoint;
+                //System.err.println("   breakLine: preparing for new iteration. Last break="+lastbreak+", pos="+pos+", startpoint="+startpoint);
+            }
+        }
+        return newline.toString();
+    }
+    
+    /**
+     * This method tries to open a connection to the provided URL. 
+     * If successful it will return the same URL. 
+     * If the protocol is HTTP(S) and the request was redirected (status 3xx) the new location will be returned
+     * If an error occurs while trying to connect to the server, the original URL will be returned 
+     * (or as far as it was able to resolve before the error occurred)
+     * @param url
+     * @return 
+     */
+    public static URL resolveURL(URL url) {
+        String protocol=url.getProtocol();
+        if (!protocol.startsWith("http")) return url;
+        try {
+ 	    HttpURLConnection connection = (HttpURLConnection)url.openConnection();            
+            int status = connection.getResponseCode();
+            if (status>=00 && status<400) {               
+                String newUrl = connection.getHeaderField("Location"); // get redirect url from "location" header field
+                url=resolveURL(new URL(newUrl)); // try recursively in case you are redirected multiple times
+            } 
+        } catch (IOException iox) {
+            return url;
+        }
+	return url;       
+    }
+    
     
     /** Writes the given line to STDERR after first indenting it */
     public static void debugOutput(String line, int indent) {

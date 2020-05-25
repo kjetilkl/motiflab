@@ -119,7 +119,7 @@ public class DataTrack implements Cloneable {
         return name;
     }
     
-    /** Associates a protocol with this data track. By convention the protocol should be executed
+    /** Associates a protocol script with this data track. By convention the protocol should be executed
      *  after the track has been loaded. Multiple commands can be used if separated by semi-colons.
      *  References to the new loaded track (whose name is not necessarily known) can be made by using
      *  the token '?'
@@ -160,8 +160,6 @@ public class DataTrack implements Cloneable {
      */
     public boolean containsDataSource(DataSource source) {
         for (DataSource s:datasources) {
-            // if (s.equals(source)) System.err.println(s.toString()+"  <= EQUALS => "+source.toString());
-            // else if (s.hasSameOrigin(source)) System.err.println(s.toString()+"  <= SAME SOURCE => "+source.toString()+ ". Diff="+s.reportFirstDifference(source));
             if (s.equals(source)) return true;
         }
         return false;

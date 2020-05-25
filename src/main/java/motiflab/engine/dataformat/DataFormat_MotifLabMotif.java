@@ -35,7 +35,7 @@ public class DataFormat_MotifLabMotif extends DataFormat {
         addOptionalParameter("Include non-standard fields", Boolean.TRUE, new Boolean[]{Boolean.TRUE,Boolean.FALSE},"Include non-standard fields that have been added by a user");
         addOptionalParameter("Include derived fields", Boolean.FALSE, new Boolean[]{Boolean.TRUE,Boolean.FALSE},"Include fields that can be derived from others, such as e.g. Consensus, IC-content and GC-content");
         addOptionalParameter("Include color info", Boolean.FALSE, new Boolean[]{Boolean.TRUE,Boolean.FALSE},"Include information about the colors assigned to each motif");
-        addOptionalParameter("Register identifier definitions", Boolean.TRUE, new Boolean[]{Boolean.TRUE,Boolean.FALSE},"Register information about new identifier types that might be included in Motif Collections.");
+        addOptionalParameter("Register identifier definitions", Boolean.TRUE, new Boolean[]{Boolean.TRUE,Boolean.FALSE},"Register information about new identifier types that may be included in Motif Collections.");
         setParameterFilter("Include derived fields","output"); 
         setParameterFilter("Include non-standard fields","output");         
         setParameterFilter("Include color info","output");  

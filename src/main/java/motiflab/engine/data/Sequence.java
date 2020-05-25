@@ -157,7 +157,7 @@ public final class Sequence extends Data implements BasicDataType {
             tooltip.append("] relative to gene <b>");
             tooltip.append(genename);
             tooltip.append("</b> with TSS at ");
-            tooltip.append(TSS.toString());
+            tooltip.append(MotifLabEngine.groupDigitsInNumber(TSS));
             tooltip.append(" on ");
             tooltip.append(orientationString);
             tooltip.append(" strand");            

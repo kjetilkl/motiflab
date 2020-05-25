@@ -1,14 +1,17 @@
 /*
- 
+ A Data Source represents a way of obtaining a specific data track for a given genome build via a certain protocol.
+ E.g. one data source could fetch a DNA track for hg19 from a DAS server and another data source could get a list of SNP regions for hg38 from an SQL database.
+ Subclasses of DataSource implement different "protocols" (ways of obtaining data) such as the HTTP GET protocl, databases access or reading from local files.
+ Each object instance of a subclass contains the information/configuration necessary to obtain a specific datatrack (or part of a track) via that protocol
  
  */
 
 package motiflab.engine.datasource;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import javax.swing.Icon;
+import motiflab.engine.MotifLabResource;
 import motiflab.engine.task.ExecutableTask;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.SystemError;
@@ -19,20 +22,12 @@ import motiflab.engine.dataformat.DataFormat;
  *
  * @author Kjetil Klepper 
  */
-public abstract class DataSource implements Cloneable {
+public abstract class DataSource implements Cloneable, MotifLabResource {
      public static final String PATTERN_TEMPLATE_CHROMOSOME="$CHROMOSOME";
      public static final String PATTERN_TEMPLATE_START="$START";
      public static final String PATTERN_TEMPLATE_END="$END";
-     
-     public static final String HTTP_GET="GET";
-     public static final String HTTP_POST="POST"; // for future use maybe
-     public static final String DAS_SERVER="DAS";
-     public static final String FILE_SERVER="FILE";     
-     public static final String SQL_SERVER="SQL";        
-     public static final String VOID="VOID";
-     public static final String TEST="TEST";
                
-     protected String name;
+     protected String name; // The name of the datatrack obtained by this data source
      protected DataTrack dataTrack;
      protected int organism;  
      protected int delay=0;
@@ -44,7 +39,7 @@ public abstract class DataSource implements Cloneable {
      
      protected static DataLoader dataloader=null;
      
-     private static int counter=1;
+     private static int counter=1; // global counter of number of Data Sources (for debugging)
      private int myindex=0;
      
      public DataSource(DataTrack dataTrack, int organism, String genomebuild, String dataformatName) {
@@ -57,13 +52,52 @@ public abstract class DataSource implements Cloneable {
          myindex=counter++;
      }
      
+     /** This constructor is only used to create "template" resources */
+     @Deprecated
+     public DataSource() {
+         myindex=counter++;
+     }
+     
      /**
-      * After the data source has been created with standard parameters (track, organism/build, dataformatName),
-      * this method can be called to initialize other settings based on values in the map
+      * This method can be used to initialize basic attributes after creating an instance using the zero-argument DataSource() constructor
+      * @param dataTrack
+      * @param organism
+      * @param genomebuild
+      * @param dataformatName 
+      */
+     public void initializeDataSource(DataTrack dataTrack, int organism, String genomebuild, String dataformatName) {
+         this.dataTrack=dataTrack;
+         if (dataTrack!=null) this.name=dataTrack.getName();
+         this.organism=organism;
+         this.dataformatName=dataformatName;
+         this.genomebuild=genomebuild;
+         resolveDataFormat();         
+     }
+     
+     /**
+      * After a data source has been created with standard parameters (track, organism/build, dataformatName),
+      * this method can be called to initialize other settings based on values in the map.
+      * This method is called automatically after creation of the Data Source when loading a configuration from a file/stream.
+      * In this case the map is filled in with all key-value attributes found inside the protocol-tag for this Data Source in the XML configuration file.
+      * Each child-tag of the protocol tag is one attribute where the child-tag name is the key and the contents of the tag is the value.
+      * If the protocol-specific configuration for this data source is more advanced (for instance using nested tags) 
+      * the initializeSourceFromXML(protocolElement) method should be used instead of this method to process the XML-file "manually"
       * @param map
       * @throws SystemError 
       */
      public void initializeDataSourceFromMap(HashMap<String,Object> map) throws SystemError {}      
+     
+     /**
+      * After a data source has been created with standard parameters (track, organism/build, dataformatName),
+      * this method can be called to initialize other settings based on attributes defined in the "protocol" section of an XML configuration file.
+      * The method is an alternative to initializeDataSourceFromMap(map) for data sources that have more complex configuration format needs.
+      * Note that both the initializeDataSourceFromMap() and this initializeSourceFromXML() method is called after each other, 
+      * and a data source should preferably implement no more than one of these two.
+      * @param protocolElement
+      * @throws Exception 
+      */
+     public void initializeSourceFromXML(org.w3c.dom.Element protocolElement) throws Exception {}
+     
      
     /**
      * Returns the non-standard (i.e. data source type-specific) parameters of this datasource as a Map
@@ -75,39 +109,29 @@ public abstract class DataSource implements Cloneable {
      public static void setDataLoader(DataLoader loader) {
          dataloader=loader;
      }
-     
-     public static String[] getSupportedProtocols() {
-         return new String[]{HTTP_GET,DAS_SERVER,SQL_SERVER,FILE_SERVER,VOID};
-     }
-     
-     /** Returns a list of DataSource types (protocols) that support the given feature dataset type */
-     public static String[] getDataSourceProtocolsSupportingFeatureDataType(Class type) {
-         ArrayList<String> supported=new ArrayList<String>();
-         if (DataSource_http_GET.supportsFeatureDataType(type)) supported.add(HTTP_GET);
-         if (DataSource_DAS.supportsFeatureDataType(type)) supported.add(DAS_SERVER);
-         if (DataSource_SQL.supportsFeatureDataType(type)) supported.add(SQL_SERVER);
-         if (DataSource_FileServer.supportsFeatureDataType(type)) supported.add(FILE_SERVER);
-         if (DataSource_VOID.supportsFeatureDataType(type)) supported.add(VOID);
-         String[] result=new String[supported.size()];
-         return supported.toArray(result);
-     }
-     
-     /** Returns a list of DataSource types (protocols) that do not support the given feature dataset type */
-     public static String[] getDataSourceProtocolsNotSupportingFeatureDataType(Class type) {        
-         ArrayList<String> collection=new ArrayList<String>();
-         collection.addAll(Arrays.asList(getSupportedProtocols()));
-         String[] supported=getDataSourceProtocolsSupportingFeatureDataType(type);
-         collection.removeAll(Arrays.asList(supported));
-         String[] result=new String[collection.size()];
-         return collection.toArray(result);
-     }     
-     
+
      
      /** Returns an array of Feature Dataset classes (DNASequenceDataset.class,
       *  NumericDataset.class, RegionDataset.class) denoting which data types
       *  are supported by this DataSource
+      *  @return a list of data classes that this Data Source can handle
       */
      public abstract Class[] getSupportedData();
+     
+     /**
+      * Returns True if this Data Source can handle datasets of the given type
+      * @param type The type of dataset, e.g. NumericDataset.class, DNASequenceDataset.class or RegionDataset.class
+      * @return 
+      */
+     public boolean supportsFeatureDataType(Class type) {     
+         Class[] supported = getSupportedData();
+         if (supported==null || supported.length==0) return false;
+         for (Class supportedtype:supported) {
+             if (supportedtype.isAssignableFrom(type)) return true;
+         }
+         return false;
+     }
+     
      
      public DataTrack getDataTrack() {
          return dataTrack;
@@ -131,6 +155,12 @@ public abstract class DataSource implements Cloneable {
      public void setOrganism(int organism) {
          this.organism=organism;
      }
+     
+     /** This should return TRUE if the DataSource relies on a standard data format (such as e.g. FASTA or GTF format)
+      *  which means that the track data can be parsed by one of MotifLab*s internal DataFormat claases 
+      *  or FALSE if the DataSource uses a proprietary format and must therefore be responsible for parsing its own data 
+      */
+     public abstract boolean usesStandardDataFormat();
      
      public String getDataFormat() {
          return dataformatName;
@@ -205,6 +235,10 @@ public abstract class DataSource implements Cloneable {
          return null;
      }
      
+     /**
+      * Returns the name of the protocol that the DataSource subclass implements, e.g. GET, DAS or SQL
+      * @return 
+      */
      public abstract String getProtocol();
      
      /** 
@@ -230,9 +264,9 @@ public abstract class DataSource implements Cloneable {
     
     /** 
      * This method will return the number of milliseconds one should wait before 
-     * accessing the server for this DataSource. The number is based on the time 
-     * of last access (as registered by the a call to notifyDataSourceAccess())
-     * and the "delay" property for this DataSource
+     * trying to once more access the server for this DataSource. 
+     * The number is based on the time of last access (as registered by the a 
+     * call to notifyDataSourceAccess()) and the "delay" property for this DataSource
      */
     
     public synchronized int getServerTimeslot() {
@@ -282,12 +316,75 @@ public abstract class DataSource implements Cloneable {
     @Override
     public abstract DataSource clone();
           
+    
+    /**
+     * This method can be implemented by subclasses other than the 5 "standard protocols" (GET, DAS, SQL, FILE and VOID)
+     * to return a GUI panel that can be used to set the properties of the Data Source. The panel should be filled
+     * in based on the current settings of the provided data source object
+     * @return 
+     */    
+    public javax.swing.JPanel getConfigurationPanel() {
+        return null;
+    }
+    
+    /**
+     * This method can be implemented by subclasses other than the 5 "standard protocols" (GET, DAS, SQL, FILE and VOID)
+     * to update the configuration of a Data Source based the provided panel. Note that the data source does
+     * not have to be "this" object
+     * @param configPanel A GUI panel that contains the new settings for this data source
+     * @throws SystemError if the panel is not recognized or something went wrong when parsing the panel
+     */    
+    public void updateConfigurationFromPanel(javax.swing.JPanel configPanel) throws SystemError {
+
+    }  
+    
+    /**
+     * This method can be implemented by subclasses other than the 5 "standard protocols" (GET, DAS, SQL, FILE and VOID)
+     * to return a documentation string for this Data Source. The string can contain HTML formatting
+     * @return a help string
+     */    
+    public String getHelp() {
+        return "";
+    }    
+    
+    
     @Override
     public String toString() {
-        return "DataSource["+name+"] for {"+motiflab.engine.data.Organism.getCommonName(organism)+"/"+getGenomeBuild()+"}  "+getProtocol()+","+getDataFormat();
+        return "DataSource["+name+"] for {"+motiflab.engine.data.Organism.getCommonName(organism)+"/"+getGenomeBuild()+"}  protocol="+getProtocol()+", format="+getDataFormat();
     }
     
     public void debug() {
         System.err.println("   ["+myindex+"] "+motiflab.engine.data.Organism.getCommonName(organism)+"  "+getProtocol()+"   "+getGenomeBuild());        
     }
+
+    
+    // -------------------------- Note: Data Sources are registered as MotifLab Resources only for the sake of the different data source "protocols" not the individual data sources
+    // --------------------------       In other words, only a singleton template (dummy) instance is registered as a resources for each DataSource subclass (protocol), but new DataSources can then be created as needed
+    
+    @Override
+    public String getResourceName() {
+        return getProtocol();
+    }
+
+    @Override
+    public Class getResourceClass() {
+        return this.getClass();
+    }
+
+    @Override
+    public String getResourceTypeName() {
+        return "DataSource";
+    }
+
+    @Override
+    public Icon getResourceIcon() {
+        return null;
+    }
+
+    @Override
+    public Object getResourceInstance() { // note that this returns the singleton template instance for this data source
+        return this;
+    }
+    
+    
 }
