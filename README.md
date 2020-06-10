@@ -25,7 +25,7 @@ MotifLab is written in Java. To build the project from source you will need:
 
 Most of the dependencies are available from the central Maven repository and will be handled automatically.
 However, one dependency - [bigwig-1.0.jar](https://www.motiflab.org/dependencies/bigwig-1.0.jar) - must currently be dealt with manually. 
-To install this dependency in your local Maven repository, download the file and run the following command:
+To install this dependency in your local Maven repository, download the file and run the following command: (remember to change "pathTo" to the actual path of the file)
 
 ```
 mvn install:install-file -Dfile=pathTo/bigwig-1.0.jar -DgroupId=org.broad.igv -DartifactId=bigwig -Dversion=1.0 -Dpackaging=jar
