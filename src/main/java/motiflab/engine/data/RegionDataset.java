@@ -7,6 +7,7 @@ package motiflab.engine.data;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import motiflab.engine.ExecutionError;
@@ -160,6 +161,7 @@ public class RegionDataset extends FeatureDataset implements Cloneable {
         newdataset.isnestedtrack=this.isnestedtrack;
         for (int i=0;i<size;i++) {
             RegionSequenceData seq=(RegionSequenceData)getSequenceByIndex(i);
+            if (seq==null) throw new ConcurrentModificationException("Sequence was deleted before the dataset could be cloned"); // not sure what else to do
             newdataset.addSequence((RegionSequenceData)seq.clone());
         }
         return newdataset;

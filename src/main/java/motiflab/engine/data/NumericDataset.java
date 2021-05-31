@@ -6,6 +6,7 @@
 package motiflab.engine.data;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import motiflab.engine.ExecutionError;
@@ -174,6 +175,7 @@ public class NumericDataset extends FeatureDataset implements Cloneable {
         int size=getNumberofSequences();
         for (int i=0;i<size;i++) {
             NumericSequenceData seq=(NumericSequenceData)getSequenceByIndex(i);
+            if (seq==null) throw new ConcurrentModificationException("Sequence was deleted before the dataset could be cloned"); // not sure what else to do
             newdataset.addSequence((NumericSequenceData)seq.clone());
         }
         return newdataset;
