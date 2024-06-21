@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import motiflab.engine.task.ExecutableTask;
 import motiflab.engine.ExecutionError;
+import motiflab.engine.ParameterSettings;
 import motiflab.engine.SystemError;
 import motiflab.engine.data.DNASequenceDataset;
 import motiflab.engine.data.DataSegment;
@@ -115,20 +116,26 @@ public class DataSource_DAS extends DataSource {
     }
     
     @Override
-    public boolean setServerAddress(String serveraddress) {
+    public boolean setServerAddress(String serveraddress) { 
+        // Replace the host part of this datasource's current baseURL based on the provided serveraddress. 
+        // This is mainly used in cloned datasources to try out alternative mirrors
         if (serveraddress.startsWith("http://")) serveraddress=serveraddress.substring("http://".length());
-        String newaddress=baseURL;
-        boolean startsWithHTTP=newaddress.startsWith("http://");
+        else if (serveraddress.startsWith("https://")) serveraddress=serveraddress.substring("https://".length());        
+        boolean startsWithHTTP=baseURL.startsWith("http://");
+        boolean startsWithHTTPS=baseURL.startsWith("https://");
+        String newaddress=baseURL;       
         if (startsWithHTTP) newaddress=newaddress.substring("http://".length());
+        else if (startsWithHTTPS) newaddress=newaddress.substring("https://".length());        
         int slashpos=newaddress.indexOf("/");
         if (slashpos>=0) {
             String suffix=newaddress.substring(slashpos);
             serveraddress+=suffix;          
         } 
         if (startsWithHTTP) serveraddress="http://"+serveraddress;
+        else if (startsWithHTTPS) serveraddress="https://"+serveraddress;        
         baseURL=serveraddress;
         return true;
-    }    
+    }     
     
     @Override
     public String getProtocol() {return PROTOCOL_NAME;}
@@ -169,7 +176,7 @@ public class DataSource_DAS extends DataSource {
         
         Object data=null;
         if (dataTrack.getDataType()==NumericDataset.class) {
-            // This is not complete!!! Missing parser for DAS Numeric data. I guess that is OK for now since DAS specification 1 doesn't seem to include support for wiggle tracks
+            // This is not complete!!! Missing parser for DAS Numeric data. I guess that is OK for now since DAS specification 1 doesn't seem to include support for numeric tracks
             data=null;
             throw new ExecutionError("SLOPPY PROGRAMMING ERROR: DAS protocol has not been implemented for Numeric Data");            
         } else if (dataTrack.getDataType()==RegionDataset.class) {
@@ -197,7 +204,7 @@ public class DataSource_DAS extends DataSource {
         DataSource_DAS copy=new DataSource_DAS(dataTrack, organism, genomebuild, baseURL, dataformatName, featurename);
         copy.delay=this.delay;
         copy.dataformat=this.dataformat;
-        copy.dataformatSettings=this.dataformatSettings;
+        if (dataformatSettings!=null) copy.dataformatSettings=(ParameterSettings)this.dataformatSettings.clone();
         return copy;
     }  
 

@@ -5,6 +5,7 @@
 
 package motiflab.engine.datasource;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import motiflab.engine.data.Region;
@@ -42,6 +43,13 @@ public class DASParser_Region {
         URL url=new URL(uri);
         URLConnection connection=url.openConnection();
         connection.setConnectTimeout(timeout);
+        // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
+        int status = ((HttpURLConnection)connection).getResponseCode();
+        String location = ((HttpURLConnection)connection).getHeaderField("Location");
+        if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+                String redirectURL = url.toString().replace("http","https");
+                return parse(redirectURL, timeout);
+        }         
         InputStream inputStream = connection.getInputStream();
         saxParser.parse(inputStream, handler);
         return regionlist;

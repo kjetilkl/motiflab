@@ -118,7 +118,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
     private JTable datasourceTable;
     private JTable serverTable;
     private JTable SQLsourceTable;
-    private ParametersPanel dataFormatParametersPanel=null;
+    private ParametersPanel dataFormatParametersPanel=null; // reference to the panel containing settings specific for the selected data format
     private SupportedOrganismsRendered organismRenderer=new SupportedOrganismsRendered();
     private DataConfiguration dataconfiguration=null;
     private HashMap<String,DataTrack> availableTracks=null;
@@ -251,7 +251,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editSourceProtocolCombobox.setSelectedItem(DataSource_http_GET.PROTOCOL_NAME); // this is safe as it applies to all types of tracks and hence is never disabled
         editSourceProtocolCombobox.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) { // protocol is change
+            public void actionPerformed(ActionEvent e) { // protocol is changed
                 String selected=editSourceProtocolCombobox.getSelectedItem().toString();              
                 Object renderer=editSourceProtocolCombobox.getRenderer();
                 if (renderer instanceof DisableableComboRenderer) {
@@ -358,6 +358,16 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         return protocolnames.toArray(datasourceprotocols);
     }
     
+    /**
+     * Returns a template instance of a DataSource with the specified protocol
+     * @param protocol
+     * @return 
+     */
+    private DataSource getDataSourceInstance(String protocol) {
+       DataSource datasource=(DataSource)engine.getResource(protocol, "DataSource");
+       return datasource;
+    }
+    
      /** Returns the names of DataSource types (protocols) that support the given feature dataset type */
      public String[] getDataSourceProtocolsSupportingFeatureDataType(Class type) {
          ArrayList<String> supported=new ArrayList<String>();
@@ -390,7 +400,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         options.add("Configuration file");
         options.add("Manual entry");
         // add plugin options        
-        ArrayList<MotifLabResource> resources=engine.getResources("DataTrackConfigurationDialog"); // Note that the name is different from the one in the method below
+        ArrayList<MotifLabResource> resources=engine.getResources("DataTrackConfigurationDialog"); // Note that the resource type is different from the one in the method below
         for (MotifLabResource r:resources) {
             options.add(r.getResourceName());
         }       
@@ -404,7 +414,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         options.add("UCSC Genome Browser");
         options.add("DAS Registry");        
         // add plugin options
-        ArrayList<MotifLabResource> resources=engine.getResources("DataSourceConfigurationDialog"); // Note that the name is different from the one in the method above
+        ArrayList<MotifLabResource> resources=engine.getResources("DataSourceConfigurationDialog"); // Note that the resource type is different from the one in the method above
         for (MotifLabResource r:resources) {
             options.add(r.getResourceName());
         }           
@@ -412,6 +422,9 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         return new DefaultComboBoxModel(options.toArray(list));  //         
     }
     
+    /** Returns a comboboxmodel containing the data formats supported by the specified FeatureDataset type and DataSource protocol
+     *  If any of the parameters provided are NULL, they will instead be inferred from the current selections in the GUI
+     */
     private DefaultComboBoxModel getSupportedDataFormats(Class type, String protocol) {
         if (type==null) {
             String typeString=(String)dataTrackPropertiesTypeCombobox.getSelectedItem();
@@ -421,12 +434,20 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         }
         ArrayList<DataFormat> inputformatsList=(type!=null)?gui.getEngine().getDataInputFormats(type):gui.getEngine().getFeatureDataInputFormats();
         if (protocol==null) protocol=(String)editSourceProtocolCombobox.getSelectedItem();
-        if (protocol!=null && protocol.equals(DataSource_FileServer.PROTOCOL_NAME)) {
-            // this is sort of a hack to limit the available dataformats for file servers
-            inputformatsList=filterDataFormats(inputformatsList, new Class[]{DataFormat_BigBed.class,DataFormat_BigWig.class,DataFormat_2bit.class}); // only allow these three to be used for new File Servers from now on.
-        } else if (protocol!=null && protocol.equals(DataSource_http_GET.PROTOCOL_NAME)) {
-            inputformatsList=filterDataFormatsThatOnlyParseLocalFiles(inputformatsList);
+        // the inputformatsList now contains all dataformats supported by the FeatureDataset type. Next, we also filter based on those supported by the DataSource protocol
+        if (protocol!=null) {
+            DataSource datasource = getDataSourceInstance(protocol);
+            inputformatsList = datasource.filterProtocolSupportedDataFormats(inputformatsList);
         }
+        // old hardcoded filtering for specific protocols
+//        if (protocol!=null && protocol.equals(DataSource_FileServer.PROTOCOL_NAME)) {
+//            // this is sort of a hack to limit the available dataformats for file servers
+//            inputformatsList=filterDataFormats(inputformatsList, new Class[]{DataFormat_BigBed.class,DataFormat_BigWig.class,DataFormat_2bit.class}); // only allow these three to be used for new File Servers from now on.
+//        } else if (protocol!=null && protocol.equals(DataSource_http_GET.PROTOCOL_NAME)) {
+//            inputformatsList=filterDataFormatsThatOnlyParseLocalFiles(inputformatsList);
+//        }
+
+        
         String[] list=new String[inputformatsList.size()];
         int i=0;
         for (DataFormat formatter:inputformatsList) {
@@ -436,33 +457,56 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         return new DefaultComboBoxModel(list);        
     }
   
-    private ArrayList<DataFormat> filterDataFormatsThatOnlyParseLocalFiles(ArrayList<DataFormat> list) {
-        Iterator<DataFormat> iter=list.iterator();
-        while (iter.hasNext()) {
-            DataFormat format=iter.next();
-            if (format.canOnlyParseDirectlyFromLocalFile()) iter.remove();
-        }
-        return list;
-    }    
+// --- The functionality of these 3 methods have been replaced by methods in other classes    
     
-    private ArrayList<DataFormat> filterDataFormats(ArrayList<DataFormat> list, Class[] filter) {
-        if (filter==null || filter.length==0) return list;
-        ArrayList<DataFormat> result=new ArrayList<DataFormat>();
-        for (DataFormat format:list) {
-            if (inClassFilter(format, filter)) result.add(format);
-        }
-        return result;
-    }
-    
-    private boolean inClassFilter(Object o, Class[] filter) {
-        for (Class c:filter) {
-            if (o.getClass()==c) return true;
-        }
-        return false;
-    }
+//    private ArrayList<DataFormat> filterDataFormatsThatOnlyParseLocalFiles(ArrayList<DataFormat> list) {
+//        Iterator<DataFormat> iter=list.iterator();
+//        while (iter.hasNext()) {
+//            DataFormat format=iter.next();
+//            if (format.canOnlyParseDirectlyFromLocalFile()) iter.remove();
+//        }
+//        return list;
+//    }    
+//    
+//    /** Returns the intersections between the two provided lists */
+//    private ArrayList<DataFormat> filterDataFormats(ArrayList<DataFormat> list, Class[] filter) {
+//        if (filter==null || filter.length==0) return list;
+//        ArrayList<DataFormat> result=new ArrayList<DataFormat>();
+//        for (DataFormat format:list) {
+//            if (inClassFilter(format, filter)) result.add(format);
+//        }
+//        return result;
+//    }
+//    
+//    private boolean inClassFilter(Object o, Class[] filter) {
+//        for (Class c:filter) {
+//            if (o.getClass()==c) return true;
+//        }
+//        return false;
+//    }
     
     /** */
     private void showDataFormatSettingsPanel(String protocol, JPanel panel) {
+        
+        // The GET and FILE protocol are the only ones that support standard DataFormats thay may have additional Data format settings
+        // whereas SQL, DAS and VOID protocols do not support standard DataFormats.
+        // Note, however, that future DataSource plugins may also support standard DataFormats
+        
+        // The two panels below: "additionalDataFormatSettingsPanel_GET" and "additionalDataFormatSettingsPanel_FILE"
+        // are just containers that are added to the higher-level panels for each of these DataSource types (in different "cards")
+
+        // The panel to define the dataformat-specific settings is provided by the second parameter to this method,
+        // but this is also a "singleton" which is referenced by the global variable "dataFormatParametersPanel".
+        // This (apparently) makes it easier to parse the settings afterwards.
+        
+        // the settings panel (and hence also the global "dataFormatParametersPanel" variable) is created anew every time
+        // the DataFormat is changed (by the user selecting a different one in a combobox), since each DataFormat will have a new set of format-specific parameters. 
+        // (The settings panel is automatically built from the parameters exported by the data format)
+        
+        // The purpose of this particular method is to add this new singleton panel to the 
+        // correct parent container, which can be either the GET or FILE panel cards, but may in the future also be plugin cards?
+        // So, this hardcoding is maybe not be best way to deal with things.
+        
         additionalDataFormatSettingsPanel_GET.removeAll();
         additionalDataFormatSettingsPanel_FILE.removeAll();
         if (panel!=null) {
@@ -1815,7 +1859,6 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                         JOptionPane.showMessageDialog(gui.getFrame(), e.getClass().getSimpleName()+"\n"+e.getMessage(),"Error" ,JOptionPane.ERROR_MESSAGE);
                     }
                 }
-                // datasourcepanel=((DataSource)resource).getConfigurationPanel(); // this is a generic panel which is filled in with the values of the current data source    
                 datasourcepanel=currentDataSource.getConfigurationPanel();
             }
             if (datasourcepanel==null) datasourcepanel=newMessagePanel("No configuration panel found for DataSource protocol: "+protocol);
@@ -2178,8 +2221,8 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
          if (datasource==null) addDataSource=true; else addDataSource=false; 
          currentDataSource=datasource;         
          String datatrackName=currentDataTrack.getName();
-         int organism=(addDataSource)?Organism.HUMAN:datasource.getOrganism(); // default to HUMAN hg18 when adding new source
-         String build=(addDataSource)?"hg18":datasource.getGenomeBuild();
+         int organism=(addDataSource)?Organism.HUMAN:datasource.getOrganism(); // default to HUMAN hg38 when adding new source
+         String build=(addDataSource)?"hg38":datasource.getGenomeBuild();
          if (build==null) build="";         
          String protocol=(addDataSource)?DataSource_http_GET.PROTOCOL_NAME:datasource.getProtocol();
          String dataformat=(addDataSource)?null:datasource.getDataFormat();
@@ -2251,7 +2294,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
         editSourceDataFormatCombobox.setVisible(enabled);
     }
     
-    /** Returns TRUE if the given DataSource protocol uses standard Data Formats to parse  track data */
+    /** Returns TRUE if the given DataSource protocol uses standard Data Formats to parse track data */
     private boolean usesStandardDataFormat(String protocol) {
         DataSource ds=getDataSourceTemplate(protocol);
         if (ds!=null) {
@@ -2384,7 +2427,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                javax.swing.JDialog dialog=(javax.swing.JDialog)d;
                dialog.setModal(true);
                dialog.setLocation(gui.getFrame().getWidth()/2-dialog.getWidth()/2, gui.getFrame().getHeight()/2-dialog.getHeight()/2);
-               dialog.setVisible(true);  // this should clock until the dialog closes itself
+               dialog.setVisible(true);  // this should lock until the dialog closes itself
                Object newsource=((ConfigurablePlugin)plugin).getPluginParameterValue("datasource"); // the plugin should set this parameter if the user has pressed OK button to close the dialog
                dialog.dispose();
                if (newsource instanceof DataSource) {
@@ -2549,7 +2592,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
      * "DataSourceConfigurationDialog" resource and should then be able to return both a "datatrack_dialog" and a "dataource_dialog".)
      * The dialog will be shown in a modal fashion. The dialog should contain "OK" and "Cancel" buttons
      * that can be used to close the dialog (the dialog is responsible for calling "setVisible(false)" if either
-     * of these buttons are pressed. If the OK button is pressed, the dialog must also make the selected DataSource
+     * of these buttons are pressed. If the OK button is pressed, the dialog must also make the selected DataTrack
      * object available through a call to getPluginParameterValue("datatrack"). If the Cancel button was pressed
      * the request for the datatrack parameter value should return NULL.
      * @param plugin A plugin which should also implement ConfigurablePlugin
@@ -2704,10 +2747,10 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     }
 
     @Action
-    public void editSourceOKButtonClickedAction() {
-        int organism=Organism.HUMAN;
+    public void editSourceOKButtonClickedAction() { // this method is called when the user clicks the OK button in the "edit data source" panel (which is used both for adding a new data source and editing an existing one)
+        int organism=Organism.HUMAN; // default
         Object organismObject=editSourceOrganismCombobox.getSelectedItem();
-        if (organismObject!=null) organism=((Integer)organismObject).intValue();
+        if (organismObject!=null) organism=((Integer)organismObject);
         String build=(String)editSourceBuildCombobox.getSelectedItem();
         build=(build==null)?"":build.trim();
         String dataformat=(String)editSourceDataFormatCombobox.getSelectedItem();
@@ -2721,7 +2764,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             if (protocol.equals(DataSource_DAS.PROTOCOL_NAME)) {
                 String baseURL=editDASsourceBaseURLtextfield.getText().trim();
                 String feature=editDASsourceFeatureTextfield.getText().trim();
-                currentDataSource=new DataSource_DAS(currentDataTrack,organism,build,baseURL,dataformat,feature);
+                currentDataSource=new DataSource_DAS(currentDataTrack,organism,build,baseURL,null,feature);
             }
             else if (protocol.equals(DataSource_http_GET.PROTOCOL_NAME)) {
                 String baseURL=editGETsourceBaseURLtextfield.getText().trim();
@@ -2744,7 +2787,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                 String tablename=editSQLsourceTableNameField.getText().trim();
                 int port=-1;
                 try {
-                  if (!portString.isEmpty()) port=Integer.parseInt(portString); 
+                    if (!portString.isEmpty()) port=Integer.parseInt(portString); 
                 } catch (NumberFormatException ne) {
                     JOptionPane.showMessageDialog(editSQLsourcePanel, "The port number must be an integer", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
@@ -2758,7 +2801,6 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                     return;                   
                 }
                 currentDataSource=new DataSource_SQL(currentDataTrack,organism,build, baseURL, port, databasename, tablename, username, passwordString, fields);
-                currentDataSource.setDataFormatSettings(dataformatSettings);
                 initializeSQLtableFromSource(null); // clear the table for next time
             }             
             else if (protocol.equals(DataSource_VOID.PROTOCOL_NAME)) {

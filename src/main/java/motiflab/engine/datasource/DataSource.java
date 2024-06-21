@@ -8,6 +8,7 @@
 
 package motiflab.engine.datasource;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import javax.swing.Icon;
@@ -35,7 +36,7 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
      protected String genomebuild=null;
      protected String dataformatName=null;
      protected DataFormat dataformat=null;
-     protected ParameterSettings dataformatSettings=null; // additional parameters for the DataFormat
+     protected ParameterSettings dataformatSettings=null; // additional parameters for the DataFormat used by this source object
      
      protected static DataLoader dataloader=null;
      
@@ -157,7 +158,7 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
      }
      
      /** This should return TRUE if the DataSource relies on a standard data format (such as e.g. FASTA or GTF format)
-      *  which means that the track data can be parsed by one of MotifLab*s internal DataFormat claases 
+      *  which means that the track data can be parsed by one of MotifLab*s internal DataFormat classes 
       *  or FALSE if the DataSource uses a proprietary format and must therefore be responsible for parsing its own data 
       */
      public abstract boolean usesStandardDataFormat();
@@ -186,6 +187,17 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
          return dataformat;
      }
  
+     
+     /** This method can be overridden in subclasses to filter out DataFormats
+      *  from the provided list that are not supported by the DataSource type/protocol
+      * 
+      * @param list
+      * @return 
+      */
+     public ArrayList<DataFormat> filterProtocolSupportedDataFormats(ArrayList<DataFormat> list) {
+         return list;
+     }
+     
     /**
      * Returns TRUE if the argument data source has the same organism
      * and genome build as this source

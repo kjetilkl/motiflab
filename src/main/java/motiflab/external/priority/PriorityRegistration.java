@@ -502,7 +502,7 @@ private void sendRegistration() {
         URLConnection   urlConn;
         DataOutputStream    printout;
         DataInputStream     input;
-        url = new URL ("http://www.cs.duke.edu/~amink/software/priority/download/index.html");
+        url = new URL ("https://www.cs.duke.edu/~amink/software/priority/download/index.html");
         urlConn = url.openConnection();
         urlConn.setDoInput (true);
         urlConn.setDoOutput (true);

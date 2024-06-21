@@ -4647,6 +4647,15 @@ public void removeAllResources() {
         InputStream inputStream = null;
         BufferedReader dataReader = null;
         URLConnection connection=url.openConnection();
+        // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
+        if (connection instanceof HttpURLConnection) {
+            int status = ((HttpURLConnection)connection).getResponseCode();
+            String location = ((HttpURLConnection)connection).getHeaderField("Location");
+            if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+                    String redirectURL = url.toString().replace("http","https");
+                    return getPage(new URL(redirectURL));
+            } 
+        }
         inputStream=connection.getInputStream();
         dataReader = new BufferedReader(new InputStreamReader(inputStream));
         String line=null;
@@ -4667,6 +4676,14 @@ public void removeAllResources() {
         InputStream inputStream = null;
         BufferedReader dataReader = null;
         HttpURLConnection connection=(HttpURLConnection)url.openConnection();
+        // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
+	int status = ((HttpURLConnection)connection).getResponseCode();
+	String location = ((HttpURLConnection)connection).getHeaderField("Location");
+	if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+		String redirectURL = url.toString().replace("http","https");
+	        getPage(new URL(redirectURL), document);
+                return;
+	}        
         inputStream=connection.getInputStream();
         dataReader = new BufferedReader(new InputStreamReader(inputStream));
         String line=null;
@@ -4686,6 +4703,15 @@ public void removeAllResources() {
         InputStream inputStream = null;
         BufferedReader dataReader = null;
         URLConnection connection=url.openConnection();
+        // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
+        if (connection instanceof HttpURLConnection) {
+            int status = ((HttpURLConnection)connection).getResponseCode();
+            String location = ((HttpURLConnection)connection).getHeaderField("Location");
+            if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+                    String redirectURL = url.toString().replace("http","https");
+                    return getPageAsList(new URL(redirectURL));
+            }        
+        }
         inputStream=connection.getInputStream();
         dataReader = new BufferedReader(new InputStreamReader(inputStream));
         String line=null;
@@ -5911,7 +5937,7 @@ public void removeAllResources() {
         try {
  	    HttpURLConnection connection = (HttpURLConnection)url.openConnection();            
             int status = connection.getResponseCode();
-            if (status>=00 && status<400) {               
+            if (status>=300 && status<400) {               
                 String newUrl = connection.getHeaderField("Location"); // get redirect url from "location" header field
                 url=resolveURL(new URL(newUrl)); // try recursively in case you are redirected multiple times
             } 

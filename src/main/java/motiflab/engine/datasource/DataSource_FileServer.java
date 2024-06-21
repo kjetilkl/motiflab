@@ -9,11 +9,16 @@ import java.util.HashMap;
 import motiflab.engine.task.ExecutableTask;
 import motiflab.engine.ExecutionError;
 import motiflab.engine.MotifLabEngine;
+import motiflab.engine.ParameterSettings;
 import motiflab.engine.SystemError;
 import motiflab.engine.data.DNASequenceDataset;
 import motiflab.engine.data.DataSegment;
 import motiflab.engine.data.NumericDataset;
 import motiflab.engine.data.RegionDataset;
+import motiflab.engine.dataformat.DataFormat;
+import motiflab.engine.dataformat.DataFormat_2bit;
+import motiflab.engine.dataformat.DataFormat_BigBed;
+import motiflab.engine.dataformat.DataFormat_BigWig;
 
 /**
  * The FileServer class relies on data read from files on the local filesystem
@@ -99,7 +104,7 @@ public class DataSource_FileServer extends DataSource {
         DataSource_FileServer copy=new DataSource_FileServer(dataTrack, organism, genomebuild, filepath, segmentsize, dataformatName);
         copy.delay=this.delay;
         copy.dataformat=this.dataformat;
-        copy.dataformatSettings=this.dataformatSettings;
+        if (dataformatSettings!=null) copy.dataformatSettings=(ParameterSettings)this.dataformatSettings.clone();
         return copy;
     } 
 
@@ -148,7 +153,26 @@ public class DataSource_FileServer extends DataSource {
     @Override
     public boolean usesStandardDataFormat() {
         return true;
-    }      
+    }     
+    
+    @Override
+     public ArrayList<DataFormat> filterProtocolSupportedDataFormats(ArrayList<DataFormat> list) {
+         // For now, the FILE DataSource protocol only supports the three DataFormats listed below
+        Class[] supported = new Class[]{DataFormat_BigBed.class, DataFormat_BigWig.class, DataFormat_2bit.class}; 
+        ArrayList<DataFormat> result=new ArrayList<>();
+        for (DataFormat format:list) {
+            if (inClassFilter(format, supported)) result.add(format);
+        }
+        return result;                  
+    }    
+     
+    private boolean inClassFilter(Object o, Class[] filter) {
+        for (Class c:filter) {
+            if (o.getClass()==c) return true;
+        }
+        return false;
+    }     
+     
     
     @Override
     public org.w3c.dom.Element getXMLrepresentation(org.w3c.dom.Document document) {

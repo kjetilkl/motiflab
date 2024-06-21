@@ -9,18 +9,22 @@ package motiflab.engine.datasource;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import motiflab.engine.ExecutionError;
+import motiflab.engine.ParameterSettings;
 import motiflab.engine.task.ExecutableTask;
 import motiflab.engine.SystemError;
 import motiflab.engine.data.DNASequenceDataset;
 import motiflab.engine.data.DataSegment;
 import motiflab.engine.data.NumericDataset;
 import motiflab.engine.data.RegionDataset;
+import motiflab.engine.dataformat.DataFormat;
 import motiflab.engine.protocol.ParseError;
 
 /**
@@ -124,18 +128,24 @@ public class DataSource_http_GET extends DataSource {
         } catch (MalformedURLException e) {return null;}
     } 
     
-     @Override
-    public boolean setServerAddress(String serveraddress) {
+    @Override
+    public boolean setServerAddress(String serveraddress) { 
+        // Replace the host part of this datasource's current baseURL based on the provided serveraddress. 
+        // This is mainly used in cloned datasources to try out alternative mirrors
         if (serveraddress.startsWith("http://")) serveraddress=serveraddress.substring("http://".length());
-        String newaddress=baseURL;
-        boolean startsWithHTTP=newaddress.startsWith("http://");
+        else if (serveraddress.startsWith("https://")) serveraddress=serveraddress.substring("https://".length());        
+        boolean startsWithHTTP=baseURL.startsWith("http://");
+        boolean startsWithHTTPS=baseURL.startsWith("https://");
+        String newaddress=baseURL;       
         if (startsWithHTTP) newaddress=newaddress.substring("http://".length());
+        else if (startsWithHTTPS) newaddress=newaddress.substring("https://".length());        
         int slashpos=newaddress.indexOf("/");
         if (slashpos>=0) {
             String suffix=newaddress.substring(slashpos);
             serveraddress+=suffix;          
         } 
         if (startsWithHTTP) serveraddress="http://"+serveraddress;
+        else if (startsWithHTTPS) serveraddress="https://"+serveraddress;        
         baseURL=serveraddress;
         return true;
     }       
@@ -164,6 +174,17 @@ public class DataSource_http_GET extends DataSource {
     @Override
     public boolean usesStandardDataFormat() {
         return true;
+    }      
+    
+    @Override
+    public ArrayList<DataFormat> filterProtocolSupportedDataFormats(ArrayList<DataFormat> list) {
+        // The GET protocol does not support DataFormats that can only parse local files, such as BigBED, BigWIG and 2bit
+        Iterator<DataFormat> iter=list.iterator();
+        while (iter.hasNext()) {
+            DataFormat format=iter.next();
+            if (format.canOnlyParseDirectlyFromLocalFile()) iter.remove();
+        }
+        return list;
     }      
     
     @Override
@@ -220,12 +241,17 @@ public class DataSource_http_GET extends DataSource {
     
     private ArrayList<String> getPage(URL url, int timeout, ExecutableTask task) throws Exception {
         ArrayList<String> document=new ArrayList<String>();
-        InputStream inputStream = null;
-        BufferedReader dataReader = null;
         URLConnection connection=url.openConnection();
         connection.setConnectTimeout(timeout);
-        inputStream=connection.getInputStream();
-        dataReader = new BufferedReader(new InputStreamReader(inputStream));
+        // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
+        int status = ((HttpURLConnection)connection).getResponseCode();
+        String location = ((HttpURLConnection)connection).getHeaderField("Location");
+        if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+                String redirectURL = url.toString().replace("http","https");
+                return getPage(new URL(redirectURL), timeout, task);
+        }        
+        InputStream inputStream=connection.getInputStream();
+        BufferedReader dataReader = new BufferedReader(new InputStreamReader(inputStream));
         long count=0;
         String line;
         try {
@@ -244,10 +270,10 @@ public class DataSource_http_GET extends DataSource {
 
     @Override
     public DataSource clone() {
-        DataSource_http_GET copy=new DataSource_http_GET(dataTrack, organism, genomebuild, baseURL, dataformatName, parameterStringTemplate);
+        DataSource_http_GET copy=new DataSource_http_GET(dataTrack, organism, genomebuild, baseURL, dataformatName, parameterStringTemplate);        
         copy.delay=this.delay;
         copy.dataformat=this.dataformat;
-        copy.dataformatSettings=this.dataformatSettings;
+        if (dataformatSettings!=null) copy.dataformatSettings=(ParameterSettings)this.dataformatSettings.clone();
         return copy;
     } 
 
