@@ -17,8 +17,14 @@ import motiflab.engine.data.NumericDataset;
 import motiflab.engine.data.RegionDataset;
 import motiflab.engine.dataformat.DataFormat;
 import motiflab.engine.dataformat.DataFormat_2bit;
+import motiflab.engine.dataformat.DataFormat_BED;
 import motiflab.engine.dataformat.DataFormat_BigBed;
 import motiflab.engine.dataformat.DataFormat_BigWig;
+import motiflab.engine.dataformat.DataFormat_FASTA;
+import motiflab.engine.dataformat.DataFormat_GFF;
+import motiflab.engine.dataformat.DataFormat_GTF;
+import motiflab.engine.dataformat.DataFormat_Interactions;
+import motiflab.engine.dataformat.DataFormat_WIG;
 
 /**
  * The FileServer class relies on data read from files on the local filesystem
@@ -29,9 +35,13 @@ import motiflab.engine.dataformat.DataFormat_BigWig;
  * This will probably also be the only (or at least primary) 
  * use supported by the Configuration GUI.
  * However, the class also supports a second "legacy" mode in which plain-text
- * full-genome datafiles in either FASTA, BED or WIG formats are split into 
+ * full-genome datafiles in either FASTA, BED or WIG formats may be split into 
  * smaller segment-files in order to access the middle of chromosomes more efficiently
- * (a sort of "poor-man's random access" file).
+ * (a sort of "poor-man's random access" file). 
+ * When the dataset is split across multiple segment files, the filepath should 
+ * point to a directory containing subdirectories named after the chromosome (e.g. "chr13")
+ * and containing files with filenames on the format "chrXXX_nnn.[fasta,wig,bed]"
+ * where "nnn" is an integer number 
  * 
  * @author kjetikl
  */
@@ -41,8 +51,8 @@ public class DataSource_FileServer extends DataSource {
     
     
     private String filepath=""; // For "single-file" sources this should point directly to the file. For split-files, it should point to the directory.
-    private int segmentsize=0; // Legacy setting. The size of each segment file (in bp). If the size is 0, the filepath should point directly to a single (unsplit) file. If the size is larger than 0 the filepath should point to a directory containing split-segment files.
-        
+    private int segmentsize=0; // Legacy setting. The size of each segment file (in bp). If the size is 0, the filepath should point directly to a single (unsegmented) file. If the size is larger than 0 the filepath should point to a directory containing split-segment files.
+    
     public DataSource_FileServer(DataTrack datatrack, int organism, String genomebuild, String filepath, int segmentsize, String dataFormatName) {
         super(datatrack,organism, genomebuild, dataFormatName);
         this.filepath=filepath;
@@ -156,14 +166,14 @@ public class DataSource_FileServer extends DataSource {
     }     
     
     @Override
-     public ArrayList<DataFormat> filterProtocolSupportedDataFormats(ArrayList<DataFormat> list) {
+     public ArrayList<DataFormat> filterProtocolSupportedDataFormats(ArrayList<DataFormat> list) { 
          // For now, the FILE DataSource protocol only supports the three DataFormats listed below
-        Class[] supported = new Class[]{DataFormat_BigBed.class, DataFormat_BigWig.class, DataFormat_2bit.class}; 
+        Class[] supported = new Class[]{DataFormat_BigBed.class, DataFormat_BigWig.class, DataFormat_2bit.class, DataFormat_FASTA.class, DataFormat_BED.class, DataFormat_GFF.class, DataFormat_GTF.class, DataFormat_Interactions.class, DataFormat_WIG.class}; 
         ArrayList<DataFormat> result=new ArrayList<>();
         for (DataFormat format:list) {
             if (inClassFilter(format, supported)) result.add(format);
         }
-        return result;                  
+        return result;              
     }    
      
     private boolean inClassFilter(Object o, Class[] filter) {
@@ -208,9 +218,13 @@ public class DataSource_FileServer extends DataSource {
             if (dataformatName==null || dataformatName.isEmpty()) throw new ExecutionError("Configuration Error: Data format not specified for File Server:\n"+this.toString()+"\nSelect 'Configure Datatracks' from the 'Configure' menu to set the data format for this source");
             throw new ExecutionError("Unable to resolve data format '"+dataformatName+"' in "+this.toString());
         }
-        if (dataformat.canOnlyParseDirectlyFromLocalFile()) {
+        if (dataformat.canOnlyParseDirectlyFromLocalFile()) { // Probably 2bit, BigBED or BigWig
             dataformat.parseInput(filepath, segment, dataformatSettings, task);
-        } else { // probably legacy file servers
+        } 
+        else if (segmentsize==0) { // the whole genome should be in a single file
+            dataformat.parseInput(filepath, segment, dataformatSettings, task);
+        }
+        else { // the whole-genome data is split across
             ArrayList<String> page=null;
                  if (type==DNASequenceDataset.class) page=getDNAData(chromosome,start,end, task.getMotifLabEngine());
             else if (type==NumericDataset.class) page=getNumericData(chromosome,start,end, task.getMotifLabEngine());
@@ -406,6 +420,7 @@ public class DataSource_FileServer extends DataSource {
         if (segmentsize<=0) throw new ExecutionError("Segment size <= 0 when reading region data from segmented files");        
         start--; // since this script gets its data from BED-files (which are 0-indexed) whereas the requested region is probably 1-indexed
                  // I will offset the region by 1 base upstream just to make sure I return the whole range requested by the user.
+                 // The actual handling of the coordinates will be handled later by the dataformat parser anyway.
         int splitsize=(segmentsize<=0)?Integer.MAX_VALUE:segmentsize;
         int firstSegment=(int)(start/splitsize);
         int lastSegment=(int)(end/splitsize);

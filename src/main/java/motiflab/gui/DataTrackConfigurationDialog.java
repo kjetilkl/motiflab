@@ -331,9 +331,9 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
                 removeSelectedRowsFromSQLsourceTable();
             }
         }); 
-        // disable the SegmentSize widget for all eternity since we do not allow "legacy" file servers to be configured
-        editFILEsourceSegmentsizeLabel.setVisible(false);
-        editFILEsourceSegmentsizeSpinner.setVisible(false);
+//        // disable the SegmentSize widget for all eternity since we do not allow "legacy" file servers to be configured
+//        editFILEsourceSegmentsizeLabel.setVisible(false);
+//        editFILEsourceSegmentsizeSpinner.setVisible(false);
         showTopMenuPanel();
         pack();
         gui.getFrame().setCursor(Cursor.getDefaultCursor());
@@ -433,20 +433,13 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
             else if (typeString!=null && typeString.equals("Region")) type=RegionDataset.class;
         }
         ArrayList<DataFormat> inputformatsList=(type!=null)?gui.getEngine().getDataInputFormats(type):gui.getEngine().getFeatureDataInputFormats();
+        Collections.sort(inputformatsList);
         if (protocol==null) protocol=(String)editSourceProtocolCombobox.getSelectedItem();
         // the inputformatsList now contains all dataformats supported by the FeatureDataset type. Next, we also filter based on those supported by the DataSource protocol
         if (protocol!=null) {
             DataSource datasource = getDataSourceInstance(protocol);
             inputformatsList = datasource.filterProtocolSupportedDataFormats(inputformatsList);
         }
-        // old hardcoded filtering for specific protocols
-//        if (protocol!=null && protocol.equals(DataSource_FileServer.PROTOCOL_NAME)) {
-//            // this is sort of a hack to limit the available dataformats for file servers
-//            inputformatsList=filterDataFormats(inputformatsList, new Class[]{DataFormat_BigBed.class,DataFormat_BigWig.class,DataFormat_2bit.class}); // only allow these three to be used for new File Servers from now on.
-//        } else if (protocol!=null && protocol.equals(DataSource_http_GET.PROTOCOL_NAME)) {
-//            inputformatsList=filterDataFormatsThatOnlyParseLocalFiles(inputformatsList);
-//        }
-
         
         String[] list=new String[inputformatsList.size()];
         int i=0;
