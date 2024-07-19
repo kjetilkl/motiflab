@@ -1,9 +1,8 @@
 /*
  A Data Source represents a way of obtaining a specific data track for a given genome build via a certain protocol.
  E.g. one data source could fetch a DNA track for hg19 from a DAS server and another data source could get a list of SNP regions for hg38 from an SQL database.
- Subclasses of DataSource implement different "protocols" (ways of obtaining data) such as the HTTP GET protocl, databases access or reading from local files.
- Each object instance of a subclass contains the information/configuration necessary to obtain a specific datatrack (or part of a track) via that protocol
- 
+ Subclasses of DataSource implement different "protocols" (ways of obtaining data) such as the HTTP GET protocol, databases access or reading from local files.
+ Each object instance of a subclass contains the information/configuration necessary to obtain a specific datatrack (or part of a track) via that protocol for a given organism/genome build.
  */
 
 package motiflab.engine.datasource;
@@ -261,7 +260,12 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
      
      /** 
       * Sets the server address (domain name or IP) for the internet server
-      * associated with this DataSource (or null)
+      * associated with this DataSource 
+      * If the new address includes a protocol, the new protocol will replace the old.
+      * If the new address includes a path-component, this will be used as a path-prefix before the original path.
+      * E.g. if the old baseURL is "http://xxx.com/database" and the new server address is "https://www.yyy.org/xcopy",
+      * then the new baseURL will be "https://www.yyy.org/xcopy/database".
+      * This function is mostly used to swap out the address with alternative mirror-servers for the DataSource if the original server fails to deliver
       */
      public abstract boolean setServerAddress(String address);     
      
@@ -341,8 +345,8 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
     
     /**
      * This method can be implemented by subclasses other than the 5 "standard protocols" (GET, DAS, SQL, FILE and VOID)
-     * to update the configuration of a Data Source based the provided panel. Note that the data source does
-     * not have to be "this" object
+     * to update the configuration of a Data Source based on the provided GUI panel. 
+     * Note that the data source does not have to be "this" object
      * @param configPanel A GUI panel that contains the new settings for this data source
      * @throws SystemError if the panel is not recognized or something went wrong when parsing the panel
      */    
@@ -370,7 +374,7 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
     }
 
     
-    // -------------------------- Note: Data Sources are registered as MotifLab Resources only for the sake of the different data source "protocols" not the individual data sources
+    // -------------------------- Note: Data Sources are registered as MotifLab Resources only for the sake of the different data source "protocols" and not for the individual data sources
     // --------------------------       In other words, only a singleton template (dummy) instance is registered as a resources for each DataSource subclass (protocol), but new DataSources can then be created as needed
     
     @Override

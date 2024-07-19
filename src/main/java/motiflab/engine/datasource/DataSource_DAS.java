@@ -44,7 +44,8 @@ public class DataSource_DAS extends DataSource {
      */
     public DataSource_DAS(DataTrack datatrack, int organism, String genomebuild, String baseURL, String dataFormatName, String featurename) {
         super(datatrack,organism,genomebuild,dataFormatName);
-        this.baseURL=baseURL;
+        if (baseURL.contains("://")) this.baseURL=baseURL; 
+        else this.baseURL="https://"+baseURL; // always include the protocol prefix
         this.featurename=featurename;   
     }
     
@@ -64,9 +65,6 @@ public class DataSource_DAS extends DataSource {
         return new Class[]{DNASequenceDataset.class,RegionDataset.class};
     }   
     
-//    public static boolean supportsFeatureDataType(Class type) {
-//        return (type==DNASequenceDataset.class || type==RegionDataset.class);
-//    }
     
     @Override    
     public void initializeDataSourceFromMap(HashMap<String,Object> map) throws SystemError {
@@ -119,21 +117,27 @@ public class DataSource_DAS extends DataSource {
     public boolean setServerAddress(String serveraddress) { 
         // Replace the host part of this datasource's current baseURL based on the provided serveraddress. 
         // This is mainly used in cloned datasources to try out alternative mirrors
-        if (serveraddress.startsWith("http://")) serveraddress=serveraddress.substring("http://".length());
-        else if (serveraddress.startsWith("https://")) serveraddress=serveraddress.substring("https://".length());        
-        boolean startsWithHTTP=baseURL.startsWith("http://");
-        boolean startsWithHTTPS=baseURL.startsWith("https://");
-        String newaddress=baseURL;       
-        if (startsWithHTTP) newaddress=newaddress.substring("http://".length());
-        else if (startsWithHTTPS) newaddress=newaddress.substring("https://".length());        
-        int slashpos=newaddress.indexOf("/");
-        if (slashpos>=0) {
-            String suffix=newaddress.substring(slashpos);
-            serveraddress+=suffix;          
-        } 
-        if (startsWithHTTP) serveraddress="http://"+serveraddress;
-        else if (startsWithHTTPS) serveraddress="https://"+serveraddress;        
-        baseURL=serveraddress;
+        String newServerAddress = serveraddress;
+        boolean newStartsWithHTTP=newServerAddress.toLowerCase().startsWith("http://");
+        boolean newStartsWithHTTPS=newServerAddress.toLowerCase().startsWith("https://");         
+        if (newStartsWithHTTP) newServerAddress=newServerAddress.substring("http://".length());
+        else if (newStartsWithHTTPS) newServerAddress=newServerAddress.substring("https://".length());        
+        boolean oldStartsWithHTTP=baseURL.toLowerCase().startsWith("http://");
+        boolean oldStartsWithHTTPS=baseURL.toLowerCase().startsWith("https://");      
+        String oldServerAddress=baseURL;       
+        if (oldStartsWithHTTP) oldServerAddress=oldServerAddress.substring("http://".length());
+        else if (oldStartsWithHTTPS) oldServerAddress=oldServerAddress.substring("https://".length());         
+        String originalPath="";
+        int slashpos=oldServerAddress.indexOf("/");
+        if (slashpos>=0) { // original URL contains a path
+            originalPath=oldServerAddress.substring(slashpos);  // this path includes the slash
+        }
+        String protocol=(oldStartsWithHTTP)?"http":"https"; // use HTTPS as default if not specified
+        if (newStartsWithHTTP) protocol="http"; 
+        else if (newStartsWithHTTPS) protocol="https"; // If new server has no protocol, default to the original's
+        if (!originalPath.isEmpty() && newServerAddress.endsWith("/")) newServerAddress=newServerAddress.substring(0, newServerAddress.length()-1); // strip duplicated slash
+        String newURL=protocol+"://"+newServerAddress+originalPath;           
+        baseURL=newURL;
         return true;
     }     
     
@@ -150,7 +154,8 @@ public class DataSource_DAS extends DataSource {
         return baseURL;
     }
     public void setBaseURL(String baseURL) {
-        this.baseURL=baseURL;
+        if (baseURL.contains("://")) this.baseURL=baseURL; 
+        else this.baseURL="https://"+baseURL; // always include the protocol prefix
     }
     
     @Override

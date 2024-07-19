@@ -127,10 +127,7 @@ public class DataSource_FileServer extends DataSource {
     public Class[] getSupportedData() {
         return new Class[]{DNASequenceDataset.class,RegionDataset.class,NumericDataset.class};
     }     
-    
-//    public static boolean supportsFeatureDataType(Class type) {
-//        return (type==DNASequenceDataset.class || type==RegionDataset.class || type==NumericDataset.class);
-//    }    
+     
 
     @Override
     public String getServerAddress() {

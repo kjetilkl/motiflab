@@ -150,10 +150,7 @@ public class DataSource_SQL extends DataSource {
     public Class[] getSupportedData() {
         return new Class[]{RegionDataset.class};
     }      
-    
-//    public static boolean supportsFeatureDataType(Class type) {
-//        return (type==RegionDataset.class);
-//    }    
+       
     
     @Override
     public boolean equals(Object obj) {

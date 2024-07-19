@@ -14,7 +14,10 @@ import motiflab.engine.data.Region;
 import motiflab.engine.data.RegionDataset;
 
 /**
- *
+ * The VOID protocol will always return "empty" tracks, 
+ * i.e. a Region Dataset with no regions, a Numeric Dataset where all values are zero
+ * or a DNA Sequence Dataset where all bases are 'N'
+ * 
  * @author Kjetil
  */
 public class DataSource_VOID extends DataSource {

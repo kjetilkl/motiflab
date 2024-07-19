@@ -4,7 +4,10 @@
 package motiflab.engine;
 
 /**
- *
+ * MotifLabResources are objects that can be registered with the engine with its "name" and an optional "type".
+ * Other classes can then ask the engine to provide them with a named resource or all resources of specific type.
+ * This makes it easier to dynamically add new components to the system, such as new Tools, Analyses or DataSources added by plugins.
+ * For instance, instead of using a hard-coded list of options for a menu, the menu can be populated with registered resources of the relevant type.
  * @author kjetikl
  */
 public interface MotifLabResource {

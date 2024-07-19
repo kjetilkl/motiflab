@@ -147,7 +147,6 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     public void initialize() {
         logMessage("Initializing MotifLab");
         importPlugins(new String[]{"type:DataSource","load:early"}, null);  //   
-        //loadEarlyTestPlugins(); // only for debugging!! This line can safely be removed
         initializeDataSourceTypes();
         setupDataLoader();
         geneIDResolver=new GeneIDResolver(this);        
@@ -179,7 +178,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     }
     
     /**
-     * Registers templates for all Data Source types (i.e. data source protocols) as MotifLab Resources
+     * Registers templates for all standard Data Source types (i.e. data source protocols) as MotifLab Resources
      */
     private void initializeDataSourceTypes() {
         registerResource(motiflab.engine.datasource.DataSource_http_GET.getTemplateInstance());
@@ -224,8 +223,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         importPredefinedMotifCollections(); // import information about predefined motif collections   
         importExternalPrograms(); // import external programs         
         importDataRepositories();         
-        importPlugins(null, new String[]{"type:DataSource", "load:early"});  // Data Sources and "early" plugins should already have been imported, so skip them here...     
-        // loadLateTestPlugins(); // only for debugging!! This line can safely be removed        
+        importPlugins(null, new String[]{"type:DataSource", "load:early"});  // Data Sources and "early" plugins should already have been imported, so skip them here...            
     }
 
     private static Date getCorrectDate(int year, int month, int day) {
@@ -2666,9 +2664,10 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     
     /** Imports plugins
      * This method can be called multiple times, but the same plugins should not be imported more than once.
-     * Two different lists can be optionally be provided as arguments. The first is a whitelist and, if it is defined,
-     * only plugins in this list will be imported. The second is a blacklist. If this is defined then all plugins except
-     * the ones in this list will be imported. The entries in the lists can refer to plugins on the form "meta-attribute:value".
+     * Two different lists can optionally be provided as arguments. 
+     * The first is a whitelist. If it is defined, only plugins in this list will be imported. 
+     * The second is a blacklist. If this is defined, then all (whitelisted) plugins except the ones in this list will be imported. 
+     * The entries in the lists can refer to plugins on the form "meta-attribute:value".
      * For instance "type:Tool", "type:DataSource" or "load:early" (if meta-attribute is omitted, it will default to "type". E.g. "Operation" equals "type:Operation")
      * @param processPlugins If defined (not null), plugins will only be imported if their "type" is in this list
      * @param skipPlugins    If defined (not null), plugins will NOT be imported if their "type" is in this list
@@ -2740,38 +2739,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         return false;
     }    
     
-    private void loadEarlyTestPlugins() { // this will manually import plugins. This is just for rapid development and testing!      
-//        try {
-//            motiflab.plugins.Test_Plugin plugin=new motiflab.plugins.Test_Plugin();
-//            plugin.initializePlugin(this);
-//            HashMap<String,Object> meta=new HashMap<String, Object>();
-//            meta.put("name",plugin.getPluginName());
-//            meta.put("type","Tool");
-//            meta.put("version","1.0");
-//            meta.put("description","lorem ipsum");
-//            meta.put("_plugin",plugin);
-//            registerPlugin(plugin,meta);
-//        } catch (Exception e) {
-//            logMessage("Plugin error: "+e.toString());
-//        }      
-    }
-    
-    private void loadLateTestPlugins() { // this will manually import plugins. This is just for rapid development and testing!                       
-//        try {
-//            motiflab.plugins.Test_Plugin plugin=new motiflab.plugins.Test_Plugin();
-//            plugin.initializePlugin(this);
-//            HashMap<String,Object> meta=new HashMap<String, Object>();
-//            meta.put("name",plugin.getPluginName());
-//            meta.put("type","Tool");
-//            meta.put("version","1.0");
-//            meta.put("description","lorem ipsum");
-//            meta.put("_plugin",plugin);
-//            registerPlugin(plugin,meta);
-//        } catch (Exception e) {
-//            logMessage("Plugin error: "+e.toString());
-//        }                 
-    }    
-    
+   
     /** Load all the classes within the provided JAR file and return the (first and hopefully only) class which implements the Plugin interface 
      *  The method will also add all JAR-files residing beneath a lib/ directory to the class loader, so that they can be loaded when required
      */

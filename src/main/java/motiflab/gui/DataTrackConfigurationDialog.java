@@ -137,6 +137,9 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         this.gui=gui;
         engine=gui.getEngine();
         initComponents();
+        // Hack since Netbeans no longer allows be to edit the components in initComponents()
+        
+        // -----------------
         cardpaneEditSourceMainCardPanel.setBorder(javax.swing.BorderFactory.createCompoundBorder(
                 BorderFactory.createEtchedBorder(), 
                 BorderFactory.createEmptyBorder(1, 10, 1, 10)
@@ -207,8 +210,8 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
             
         });
         datasourceTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                boolean selected=(datatrackTable.getSelectedRowCount()>0);            
+            public void valueChanged(ListSelectionEvent e) {              
+                boolean selected=(datatrackTable.getSelectedRowCount()>0 || datasourceTable.getSelectedRows().length>0); // getSelectedRowCount() sometimes return 0 even if rows are selected, which is wrong!           
                 editTrackEditButton.setEnabled(selected);
                 editTrackRemoveButton.setEnabled(selected);
             }
@@ -334,6 +337,14 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
 //        // disable the SegmentSize widget for all eternity since we do not allow "legacy" file servers to be configured
 //        editFILEsourceSegmentsizeLabel.setVisible(false);
 //        editFILEsourceSegmentsizeSpinner.setVisible(false);
+        dataTrackPropertiesDisplaySettingsLabel.setIcon(datasourcesLabel.getIcon());
+        dataTrackPropertiesDisplaySettingsLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        String displaySettingsHelp = "<html>A semicolon-separated list of <i>display settings</i> (protocol directives)<br>that can be used to control how the track will be displayed.<br>"
+                + "Use the placeholder \" <b>?</b> \" to refer to the track name (i.e. the \"target\").<br><br>Example:<br><tt>$multicolor(?)=true;$height(?)=100;</tt></html>";
+        dataTrackPropertiesDisplaySettingsLabel.setToolTipText(displaySettingsHelp);      
+        dataTrackPropertiesNameLabel.setIcon(new SimpleDataPanelIcon(16, 16, SimpleDataPanelIcon.BLANK_ICON, null)); // I have to add an icon to this label as well, or else it will be misaligned for some reason
+        dataTrackPropertiesNameLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);  
+        
         showTopMenuPanel();
         pack();
         gui.getFrame().setCursor(Cursor.getDefaultCursor());
@@ -1826,6 +1837,10 @@ private void editTrackCancelButtonPressed(java.awt.event.MouseEvent evt) {//GEN-
 }//GEN-LAST:event_editTrackCancelButtonPressed
 
 private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_editSourceProtocolChanged
+      // This method will be called twice in succession. First to DESELECT the currently selected item, and then again to SELECT the newly chosen item
+      // I only need to respond to the second case and return immediately for the first case.
+      if (evt.getStateChange()==java.awt.event.ItemEvent.DESELECTED) return; //    
+  
       String protocol=(String)editSourceProtocolCombobox.getSelectedItem();  
       // The first five Data Source types here are included in the standard MotifLab distribution, but other types can be added as plugins
            if (protocol.equals(DataSource_DAS.PROTOCOL_NAME)) ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "DASprotocol");
@@ -1834,32 +1849,34 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
       else if (protocol.equals(DataSource_SQL.PROTOCOL_NAME)) ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "SQLprotocol");
       else if (protocol.equals(DataSource_VOID.PROTOCOL_NAME)) ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "VOIDprotocol");
       else { // plugin protocol
-            gui.logMessage("editSourceProtocolChanged:  current source="+currentDataSource);
             JPanel datasourcepanel=null;
             Object resource=engine.getResource(protocol, "DataSource");
             if (resource instanceof DataSource) {
-                if (currentDataSource==null || !((DataSource)resource).getClass().isAssignableFrom(currentDataSource.getClass()) ) {
+                if (currentDataSource==null || !((DataSource)resource).getClass().isAssignableFrom(currentDataSource.getClass())) {                 
                     try {
-                      currentDataSource=((DataSource)resource).getClass().newInstance();
-                      int organism=Organism.HUMAN;
-                      Object organismObject=editSourceOrganismCombobox.getSelectedItem();
-                      if (organismObject!=null) organism=((Integer)organismObject).intValue();
-                      String build=(String)editSourceBuildCombobox.getSelectedItem();
-                      build=(build==null)?"":build.trim();
-                      String dataformat=(String)editSourceDataFormatCombobox.getSelectedItem();                      
-                      currentDataSource.initializeDataSource(currentDataTrack, organism, build, dataformat);
+                        DataSource newDataSource=((DataSource)resource).getClass().newInstance();
+                        int organism=Organism.HUMAN; // this default is replaced below with the value from the editor panel
+                        Object organismObject=editSourceOrganismCombobox.getSelectedItem();
+                        if (organismObject!=null) organism=((Integer)organismObject).intValue();
+                        String build=(String)editSourceBuildCombobox.getSelectedItem();
+                        build=(build==null)?"":build.trim();
+                        String dataformat=(String)editSourceDataFormatCombobox.getSelectedItem();                      
+                        newDataSource.initializeDataSource(currentDataTrack, organism, build, dataformat);
+                        datasourcepanel=newDataSource.getConfigurationPanel();
                     } catch (Exception e) {
                         JOptionPane.showMessageDialog(gui.getFrame(), e.getClass().getSimpleName()+"\n"+e.getMessage(),"Error" ,JOptionPane.ERROR_MESSAGE);
                     }
+                } else {
+                    datasourcepanel=currentDataSource.getConfigurationPanel();
                 }
-                datasourcepanel=currentDataSource.getConfigurationPanel();
+                
             }
             if (datasourcepanel==null) datasourcepanel=newMessagePanel("No configuration panel found for DataSource protocol: "+protocol);
             // ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).addLayoutComponent(datasourcepanel, protocol); // not working?!
             datasourcepanel.setName(protocol); // this is necessary so that we can search for it later by name
             addUniqueComponent(cardpaneEditSourceMainCardPanel, datasourcepanel, protocol);
-            ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, protocol);   
-    }
+            ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, protocol);
+    }          
 }//GEN-LAST:event_editSourceProtocolChanged
 
     /** Returns a very simple JPanel containing a single JLabel with a message */
@@ -2193,11 +2210,11 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
               if (datatype==null) dataTrackPropertiesTypeCombobox.setSelectedItem("Numeric");
          else if (datatype==DNASequenceDataset.class) dataTrackPropertiesTypeCombobox.setSelectedItem("Sequence");
          else if (datatype==NumericDataset.class) dataTrackPropertiesTypeCombobox.setSelectedItem("Numeric");
-         else if (datatype==RegionDataset.class) dataTrackPropertiesTypeCombobox.setSelectedItem("Region");
+         else if (datatype==RegionDataset.class) dataTrackPropertiesTypeCombobox.setSelectedItem("Region");            
          ArrayList<DataSource> sources=(addDataTrack)?new ArrayList<DataSource>():datatrack.getDatasources();
          String[] columnNames=new String[]{TABLECOLUMN_ORGANISM,TABLECOLUMN_BUILD,TABLECOLUMN_PROTOCOL,TABLECOLUMN_DATAFORMAT,TABLECOLUMN_SERVER};
          Object[][] data=new Object[sources.size()][columnNames.length];
-         for (int i=0;i<sources.size();i++) {
+         for (int i=0;i<sources.size();i++) {          
              DataSource source=sources.get(i);
              data[i]=new Object[]{new Integer(source.getOrganism()),source.getGenomeBuild(),source.getProtocol(),source.getDataFormat(),source.getServerAddress()};
          }
@@ -2207,7 +2224,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
          ((CardLayout)getContentPane().getLayout()).show(getContentPane(), "cardpaneEditTrack");        
          getRootPane().setDefaultButton(editTrackOKButton);
          editTrackEditButton.setEnabled(false); // this will be enabled when selecting a source
-         editTrackRemoveButton.setEnabled(false);
+         editTrackRemoveButton.setEnabled(false);      
     }    
     
     private void showEditDataSourcePanel(DataSource datasource) {
@@ -2358,8 +2375,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             Object object=engine.getResource(selectedSource, "DataSourceConfigurationDialog");
             if (object instanceof Plugin) addDataSourceFromPlugin((Plugin)object);
             else JOptionPane.showMessageDialog(gui.getFrame(), "Unable to show configuration dialog for '"+selectedSource+"'","Error", JOptionPane.ERROR_MESSAGE);
-        }
-                   
+        }                 
     }
     
     private void addDataSourceFromUCSC() {
@@ -2753,7 +2769,8 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             dataformatSettings=dataFormatParametersPanel.getParameterSettings();
         }           
         String protocol=(String)editSourceProtocolCombobox.getSelectedItem();  
-        if (addDataSource) { // adding new data source for a track         
+        
+        if (addDataSource) { // adding new data source for a track           
             if (protocol.equals(DataSource_DAS.PROTOCOL_NAME)) {
                 String baseURL=editDASsourceBaseURLtextfield.getText().trim();
                 String feature=editDASsourceFeatureTextfield.getText().trim();
@@ -2800,7 +2817,6 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                 currentDataSource=new DataSource_VOID(currentDataTrack,organism,build);
             }
             else { // add new source for plugin data source protocol
-                gui.logMessage("Case #1 - Adding new data source (empty)");
                 Object resource=engine.getResource(protocol, "DataSource");
                 if (resource instanceof DataSource) {
                     try {
@@ -2814,9 +2830,8 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                     }
                 }
             }
-            if (currentDataSource!=null) currentDataTrack.addDataSource(currentDataSource);            
+            if (currentDataSource!=null) currentDataTrack.addDataSource(currentDataSource);          
         } else { // editing existing data source for a track
-            gui.logMessage("Current data source protocol="+currentDataSource.getProtocol()+", selected protocol = "+protocol);
             String currentprotocol=currentDataSource.getProtocol();            
             if (protocol.equals(currentprotocol)) { // protocol is the same as before. Just replace the current values in the datasource object
                  currentDataSource.setDataFormat(dataformat);
@@ -2869,7 +2884,6 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                     ((DataSource_SQL)currentDataSource).setDBfields(fields); 
                     initializeSQLtableFromSource(null); // clear the table for next time                    
                  } else { // plugin data source
-                      gui.logMessage("Case #2 - Editing existing data source: "+currentDataSource);
                       try {
                            JPanel configPanel=getDataSourceConfigurationPanel(cardpaneEditSourceMainCardPanel,protocol); // the configuration panel for this protocol should be stored as a child of cardpaneEditSourceMainCardPanel
                            if (configPanel!=null) currentDataSource.updateConfigurationFromPanel(configPanel);
@@ -2879,7 +2893,6 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                        }                       
                  }                
             } else { // protocol has been changed. We need to replace the whole datasource object 
-                 gui.logMessage("Case #3a - Protocol was changed");
                  DataSource newsource=null;
                  if (protocol.equals(DataSource_DAS.PROTOCOL_NAME)) {
                      String baseURL=editDASsourceBaseURLtextfield.getText().trim();
@@ -2924,7 +2937,6 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                  else if (protocol.equals(DataSource_VOID.PROTOCOL_NAME)) {
                      newsource=new DataSource_VOID(currentDataTrack,organism,build);
                  } else {
-                     gui.logMessage("Case #3 - Adding new data source (empty) since protocol was changed");
                      Object resource=engine.getResource(protocol, "DataSource");
                      if (resource instanceof DataSource) {
                          try {
