@@ -373,6 +373,7 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
     /** Returns the rendered width of the sequence name associated with this visualizer
      */
     public int getRenderedLabelWidth() {
+        // if ("no lanel in front") return 20; else return namelabel.getWidth();
         return namelabel.getWidth();
     }
     
@@ -729,7 +730,7 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
        int start=settings.getSequenceViewPortStart(sequenceName);
        int end=settings.getSequenceViewPortEnd(sequenceName);
        String posString=start+"-"+end;
-       String newString = JOptionPane.showInputDialog("Enter new viewport coordinates", posString);              
+       String newString = JOptionPane.showInputDialog("Enter new viewport coordinates for "+sequenceName, posString);              
        if (newString==null) return;
        boolean TSSrelative=false; // To Do: Allow specification of relative (or TSS/TES-relative) coordinates as an alternative to just genomic coordinates
        boolean TESrelative=false;
@@ -1208,8 +1209,8 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
            int end=selectionPane.getSelectionEndPosition();
            int selectedbases=settings.countSelectedBasesInSequence(sequenceName, start, end, e.isShiftDown(), !e.isAltDown(), true);
            String statusmsg;
-           if (end-start==0) statusmsg="Selected 1 base [chr"+datasequence.getChromosome()+":"+start+"]. Total = "+selectedbases+" bp";
-           else statusmsg="Selected "+(end-start+1)+" bases  [chr"+datasequence.getChromosome()+":"+start+"-"+end+"]. Total = "+selectedbases+" bp";
+           if (end-start==0) statusmsg="Selected 1 base [chr"+datasequence.getChromosome()+":"+start+"]. Total = "+MotifLabEngine.groupDigitsInNumber(selectedbases)+" bp";
+           else statusmsg="Selected "+(MotifLabEngine.groupDigitsInNumber(end-start+1))+" bases  [chr"+datasequence.getChromosome()+":"+start+"-"+end+"]. Total = "+MotifLabEngine.groupDigitsInNumber(selectedbases)+" bp";
            gui.statusMessage(statusmsg);
            //setToolTipText((end-start==0)?"1 bp":((end-start+1)+" bp"));  // this did not work...                     
        }
@@ -1946,6 +1947,8 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
         
         @Override
         public void paintComponent(Graphics g) { // paint SequenceLabel
+            int align=settings.getSequenceLabelAlignment();
+            if (align==SwingConstants.TRAILING) return; // the label should not be painted here
             //super.paintComponent(g); // draws the text on the label            
             java.awt.Font font=getFont();
             java.awt.Rectangle bounds=font.getStringBounds(sequenceName, ((Graphics2D)g).getFontRenderContext()).getBounds();
@@ -1953,7 +1956,6 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
             if (sequenceNameWidth<20) sequenceNameWidth=20; // just to have a minimum
             int labelwidth=getWidth()-(labelLeftMargin+10); // 10 is just a "right margin"
             int arrowWidth=(sequenceNameWidth<labelwidth)?sequenceNameWidth:labelwidth;
-            int align=settings.getSequenceLabelAlignment();
             int y=0;
                  if (align==SwingConstants.TOP) y=((condensedmode)?1:rulerHeight)+9;//+bounds.height/2;
             else if (align==SwingConstants.CENTER) { // "middle" alignment
@@ -2520,6 +2522,7 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
         private int yoffsetViewPort=rulerHeight+19;
         private int yoffsetZoomLevel=rulerHeight+31;
         private int yoffsetButtons=rulerHeight+34;
+        private String viewPortString="";
         
         public InfoPanel() {
             super();           
@@ -2736,14 +2739,15 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
             if (condensedmode) yoffsetViewBox+=rulerHeight; // reset offset
             if (!condensedmode) {
                 //draw ViewPort coordinates
-                String viewPortString;
                 g.setColor(Color.black);
-                if (orientation==VisualizationSettings.DIRECT) {viewPortString=getChromosomeString()+viewPortStart+"\u2192"+viewPortEnd;}
-                else {viewPortString=getChromosomeString()+viewPortEnd+"\u2190"+viewPortStart;}
+                if (orientation==VisualizationSettings.DIRECT) {viewPortString=getChromosomeString()+MotifLabEngine.groupDigitsInNumber(viewPortStart)+"\u2192"+MotifLabEngine.groupDigitsInNumber(viewPortEnd);}
+                else {viewPortString=getChromosomeString()+MotifLabEngine.groupDigitsInNumber(viewPortEnd)+"\u2190"+MotifLabEngine.groupDigitsInNumber(viewPortStart);}
                 g.setFont(font);
                 if (settings.useTextAntialiasing()) ((Graphics2D)g).setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, MotifLabGUI.ANTIALIAS_MODE);
                 g.drawString(viewPortString, xoffset, yoffsetViewPort);
-
+                int viewPortStringWidth=getFontMetrics(getFont()).stringWidth(viewPortString);
+                if (viewPortStringWidth<150) viewPortStringWidth=150;
+                size.width=viewPortStringWidth;
                  //draw Zoom level
                 String zoomString;
                 if (scale>=0.01) { // zoom level above 1%. Round down to nearest integer

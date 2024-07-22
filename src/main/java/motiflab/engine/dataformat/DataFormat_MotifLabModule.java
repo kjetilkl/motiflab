@@ -284,7 +284,9 @@ public class DataFormat_MotifLabModule extends DataFormat {
        String[] goterms=null;       
        int count=0;
        if (target==null) target=new Module("unknown");
+       int lineNumber=0;
        for (String line:input) {
+           lineNumber++;
            line=line.trim();
            if (line.isEmpty() || line.startsWith("##") || line.startsWith("//")) continue; // a single # denotes a module property (key=value pair) but a double # is treated as a comment  (as is // )
            String[] split=line.split("\\s*=\\s*",2);
@@ -293,48 +295,48 @@ public class DataFormat_MotifLabModule extends DataFormat {
            //if (property.startsWith("#")) property=property.substring(1); // the leading # is optional
            String value=split[1];
            if (property.equals("moduleid") || property.equals("#moduleid")) {
-                if (count>0) throw new ParseError("The file contains multiple modules. Please load it as Module Collection instead");
+                if (count>0) throw new ParseError("The file contains multiple modules. Please load it as Module Collection instead", lineNumber);
                 moduleID=value;
                 count++;
            } else if (property.equals("maxlength") || property.equals("max length")) {
-               try {maxlength=Integer.parseInt(value);} catch(Exception e) {throw new ParseError("Unable to parse expected numeric value for MaxLength in '"+moduleID+"':"+line);}
+               try {maxlength=Integer.parseInt(value);} catch(Exception e) {throw new ParseError("Unable to parse expected numeric value for MaxLength in '"+moduleID+"':"+line, lineNumber);}
            } else if (property.equals("ordered")) {
                ordered=(value.equalsIgnoreCase("TRUE") || value.equalsIgnoreCase("YES"));
            } else if (property.equals("motifs")) {
                modulemotifnames=value.trim().split("\\s*,\\s*");
            } else if (property.startsWith("motif")) {
-               if (!property.matches("motif\\(\\s*\\S+\\s*\\)")) throw new ParseError("Unable to parse motif line for module '"+moduleID+"' Proper format is Motif(X)=<list of motifs>. Got: "+line);
+               if (!property.matches("motif\\(\\s*\\S+\\s*\\)")) throw new ParseError("Unable to parse motif line for module '"+moduleID+"' Proper format is Motif(X)=<list of motifs>. Got: "+line, lineNumber);
                String modulemotifname=split[0].replaceAll(".*\\(\\s*","");
                modulemotifname=modulemotifname.replaceAll("\\s*\\)\\s*","");
-               if (modulemotifnames==null || !arrayContains(modulemotifnames, modulemotifname)) throw new ParseError("Unknown module motif reference in line: "+line);
+               if (modulemotifnames==null || !arrayContains(modulemotifnames, modulemotifname)) throw new ParseError("Unknown module motif reference in line: "+line, lineNumber);
                String[] motifslist=value.split("\\s*,\\s*");
                singlemotifs.put(modulemotifname,motifslist);
            } else if (property.startsWith("orientation")) {
-               if (!property.matches("orientation\\(\\s*\\S+\\s*\\)")) throw new ParseError("Unable to parse orientation line for module '"+moduleID+"' Proper format is Orientation(X)=DIRECT|REVERSE|+|-|+1|-1. Got: "+line);
+               if (!property.matches("orientation\\(\\s*\\S+\\s*\\)")) throw new ParseError("Unable to parse orientation line for module '"+moduleID+"' Proper format is Orientation(X)=DIRECT|REVERSE|+|-|+1|-1. Got: "+line, lineNumber);
                String modulemotifname=split[0].replaceAll(".*\\(\\s*","");
                modulemotifname=modulemotifname.replaceAll("\\s*\\)\\s*","");
-               if (modulemotifnames==null || !arrayContains(modulemotifnames, modulemotifname)) throw new ParseError("Unknown module motif reference in line: "+line);
+               if (modulemotifnames==null || !arrayContains(modulemotifnames, modulemotifname)) throw new ParseError("Unknown module motif reference in line: "+line, lineNumber);
                if (value.equalsIgnoreCase("DIRECT") || value.equalsIgnoreCase("1") || value.equalsIgnoreCase("+1") || value.equalsIgnoreCase("+")) orientations.put(modulemotifname, Module.DIRECT);
                else if (value.equalsIgnoreCase("REVERSE") || value.equalsIgnoreCase("-") || value.equalsIgnoreCase("-1")) orientations.put(modulemotifname, Module.REVERSE);
            } else if (property.startsWith("distance")) {
-               if (!property.matches("distance\\(\\s*\\S+\\s*,\\s*\\S+\\s*\\)")) throw new ParseError("Unable to parse distance line for module '"+moduleID+"' Proper format is Distamce(X,Y)=[min,max]. Got: "+line);
+               if (!property.matches("distance\\(\\s*\\S+\\s*,\\s*\\S+\\s*\\)")) throw new ParseError("Unable to parse distance line for module '"+moduleID+"' Proper format is Distamce(X,Y)=[min,max]. Got: "+line, lineNumber);
                String pairstring=split[0].replaceAll(".*\\(\\s*","");
                pairstring=pairstring.replaceAll("\\s*\\)\\s*","");
                String[] pair=pairstring.split("\\s*,\\s*");
                String valuepairstring=value.replaceAll(".*\\[\\s*", "");
                valuepairstring=valuepairstring.replaceAll("\\s*\\]\\s*","");
                String[] valuepair=valuepairstring.split("\\s*,\\s*");
-               if (modulemotifnames==null || !arrayContains(modulemotifnames, pair[0]) || !arrayContains(modulemotifnames, pair[1])) throw new ParseError("Unknown module motif reference in line: "+line);
+               if (modulemotifnames==null || !arrayContains(modulemotifnames, pair[0]) || !arrayContains(modulemotifnames, pair[1])) throw new ParseError("Unknown module motif reference in line: "+line, lineNumber);
                int mindist=0;
                int maxdist=0; 
                if (valuepair[0].equalsIgnoreCase("UNLIMITED") || valuepair[0].equals("*")) mindist=Integer.MIN_VALUE;
                else try {
                    mindist=Integer.parseInt(valuepair[0]);
-               } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for min-distance: "+line);}
+               } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for min-distance: "+line, lineNumber);}
                if (valuepair[1].equalsIgnoreCase("UNLIMITED") || valuepair[1].equals("*")) maxdist=Integer.MAX_VALUE;
                else try {
                    maxdist=Integer.parseInt(valuepair[1]);
-               } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for max-distance: "+line);}
+               } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for max-distance: "+line, lineNumber);}
                distance.put(pair[0]+"\t"+pair[1], new int[]{mindist,maxdist});
            } else if (property.equals("go")) {
                goterms=value.split("\\s*,\\s*");
@@ -347,9 +349,9 @@ public class DataFormat_MotifLabModule extends DataFormat {
                java.awt.Color color=VisualizationSettings.convertHTMLrepresentationToColor(value);
                if (color!=null) engine.getClient().getVisualizationSettings().setFeatureColor(featureName, color, false);                            
            } else { // unknown property (i.e. user-defined, non-standard)
-                if (!Module.isValidUserDefinedPropertyKey(property)) throw new ParseError("Not a valid property name: '"+property+"' for module '"+moduleID+"'");
+                if (!Module.isValidUserDefinedPropertyKey(property)) throw new ParseError("Not a valid property name: '"+property+"' for module '"+moduleID+"'", lineNumber);
                 if (value.endsWith(";")) value=value.substring(0,value.length()-1); // allow one ';' at the end but remove it if present
-                if (value.contains(";")) throw new ParseError("Value for property '"+property+"' for module '"+moduleID+"' contains illegal character ';'");
+                if (value.contains(";")) throw new ParseError("Value for property '"+property+"' for module '"+moduleID+"' contains illegal character ';'", lineNumber);
                 Object valueobject=Module.getObjectForPropertyValueString(value);
                 if (valueobject!=null) target.setUserDefinedPropertyValue(property, valueobject);
            } 

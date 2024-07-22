@@ -508,8 +508,7 @@ private void trackSelectedAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:ev
         nameTextField.setEnabled(false);
         supportedBuildIcon.setEnabled(false);
         if (!argument.isEmpty()) argument="?"+argument;
-        final String urlstring=getBaseURL(server)+argument;
-        //gui.logMessage(urlstring);        
+        final String urlstring=getBaseURL(server)+argument;     
         SwingWorker worker=new SwingWorker<Void, Void>() {
             Exception ex=null;
             @Override 
@@ -858,7 +857,7 @@ private void trackSelectedAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:ev
     private HashMap<String,String[][]> parsePage(String page) {
         //gui.logMessage("*** Parsing new results from server ***");
         HashMap<String, String[][]> map=new HashMap<String,String[][]>();
-        String[] sections=page.split("<SELECT NAME="); 
+        String[] sections=page.split("<SELECT.*?NAME="); 
         if (sections.length<=1) return map; // there should be more than one !!
         for (int i=1;i<sections.length;i++) { // start at i=1 because the first section contains no SELECT
             String section=sections[i].substring(0,sections[i].indexOf("</SELECT"));
@@ -869,7 +868,6 @@ private void trackSelectedAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:ev
             String menuname=section.substring(0,pos).trim();
             menuname=stripQuotes(menuname);  
             String options[]=section.split("<OPTION");
-
             if (options.length<=1) continue; // no options? try the next section
             String[][] keyvalue=new String[options.length-1][3];
             for (int j=1;j<options.length;j++) {
@@ -887,7 +885,7 @@ private void trackSelectedAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:ev
                   keyvalue[j-1][0]=key;                
                   keyvalue[j-1][1]=value;     
                   keyvalue[j-1][2]=(isSelected)?"selected":null;
-            }            
+            }    
             map.put(menuname, keyvalue);
         }            
         return map;
@@ -915,7 +913,7 @@ private void trackSelectedAction(java.awt.event.ActionEvent evt) {//GEN-FIRST:ev
         if (currentConfiguration==null) return null;
         String[][] options=currentConfiguration.get("hgta_outputType");
         if (options==null) return null;
-        for (int i=0;i<options.length;i++) {
+        for (int i=0;i<options.length;i++) {         
                  if (options[i][0].equals("wigData")) return NumericDataset.class;
             else if (options[i][0].equals("gff")) return RegionDataset.class;   
         }

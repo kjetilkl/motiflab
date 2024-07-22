@@ -32,12 +32,12 @@ public class Motif extends Data implements Comparable, BasicDataType {
     public static final String HALFSITE="Halfsite";
     public static final String DIMER="Dimer";
     public static final String OLIGOMER="Oligomer";
+
     private static final String[] partStrings=new String[]{FULL,HALFSITE,DIMER,OLIGOMER}; // the order of these should correponds to the integer constants above!
-
-    private static String typedescription="Motif";
-    private static ArrayList<String> tissueNameTable=new ArrayList<String>(); // tissues are stored as numbers rather than Strings to save space (since a limited number of tissues appear all over)
-    private static HashMap<String,Short> tissueIDTable=new HashMap<String,Short>(); // tissues are stored as numbers rather than Strings to save space (since a limited number of tissues appear all over)
-
+    private static final String[] reservedproperties=new String[]{"short","shortname","short name","long","longname","long name","name","names","ID","consensus","IC","IC-content","GC-content","GO","class","classification","organisms","partners","interactions","alternatives","expression","quality","factors","size","part","halfsite","matrix","A","C","G","T","W"};
+    private static final String typedescription="Motif";
+    
+    private static transient HashMap<String,Class> userdefinedpropertyClasses=null; // contains a lookup-table defining the class-type of each user-defined property    
 
     private String name=null; // usually accession. This is the name or ID used when referencing this Motif
     private String shortname=null; //
@@ -55,12 +55,20 @@ public class Motif extends Data implements Comparable, BasicDataType {
     private double[][] matrix; // x rows, 4 columns
     private ArrayList<String> interactionpartners=null; // A list which stores the names (Motif IDs) of known interaction partners
     private ArrayList<String> knownduplicates=null; // A list which stores the names (Motif IDs) of known duplicate motif models
-    private ArrayList<Short> tissues=null; // A list which stores the IDs of tissues the factors for this motif is expressed in. Use the static tissueNameTable to  get the name of a tissue
     private int[] GOterms=null; // The GO terms associated with this motif stored as numbers rather than strings
     private HashMap<String,Object> properties=null; // A list which stores key-value pairs for user-defined properties. These keys are always in UPPERCASE!
-    private static final String[] reservedproperties=new String[]{"short","shortname","short name","long","longname","long name","name","names","ID","consensus","IC","IC-content","GC-content","GO","class","classification","organisms","partners","interactions","alternatives","expression","quality","factors","size","part","halfsite","matrix","A","C","G","T","W"};
+    private ArrayList<String> tissueExpression=null; // as of v2.0 this property will replace the deprecated "tissues" list and the two lookup tables below
 
-    private static transient HashMap<String,Class> userdefinedpropertyClasses=null; // contains a lookup-table defining the class-type of each user-defined property
+    @Deprecated
+    private ArrayList<Short> tissues=null; // DEPRECATED: A list which stores the IDs of tissues the factors for this motif is expressed in. Use the static tissueNameTable to get the name of a tissue    
+    @Deprecated
+    private static ArrayList<String> tissueNameTable=new ArrayList<String>(); // tissues are stored as numbers rather than Strings to save space (since a limited number of tissues appear all over)
+    @Deprecated
+    private static HashMap<String,Short> tissueIDTable=new HashMap<String,Short>(); // tissues are stored as numbers rather than Strings to save space (since a limited number of tissues appear all over)    
+   
+    
+
+
 
     /**
      * Constructs a new Motif object with the given name
@@ -414,6 +422,8 @@ public class Motif extends Data implements Comparable, BasicDataType {
      * Returns a  list of tissues that factors for this motifs are expressed in
      */
     public ArrayList<String> getTissueExpressionAsStringArray() {
+        if (tissueExpression!=null && !tissueExpression.isEmpty()) return tissueExpression;
+        // legacy case (Deprecated)
         if (tissues==null || tissues.isEmpty() || tissueNameTable==null || tissueNameTable.isEmpty()) return new ArrayList<String>();
         else {
            ArrayList<String>list=new ArrayList<String>(tissues.size());
@@ -429,6 +439,8 @@ public class Motif extends Data implements Comparable, BasicDataType {
      * (or an empty string)
      */
     public String getTissueExpressionAsString() {
+        if (tissueExpression!=null && !tissueExpression.isEmpty()) return MotifLabEngine.splice(tissueExpression, ",");
+        // legacy case (Deprecated)
         if (tissues==null || tissues.isEmpty() || tissueNameTable==null || tissueNameTable.isEmpty()) return "";
         StringBuilder builder=new StringBuilder();
         for (int i=0;i<tissues.size();i++) {
@@ -444,20 +456,35 @@ public class Motif extends Data implements Comparable, BasicDataType {
     * (Note: the argument array will be sorted when calling this method)
      */
     public void setTissueExpression(String[] names) {
-        if (names==null || names.length==0) tissues=null;
+        if (names==null || names.length==0) tissueExpression=null;
         else {
-            Arrays.sort(names);
-            tissues=new ArrayList<Short>(names.length);
-            for (String n:names ) tissues.add(Motif.getTissueIndexForName(n));
-        }
+            if (tissueExpression==null) tissueExpression=new ArrayList<>(names.length);
+            tissueExpression.clear();
+            tissueExpression.addAll(Arrays.asList(names));            
+        }        
+        // legacy case (Deprecated)           
+//        if (names==null || names.length==0) tissues=null;
+//        else {
+//            Arrays.sort(names);
+//            tissues=new ArrayList<Short>(names.length);
+//            for (String n:names ) tissues.add(Motif.getTissueIndexForName(n));
+//        }
     }
+    
     public void setTissueExpression(ArrayList<String> names) {
-        if (names==null || names.isEmpty()) tissues=null;
+        if (names==null || names.isEmpty()) tissueExpression=null;
         else {
-            String[] list=new String[names.size()];
-            list=names.toArray(list);
-            setTissueExpression(list);
-        }
+            if (tissueExpression==null) tissueExpression=new ArrayList<>(names.size());
+            tissueExpression.clear();
+            tissueExpression.addAll(names);
+        }       
+        // legacy case (Deprecated)        
+//        if (names==null || names.isEmpty()) tissues=null;
+//        else {
+//            String[] list=new String[names.size()];
+//            list=names.toArray(list);
+//            setTissueExpression(list);
+//        }
     }
     
     public void setGOterms(int[] terms) {
@@ -735,7 +762,8 @@ public class Motif extends Data implements Comparable, BasicDataType {
         if (part!=null && !part.equals(FULL)) {parameter.append("PART:");parameter.append(part);parameter.append(";");}
         if (quality<6) {parameter.append("QUALITY:");parameter.append(quality);parameter.append(";");}
         if (organisms!=null && !organisms.isEmpty()) {parameter.append("ORGANISMS:");parameter.append(organisms);parameter.append(";");}
-        if (tissues!=null && !tissues.isEmpty()) {parameter.append("EXPRESSION:");parameter.append(getTissueExpressionAsString());parameter.append(";");}
+        // if (tissues!=null && !tissues.isEmpty()) {parameter.append("EXPRESSION:");parameter.append(getTissueExpressionAsString());parameter.append(";");}
+        if (tissueExpression!=null && !tissueExpression.isEmpty()) {parameter.append("EXPRESSION:");parameter.append(getTissueExpressionAsString());parameter.append(";");}
         if (bindingfactors!=null && !bindingfactors.isEmpty()) {parameter.append("FACTORS:");parameter.append(bindingfactors);parameter.append(";");}
         if (interactionpartners!=null && !interactionpartners.isEmpty()) {parameter.append("PARTNERS:");parameter.append(MotifLabEngine.splice(interactionpartners,","));parameter.append(";");}
         if (knownduplicates!=null && !knownduplicates.isEmpty()) {parameter.append("ALTERNATIVES:");parameter.append(MotifLabEngine.splice(knownduplicates,","));parameter.append(";");}
@@ -999,7 +1027,8 @@ public class Motif extends Data implements Comparable, BasicDataType {
         this.classification=((Motif)source).classification;
         this.interactionpartners=((Motif)source).interactionpartners;
         this.knownduplicates=((Motif)source).knownduplicates;
-        this.tissues=((Motif)source).tissues;
+        // this.tissues=((Motif)source).tissues;
+        this.tissueExpression=((Motif)source).tissueExpression;
         double[][] sourcematrix=((Motif)source).matrix;
         //this.matrix=(double[][])sourcematrix.clone();
         this.matrix=sourcematrix;
@@ -1027,7 +1056,8 @@ public class Motif extends Data implements Comparable, BasicDataType {
         motif.organisms=this.organisms;
         motif.interactionpartners=(this.interactionpartners==null)?null:(ArrayList<String>)this.interactionpartners.clone();
         motif.knownduplicates=(this.knownduplicates==null)?null:(ArrayList<String>)this.knownduplicates.clone();
-        motif.tissues=(this.tissues==null)?null:(ArrayList<Short>)this.tissues.clone();
+        //motif.tissues=(this.tissues==null)?null:(ArrayList<Short>)this.tissues.clone(); // Deprecated. Do not include!
+        motif.tissueExpression=(this.tissueExpression==null)?null:(ArrayList<String>)this.tissueExpression.clone();
         motif.GOterms=(this.GOterms==null)?null:(int[])this.GOterms.clone();
         motif.properties=cloneProperties();//properties.clone();
         return motif;
@@ -1067,7 +1097,8 @@ public class Motif extends Data implements Comparable, BasicDataType {
         if ((other.organisms==null && this.organisms!=null) || (other.organisms!=null && this.organisms==null) ||  (other.organisms!=null && this.organisms!=null && !other.organisms.equals(this.organisms))) return false;
         if ((other.knownduplicates==null && this.knownduplicates!=null) || (other.knownduplicates!=null && this.knownduplicates==null) ||  (other.knownduplicates!=null && this.knownduplicates!=null && !listcompare(this.knownduplicates,other.knownduplicates))) return false;
         if ((other.interactionpartners==null && this.interactionpartners!=null) || (other.interactionpartners!=null && this.interactionpartners==null) ||  (other.interactionpartners!=null && this.interactionpartners!=null && !listcompare(this.interactionpartners,other.interactionpartners))) return false;
-        if ((other.tissues==null && this.tissues!=null) || (other.tissues!=null && this.tissues==null) ||  (other.tissues!=null && this.tissues!=null && !listcompare(this.tissues,other.tissues))) return false;
+        // if ((other.tissues==null && this.tissues!=null) || (other.tissues!=null && this.tissues==null) ||  (other.tissues!=null && this.tissues!=null && !listcompare(this.tissues,other.tissues))) return false;
+        if ((other.tissueExpression==null && this.tissueExpression!=null) || (other.tissueExpression!=null && this.tissueExpression==null) ||  (other.tissueExpression!=null && this.tissueExpression!=null && !listcompare(this.tissueExpression,other.tissueExpression))) return false;
         if ((other.GOterms==null && this.GOterms!=null) || (other.GOterms!=null && this.GOterms==null) ||  (other.GOterms!=null && this.GOterms!=null && !MotifLabEngine.listcompare(this.GOterms,other.GOterms))) return false;
         if ((other.properties==null && this.properties!=null) || (other.properties!=null && this.properties==null) ||  (other.properties!=null && this.properties!=null && !this.properties.equals(other.properties))) return false;
         if (other.matrixtype!=this.matrixtype) return false; // needed in order to avoid follow-up errors from old bug
@@ -1123,6 +1154,7 @@ public class Motif extends Data implements Comparable, BasicDataType {
      * (Note that tissue IDs can change from session to session, so always use proper
      * String names for "cross-session references"
      */
+    @Deprecated
     private static short getTissueIndexForName(String name) {
         if (tissueIDTable==null) tissueIDTable=new HashMap<>();
         if (tissueIDTable.containsKey(name)) return tissueIDTable.get(name);
@@ -1797,8 +1829,8 @@ public class Motif extends Data implements Comparable, BasicDataType {
                 motif.setKnownDuplicatesNames(alternatives);
             } else if (segment.startsWith("EXPRESSION:") && segment.length()>"EXPRESSION:".length()) {
                 String expressionString=segment.substring("EXPRESSION:".length()).trim();
-                String[] tissueExpression=expressionString.split("\\s*,\\s*");
-                motif.setTissueExpression(tissueExpression);
+                String[] tissueexpression=expressionString.split("\\s*,\\s*");
+                motif.setTissueExpression(tissueexpression);
             } else if (segment.startsWith("QUALITY:") && segment.length()>"QUALITY:".length()) {
                 try {
                     motif.setQuality(Integer.parseInt(segment.substring("QUALITY:".length())));
@@ -2437,7 +2469,7 @@ public class Motif extends Data implements Comparable, BasicDataType {
     private static final long serialVersionUID = 1L;
 
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
-         short currentinternalversion=1; // this is an internal version number for serialization of objects of this type
+         short currentinternalversion=2; // this is an internal version number for serialization of objects of this type. Version 2 replaced the "tissues<Short>" list (plus two LUTs) with the "tissueExpression<String>" list
          out.writeShort(currentinternalversion);
          out.defaultWriteObject();
     }
@@ -2445,7 +2477,13 @@ public class Motif extends Data implements Comparable, BasicDataType {
     private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
          short currentinternalversion=in.readShort(); // the internalversion number is used to determine correct format of data
          if (currentinternalversion==1) {
+             in.defaultReadObject();             
+             // at this point I would have liked to convert the old "tisse" list to the new "tissueExpression" list,
+             // but, as it turns out, serializing and restoring motifs that have tissue expression properties did not work at all in the previous version either :-S
+             // (Why was this not discovered in testing?)
+         } if (currentinternalversion==2) {
              in.defaultReadObject();
-         } else if (currentinternalversion>1) throw new ClassNotFoundException("Newer version");
+         } else if (currentinternalversion>2) throw new ClassNotFoundException("Newer version");
     }
+    
 }

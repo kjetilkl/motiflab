@@ -6,6 +6,7 @@
 package motiflab.engine.data;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import motiflab.engine.ExecutionError;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.task.ExecutableTask;
@@ -39,6 +40,7 @@ public class DNASequenceDataset extends FeatureDataset {
         int size=getNumberofSequences();
         for (int i=0;i<size;i++) {
             DNASequenceData seq=(DNASequenceData)getSequenceByIndex(i);
+            if (seq==null) throw new ConcurrentModificationException("Sequence was deleted before the dataset could be cloned"); // not sure what else to do
             newdataset.addSequence((DNASequenceData)seq.clone());
         }
         return newdataset;

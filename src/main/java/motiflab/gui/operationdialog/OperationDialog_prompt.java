@@ -138,7 +138,12 @@ public class OperationDialog_prompt extends OperationDialog {
         Class sourceClass=getSourceClass();
         if (constraintsTextfield.isEnabled() && (sourceClass==NumericVariable.class || sourceClass==TextVariable.class)) {
             String constraints=constraintsTextfield.getText();
-            if (constraints!=null && !constraints.trim().isEmpty()) {
+            if (constraints!=null) constraints=constraints.trim();
+            if (constraints!=null && !constraints.isEmpty()) {
+                if (!(constraints.startsWith("[") || constraints.startsWith("{")) && !(constraints.endsWith("]") || constraints.endsWith("}"))) { // brackets are missing. Just add them
+                    if (sourceClass==NumericVariable.class && constraints.contains(":")) constraints="["+constraints+"]";
+                    else constraints="{"+constraints+"}";
+                }
                 return new PromptConstraints(sourceClass, constraints);
             }
         } return null;        

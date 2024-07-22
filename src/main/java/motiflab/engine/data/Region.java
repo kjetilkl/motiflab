@@ -716,7 +716,7 @@ public class Region implements Cloneable,Serializable {
         int i=0;
         int total=keys.size();
         for (String key:keys) {
-            if (key.equalsIgnoreCase("thickStart") || key.equalsIgnoreCase("thickEnd")) continue;
+            if (key.equalsIgnoreCase("thickStart") || key.equalsIgnoreCase("thickEnd") || key.equalsIgnoreCase("thick")) continue;
             if (maxlength>0 && result.length()>maxlength) {
                 result.append("...");
                 break;

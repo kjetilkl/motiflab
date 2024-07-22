@@ -190,7 +190,9 @@ public class DataFormat_MapFormat extends DataFormat {
         if (entryseparator.equals(keyvalueseparator)) throw new ParseError("Unable to parse entries when entryseparator is the same as key-value separator '"+entryseparator+"'");
         if (!entryseparator.equals(" ")) entryseparator="\\x20*"+entryseparator+"\\x20*"; // regex with 0 or more spaces on each side of separator 
         if (!keyvalueseparator.equals(" ")) keyvalueseparator="\\x20*"+keyvalueseparator+"\\x20*"; // regex with 0 or more spaces on each side of separator 
+        int lineNumber=0;
         for (String line:input) {
+            lineNumber++;
             if (line.startsWith("#")) continue; // skip comment lines
             line=line.trim();
             String[] entries=line.split(entryseparator);
@@ -212,7 +214,7 @@ public class DataFormat_MapFormat extends DataFormat {
                      if (((DataMap)target).getMembersClass().equals(Sequence.class)) {
                         key=convertIllegalSequenceNamesIfNecessary(key, false);
                         String error=engine.checkSequenceNameValidity(key, false);
-                        if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+key+"' : "+error);                              
+                        if (error!=null) throw new ParseError("Encountered invalid name for sequence '"+key+"' : "+error, lineNumber);                              
                      }
                      if (allowDuplicates && target instanceof TextMap) {
                         Object currentValue=((DataMap)target).getValue(key);

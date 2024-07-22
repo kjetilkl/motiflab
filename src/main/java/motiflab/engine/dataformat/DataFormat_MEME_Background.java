@@ -69,11 +69,13 @@ public class DataFormat_MEME_Background extends DataFormat {
         Iterator iter=input.iterator();
         int order=-1;
         HashMap<String,Double> probabilities=new HashMap<String,Double>();
+        int lineNumber=0;
         while (iter.hasNext()) { // remove blank lines
+            lineNumber++;
             String next=((String)iter.next()).trim();
             if (next.isEmpty() || next.startsWith("#")) continue;
             String[] parts=next.split("\\s");
-            if (parts.length!=2) throw new ParseError("Expected oligo followed by probability value.\nFound '"+next+"'");
+            if (parts.length!=2) throw new ParseError("Expected oligo followed by probability value.\nFound '"+next+"'", lineNumber);
             String oligo=parts[0].toUpperCase();
             if (!isValidOligo(oligo)) throw new ParseError("Invalid DNA oligo encountered: '"+oligo+"'");
             try {
@@ -81,7 +83,7 @@ public class DataFormat_MEME_Background extends DataFormat {
                probabilities.put(oligo, value);
                int eorder=oligo.length()-1;
                if (eorder>order) order=eorder;
-            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: '"+parts[1]+"'");}
+            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: '"+parts[1]+"'", lineNumber);}
         }
         // now check that all oligos are present! 
         int index=0;

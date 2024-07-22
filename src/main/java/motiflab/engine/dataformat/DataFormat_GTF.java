@@ -178,9 +178,9 @@ public class DataFormat_GTF extends DataFormat {
                if (Thread.interrupted() || (task!=null && task.getStatus().equals(ExecutableTask.ABORTED))) throw new InterruptedException();                
                Thread.yield();
             }     
-            if (line.startsWith("#ERROR:")) throw new ParseError(line.substring("#ERROR:".length()).trim());            
+            if (line.startsWith("#ERROR:")) throw new ParseError(line.substring("#ERROR:".length()).trim(), count);            
             if (line.startsWith("#") || line.isEmpty()) continue; // GTF comment line
-            HashMap<String,Object> map=parseSingleLineInStandardFormat(line);
+            HashMap<String,Object> map=parseSingleLineInStandardFormat(line, count);
             // check that start<=end in the map. Else assume reverse strand
             if (map.get("START") instanceof Integer && map.get("END") instanceof Integer) {
                 int start=(Integer)map.get("START");
@@ -266,10 +266,10 @@ public class DataFormat_GTF extends DataFormat {
        
     
     /** parses a single line in a GTF-file and returns a HashMap with the different properties (with values as strings!) according to the capturing groups in the formatString */
-    private HashMap<String,Object> parseSingleLineInStandardFormat(String line) throws ParseError {
+    private HashMap<String,Object> parseSingleLineInStandardFormat(String line, int lineNumber) throws ParseError {
         HashMap<String,Object> result=new HashMap<String,Object>();
         String[] fields=line.split("\t");
-        if (fields.length!=9) throw new ParseError("Expected at 9 fields per line in GTF-format. Got "+fields.length+":\n"+line);
+        if (fields.length!=9) throw new ParseError("Expected at 9 fields per line in GTF-format. Got "+fields.length+":\n"+line, lineNumber);
         String chromosome=fields[0];
         if (chromosome.startsWith("chr")) chromosome=chromosome.substring(3);
         int underscorepos=fields[1].indexOf('_');
@@ -279,20 +279,20 @@ public class DataFormat_GTF extends DataFormat {
         result.put("FEATURE",fields[2]);
         try {
             result.put("START",Integer.parseInt(fields[3]));        
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage(), lineNumber);}
         try {
             result.put("END",Integer.parseInt(fields[4]));        
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage(), lineNumber);}
         try {
             result.put("SCORE",Double.parseDouble(fields[5]));        
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage(), lineNumber);}
         
         result.put("STRAND",fields[6]);
         String[] attributes=fields[8].split(";\\s*");
         for (String attribute:attributes) {
             attribute=attribute.trim();
             String[] pair=attribute.split(" ",2);
-            if (pair.length!=2) throw new ParseError("Attribute not in recognized '<key> <value>' format: "+attribute); 
+            if (pair.length!=2) throw new ParseError("Attribute not in recognized '<key> <value>' format: "+attribute, lineNumber); 
             String key=pair[0].trim();
             String value=pair[1].trim();
             if (value.startsWith("\"")) value=value.substring(1);

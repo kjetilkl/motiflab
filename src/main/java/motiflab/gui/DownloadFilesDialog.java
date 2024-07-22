@@ -56,7 +56,7 @@ public class DownloadFilesDialog extends javax.swing.JDialog {
      * @param files Specifies files to download. Each entry should be an Object[]{URL,File,Integer/Long}  
      *              where URL is the remote URL to download from, File is the local file to save to
      *              and Integer is the size of the remote file in bytes (can be NULL or 0 if size is unknown)
-     *              URL and File could be also Strings which will then be converted into URL/File.
+     *              URL and File could also be Strings which will then be converted into URL/File.
      * 
      */
     public void download(ArrayList<Object[]> filesList) {

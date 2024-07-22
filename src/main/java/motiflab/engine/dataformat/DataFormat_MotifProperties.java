@@ -253,16 +253,16 @@ public class DataFormat_MotifProperties extends DataFormat {
         if (target instanceof MotifCollection) return parseMotifCollection(input,(MotifCollection)target,properties,separator,listseparator, task);
         else if (target instanceof Motif) {
             if (input.size()<=firstLineIndex) throw new ParseError("No data to parse");
-            return parseMotif(input.get(firstLineIndex),(Motif)target,properties,separator,listseparator);  
+            return parseMotif(input.get(firstLineIndex),(Motif)target,properties,separator,listseparator, firstLineIndex+1);  
         }
         else throw new ParseError("Unable to parse Motif input to target data of type "+target.getTypeDescription());
     }
     
 
-    protected Motif parseMotif(String line, Motif target, String[] properties, String separator, String listseparator) throws ParseError {
+    protected Motif parseMotif(String line, Motif target, String[] properties, String separator, String listseparator, int lineNumber) throws ParseError {
        String motifID=null;
        String[] values=line.split(separator);
-       if (values.length<properties.length) throw new ParseError("Expected "+properties.length+" properties but found only "+values.length+": "+line);      
+       if (values.length<properties.length) throw new ParseError("Expected "+properties.length+" properties but found only "+values.length+": "+line, lineNumber);      
        // determine motifID first
        for (int i=0;i<properties.length;i++) {
            if (properties[i].equalsIgnoreCase("ID")) {
@@ -270,7 +270,7 @@ public class DataFormat_MotifProperties extends DataFormat {
                break;
            }
        }       
-       if (motifID==null) throw new ParseError("Missing required property: ID");
+       if (motifID==null) throw new ParseError("Missing required property: ID", lineNumber);
        if (target==null) target=new Motif(motifID);
        else target.rename(motifID);
        
@@ -288,16 +288,16 @@ public class DataFormat_MotifProperties extends DataFormat {
            Class type=Motif.getPropertyClass(property, engine);
                 if (type==String.class) {value=valueAsString;}
            else if (type==Boolean.class) {
-               if (!(basicValue instanceof Boolean)) throw new ParseError("Expected boolean value for property '"+property+"'. Got: "+valueAsString);    
+               if (!(basicValue instanceof Boolean)) throw new ParseError("Expected boolean value for property '"+property+"'. Got: "+valueAsString, lineNumber);    
                value=basicValue;
            }
            else if (type==Integer.class) {
-                if (!(basicValue instanceof Integer || basicValue instanceof Double)) throw new ParseError("Expected numeric value for property '"+property+"'. Got: "+valueAsString);           
+                if (!(basicValue instanceof Integer || basicValue instanceof Double)) throw new ParseError("Expected numeric value for property '"+property+"'. Got: "+valueAsString, lineNumber);           
                 value=basicValue;
            }
            else if (type==Double.class) {
                 if (basicValue instanceof Integer) basicValue=new Double((Integer)basicValue);
-                if (!(basicValue instanceof Double)) throw new ParseError("Expected numeric value for property '"+property+"'. Got: "+valueAsString);    
+                if (!(basicValue instanceof Double)) throw new ParseError("Expected numeric value for property '"+property+"'. Got: "+valueAsString, lineNumber);    
                 value=basicValue;
            }
            else if (type==List.class || type==ArrayList.class) {
@@ -319,7 +319,7 @@ public class DataFormat_MotifProperties extends DataFormat {
            try {
                target.setPropertyValue(property, value);
            } catch (ExecutionError e) {
-               throw new ParseError(e.getMessage());
+               throw new ParseError(e.getMessage(), lineNumber);
            }
        }
        return target;
@@ -330,9 +330,11 @@ public class DataFormat_MotifProperties extends DataFormat {
         if (target==null) target=new MotifCollection("MotifCollection");
         int count=0;  
         int size=input.size();
+        int lineNumber=0;
         for (String line:input) {
+            lineNumber++;
             if (line.isEmpty() || line.startsWith("#")) continue;
-            Motif motif=parseMotif(line, null, properties, separator, listseparator);
+            Motif motif=parseMotif(line, null, properties, separator, listseparator, lineNumber);
             target.addMotifToPayload(motif);            
             if (task!=null) task.setProgress(count, size);
             count++;

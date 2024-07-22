@@ -238,7 +238,7 @@ public class DataFormat_BedGraph extends DataFormat {
                if (count%500==0) Thread.yield();
             }
             if (line.startsWith("#") || line.isEmpty()) continue; // assume comment line
-            Object[] map=parseSingleLine(line,startpos,exclusiveEnd);
+            Object[] map=parseSingleLine(line,startpos,exclusiveEnd,count);
             String chromosome=(String)map[0];
             int regionstart=(Integer)map[1];
             int regionend=(Integer)map[2];
@@ -248,25 +248,25 @@ public class DataFormat_BedGraph extends DataFormat {
                targetSequence=(NumericSequenceData)target;
                if (!targetSequence.getChromosome().equals(chromosome)) continue;
                if (regionstart>targetSequence.getRegionEnd() || regionend<targetSequence.getRegionStart()) continue;
-               addRegionToTarget(targetSequence,map);
+               addRegionToTarget(targetSequence,map,count);
             } else if (target instanceof NumericDataset) { // add values to all applicable sequences (those that cover the genomic region)
                 ArrayList<FeatureSequenceData> sequences=((NumericDataset)target).getAllSequences();
                 for (FeatureSequenceData seq:sequences) {
                     targetSequence=(NumericSequenceData)seq;
                     if (!targetSequence.getChromosome().equals(chromosome)) continue;
                     if (regionstart>targetSequence.getRegionEnd() || regionend<targetSequence.getRegionStart()) continue;
-                    addRegionToTarget(targetSequence,map);
+                    addRegionToTarget(targetSequence,map,count);
                 }
             } else if (target instanceof DataSegment) {
-                addRegionToTarget(target,map);
-            } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-numeric track as target for BedGraph dataformat: "+target.getClass().getSimpleName());
+                addRegionToTarget(target,map,count);
+            } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-numeric track as target for BedGraph dataformat: "+target.getClass().getSimpleName(),count);
         }        
         return target;
     }
 
 
     /** parses a single line in a BedGraph-file and returns an array containing in order: chromosome (String, without CHR-prefix), region start (Integer, GFF-coordinates), region end (Integer, GFF-coordinates), value (Double) */
-    private Object[] parseSingleLine(String line, int startpos, boolean exclusiveEnd) throws ParseError {
+    private Object[] parseSingleLine(String line, int startpos, boolean exclusiveEnd, int linenumber) throws ParseError {
         String[] fields=line.split("\t");
         if (fields.length!=4) throw new ParseError("Expected 4 fields per line in BedGraph-format, but found "+fields.length);
         String chromosome=fields[0];
@@ -277,15 +277,15 @@ public class DataFormat_BedGraph extends DataFormat {
         try {
             start=Integer.parseInt(fields[1]);
             if (startpos==0) start++; // if BED is zero-indexed, convert to one-indexing which is used by MotifLab
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START coordinate: "+fields[1]);}        
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START coordinate: "+fields[1],linenumber);}        
         try {
             end=Integer.parseInt(fields[2]);
             if (startpos==0) end++; // if BED is zero-indexed, convert to one-indexing which is used by MotifLab
             if (exclusiveEnd) end--; // substract 1 because the end-coordinate in BED-files are non-inclusive        
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END coordinate: "+fields[2]);}        
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END coordinate: "+fields[2],linenumber);}        
         try {
             value=Double.parseDouble(fields[3]);
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value: "+fields[3]);}        
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value: "+fields[3],linenumber);}        
         Object[] result=new Object[]{chromosome,start,end,value};
         return result;
     }
@@ -296,7 +296,7 @@ public class DataFormat_BedGraph extends DataFormat {
      * @param map
      * @throws ParseError 
      */
-    private void addRegionToTarget(Object target, Object[] map) throws ParseError {
+    private void addRegionToTarget(Object target, Object[] map, int linenumber) throws ParseError {
         String chromosome=(String)map[0];
         int start=(Integer)map[1]; // these are here genomic (GFF-coordinates)
         int end=(Integer)map[2]; // these are here genomic (GFF-coordinates)
@@ -311,7 +311,7 @@ public class DataFormat_BedGraph extends DataFormat {
             start-=targetStart; // convert to relative coordinates
             end-=targetStart;            
             ((DataSegment)target).addNumericValue(start,end,value);
-        } else throw new ParseError("Target object neither NumericSequenceData nor DataSegment in DataFormat_BedGraph.addRegionToTarget():"+target.toString());
+        } else throw new ParseError("Target object neither NumericSequenceData nor DataSegment in DataFormat_BedGraph.addRegionToTarget():"+target.toString(),linenumber);
     }
 
 }

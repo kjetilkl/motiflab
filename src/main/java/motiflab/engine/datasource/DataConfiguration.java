@@ -224,17 +224,25 @@ public class DataConfiguration implements Cloneable {
                     }
                 }
                 DataSource datasource=null;
-                     if (protocoltype.equals(DataSource.HTTP_GET))  datasource=new DataSource_http_GET(track, organism, build, dataformatName);
-                else if (protocoltype.equals(DataSource.DAS_SERVER)) datasource=new DataSource_DAS(track, organism, build, dataformatName);
-                else if (protocoltype.equals(DataSource.FILE_SERVER)) datasource=new DataSource_FileServer(track, organism, build, dataformatName);
-                else if (protocoltype.equals(DataSource.SQL_SERVER)) datasource=new DataSource_SQL(track, organism, build);
-                else if (protocoltype.equals(DataSource.VOID)) datasource=new DataSource_VOID(track, organism, build);
+
+                     if (protocoltype.equals(DataSource_http_GET.PROTOCOL_NAME))  datasource=new DataSource_http_GET(track, organism, build, dataformatName);
+                else if (protocoltype.equals(DataSource_DAS.PROTOCOL_NAME)) datasource=new DataSource_DAS(track, organism, build, dataformatName);
+                else if (protocoltype.equals(DataSource_FileServer.PROTOCOL_NAME)) datasource=new DataSource_FileServer(track, organism, build, dataformatName);
+                else if (protocoltype.equals(DataSource_SQL.PROTOCOL_NAME)) datasource=new DataSource_SQL(track, organism, build);
+                else if (protocoltype.equals(DataSource_VOID.PROTOCOL_NAME)) datasource=new DataSource_VOID(track, organism, build);
+                else { // this could be a plugin datasource
+                    Object ds=MotifLabEngine.getEngine().getResource(protocoltype, "DataSource");
+                    if (ds instanceof DataSource) {
+                       Class datasourcetype=ds.getClass();
+                       datasource=(DataSource)datasourcetype.newInstance();
+                       datasource.initializeDataSource(track, organism, build, dataformatName);
+                    } else throw new SystemError("Unknown Data Source protocol: "+protocoltype);                    
+                }
                 
                 if (datasource!=null) {
                     try {
-                        if (datasource instanceof DataSource_SQL) {
-                           ((DataSource_SQL)datasource).initializeSourceFromXML(protocol); 
-                        } else datasource.initializeDataSourceFromMap(parameters);
+                        datasource.initializeDataSourceFromMap(parameters); // a data source could implement this method or the one below to initialize its attributes, but probably not both
+                        datasource.initializeSourceFromXML(protocol);       // a data source could implement this method or the one above to initialize its attributes, but probably not both
                     } catch (Exception e) {
                         throw new SystemError("Parameter error for DataTrack ["+datatrackName+"], data source number "+(j+1)+": "+e.getMessage());
                     }                   

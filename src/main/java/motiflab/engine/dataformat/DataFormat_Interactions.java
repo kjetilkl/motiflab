@@ -334,7 +334,7 @@ public class DataFormat_Interactions extends DataFormat {
                Thread.yield();
             }
             if (line.startsWith("#") || line.isEmpty()) continue; // assume comment line
-            HashMap<String,Object> map=parseSingleLine(line, startpos, exclusiveEnd, customfields);
+            HashMap<String,Object> map=parseSingleLine(line, startpos, exclusiveEnd, customfields, count);
             String regionchromosome=(String)map.get("CHROMOSOME");
             int regionstart=(Integer)map.get("START"); // These should now be 1-indexed and end-inclusive (like GFF-coordinates)
             int regionend=(Integer)map.get("END");     // These should now be 1-indexed and end-inclusive (like GFF-coordinates)
@@ -344,17 +344,17 @@ public class DataFormat_Interactions extends DataFormat {
                targetSequence=(RegionSequenceData)target;
                if (!targetSequence.getChromosome().equals(regionchromosome)) continue;
                if (regionstart>targetSequence.getRegionEnd() || regionend<targetSequence.getRegionStart()) continue;
-               addRegionToTarget(targetSequence,map);
+               addRegionToTarget(targetSequence,map, count);
             } else if (target instanceof RegionDataset) { // add region to all applicable sequences (those that cover the genomic region)
                 ArrayList<FeatureSequenceData> sequences=((RegionDataset)target).getAllSequences();
                 for (FeatureSequenceData seq:sequences) {
                     targetSequence=(RegionSequenceData)seq;
                     if (!targetSequence.getChromosome().equals(regionchromosome)) continue;
                     if (regionstart>targetSequence.getRegionEnd() || regionend<targetSequence.getRegionStart()) continue;
-                    addRegionToTarget(targetSequence,map);
+                    addRegionToTarget(targetSequence,map, count);
                 }
             } else if (target instanceof DataSegment) {
-                addRegionToTarget(target,map);
+                addRegionToTarget(target,map, count);
             } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for BED dataformat: "+target.getClass().getSimpleName());
         
         }        
@@ -362,7 +362,7 @@ public class DataFormat_Interactions extends DataFormat {
     }
 
 
-    private Region addRegionToTarget(Object target, HashMap<String,Object> map) throws ParseError {
+    private Region addRegionToTarget(Object target, HashMap<String,Object> map, int lineNumber) throws ParseError {
         int start=0, end=0; // these are offset relative to the start of the parent sequence or segment
         int targetStart=0;
         if (target instanceof RegionSequenceData) {
@@ -373,10 +373,10 @@ public class DataFormat_Interactions extends DataFormat {
             targetStart=(Integer)map.get("ParentTargetStart");
         } else throw new ParseError("Target object neither RegionSequenceData nor DataSegment in DataFormat_Interactions.addRegionToTarget():"+target.toString());
         Object startValue=map.get("START");
-        if (startValue==null) throw new ParseError("Missing 'start' coordinate");
+        if (startValue==null) throw new ParseError("Missing 'start' coordinate", lineNumber);
         if (startValue instanceof Integer) start=(Integer)startValue;        
         Object endValue=map.get("END");
-        if (startValue==null) throw new ParseError("Missing 'end' coordinate");
+        if (startValue==null) throw new ParseError("Missing 'end' coordinate", lineNumber);
         if (endValue instanceof Integer) end=(Integer)endValue;
         double score=0;
         Object scoreValue=map.get("SCORE");
@@ -452,7 +452,7 @@ public class DataFormat_Interactions extends DataFormat {
                 childMap.put("TYPE", childType);
                 childMap.put("nestedRegionName", "Region#"+(i+1));
                 childMap.put("ParentTargetStart", -start);
-                addRegionToTarget(newRegion,childMap);       
+                addRegionToTarget(newRegion,childMap, lineNumber);       
             }           
         }
         return newRegion;
@@ -460,7 +460,7 @@ public class DataFormat_Interactions extends DataFormat {
 
     
     /** parses a single line in a BED-file and returns a HashMap with the different properties (with values as strings!) according to the capturing groups in the formatString */
-    private HashMap<String,Object> parseSingleLine(String line, int startpos, boolean exclusiveEnd, String[] customfields) throws ParseError {
+    private HashMap<String,Object> parseSingleLine(String line, int startpos, boolean exclusiveEnd, String[] customfields, int lineNumber) throws ParseError {
         String[] format=new String[]{"chr","start","end","type","score","strand","thickStart","thickEnd","reserved","linkedRegions","blockSizes","chromStarts","typeChildren"};
         HashMap<String,Object> result=new HashMap<String,Object>();
         String[] fields=line.split("\t");
@@ -483,13 +483,13 @@ public class DataFormat_Interactions extends DataFormat {
                     start=Integer.parseInt(value);
                     if (startpos==0) start++; // if BED is zero-indexed, convert to one-indexing which is used by MotifLab
                     result.put("START",start);
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+value);}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+value, lineNumber);}
             }
             else if (property.equalsIgnoreCase("thickStart")) {
                 try {
                     thickstart=Integer.parseInt(value);
                     if (startpos==0) thickstart++; // if BED is zero-indexed, convert to one-indexing which is used by MotifLab
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for THICKSTART: "+value);}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for THICKSTART: "+value, lineNumber);}
             }            
             else if (property.equalsIgnoreCase("end")) {
                 try {
@@ -497,14 +497,14 @@ public class DataFormat_Interactions extends DataFormat {
                     if (startpos==0) end++; // if BED is zero-indexed, convert to one-indexing which is used by MotifLab
                     if (exclusiveEnd) end--; // substract 1 because the end-coordinate in BED-files are non-inclusive. (Note: if (startpos==0 && exclusiveEnd==true) then the end-coordinate is not really changed)
                     result.put("END",end);
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+value);}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+value, lineNumber);}
             }
             else if (property.equalsIgnoreCase("thickEnd")) {
                 try {
                     thickend=Integer.parseInt(value);
                     if (startpos==0) thickend++; // if BED is zero-indexed, convert to one-indexing which is used by MotifLab
                     if (exclusiveEnd) thickend--; // substract 1 because the end-coordinate in BED-files are non-inclusive. (Note: if (startpos==0 && exclusiveEnd==true) then the end-coordinate is not really changed)
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+value);}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+value, lineNumber);}
             }            
             else if (property.equalsIgnoreCase("type")) {
                 Object type=value;
@@ -514,7 +514,7 @@ public class DataFormat_Interactions extends DataFormat {
             else if (property.equalsIgnoreCase("score")) {
                 try {
                     result.put("SCORE",Double.parseDouble(value));
-                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+value);}
+                } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+value, lineNumber);}
             }
             else if (property.equalsIgnoreCase("strand") || property.equalsIgnoreCase("orientation")) {
                 String strandString=".";
@@ -524,7 +524,7 @@ public class DataFormat_Interactions extends DataFormat {
             } 
             else if (property.equalsIgnoreCase("blockSizes") || property.equalsIgnoreCase("chromStarts")) {
                 int parts=(Integer)result.get("linkedRegions");
-                int[] newvalue=parseIntegerList(value,parts);
+                int[] newvalue=parseIntegerList(value,parts, lineNumber);
                 result.put(property,newvalue);
             } 
             else if (property.equalsIgnoreCase("linkedRegions")) {
@@ -562,12 +562,12 @@ public class DataFormat_Interactions extends DataFormat {
         return value;
     }
 
-    private int[] parseIntegerList(String list, int expected) throws ParseError {
+    private int[] parseIntegerList(String list, int expected, int lineNumber) throws ParseError {
         String[] parts=list.trim().split("\\s*,\\s*");
-        if (parts.length<expected) throw new ParseError("Expected list with "+expected+" numbers, but got: "+list);
+        if (parts.length<expected) throw new ParseError("Expected list with "+expected+" numbers, but got: "+list, lineNumber);
         int[] numbers=new int[expected];
         for (int i=0;i<expected;i++) {
-           try {numbers[i]=Integer.parseInt(parts[i]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected number: "+parts[i]);}
+           try {numbers[i]=Integer.parseInt(parts[i]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected number: "+parts[i], lineNumber);}
         }
         return numbers;
     }

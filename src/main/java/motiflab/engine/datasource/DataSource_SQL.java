@@ -32,6 +32,8 @@ import org.w3c.dom.NodeList;
  */
 public class DataSource_SQL extends DataSource {
     
+    public static final String PROTOCOL_NAME="SQL";    
+    
     private String serverAddress=null;
     private int port=-1; // 
     private String databasename=null;
@@ -57,7 +59,12 @@ public class DataSource_SQL extends DataSource {
         this.port=port;  
         setDBfields(fields);
     }      
+
+    private DataSource_SQL() {}
     
+    public static DataSource_SQL getTemplateInstance() {
+        return new DataSource_SQL();
+    }      
     
     
     private Connection getConnection() throws SQLException {
@@ -136,17 +143,14 @@ public class DataSource_SQL extends DataSource {
 
     @Override
     public String getProtocol() {
-        return SQL_SERVER;
+        return PROTOCOL_NAME;
     }
 
     @Override
     public Class[] getSupportedData() {
         return new Class[]{RegionDataset.class};
     }      
-    
-    public static boolean supportsFeatureDataType(Class type) {
-        return (type==RegionDataset.class);
-    }    
+       
     
     @Override
     public boolean equals(Object obj) {
@@ -241,6 +245,11 @@ public class DataSource_SQL extends DataSource {
     public boolean useCache() {
         return true;
     }    
+    
+    @Override
+    public boolean usesStandardDataFormat() {
+        return false;
+    }      
     
     public String getQuery() throws ExecutionError {
         String chrField=getDBfieldForRegionProperty("chromosome");        
@@ -347,7 +356,7 @@ public class DataSource_SQL extends DataSource {
     public org.w3c.dom.Element getXMLrepresentation(org.w3c.dom.Document document) {
         org.w3c.dom.Element element = super.getXMLrepresentation(document);
         org.w3c.dom.Element protocol=document.createElement("Protocol");
-        protocol.setAttribute("type", SQL_SERVER);
+        protocol.setAttribute("type", PROTOCOL_NAME);
         
         org.w3c.dom.Element dbElement=document.createElement("Database");
         dbElement.setAttribute("server",serverAddress);

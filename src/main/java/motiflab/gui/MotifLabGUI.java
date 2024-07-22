@@ -189,7 +189,7 @@ public final class MotifLabGUI extends FrameView implements MotifLabClient, Data
     private static final String recentsessionsfilename="recentsession.ser";
     private static final String lastusedlocationfilename="lastdir.ser";
     private static final String autosavedsessionfilename="autosavedsession.mls";
-    private int maxRecentSessions=6; // max number of recent sessions to show in menu
+    private int maxRecentSessions=8; // max number of recent sessions to show in menu. This should probably be configurable somehow!
     private boolean promptBeforeDiscard=true;
     private boolean skip0=true;
     private JMenu viewInSidePanelMenu;  // lists open tabs in main window in the view menu
@@ -220,6 +220,7 @@ public final class MotifLabGUI extends FrameView implements MotifLabClient, Data
     private String autoSaveSessionSetting="Never";
     private int loggerLevel=2; // 1=show only errors, 2=show normal messages, 3=show execution log, 4=show every status update
     private int stackDumpLevel=0; // 0=no stack dumps, 1=stack dump critical errors, 2=stack dump all errors
+    private boolean useColorsInLog=true;
 
     private final static NumberFormat normalNumberFormat=NumberFormat.getInstance();
     private final static NumberFormat scientificNumberFormat=new DecimalFormat("0.#####E0");
@@ -3191,7 +3192,13 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
               public void run() {
                    try {
                         StyledDocument log=logPanel.getStyledDocument();
-                        log.insertString(log.getLength(), msg+"\n", null);
+                        int pos=log.getLength();
+                        log.insertString(pos, msg+"\n", null);
+                        if (useColorsInLog) {
+                            javax.swing.text.StyleContext sc = javax.swing.text.StyleContext.getDefaultStyleContext();
+                            javax.swing.text.AttributeSet aset = sc.addAttribute(javax.swing.text.SimpleAttributeSet.EMPTY, javax.swing.text.StyleConstants.Foreground, Color.RED);
+                            log.setCharacterAttributes(pos,msg.length(),aset, false);                                
+                        }
                    } catch (Exception e) {System.err.println("ERROR: Unable to write message in LogPanel: '"+msg+"'");}
               } // end run()
           }; // end Runnable
@@ -3211,7 +3218,16 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
              public void run() {
                    try {
                         StyledDocument log=logPanel.getStyledDocument();
-                        log.insertString(log.getLength(), msg+"\n", null);
+                        int pos=log.getLength();
+                        log.insertString(pos, msg+"\n", null);
+                        if (useColorsInLog && (msg.startsWith("NOTE:") || msg.contains("WARNING:") || msg.contains("Warning:") || msg.contains("ERROR:") || msg.contains("Error:"))) {
+                            Color usecolor=Color.RED;
+                            if (msg.startsWith("NOTE:")) usecolor=Color.BLUE;
+                            else if (msg.contains("WARNING:") || msg.contains("Warning:")) usecolor=Color.MAGENTA;
+                            javax.swing.text.StyleContext sc = javax.swing.text.StyleContext.getDefaultStyleContext();
+                            javax.swing.text.AttributeSet aset = sc.addAttribute(javax.swing.text.SimpleAttributeSet.EMPTY, javax.swing.text.StyleConstants.Foreground, usecolor);
+                            log.setCharacterAttributes(pos,msg.length(),aset, false);       
+                        }                                            
                    } catch (Exception e) {System.err.println("ERROR: Unable to write message in LogPanel: '"+msg+"'");}
              } // end run()
           }; // end Runnable
@@ -4262,6 +4278,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
 
 
     @Action
+    @Deprecated
     public void activateTransfacPROaction() {
         getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         ActivateTransfacProDialog dialog=new ActivateTransfacProDialog(this);
@@ -5055,7 +5072,9 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                     tabNames=(String[])restored.get("tabnames");
                     selectedTabName=(String)restored.get("selectedtab");
                     defaultCollectionCopy=(SequenceCollection)restored.get("defaultsequencecollection");
-                    sessionFormatVersion=Integer.parseInt((String)restored.get("sessionFormatVersion"));
+                    if (restored.containsKey("sessionFormatVersion")) {
+                        sessionFormatVersion=Integer.parseInt((String)restored.get("sessionFormatVersion"));
+                    }
                     if (restored.containsKey("exception")) throw (Exception)restored.get("exception");
                 } catch (Exception e) {
                     // logMessage("Exception was thrown");
@@ -5112,6 +5131,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                      else {
                          JOptionPane.showMessageDialog(getFrame(), ex.getClass().getSimpleName().toString()+":\n\n"+ex.getMessage(),"Restore Session Error" ,JOptionPane.ERROR_MESSAGE);
                          logMessage("Unable to restore session: "+ex.getClass().getSimpleName().toString()+" - "+ex.getMessage());
+                         ex.printStackTrace();
                      }
                 } else if (datalist==null || settings==null || restoredProtocols==null || tabNames==null || selectedTabName==null) {
                         String msg="";
@@ -6640,7 +6660,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                 else if (componentname.equalsIgnoreCase("datatracksButton")) flashpanel=databaseButton;
                 else {logMessage("Unrecognized panel:"+componentname);return;}
                 PanelFlasher flasher=new PanelFlasher(flashpanel, new java.awt.Color(255,200,0));
-                final Timer timer = new Timer(15, flasher);
+                final Timer timer = new Timer(20, flasher);
                 flasher.timer=timer;
                 timer.start();
             } else logMessage("Unrecognized internal command: "+command);
@@ -7062,8 +7082,11 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         private Color currentColor;
         private JPanel rect;
         private boolean ok=true;
+        private final JComponent flashpanel;
+        
         public PanelFlasher(JComponent flashpanel, Color startcolor) {
             this.currentColor=startcolor;
+            this.flashpanel=flashpanel;
             JPanel glasspane=(JPanel)getFrame().getGlassPane();
             if (glasspane.getLayout()!=null) glasspane.setLayout(null); // use absolute layout on glasspane
             rect=new JPanel() {
@@ -7091,6 +7114,13 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         public void actionPerformed(ActionEvent e) {
             JPanel glasspane=(JPanel)getFrame().getGlassPane();
             glasspane.setVisible(true);
+            try { // update flashing rectangle, just in case
+                java.awt.Point point=flashpanel.getLocationOnScreen();
+                SwingUtilities.convertPointFromScreen(point, glasspane);
+                rect.setBounds(flashpanel.getBounds());
+                rect.setLocation(point);
+                rect.setPreferredSize(flashpanel.getSize());
+            } catch (java.awt.IllegalComponentStateException ex) {}            
             int alpha=currentColor.getAlpha()-20;
             if (alpha<0) alpha=0;
             currentColor=new Color(currentColor.getRed(),currentColor.getGreen(),currentColor.getBlue(),alpha);

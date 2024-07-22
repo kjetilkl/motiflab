@@ -12,19 +12,16 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
-import motiflab.engine.MotifLabEngine;
 import motiflab.external.ExternalProgram;
 
 /**
@@ -364,12 +361,19 @@ public String getExecutableLocation() {
 
 /** 
  * Downloads an executable program from the given URL and "installs" it under the localfile
- * If isZIPfile is set to TRUE the file will be unzipped after downloading has finished
+ * If isZIPfile is set to TRUE, the file will be unzipped after downloading has finished
  * and the source ZIP-file will subsequently be deleted
  */
 private void downloadFile(URL url, File localfile, boolean isZIPfile) throws IOException {
-    //System.err.println("Is EDT="+SwingUtilities.isEventDispatchThread());
     URLConnection connection=url.openConnection();
+    // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually    
+    int status = ((HttpURLConnection)connection).getResponseCode();
+    String redirect = ((HttpURLConnection)connection).getHeaderField("Location");
+    if (status>300 && status<400 && redirect!=null && "http".equalsIgnoreCase(url.getProtocol()) && redirect.startsWith("https")) {
+            String redirectURL = url.toString().replace("http","https");
+            downloadFile(new URL(redirectURL), localfile, isZIPfile);
+            return;
+    }    
     final int filesize=connection.getContentLength();
     final int[] bytesread=new int[1];
     SwingUtilities.invokeLater(new Runnable() {

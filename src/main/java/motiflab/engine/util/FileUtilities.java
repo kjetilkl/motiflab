@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -58,7 +59,17 @@ public class FileUtilities {
 
     /** Copies a large file (possibly greater than 2GB to a destination file */
     public static void copyLargeURLToFile(URL source, File destination, PropertyChangeListener listener) throws IOException {
-        InputStream input = source.openStream();
+        URLConnection connection = source.openConnection();
+        if (connection instanceof HttpURLConnection) {
+            int status = ((HttpURLConnection)connection).getResponseCode();
+            String location = ((HttpURLConnection)connection).getHeaderField("Location");
+            if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")) {
+                    String redirectURL = source.toString().replace("http","https");
+                    copyLargeURLToFile(new URL(redirectURL), destination, listener);
+                    return;
+            }
+        }             
+        InputStream input = connection.getInputStream();
         copyLargeInputStreamToFile(input, destination, listener);
     }
 
@@ -66,6 +77,15 @@ public class FileUtilities {
         URLConnection connection = source.openConnection();
         connection.setConnectTimeout(connectionTimeout);
         connection.setReadTimeout(readTimeout);
+        if (connection instanceof HttpURLConnection) {
+            int status = ((HttpURLConnection)connection).getResponseCode();
+            String location = ((HttpURLConnection)connection).getHeaderField("Location");
+            if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")) {
+                    String redirectURL = source.toString().replace("http","https");
+                    copyLargeURLToFile(new URL(redirectURL), destination, connectionTimeout, readTimeout, listener);
+                    return;
+            }
+        }
         InputStream input = connection.getInputStream();
         copyLargeInputStreamToFile(input, destination, listener);
     }

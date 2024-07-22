@@ -182,9 +182,9 @@ public class DataFormat_WIG extends DataFormat {
                    chrom=matcher.group(1);
                    //if (!chrom.equalsIgnoreCase(matcher.group(1))) throw new ParseError("Expected data from chromosome '"+chrom+"' found chromosome '"+matcher.group(1)+"'");
                    spanString=matcher.group(3);
-               } else throw new ParseError("Unable to parse Wiggle-format declaration line: "+line);
+               } else throw new ParseError("Unable to parse Wiggle-format declaration line: "+line, count);
                if (spanString!=null) {
-                    try {span=Integer.parseInt(spanString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+spanString);}
+                    try {span=Integer.parseInt(spanString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+spanString, count);}
                }
                fixed=false;
             } else if (line.startsWith("fixedStep")) {
@@ -200,21 +200,21 @@ public class DataFormat_WIG extends DataFormat {
                    startString=matcher.group(2);
                    stepString=matcher.group(3);
                    spanString=matcher.group(5);
-                 } else throw new ParseError("Unable to parse Wiggle-format declaration line:\n"+line);
-               if (startString!=null) try {position=Integer.parseInt(startString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+startString);}
-               if (stepString!=null) try {step=Integer.parseInt(stepString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+stepString);}
-               if (spanString!=null) try {span=Integer.parseInt(spanString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+spanString);}
+                 } else throw new ParseError("Unable to parse Wiggle-format declaration line:\n"+line, count);
+               if (startString!=null) try {position=Integer.parseInt(startString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+startString, count);}
+               if (stepString!=null) try {step=Integer.parseInt(stepString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+stepString, count);}
+               if (spanString!=null) try {span=Integer.parseInt(spanString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+spanString, count);}
                fixed=true;
             } else { // data line
                 String[] values=line.split("\\s+");
                 if (bedGraph) { // embedded bedGraph section
-                     if (values.length!=4) throw new ParseError("Expected 4 values per line for embedded 'bedGraph' in Wiggle format (found "+values.length+"): "+line);                   
+                     if (values.length!=4) throw new ParseError("Expected 4 values per line for embedded 'bedGraph' in Wiggle format (found "+values.length+"): "+line, count);                   
                      int start=0;
                      int end=0;
                      double numericalValue=0;
-                     try {start=Integer.parseInt(values[1]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[1]);}
-                     try {end=Integer.parseInt(values[2]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[2]);}
-                     try {numericalValue=Double.parseDouble(values[3]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[3]);}
+                     try {start=Integer.parseInt(values[1]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[1], count);}
+                     try {end=Integer.parseInt(values[2]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[2], count);}
+                     try {numericalValue=Double.parseDouble(values[3]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[3], count);}
                      start+=1; // Add +1 to start coordinate since wiggle and MotifLab is 1-indexed but bedGraph is 0-indexed
                      if (target instanceof NumericSequenceData) {
                        for (int i=start;i<=end;i++)  ((NumericSequenceData)target).setValueAtGenomicPosition(chrom, i, numericalValue);
@@ -222,11 +222,11 @@ public class DataFormat_WIG extends DataFormat {
                        for (int i=start;i<=end;i++) ((NumericDataset)target).setValueAtGenomicPosition(chrom, i, numericalValue);
                      }                                            
                 } else if (fixed) {// fixedStep
-                    if (values.length!=1) throw new ParseError("Expected 1 value per line for fixedStep Wiggle format:\n"+line);
+                    if (values.length!=1) throw new ParseError("Expected 1 value per line for fixedStep Wiggle format:\n"+line, count);
                     double numericalValue=0;
                     try {
                         numericalValue=Double.parseDouble(values[0]);
-                    } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value:\n"+values[0]);}
+                    } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value:\n"+values[0], count);}
                     if (target instanceof NumericSequenceData) {
                        for (int i=0;i<span;i++)  ((NumericSequenceData)target).setValueAtGenomicPosition(chrom, position+i, numericalValue);
                     } else if (target instanceof NumericDataset) {
@@ -234,13 +234,13 @@ public class DataFormat_WIG extends DataFormat {
                     }                     
                     position+=step;
                 } else { // variableStep
-                    if (values.length!=2) throw new ParseError("Expected 2 values per line for variableStep Wiggle format (found "+values.length+"):\n"+line);
+                    if (values.length!=2) throw new ParseError("Expected 2 values per line for variableStep Wiggle format (found "+values.length+"):\n"+line, count);
                     double numericalValue=0;
                     int pos=0;
                     try {
                         pos=Integer.parseInt(values[0]);
                         numericalValue=Double.parseDouble(values[1]);
-                    } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric values: "+values[0]+" or "+values[1]);}
+                    } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric values: "+values[0]+" or "+values[1], count);}
                     if (target instanceof NumericSequenceData) {
                        for (int i=0;i<span;i++)  ((NumericSequenceData)target).setValueAtGenomicPosition(chrom, pos+i, numericalValue);
                     } else if (target instanceof NumericDataset) {
@@ -273,7 +273,7 @@ public class DataFormat_WIG extends DataFormat {
               if (Thread.interrupted() || (task!=null && task.getStatus().equals(ExecutableTask.ABORTED))) throw new InterruptedException();                
               Thread.yield();
             }        
-            if (line.startsWith("#ERROR:")) throw new ParseError(line.substring("#ERROR:".length()).trim());                       
+            if (line.startsWith("#ERROR:")) throw new ParseError(line.substring("#ERROR:".length()).trim(), count);                       
             else if (line.contains("no data points found")) {engine.logMessage("WARNING: no data points found");break;} //throw new ParseError("No data points found in Wiggle-file");
             else if (line.startsWith("track")) continue;
             else if (line.startsWith("#bedGraph")) {bedGraph=true;continue;}
@@ -284,11 +284,11 @@ public class DataFormat_WIG extends DataFormat {
                Matcher matcher=pattern.matcher(line);
                String spanString=null;
                if (matcher.find()) {
-                   if (!chrom.equalsIgnoreCase(matcher.group(1))) throw new ParseError("Expected data from chromosome '"+chrom+"' found chromosome '"+matcher.group(1)+"'");
+                   if (!chrom.equalsIgnoreCase(matcher.group(1))) throw new ParseError("Expected data from chromosome '"+chrom+"' found chromosome '"+matcher.group(1)+"'", count);
                    spanString=matcher.group(3);
-               } else throw new ParseError("Unable to parse Wiggle-format declaration line: "+line);
+               } else throw new ParseError("Unable to parse Wiggle-format declaration line: "+line, count);
                if (spanString!=null) {
-                    try {span=Integer.parseInt(spanString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+spanString);}
+                    try {span=Integer.parseInt(spanString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+spanString, count);}
                }
                fixed=false;
             } else if (line.startsWith("fixedStep")) {
@@ -299,36 +299,36 @@ public class DataFormat_WIG extends DataFormat {
                String stepString=null;
                String spanString=null;
                if (matcher.find()) {
-                   if (!chrom.equalsIgnoreCase(matcher.group(1))) throw new ParseError("Expected data from chromosome '"+chrom+"' found chromosome '"+matcher.group(1)+"'");
+                   if (!chrom.equalsIgnoreCase(matcher.group(1))) throw new ParseError("Expected data from chromosome '"+chrom+"' found chromosome '"+matcher.group(1)+"'", count);
                    startString=matcher.group(2);
                    stepString=matcher.group(3);
                    spanString=matcher.group(5);
-                 } else throw new ParseError("Unable to parse Wiggle-format declaration line: "+line);
-               if (startString!=null) try {position=Integer.parseInt(startString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for 'start': "+startString);}
-               if (stepString!=null) try {step=Integer.parseInt(stepString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for 'step': "+stepString);}
-               if (spanString!=null) try {span=Integer.parseInt(spanString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for 'span': "+spanString);}
+                 } else throw new ParseError("Unable to parse Wiggle-format declaration line: "+line, count);
+               if (startString!=null) try {position=Integer.parseInt(startString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for 'start': "+startString, count);}
+               if (stepString!=null) try {step=Integer.parseInt(stepString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for 'step': "+stepString, count);}
+               if (spanString!=null) try {span=Integer.parseInt(spanString);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value for 'span': "+spanString, count);}
                fixed=true;
             } else { // data line
                 String[] values=line.split("\\s+");
                 if (bedGraph) { // embedded bedGraph section
-                     if (values.length!=4) throw new ParseError("Expected 4 values per line for embedded 'bedGraph' in Wiggle format (found "+values.length+"): "+line);                   
+                     if (values.length!=4) throw new ParseError("Expected 4 values per line for embedded 'bedGraph' in Wiggle format (found "+values.length+"): "+line, count);                   
                      int start=0;
                      int end=0;
                      double numericalValue=0;
-                     try {start=Integer.parseInt(values[1]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[1]);}
-                     try {end=Integer.parseInt(values[2]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[2]);}
-                     try {numericalValue=Double.parseDouble(values[3]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[3]);}
+                     try {start=Integer.parseInt(values[1]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[1], count);}
+                     try {end=Integer.parseInt(values[2]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[2], count);}
+                     try {numericalValue=Double.parseDouble(values[3]);} catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[3], count);}
                      int bufferpointer=0;
                      for (int i=start;i<end;i++) { // the end-coordinate is not included in bedGraph [start,end)
                         bufferpointer=i-dataSegmentStart+1; // add +1 because wiggle and MotifLab uses 1-indexed chromosomes while bedGraph uses 0-indexed
                         if (bufferpointer>=0 && bufferpointer<buffer.length) buffer[bufferpointer]=numericalValue;
                      }                      
                 } else if (fixed) {// fixedStep
-                    if (values.length!=1) throw new ParseError("Expected 1 value per line for fixedStep Wiggle format (found "+values.length+"): "+line);
+                    if (values.length!=1) throw new ParseError("Expected 1 value per line for fixedStep Wiggle format (found "+values.length+"): "+line, count);
                     double numericalValue=0;
                     try {
                         numericalValue=Double.parseDouble(values[0]);
-                    } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[0]);}
+                    } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric value: "+values[0], count);}
                     int bufferpointer=0;
                     for (int i=0;i<span;i++) {
                         bufferpointer=position+i-dataSegmentStart;
@@ -336,13 +336,13 @@ public class DataFormat_WIG extends DataFormat {
                     }
                     position+=step;
                 } else { // variableStep
-                    if (values.length!=2) throw new ParseError("Expected 2 values per line for variableStep Wiggle format (found "+values.length+"): "+line);
+                    if (values.length!=2) throw new ParseError("Expected 2 values per line for variableStep Wiggle format (found "+values.length+"): "+line, count);
                     double numericalValue=0;
                     int pos=0;
                     try {
                         pos=Integer.parseInt(values[0]);
                         numericalValue=Double.parseDouble(values[1]);
-                    } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric values: "+values[0]+" or "+values[1]);}
+                    } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric values: "+values[0]+" or "+values[1], count);}
                     int bufferpointer=0;
                     for (int i=0;i<span;i++) {
                         bufferpointer=pos+i-dataSegmentStart;

@@ -7,7 +7,7 @@ import javax.swing.Icon;
 /**
  * A simple class that implements the MotifLabResource interface
  * and can be used to wrap other resource objects for registration
- * witht the MotifLabEngine
+ * with the MotifLabEngine
  * 
  * @author kjetikl
  */

@@ -6,6 +6,7 @@
 package motiflab.engine.util;
 
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
@@ -48,6 +49,12 @@ public class ImportantNotificationParser {
         URL url=new URL(uri);
         URLConnection connection=url.openConnection();
         connection.setConnectTimeout(10000); // 10 seconds
+        int status = ((HttpURLConnection)connection).getResponseCode();
+        String location = ((HttpURLConnection)connection).getHeaderField("Location");
+        if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+                String redirectURL = url.toString().replace("http","https");
+                return parseNotifications(redirectURL, minLevel, minIndex);
+        }        
         InputStream inputStream = connection.getInputStream();
         try {
             saxParser.parse(inputStream, handler);

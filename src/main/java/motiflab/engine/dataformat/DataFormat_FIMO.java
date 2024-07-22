@@ -124,7 +124,7 @@ public class DataFormat_FIMO extends DataFormat {
                Thread.yield();
             }
             if (line.startsWith("#") || line.isEmpty()) continue; // GFF comment line
-            HashMap<String,Object> map=parseSingleLineInStandardFormat(line);
+            HashMap<String,Object> map=parseSingleLineInStandardFormat(line, count);
             String sequenceName=(String)map.get("SEQUENCENAME");
             RegionSequenceData targetSequence=null;
             //System.err.println("Parsed line: sequenceName="+sequenceName);
@@ -138,7 +138,7 @@ public class DataFormat_FIMO extends DataFormat {
                 addRegionToTarget(targetSequence,map,orientation);
             } else if (target instanceof DataSegment) {
                 addRegionToTarget(target,map,orientation);
-            } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for GFF dataformat: "+target.getClass().getSimpleName());
+            } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for GFF dataformat: "+target.getClass().getSimpleName(), count);
         }
         return target;
     }
@@ -222,10 +222,10 @@ public class DataFormat_FIMO extends DataFormat {
 
 
     /** parses a single line in a GFF-file and returns a HashMap with the different properties (with values as strings!) according to the capturing groups in the formatString */
-    private HashMap<String,Object> parseSingleLineInStandardFormat(String line) throws ParseError {
+    private HashMap<String,Object> parseSingleLineInStandardFormat(String line, int lineNumber) throws ParseError {
         HashMap<String,Object> result=new HashMap<String,Object>();
         String[] fields=line.split("\t");
-        if (fields.length<8) throw new ParseError("Expected at least 8 fields per line in GFF-format. Got "+fields.length+":\n"+line);
+        if (fields.length<8) throw new ParseError("Expected at least 8 fields per line in GFF-format. Got "+fields.length+":\n"+line, lineNumber);
         //System.err.println("Parsed standard: "+line+" =>"+fields[0]);
         result.put("SEQUENCENAME",fields[0]);
         result.put("FEATURE",fields[1]);
@@ -236,16 +236,16 @@ public class DataFormat_FIMO extends DataFormat {
         try {
             start=Integer.parseInt(fields[3]);
             result.put("START",start);
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage(), lineNumber);}
         try {
             end=Integer.parseInt(fields[4]);
             result.put("END",end);
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage(), lineNumber);}
         try {
             double score=Double.parseDouble(fields[5]);
             if (score<0) score=score*(-1); // why are the scores negative?
             result.put("SCORE",score);
-        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage());}
+        } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage(), lineNumber);}
 //        if (end<start) result.put("STRAND","-");
 //        else result.put("STRAND", "+");
         result.put("STRAND",fields[6]);
@@ -253,7 +253,7 @@ public class DataFormat_FIMO extends DataFormat {
             String[] attributes=fields[8].split(";");
             for (String attribute:attributes) {
                 String[] pair=attribute.split("=");
-                if (pair.length!=2) throw new ParseError("Attribute not in recognized 'key=value' format: "+attribute);
+                if (pair.length!=2) throw new ParseError("Attribute not in recognized 'key=value' format: "+attribute, lineNumber);
                 String key=pair[0].trim();
                 if (key.equalsIgnoreCase("motif_name")) key="TYPE";
                 String value=pair[1].trim();

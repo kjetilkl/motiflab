@@ -173,13 +173,13 @@ public class PromptConstraints {
         if (type==NumericVariable.class) {            
             if (map.get(ALLOWED_VALUES) instanceof Integer[]) {
                 Integer[] list=(Integer[])map.get(ALLOWED_VALUES);
-                return "["+MotifLabEngine.splice(Arrays.asList(list),",")+"]"+widget;
+                return "{"+MotifLabEngine.splice(Arrays.asList(list),",")+"}"+widget;
             } else if (map.get(ALLOWED_VALUES) instanceof Double[]) {
                  Double[] list=(Double[])map.get(ALLOWED_VALUES);
-                 return "["+MotifLabEngine.splice(Arrays.asList(list),",")+"]"+widget;                
+                 return "{"+MotifLabEngine.splice(Arrays.asList(list),",")+"}"+widget;                
             } else if (map.get(ALLOWED_VALUES) instanceof Object[]) {
                  Object[] list=(Object[])map.get(ALLOWED_VALUES);
-                 return "["+MotifLabEngine.splice(Arrays.asList(list),",")+"]"+widget;                
+                 return "{"+MotifLabEngine.splice(Arrays.asList(list),",")+"}"+widget;                
             } else { 
               Object minValue=map.get(MIN_VALUE);
               Object maxValue=map.get(MAX_VALUE);   

@@ -1063,7 +1063,22 @@ private void showAdvancedExample(java.awt.event.ActionEvent evt) {//GEN-FIRST:ev
 }
 
 private void showBEDExample() {                             
-    String example="# Enter sequence coordinates in three columns separated by TABs or commas.\n# The first column is the chromosome (optionally prefixed with \"chr\")\n# The second and third columns are genomic start and end coordinates within the chromosome\n#\n# If the coordinate in the second column is larger than the third column, the sequence is assumed to be on the reverse strand\n# The sequences will be assigned default names by MotifLab\n\n        1\t107482152\t107484352\n        2\t154043368\t154045568\n      12\t109954212\t109956412\nchr19\t   19244978\t  19247178\n  chr9\t134025155\t134027355";
+    String example=
+              "# Enter sequence coordinates in three columns separated by TABs or commas.\n"
+            + "# If TABs are used for column separation, all commas will be removed (they can optionally be used for digit grouping in large numbers).\n"
+            + "# The first column is the chromosome (optionally prefixed with \"chr\").\n"
+            + "# The second and third columns are genomic start and end coordinates within the chromosome.\n"
+            + "# If TABs are used (or only one column is entered), the location can alternatively be provided on the format 'chr:start-end'.\n"
+            + "# If the coordinate in the second column is larger than the third column, the sequence is assumed to be on the reverse strand.\n"
+            + "# Three more columns can optionally be added specifying a name for the sequence, a score (not used) and the orientation to use.\n"
+            +  "\n"
+            +  "1\t107482152\t107484352\n"
+            +  "2\t154,043,368\t154,045,568\n"
+            +  "12\t109954212\t109956412\n"
+            +  "chr19\t   19244978\t  19247178\n"
+            +  "chr9\t134025155\t134027355\n"
+            +  "chr2:154,143,368-154,145,568\n"      
+            ;
     BEDTextArea.setText(example);
 }
 
@@ -1220,7 +1235,12 @@ private String checkBEDTabEntry() {
     for (String line:lines) {
         line=line.trim();
         if (line.startsWith("#") || line.isEmpty()) continue; // regard as comment
-        line=line.replaceAll(",","\t");
+        if (line.contains("\t") || line.matches("^(\\w+)\\s*:\\s*([0-9,]+)\\s*\\-\\s*([0-9,]+)$")) line=line.replaceAll(",",""); // if columns are TAB-separated or the entry only consists of "chr:start-end" allow commas to be used for grouping
+        else line=line.replaceAll(",","\t"); // 
+        if (line.matches("^(\\w+)\\s*:\\s*(\\d+)\\s*\\-\\s*(\\d+).*")) { // the location is on the format chr:start-end. Replace the : and - with TABs to create three columns instead of one
+            line=line.replaceFirst("\\s*:\\s*","\t");
+            line=line.replaceFirst("\\s*\\-\\s*","\t");
+        }          
         String[] elements=line.split("\\s+");
         if (elements.length<3) return "There should be at least 3 columns on each line (found "+elements.length+")";
         int startpos=0;
@@ -1256,14 +1276,20 @@ private Sequence[] parseBEDEntries() {
     boolean zeroIndexed=coordinateSystem.equals("BED");
     boolean exclusiveEnd=coordinateSystem.equals("BED");
     String text=BEDTextArea.getText();
-    text=text.replaceAll(",", "\t");
     String[] lines=text.split("\n");
     int digits=(""+lines.length).length(); // how many digits does it take to number all lines 
     ArrayList<Sequence> sequences=new ArrayList<Sequence>();
     int count=0;
     for (String line:lines) {
         line=line.trim();
-        if (line.isEmpty() || line.startsWith("#")) continue;
+        if (line.isEmpty() || line.startsWith("#")) continue;        
+        if (line.contains("\t") || line.matches("^(\\w+)\\s*:\\s*([0-9,]+)\\s*\\-\\s*([0-9,]+)$")) line=line.replaceAll(",",""); // if columns are TAB-separated or the entry only consists of "chr:start-end" allow commas to be used for grouping
+        else line=line.replaceAll(",","\t"); // 
+        
+        if (line.matches("^(\\w+)\\s*:\\s*(\\d+)\\s*\\-\\s*(\\d+).*")) { // the location is on the format chr:start-end. Replace the : and - with TABs to create three columns instead of one
+            line=line.replaceFirst("\\s*:\\s*","\t");
+            line=line.replaceFirst("\\s*\\-\\s*","\t");
+        }               
         count++;
         String suffix=""+count;
         while (suffix.length()<digits) suffix="0"+suffix;

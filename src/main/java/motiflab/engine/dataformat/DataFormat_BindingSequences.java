@@ -248,7 +248,9 @@ public class DataFormat_BindingSequences extends DataFormat {
        boolean headerprocessed=false;
        ArrayList<String> sequencesList=new ArrayList<String>();
        if (target==null) target=new Motif("unknown");
+       int linenumber=0;
        for (String line:input) {
+           linenumber++;
            line=line.trim();
            if (line.isEmpty()) continue;
            else if (line.startsWith("#")) continue;
@@ -262,7 +264,7 @@ public class DataFormat_BindingSequences extends DataFormat {
                headerprocessed=true;
            } else if (line.matches("[ACGTacgtRrYyMmKkWwSsBbDdHhVvNn]+")) {
                sequencesList.add(line);
-           } else throw new ParseError("Unrecognized line: "+line);
+           } else throw new ParseError("Unrecognized line: "+line,linenumber);
        }
        if (sequencesList.isEmpty()) throw new ParseError("No binding sequences found for motif: "+motifID);
        String[] sequences=new String[sequencesList.size()];

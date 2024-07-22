@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import motiflab.engine.task.ExecutableTask;
 import motiflab.engine.ExecutionError;
+import motiflab.engine.ParameterSettings;
 import motiflab.engine.SystemError;
 import motiflab.engine.data.DNASequenceDataset;
 import motiflab.engine.data.DataSegment;
@@ -27,26 +28,36 @@ import motiflab.engine.data.NumericDataset;
  */
 public class DataSource_DAS extends DataSource {
 
+    public static final String PROTOCOL_NAME="DAS";
+    
     private String baseURL;
     private String featurename; // template
  
     /**
      * Creates a new instance of DataSource_DAS based on the given arguments
-     * @param name
+     * @param datatrack
      * @param organism
+     * @param genomebuild
      * @param baseURL
      * @param dataFormatName
-     * @param delay
-     * @param parameterStringTemplate
+     * @param featurename
      */
     public DataSource_DAS(DataTrack datatrack, int organism, String genomebuild, String baseURL, String dataFormatName, String featurename) {
         super(datatrack,organism,genomebuild,dataFormatName);
-        this.baseURL=baseURL;
+        if (baseURL.contains("://")) this.baseURL=baseURL; 
+        else this.baseURL="https://"+baseURL; // always include the protocol prefix
         this.featurename=featurename;   
     }
     
     public DataSource_DAS(DataTrack datatrack, int organism, String genomebuild,String dataFormatName) {
         super(datatrack,organism, genomebuild, dataFormatName);       
+    }   
+    
+   
+    private DataSource_DAS() {}
+    
+    public static DataSource_DAS getTemplateInstance() {
+        return new DataSource_DAS();
     }    
         
     @Override
@@ -54,9 +65,6 @@ public class DataSource_DAS extends DataSource {
         return new Class[]{DNASequenceDataset.class,RegionDataset.class};
     }   
     
-    public static boolean supportsFeatureDataType(Class type) {
-        return (type==DNASequenceDataset.class || type==RegionDataset.class);
-    }
     
     @Override    
     public void initializeDataSourceFromMap(HashMap<String,Object> map) throws SystemError {
@@ -106,23 +114,35 @@ public class DataSource_DAS extends DataSource {
     }
     
     @Override
-    public boolean setServerAddress(String serveraddress) {
-        if (serveraddress.startsWith("http://")) serveraddress=serveraddress.substring("http://".length());
-        String newaddress=baseURL;
-        boolean startsWithHTTP=newaddress.startsWith("http://");
-        if (startsWithHTTP) newaddress=newaddress.substring("http://".length());
-        int slashpos=newaddress.indexOf("/");
-        if (slashpos>=0) {
-            String suffix=newaddress.substring(slashpos);
-            serveraddress+=suffix;          
-        } 
-        if (startsWithHTTP) serveraddress="http://"+serveraddress;
-        baseURL=serveraddress;
+    public boolean setServerAddress(String serveraddress) { 
+        // Replace the host part of this datasource's current baseURL based on the provided serveraddress. 
+        // This is mainly used in cloned datasources to try out alternative mirrors
+        String newServerAddress = serveraddress;
+        boolean newStartsWithHTTP=newServerAddress.toLowerCase().startsWith("http://");
+        boolean newStartsWithHTTPS=newServerAddress.toLowerCase().startsWith("https://");         
+        if (newStartsWithHTTP) newServerAddress=newServerAddress.substring("http://".length());
+        else if (newStartsWithHTTPS) newServerAddress=newServerAddress.substring("https://".length());        
+        boolean oldStartsWithHTTP=baseURL.toLowerCase().startsWith("http://");
+        boolean oldStartsWithHTTPS=baseURL.toLowerCase().startsWith("https://");      
+        String oldServerAddress=baseURL;       
+        if (oldStartsWithHTTP) oldServerAddress=oldServerAddress.substring("http://".length());
+        else if (oldStartsWithHTTPS) oldServerAddress=oldServerAddress.substring("https://".length());         
+        String originalPath="";
+        int slashpos=oldServerAddress.indexOf("/");
+        if (slashpos>=0) { // original URL contains a path
+            originalPath=oldServerAddress.substring(slashpos);  // this path includes the slash
+        }
+        String protocol=(oldStartsWithHTTP)?"http":"https"; // use HTTPS as default if not specified
+        if (newStartsWithHTTP) protocol="http"; 
+        else if (newStartsWithHTTPS) protocol="https"; // If new server has no protocol, default to the original's
+        if (!originalPath.isEmpty() && newServerAddress.endsWith("/")) newServerAddress=newServerAddress.substring(0, newServerAddress.length()-1); // strip duplicated slash
+        String newURL=protocol+"://"+newServerAddress+originalPath;           
+        baseURL=newURL;
         return true;
-    }    
+    }     
     
     @Override
-    public String getProtocol() {return DAS_SERVER;}
+    public String getProtocol() {return PROTOCOL_NAME;}
   
     public String getFeature() {
         return featurename;
@@ -134,12 +154,18 @@ public class DataSource_DAS extends DataSource {
         return baseURL;
     }
     public void setBaseURL(String baseURL) {
-        this.baseURL=baseURL;
+        if (baseURL.contains("://")) this.baseURL=baseURL; 
+        else this.baseURL="https://"+baseURL; // always include the protocol prefix
     }
     
     @Override
     public boolean useCache() {
         return true;
+    }    
+    
+    @Override
+    public boolean usesStandardDataFormat() {
+        return false;
     }    
     
     @Override
@@ -155,7 +181,7 @@ public class DataSource_DAS extends DataSource {
         
         Object data=null;
         if (dataTrack.getDataType()==NumericDataset.class) {
-            // This is not complete!!! Missing parser for DAS Numeric data. I guess that is OK for now since DAS specification 1 doesn't seem to include support for wiggle tracks
+            // This is not complete!!! Missing parser for DAS Numeric data. I guess that is OK for now since DAS specification 1 doesn't seem to include support for numeric tracks
             data=null;
             throw new ExecutionError("SLOPPY PROGRAMMING ERROR: DAS protocol has not been implemented for Numeric Data");            
         } else if (dataTrack.getDataType()==RegionDataset.class) {
@@ -183,7 +209,7 @@ public class DataSource_DAS extends DataSource {
         DataSource_DAS copy=new DataSource_DAS(dataTrack, organism, genomebuild, baseURL, dataformatName, featurename);
         copy.delay=this.delay;
         copy.dataformat=this.dataformat;
-        copy.dataformatSettings=this.dataformatSettings;
+        if (dataformatSettings!=null) copy.dataformatSettings=(ParameterSettings)this.dataformatSettings.clone();
         return copy;
     }  
 
@@ -192,7 +218,7 @@ public class DataSource_DAS extends DataSource {
     public org.w3c.dom.Element getXMLrepresentation(org.w3c.dom.Document document) {
         org.w3c.dom.Element element = super.getXMLrepresentation(document);
         org.w3c.dom.Element protocol=document.createElement("Protocol");
-        protocol.setAttribute("type", DAS_SERVER);
+        protocol.setAttribute("type", PROTOCOL_NAME);
         org.w3c.dom.Element url=document.createElement("URL");
         url.setTextContent(baseURL);
         protocol.appendChild(url);

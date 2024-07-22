@@ -86,10 +86,10 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
                           Color color=settings.getFeatureColor(region.getType());
                           buffer.append("<font color=\"");
                           buffer.append(VisualizationSettings.convertColorToHTMLrepresentation(color));
-                          buffer.append("\">&#9632;</font> ");
+                          buffer.append("\">&#9632;</font> <b>");
                       }
                       buffer.append(type);
-                      buffer.append("&nbsp;&nbsp;[");
+                      buffer.append("</b>&nbsp;&nbsp;[");
                       buffer.append(orientation);
                       buffer.append("]&nbsp;&nbsp;");
                       buffer.append(region.getLength());
@@ -228,6 +228,7 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
                gui.getFrame().setCursor(Cursor.getDefaultCursor());
                menu.show(e.getComponent(), e.getX(),e.getY());
            }
+           gui.getFrame().setCursor(Cursor.getDefaultCursor());
        }
     }
     
@@ -241,6 +242,7 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
     }
 
     protected void showPrompt(Data data) {
+        gui.getFrame().setCursor(Cursor.getDefaultCursor());
         gui.getMotifsPanel().showPrompt(data, false, false); // showPrompt in MotifsPanel will show different prompt depending on whether the Data object is a Motif or a Module
     }
 

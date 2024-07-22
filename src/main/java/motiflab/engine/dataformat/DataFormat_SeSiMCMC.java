@@ -148,23 +148,23 @@ public class DataFormat_SeSiMCMC extends DataFormat {
                   int end;
                   try {
                       start=Integer.parseInt(matcher.group(2));
-                  } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numeric value. "+matcher.group(2));}
+                  } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numeric value. "+matcher.group(2), inputpos+1);}
                   try {
                       int length=Integer.parseInt(matcher.group(3));
                       end=start+length-1;
-                  } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numeric value. "+matcher.group(3));}
+                  } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numeric value. "+matcher.group(3), inputpos+1);}
                   double score=0;
                   try {
                       score=Double.parseDouble(matcher.group(4));
-                  } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numeric value. "+matcher.group(4));}
+                  } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numeric value. "+matcher.group(4), inputpos+1);}
                   String bindingpattern=matcher.group(7);
                   String strandString=matcher.group(5);
                   int orientation=Region.DIRECT;
                   if (strandString.equals(">")) orientation=Region.DIRECT;
                   else if (strandString.equals("<")) orientation=Region.REVERSE;
-                  else throw new ParseError("Unknown strand for motif: "+strandString);
+                  else throw new ParseError("Unknown strand for motif: "+strandString, inputpos+1);
                   RegionSequenceData sequence=(RegionSequenceData)regiondataset.getSequenceByName(sequenceName);
-                  if (sequence==null) {throw new ParseError("Unknown sequence: "+sequenceName);}
+                  if (sequence==null) {throw new ParseError("Unknown sequence: "+sequenceName, inputpos+1);}
                   Region newsite=new Region(sequence, start, end, motifname, score, orientation);
                   newsite.setProperty("sequence", bindingpattern); //
                   sequence.addRegion(newsite);

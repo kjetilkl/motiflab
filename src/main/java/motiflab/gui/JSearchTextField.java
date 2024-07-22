@@ -67,6 +67,7 @@ public class JSearchTextField extends JTextField implements FocusListener, Mouse
     private boolean inProgress=false;
     private Polygon hourglass=null;
     private String[][] structuredStringFilter=null;
+    private Object doNotFilter=null; // optionally specifies an item that should never be filtered by SearchFilter
     SwingWorker worker=null;
     
 
@@ -155,6 +156,15 @@ public class JSearchTextField extends JTextField implements FocusListener, Mouse
         filter=new SearchFilter(table); // this will also install the filter on the table!
         this.addMouseListener(this);
         this.setToolTipText("Click on the magnifying glass to enable (orange icon) or disable (gray icon) filtering of non-matching rows");
+    }
+    
+    /**
+     * Specifies a single item that should never be filtered 
+     * This can be used to include e.g. a fixed header row in the table
+     * @param item 
+     */
+    public void doNotFilterItem(Object item) {
+        doNotFilter=item;
     }
     
     /**
@@ -253,6 +263,7 @@ public class JSearchTextField extends JTextField implements FocusListener, Mouse
                Object cellvalue=entry.getValue(i);
                if (cellvalue instanceof Color) continue; // ignore this
                String valueString=null;
+               if (cellvalue == doNotFilter) return true;
                if (cellvalue instanceof Motif) valueString=((Motif)cellvalue).getPresentationName().toLowerCase();               
                else if (cellvalue instanceof Module) valueString=((Module)cellvalue).getNamePlusSingleMotifNames().toLowerCase();                             
                else valueString=entry.getStringValue(i).toLowerCase();

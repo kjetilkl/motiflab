@@ -243,7 +243,7 @@ public final class StandardProtocol extends Protocol {
         for (int i=start;i<=end;i++) {
            Element element=root.getElement(i);           
            String line;
-           int linenumber=(i+1);
+           int linenumber=(i+1); // line numbering starts at 1
            try {
               line=document.getText(element.getStartOffset(),element.getEndOffset()-element.getStartOffset());
            } catch(BadLocationException ble) {throw new ParseError(ble.getMessage(),linenumber);}

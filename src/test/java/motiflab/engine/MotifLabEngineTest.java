@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -193,6 +194,38 @@ public class MotifLabEngineTest {
 //        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
+    
+    /**
+     * Test of compareVersions method, of class MotifLabEngine.
+     */
+    @Test
+    public void testCompareVersions_2args() {
+        System.out.println("compareVersions_2args");
+        assertEquals(MotifLabEngine.compareVersions("2.0","2.0"), 0);
+        assertEquals(MotifLabEngine.compareVersions("2.0","2.0.0"), 0);
+        
+        assertEquals(MotifLabEngine.compareVersions("3","2"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("3","2.0"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("3.0","2.0"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("3.0","2"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("2.1","2.0"), 1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0.1","2.0"), 1);  
+        assertEquals(MotifLabEngine.compareVersions("2.0.1","2.0.0"), 1);         
+        assertEquals(MotifLabEngine.compareVersions("2.0.1","2.0.0.1"), 1);   
+        assertEquals(MotifLabEngine.compareVersions("2.0.-1","2.0.0"), -1);         
+        assertEquals(MotifLabEngine.compareVersions("2.0.-1","2"), -1);   
+        
+        assertEquals(MotifLabEngine.compareVersions("2","3"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0","3"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0","3.0"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2","3.0"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0","2.1"), -1);       
+        assertEquals(MotifLabEngine.compareVersions("2.0","2.0.1"), -1);  
+        assertEquals(MotifLabEngine.compareVersions("2.0.0","2.0.1"), -1);         
+        assertEquals(MotifLabEngine.compareVersions("2.0.0.1","2.0.1"), -1);   
+        assertEquals(MotifLabEngine.compareVersions("2.0.0","2.0.-1"), 1);         
+        assertEquals(MotifLabEngine.compareVersions("2","2.0.-1"), 1);                        
+    }    
 //
 //    /**
 //     * Test of executeProtocolTask method, of class MotifLabEngine.
@@ -4825,5 +4858,56 @@ public class MotifLabEngineTest {
         assertEquals(MotifLabEngine.groupDigitsInNumber(-123456789), "-123,456,789");        
         assertEquals(MotifLabEngine.groupDigitsInNumber(-1234567890), "-1,234,567,890");        
     }
+    
+    @Test
+    public void testBreakLine() {    
+        System.out.println("BreakLine");        
+        String originalText="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed condimentum massa sit amet cursus porttitor. Nam ullamcorper placerat neque quis blandit. Proin congue nulla a elementum tempus. Nulla ultrices iaculis eleifend. Phasellus aliquam diam tincidunt, posuere lectus non, commodo sem.";
+        String lineWidth50="Lorem ipsum dolor sit amet, consectetur adipiscing\nelit. Sed condimentum massa sit amet cursus\nporttitor. Nam ullamcorper placerat neque quis\nblandit. Proin congue nulla a elementum tempus.\nNulla ultrices iaculis eleifend. Phasellus aliquam\ndiam tincidunt, posuere lectus non, commodo sem.";
+        String lineWidth30="Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit.\nSed condimentum massa sit amet\ncursus porttitor. Nam\nullamcorper placerat neque\nquis blandit. Proin congue\nnulla a elementum tempus.\nNulla ultrices iaculis\neleifend. Phasellus aliquam\ndiam tincidunt, posuere lectus\nnon, commodo sem.";
+        String lineWidth20="Lorem ipsum dolor\nsit amet,\nconsectetur\nadipiscing elit. Sed\ncondimentum massa\nsit amet cursus\nporttitor. Nam\nullamcorper placerat\nneque quis blandit.\nProin congue nulla a\nelementum tempus.\nNulla ultrices\niaculis eleifend.\nPhasellus aliquam\ndiam tincidunt,\nposuere lectus non,\ncommodo sem.";
+        String lineWidth15="Lorem ipsum\ndolor sit amet,\nconsectetur\nadipiscing\nelit. Sed\ncondimentum\nmassa sit amet\ncursus\nporttitor. Nam\nullamcorper\nplacerat neque\nquis blandit.\nProin congue\nnulla a\nelementum\ntempus. Nulla\nultrices\niaculis\neleifend.\nPhasellus\naliquam diam\ntincidunt,\nposuere lectus\nnon, commodo\nsem.";
+        String lineWidth10="Lorem\nipsum\ndolor sit\namet,\nconsectet-\nur\nadipiscing\nelit. Sed\ncondiment-\num massa\nsit amet\ncursus\nporttitor.\nNam\nullamcorp-\ner\nplacerat\nneque quis\nblandit.\nProin\ncongue\nnulla a\nelementum\ntempus.\nNulla\nultrices\niaculis\neleifend.\nPhasellus\naliquam\ndiam\ntincidunt,\nposuere\nlectus\nnon,\ncommodo\nsem.";
+        String lineWidth30html="Lorem ipsum dolor sit amet,<br>consectetur adipiscing elit.<br>Sed condimentum massa sit amet<br>cursus porttitor. Nam<br>ullamcorper placerat neque<br>quis blandit. Proin congue<br>nulla a elementum tempus.<br>Nulla ultrices iaculis<br>eleifend. Phasellus aliquam<br>diam tincidunt, posuere lectus<br>non, commodo sem.";
+        String lastLineText1="This is a test of the last linexxxxxxx";
+        String lastLineSplit1="This is a test of\nthe last linexxxxxxx";
+        String lastLineText2="This is a test of the last linexxxxxxxx";
+        String lastLineSplit2="This is a test of\nthe last\nlinexxxxxxxx";
+        String Supercalifragilisticexpialidocious="Supercalifragilisticexpialidocious";
+        String Supercalifragilisticexpialidocious10="Supercali-\nfragilist-\nicexpiali-\ndocious";
+        
+ //       System.out.println(" * "+MotifLabEngine.breakLine(originalText,50,"\n").replace("\n", "|"));
+ //       System.out.println(" * "+MotifLabEngine.breakLine(originalText,30,"\n").replace("\n", "|"));
+ //       System.out.println(" * "+MotifLabEngine.breakLine(originalText,20,"\n").replace("\n", "|"));
+ //       System.out.println(" * "+MotifLabEngine.breakLine(originalText,15,"\n").replace("\n", "|"));
+ //       System.out.println(" * "+MotifLabEngine.breakLine(originalText,10,"\n").replace("\n", "|"));     
+ //       System.out.println(" * "+MotifLabEngine.breakLine(originalText,30,"<br>").replace("\n", "|"));
+ //       System.out.println(" * "+MotifLabEngine.breakLine(lastLineText1,20,"\n").replace("\n", "|"));
+ //       System.out.println(" * "+MotifLabEngine.breakLine(lastLineText2,20,"\n").replace("\n", "|"));
+ //       System.out.println(" * "+MotifLabEngine.breakLine(Supercalifragilisticexpialidocious,10,"\n").replace("\n", "|"));        
+        
+        assertEquals(MotifLabEngine.breakLine(originalText,50,"\n"), lineWidth50);        
+        assertEquals(MotifLabEngine.breakLine(originalText,30,"\n"), lineWidth30);        
+        assertEquals(MotifLabEngine.breakLine(originalText,20,"\n"), lineWidth20);        
+        assertEquals(MotifLabEngine.breakLine(originalText,15,"\n"), lineWidth15);    
+        assertEquals(MotifLabEngine.breakLine(originalText,10,"\n"), lineWidth10);          
+        assertEquals(MotifLabEngine.breakLine(originalText,30,"<br>"), lineWidth30html);        
+        assertEquals(MotifLabEngine.breakLine(lastLineText1,20,"\n"), lastLineSplit1);       
+        assertEquals(MotifLabEngine.breakLine(lastLineText2,20,"\n"), lastLineSplit2);       
+        assertEquals(MotifLabEngine.breakLine(Supercalifragilisticexpialidocious,10,"\n"), Supercalifragilisticexpialidocious10);         
+    }
+    
+    @Test
+    public void testResolveURL() {    
+        System.out.println("ResolveURL");
+        String original="https://www.motiflab.org/datasets/HOCOMOCO_v10_mouse.mlx";
+        String target="http://tare.medisin.ntnu.no/motiflab/datasets/HOCOMOCO_v10_mouse.mlx";  // note that the URL is redirected to a new protocol (HTTPS -> HTTP)
+        try {
+            assertEquals(MotifLabEngine.resolveURL(new URL(original)).toString(), new URL(target).toString()); // 
+        } catch (Exception e) {
+            assertEquals("An exception occured when comparing two URLs. ",0,1);
+        };    
+    }        
+
     
 }

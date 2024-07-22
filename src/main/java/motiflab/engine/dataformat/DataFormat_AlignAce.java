@@ -117,7 +117,7 @@ public class DataFormat_AlignAce extends DataFormat {
              String line=input.get(inputpos);
              if (line.startsWith("MAP Score:")) {
                  if (motifname==null) throw new ParseError("End of motif (MAP Score) encountered before Motif number was specififed");
-                 if (sitepatterns==null || sitepatterns.isEmpty()) throw new ParseError("No sites found for motif: "+motifname);
+                 if (sitepatterns==null || sitepatterns.isEmpty()) throw new ParseError("No sites found for motif: "+motifname, inputpos+1);
                  Motif newMotif=new Motif(motifname);
                  double[][] matrix=Motif.getMatrixForAlignedBindingSites(sitepatterns);
                  newMotif.setMatrix(matrix);
@@ -134,7 +134,7 @@ public class DataFormat_AlignAce extends DataFormat {
                     matcher=siteline.matcher(line);
                     if (matcher.matches()) {
                         if (sitepatterns!=null) sitepatterns.add(matcher.group(1));
-                        else throw new ParseError("TFBS line encountered before Motif number was specified");
+                        else throw new ParseError("TFBS line encountered before Motif number was specified",inputpos+1);
                     }
                  }
               }
@@ -174,7 +174,7 @@ public class DataFormat_AlignAce extends DataFormat {
                     } else {
                         matcher=siteline.matcher(line);
                         if (matcher.matches()) {
-                            if (motifname==null) throw new ParseError("TFBS line encountered before Motif number was specified");
+                            if (motifname==null) throw new ParseError("TFBS line encountered before Motif number was specified",inputpos+1);
                             String bindingpattern=matcher.group(1);
                             String seqNumber=matcher.group(2);
                             String positonString=matcher.group(3);
@@ -182,12 +182,12 @@ public class DataFormat_AlignAce extends DataFormat {
                             int position=0;
                             try {
                                 position=Integer.parseInt(positonString);
-                            } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numeric value: "+nfe.getMessage());}
-                            if (!sequenceNameLookup.containsKey(seqNumber)) {throw new ParseError("Missing sequence name for sequence number: #"+seqNumber);}
+                            } catch (NumberFormatException nfe) {throw new ParseError("Unable to parse expected numeric value: "+nfe.getMessage(),inputpos+1);}
+                            if (!sequenceNameLookup.containsKey(seqNumber)) {throw new ParseError("Missing sequence name for sequence number: #"+seqNumber,inputpos+1);}
                             String sequenceName=sequenceNameLookup.get(seqNumber);
                             int orientation=(strandString.equals("0"))?Region.REVERSE:Region.DIRECT;
                             RegionSequenceData sequence=(RegionSequenceData)regiondataset.getSequenceByName(sequenceName);
-                            if (sequence==null) {throw new ParseError("Unknown sequence: "+sequenceName);}
+                            if (sequence==null) {throw new ParseError("Unknown sequence: "+sequenceName,inputpos+1);}
                             Region newsite=new Region(sequence, position, position+bindingpattern.length()-1, motifname, 1.0, orientation);
                             newsite.setProperty("sequence", bindingpattern); //
                             sequence.addRegion(newsite);

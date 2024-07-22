@@ -1,6 +1,8 @@
 package motiflab.engine.dataformat;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -305,7 +307,7 @@ public abstract class DataFormat implements ParameterExporter, Comparable {
                 inputaslist.add(line);
             }
         } catch (IOException e) { 
-            throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage());
+            throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage(), ((Long)lines).intValue());
         } finally {
             try {
                 if (inputStream!=null) inputStream.close();
@@ -349,7 +351,7 @@ public abstract class DataFormat implements ParameterExporter, Comparable {
                 inputaslist.add(line);
             }
         } catch (IOException e) {
-            throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage());
+            throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage(), ((Long)lines).intValue());
         } finally {
             try {
                 if (inputStream!=null) inputStream.close();
@@ -359,12 +361,12 @@ public abstract class DataFormat implements ParameterExporter, Comparable {
     }
 
     /**
-     * This method should be overriden from applicable data formats and return TRUE
+     * This method should be overridden from applicable data formats and return TRUE
      * if the data format can only be used to parse data directly from local files
-     * (not remove files on the web or even InputStreams). The default implementation
+     * (not remote files on the web or even InputStreams). The default implementation
      * in the super class returns FALSE. A data format that returns TRUE would normally
      * throw exceptions if the methods parseInput(InputStream...) or parseInput(ArrayList<String>...)
-     * are used. Instead, the methods parseInput(String filename,...) should be used instead.
+     * are used. Instead, the methods parseInput(String filename,...) should be used.
      * @return 
      */
     public boolean canOnlyParseDirectlyFromLocalFile() {
@@ -372,11 +374,50 @@ public abstract class DataFormat implements ParameterExporter, Comparable {
     }
     
     public DataSegment parseInput(String filename, DataSegment target, ParameterSettings settings, ExecutableTask task) throws ParseError, InterruptedException {
-        throw new ParseError("System Error: Inappropriate use of data format '"+getName()+"' to parse feature data from file");
+        // NOTE TO SELF: This superclass originally threw a ParseError here and would thus only allow this method to be used
+        //               by subclasses that implemented this functionality themselves, which mostly were those that returned TRUE
+        //               for canOnlyParseDirectlyFromLocalFile(). Other classes were expected to use the parseInput(InputStream input,...)
+        //               methods instead. I have updated this here to allow the superclass to wrap this other method instead,
+        //               but I am not sure if this was a wise choice. 
+        
+        // throw new ParseError("System Error: Inappropriate use of data format '"+getName()+"' to parse feature data from file");
+        
+        InputStream input=null;
+        File file=new File(filename);
+        try {
+            input=new FileInputStream(file);
+            return parseInput(input, target, settings, task);
+        } catch (IOException e) {
+           throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage());
+        } finally {
+            try {
+                if (input!=null) input.close();
+            } catch (IOException ioe) {}
+        }              
     }  
     
     public Data parseInput(String filename, Data target, ParameterSettings settings, ExecutableTask task) throws ParseError, InterruptedException {
-        throw new ParseError("System Error: Inappropriate use of data format '"+getName()+"' to parse feature data from file");
+        // NOTE TO SELF: This superclass originally threw a ParseError here and would thus only allow this method to be used
+        //               by subclasses that implemented this functionality themselves, which mostly were those that returned TRUE
+        //               for canOnlyParseDirectlyFromLocalFile(). Other classes were expected to use the parseInput(InputStream input,...)
+        //               methods instead. I have updated this here to allow the superclass to wrap this other method instead,
+        //               but I am not sure if this was a wise choice. 
+        
+        // throw new ParseError("System Error: Inappropriate use of data format '"+getName()+"' to parse feature data from file");
+                
+        InputStream input=null;
+        File file=new File(filename);
+        try {
+            input=new FileInputStream(file);
+            return parseInput(input, target, settings, task);
+        } catch (IOException e) {
+           throw new ParseError(e.getClass().getSimpleName()+":"+e.getMessage());
+        } finally {
+            try {
+                if (input!=null) input.close();
+            } catch (IOException ioe) {}
+        }         
+        // throw new ParseError("System Error: Inappropriate use of data format '"+getName()+"' to parse feature data from file");
     }      
     
     /** Adds a progressListener to this DataFormat object */

@@ -12,18 +12,14 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EventObject;
 import java.util.HashSet;
-import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
-import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -35,11 +31,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
-import javax.swing.plaf.basic.BasicTreeUI.CellEditorHandler;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -76,6 +70,15 @@ public class ConfigureDisplaySettingsDialog extends javax.swing.JDialog {
         this.gui=gui;
         this.settings=gui.getVisualizationSettings();
         initComponents();
+        // --- the following components were added after the Swing Application Framework lost support in NetBeans...
+        JButton clearFilteredSettingsButton = new JButton();
+        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(motiflab.gui.MotifLabApp.class).getContext().getActionMap(ConfigureDisplaySettingsDialog.class, this);
+        clearFilteredSettingsButton.setAction(actionMap.get("clearFilteredSettings")); // 
+        clearFilteredSettingsButton.setText("Clear Filtered Settings"); // 
+        clearFilteredSettingsButton.setName("clearFilteredSettingsButton"); // 
+        headerPanelRight.add(clearFilteredSettingsButton,0);
+        // --- end ---
+        headerPanelLeft.add(new JLabel("  Filter "),0); // 
         newSettingColorIcon.setForegroundColor(Color.RED);
         uneditableSettings.addAll(Arrays.asList(new String[]{"Javascript","CSS","stylesheet"}));
         recognizedTypes.add(Boolean.class);
@@ -98,14 +101,7 @@ public class ConfigureDisplaySettingsDialog extends javax.swing.JDialog {
         table.setDefaultRenderer(Object.class, new SettingRenderer());
         SettingEditor settingEditor=new SettingEditor(table);
         table.setDefaultEditor(Object.class, settingEditor);
-        ArrayList<String> keys=gui.getVisualizationSettings().getAllKeys(false);
-        for (String key:keys) {
-            Object value=settings.getSetting(key);
-            if (value==null || !recognizedTypes.contains(value.getClass())) uneditableSettings.add(key);
-            Class type=(value==null)?null:value.getClass();
-            Object[] values=new Object[]{key,type,value}; // 
-            tablemodel.addRow(values);
-        }       
+        populateTable();
         table.setFillsViewportHeight(true);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setRowSelectionAllowed(true);
@@ -190,6 +186,16 @@ public class ConfigureDisplaySettingsDialog extends javax.swing.JDialog {
         });
     }
 
+    private void populateTable() {
+        ArrayList<String> keys=gui.getVisualizationSettings().getAllKeys(false);
+        for (String key:keys) {
+            Object value=settings.getSetting(key);
+            if (value==null || !recognizedTypes.contains(value.getClass())) uneditableSettings.add(key);
+            Class type=(value==null)?null:value.getClass();
+            Object[] values=new Object[]{key,type,value}; // 
+            tablemodel.addRow(values);
+        }          
+    }
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -613,6 +619,20 @@ public class ConfigureDisplaySettingsDialog extends javax.swing.JDialog {
             tablemodel.removeRow(i);
         }
     }
+    
+    @org.jdesktop.application.Action
+    public void clearFilteredSettings() {
+        String text=filterTextField.getText();
+        if (text==null || text.trim().isEmpty()) return;
+        settings.clearAllSettingsFor(text, true);
+        gui.redraw();
+        // Remove all the rows from the table
+        int rowCount = tablemodel.getRowCount();
+        for (int i=rowCount-1; i>=0; i--) {
+            tablemodel.removeRow(i);
+        }
+        populateTable();        
+    }    
   
 
 

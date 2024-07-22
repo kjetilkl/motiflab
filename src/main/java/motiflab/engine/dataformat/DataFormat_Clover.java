@@ -132,9 +132,9 @@ public class DataFormat_Clover extends DataFormat {
             if (line.matches("^>[a-zA-Z_0-9.+-]+$")) { // sequence name                
                 sequenceName=line.substring(1);
             } else {
-                HashMap<String,Object> map=parseSingleLineInStandardFormat(line, sequenceName, pattern);
+                HashMap<String,Object> map=parseSingleLineInStandardFormat(line, sequenceName, pattern, count);
                 if (map==null) continue; // not a TFBS line. Ignore it
-                if (sequenceName==null) throw new ParseError("CLOVER Format Error: Encountered TFBS line before Sequence line");
+                if (sequenceName==null) throw new ParseError("CLOVER Format Error: Encountered TFBS line before Sequence line", count);
                 RegionSequenceData targetSequence=null;
                 //System.err.println("Parsed line: sequenceName="+sequenceName);
                 if (target instanceof RegionSequenceData) {
@@ -147,7 +147,7 @@ public class DataFormat_Clover extends DataFormat {
                     addRegionToTarget(targetSequence,map,orientation);
                 } else if (target instanceof DataSegment) {
                     addRegionToTarget(target,map,orientation);
-                } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for Clover dataformat: "+target.getClass().getSimpleName());                
+                } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for Clover dataformat: "+target.getClass().getSimpleName(), count);                
             }
         }
         return target;
@@ -229,7 +229,7 @@ public class DataFormat_Clover extends DataFormat {
 
 
     /** parses a single line in a GFF-file and returns a HashMap with the different properties (with values as strings!) according to the capturing groups in the formatString */
-    private HashMap<String,Object> parseSingleLineInStandardFormat(String line, String sequenceName, Pattern pattern) throws ParseError {
+    private HashMap<String,Object> parseSingleLineInStandardFormat(String line, String sequenceName, Pattern pattern, int linenumber) throws ParseError {
         Matcher matcher=pattern.matcher(line);
         if (matcher.find()) {
            //for (int i=0;i<=matcher.groupCount();i++) System.err.println("Group["+i+"]=>"+matcher.group(i));
@@ -249,16 +249,16 @@ public class DataFormat_Clover extends DataFormat {
             try {
                 start=Integer.parseInt(startString);
                 result.put("START",start);
-            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage());}
+            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for START: "+e.getMessage(), linenumber);}
             try {
                 end=Integer.parseInt(endString);
                 result.put("END",end);
-            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage());}
+            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for END: "+e.getMessage(), linenumber);}
             try {
                 double score=Double.parseDouble(scoreString);
                 if (score<0) score=score*(-1); // why are the scores negative?
                 result.put("SCORE",score);
-            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage());}
+            } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage(), linenumber);}
     //        if (end<start) result.put("STRAND","-");
     //        else result.put("STRAND", "+");
             result.put("STRAND",strandString);

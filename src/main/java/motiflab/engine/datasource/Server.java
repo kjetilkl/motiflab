@@ -11,7 +11,7 @@ import java.util.Date;
 
 
 /**
- *
+ * 
  * @author kjetikl
  */
 public class Server implements Cloneable {

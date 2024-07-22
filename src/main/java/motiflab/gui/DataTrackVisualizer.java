@@ -60,15 +60,16 @@ public abstract class DataTrackVisualizer extends JComponent implements MouseInp
   public DataTrackVisualizer() {}; // null constructor     
      
     
-  /** This should be called after an object has been created to setup of everything. */
+  /** This should be called after an object has been created in order to setup everything. */
   public void initialize(String sequenceName, String featureName, VisualizationSettings settings) {
       this.sequenceName=sequenceName;
       this.featureName=featureName;
       this.settings=settings;
       this.gui=settings.getGUI();     
       if (featureName!=null && sequenceName!=null) {
-         FeatureDataset dataset=(FeatureDataset)settings.getEngine().getDataItem(featureName);          
-         sequencedata=dataset.getSequenceByName(sequenceName);   
+         FeatureDataset dataset=(FeatureDataset)settings.getEngine().getDataItem(featureName);  
+         if (dataset==null) gui.logMessage("WARNING: Something went wrong while initializing track visualizer for "+featureName+ "/ "+sequenceName);
+         sequencedata=(dataset!=null)?dataset.getSequenceByName(sequenceName):null;   
       }
       if (sequencedata!=null) {
          geneOrientation=sequencedata.getStrandOrientation();
@@ -609,7 +610,7 @@ public abstract class DataTrackVisualizer extends JComponent implements MouseInp
     public abstract void describeBaseForTooltip(int genomicCoordinate,int shownOrientation, StringBuilder buffer);    
     
     public String getPositionString(int genomicCoordinate) {
-          String description=""+genomicCoordinate;
+          String description=""+MotifLabEngine.groupDigitsInNumber(genomicCoordinate);
           if (TSS>=0) {
               int relative=(geneOrientation==VisualizationSettings.DIRECT)?genomicCoordinate-TSS:TSS-genomicCoordinate;
               int relativeTSS=0;

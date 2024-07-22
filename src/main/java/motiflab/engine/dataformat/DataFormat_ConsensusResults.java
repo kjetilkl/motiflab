@@ -187,6 +187,7 @@ public class DataFormat_ConsensusResults extends DataFormat {
           String motifname="";
           Pattern siteline=Pattern.compile("^\\s*(\\d+)\\|(\\d+)\\s+:\\s+(-)?(\\d+)/(\\d+)\\s+(\\w+)");
           for (int i=0;i<input.size();i++) {
+               int lineNumber=i+1;
                String line=input.get(i);               
                if (line.startsWith("THE LIST OF MATRICES FROM FINAL CYCLE")) {processing=true;continue;}
                if (!processing) continue;
@@ -209,16 +210,16 @@ public class DataFormat_ConsensusResults extends DataFormat {
                        try {
                            seqIndex=Integer.parseInt(sequenceNumber);
                            seqIndex--; // because MotifLab uses zero-indexing and Consensus uses one-indexing
-                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse sequence index: "+sequenceNumber);}
+                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse sequence index: "+sequenceNumber, lineNumber);}
                        try {
                            start=Integer.parseInt(startPos);
-                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse start position for TFBS: "+startPos);}
+                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse start position for TFBS: "+startPos, lineNumber);}
 //                       try {
 //                           score=Double.parseDouble(scoreString);
 //                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse score value: "+scoreString);}
                        int motifsize=bindingpattern.length();
                        String sequenceName=sequenceCollection.getSequenceNameByIndex(seqIndex);
-                       if (sequenceName==null) throw new ParseError("Unable to figure out which sequence has index number "+seqIndex);
+                       if (sequenceName==null) throw new ParseError("Unable to figure out which sequence has index number "+seqIndex, lineNumber);
                        RegionSequenceData regionsequence=(RegionSequenceData)regiondataset.getSequenceByName(sequenceName);
                        Region newsite=new Region(regionsequence, start, start+motifsize-1, motifname, score, orientation);
                        if (orientation==Region.REVERSE) bindingpattern=MotifLabEngine.reverseSequence(bindingpattern);

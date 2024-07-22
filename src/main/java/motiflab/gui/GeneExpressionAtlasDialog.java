@@ -677,7 +677,7 @@ public class GeneExpressionAtlasDialog extends javax.swing.JDialog {
             genes=genes.replaceAll("\\s*,\\s*", "+");
             genes=genes.replaceAll("\\s+", "+");
         }
-        String query="http://www.ebi.ac.uk/gxa/api?";
+        String query="https://www.ebi.ac.uk/gxa/api?";
         if (genes!=null) query+="geneIs="+genes;
         if (organismString!=null) query+="&species="+organismString;
         query+="&format=xml";
@@ -752,7 +752,7 @@ public class GeneExpressionAtlasDialog extends javax.swing.JDialog {
             if (condition.isEmpty()) condition=null;
             else condition=condition.replaceAll("\\s+", "+"); // espace spaces
         }
-        String query="http://www.ebi.ac.uk/gxa/api?";
+        String query="https://www.ebi.ac.uk/gxa/api?";
         query+="geneGeneIs="+genestring.toString();
         String regulation=(String)searchRegulationCombobox.getSelectedItem();
         if (condition!=null) {           
@@ -841,7 +841,7 @@ public class GeneExpressionAtlasDialog extends javax.swing.JDialog {
             public Boolean doInBackground() {
                 try {
                  if (communicatorSimilarGenes==null) communicatorSimilarGenes=new AtlasCommunicatorSearchSimilarGenes();
-                 String query="http://www.ebi.ac.uk/gxa/api?";
+                 String query="https://www.ebi.ac.uk/gxa/api?";
                  String condition=null;
                  for (int i=0;i<experiments.size();i++) {
                     SelectedExperiment exp=experiments.get(i);

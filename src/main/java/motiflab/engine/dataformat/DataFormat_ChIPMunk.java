@@ -182,6 +182,7 @@ public class DataFormat_ChIPMunk extends DataFormat {
           // now parse the lines
           Pattern siteline=Pattern.compile("WORD\\|(\\d+)\\s+(\\d+)\\s+(\\w+)\\s+(\\S+)\\s+(direct|revcomp)\\s+(\\S+)");
           for (int i=0;i<input.size();i++) {
+               int linenumber=i+1;
                String line=input.get(i);
                if (line.startsWith("ERRR|java.lang.RuntimeException:")) {
                    line=line.substring("ERRR|java.lang.RuntimeException:".length());
@@ -202,19 +203,19 @@ public class DataFormat_ChIPMunk extends DataFormat {
                        int orientation=(matcher.group(5).equals("direct"))?Region.DIRECT:Region.REVERSE;
                        try {
                            seqIndex=Integer.parseInt(seqString);
-                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse sequence index: "+seqString);}
+                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse sequence index: "+seqString, linenumber);}
                        try {
                            start=Integer.parseInt(startPos);
-                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse start position for TFBS: "+startPos);}
+                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse start position for TFBS: "+startPos, linenumber);}
                        try {
                            score=Double.parseDouble(scoreString);
-                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse score value: "+scoreString);}
+                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse score value: "+scoreString, linenumber);}
                        try {
                            somevalue=Double.parseDouble(somenumber);
-                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse last value on line: "+somenumber);}
+                       } catch (NumberFormatException e) {throw new ParseError("Unable to parse last value on line: "+somenumber, linenumber);}
                        int motifsize=bindingpattern.length();
                        String sequenceName=sequenceCollection.getSequenceNameByIndex(seqIndex);
-                       if (sequenceName==null) throw new ParseError("Unable to figure out which sequence has index number "+seqIndex);
+                       if (sequenceName==null) throw new ParseError("Unable to figure out which sequence has index number "+seqIndex, linenumber);
                        RegionSequenceData regionsequence=(RegionSequenceData)regiondataset.getSequenceByName(sequenceName);
                        int startPosition=start; // offset from start of sequence
                        int endPosition=start+motifsize-1;                         
@@ -228,7 +229,7 @@ public class DataFormat_ChIPMunk extends DataFormat {
                        if (orientation==Region.REVERSE) bindingpattern=MotifLabEngine.reverseSequence(bindingpattern);
                        newsite.setProperty("sequence", bindingpattern); //
                        regionsequence.addRegion(newsite);                       
-                 } else throw new ParseError("Unable to parse line for binding site: "+line);
+                 } else throw new ParseError("Unable to parse line for binding site: "+line, linenumber);
               }                        
            }
            return regiondataset;

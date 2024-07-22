@@ -84,7 +84,18 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
             String description=metadata.containsKey("description")?metadata.get("description").toString():"";            
             Object[] values=new Object[]{name,version,type,description}; // the null is just a placeholder
             pluginsModel.addRow(values);
-            if (plugin instanceof ConfigurablePlugin) isConfigurable.add(name);
+            if (plugin instanceof ConfigurablePlugin) { // for a plugin to be configurable here it must return either a configuration dialog or at least one non-hidden Parameter 
+                JDialog dialog=((ConfigurablePlugin)plugin).getPluginConfigurationDialog(this);
+                if (dialog!=null) isConfigurable.add(name);
+                else {
+                    Parameter[] pluginparameters=((ConfigurablePlugin)plugin).getPluginParameters();
+                    if (pluginparameters!=null && pluginparameters.length>0) {
+                        for (Parameter p:pluginparameters) {
+                            if (!p.isHidden()) {isConfigurable.add(name);break;}
+                        }
+                    }
+                }                
+            }
         }       
         pluginsTable.getColumn(TABLECOLUMN_VERSION).setPreferredWidth(60);
         pluginsTable.getColumn(TABLECOLUMN_VERSION).setMaxWidth(60);        
@@ -365,8 +376,15 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
        if (row<0) return;
        String pluginName=(String)pluginsTable.getValueAt(row, COLUMN_NAME);
        Plugin plugin=gui.getEngine().getPlugin(pluginName);
-       int option=JOptionPane.showConfirmDialog(rootPane, "Are you sure you want to remove the plug-in \""+pluginName+"\" ?", "Remove plug-in", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-       if (option==JOptionPane.YES_OPTION && plugin!=null) {
+       String warning_message="Are you sure you want to remove the plug-in \""+pluginName+"\" ?";
+       Object custom_message=gui.getEngine().getPluginProperty(pluginName, "uninstall_warning");
+       if (custom_message instanceof String) {
+           if (((String)custom_message).contains("\\n")) custom_message=((String)custom_message).replace("\\n", "\n");
+           else custom_message=MotifLabEngine.breakLine((String)custom_message, 120, "\n");
+           warning_message=(String)custom_message+"\n\n"+warning_message;
+       }      
+       int option=JOptionPane.showConfirmDialog(rootPane, warning_message, "Remove plug-in", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+       if (option==JOptionPane.OK_OPTION && plugin!=null) {
             try {
                 boolean ok=removePluginInListAndEngine(plugin);
                 if (ok) JOptionPane.showMessageDialog(this, "The plugin has been uninstalled", "Uninstall plugin", JOptionPane.INFORMATION_MESSAGE);              
@@ -495,7 +513,19 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
         } catch (SystemError e) {
             throw new ExecutionError(e.getMessage());
         }
-        Plugin plugin=engine.getPlugin(pluginName);
+        if (metadata.containsKey("motiflab_version")) {
+            String requiredVersion=metadata.get("motiflab_version").toString();          
+            if (MotifLabEngine.compareVersions(requiredVersion)<0) throw new ExecutionError("This plugin requires version "+requiredVersion+" or higher of MotifLab");
+        }
+        if (metadata.containsKey("requires")) {
+            String requires=metadata.get("requires").toString();
+            try {
+                engine.checkPluginRequirements(requires);
+            } catch (SystemError e) {
+                throw new ExecutionError(e.getMessage());
+            }
+        }        
+        Plugin plugin=engine.getPlugin(pluginName); // check if there already exists a plugin with the same name
         if (plugin!=null) { // 
             int option=JOptionPane.showConfirmDialog(rootPane, "A plugin with the same name is already registered (\""+pluginName+"\").\nDo you want to replace the current version?", "Replace plug-in", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (option==JOptionPane.YES_OPTION) {
@@ -546,7 +576,18 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
             e.printStackTrace(System.err);
         }
         installPluginInList(plugin, metadata);
-        if (plugin instanceof ConfigurablePlugin) isConfigurable.add(pluginName);
+        if (plugin instanceof ConfigurablePlugin) { // for a plugin to be configurable here it must return either a configuration dialog or at least one non-hidden Parameter 
+            JDialog dialog=((ConfigurablePlugin)plugin).getPluginConfigurationDialog(this);
+            if (dialog!=null) isConfigurable.add(pluginName);
+            else {
+                Parameter[] pluginparameters=((ConfigurablePlugin)plugin).getPluginParameters();
+                if (pluginparameters!=null && pluginparameters.length>0) {
+                    for (Parameter p:pluginparameters) {
+                        if (!p.isHidden()) {isConfigurable.add(pluginName);break;}
+                    }
+                }
+            }
+        }
     }
     
     private void removePluginDir(File pluginDir) {

@@ -10,8 +10,10 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.util.ArrayList;
 import motiflab.engine.data.NumericSequenceData;
 import motiflab.engine.data.Sequence;
 
@@ -20,8 +22,8 @@ import motiflab.engine.data.Sequence;
  * @author kjetikl
  */
 public class DataTrackVisualizer_Numeric_LineGraph extends DataTrackVisualizer_Numeric {
-      
-    private Stroke THIN_LINE=new BasicStroke(1f);     
+          
+    private static final DataTrackVisualizerSetting lineWidthSetting;     
     
     public DataTrackVisualizer_Numeric_LineGraph() {
         super();
@@ -60,8 +62,8 @@ public class DataTrackVisualizer_Numeric_LineGraph extends DataTrackVisualizer_N
        
     private void drawLineGraph(Graphics2D graphics, int start, int height, int width, int bases, int graphicsXoffset, int graphicsYoffset, int orientation, Color linecolor, boolean optimize) {
        double scale=settings.getScale(sequenceName);  
-       double thickness=(double)settings.getSettingAsType(featureName+".thickness", 1.0d);
-       Stroke useStroke=(thickness==1)?THIN_LINE:new BasicStroke((float)thickness);
+       double thickness=(double)settings.getSettingAsType(featureName+".lineWidth", 1.0d);
+       Stroke useStroke=new BasicStroke((float)thickness);
        double maxvalue=0;
        double minvalue=0;
        double baselinevalue=0;       
@@ -143,5 +145,22 @@ public class DataTrackVisualizer_Numeric_LineGraph extends DataTrackVisualizer_N
        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
-       
+ 
+    @Override
+    public ArrayList<DataTrackVisualizerSetting> getGraphTypeSettings() {
+        ArrayList<DataTrackVisualizerSetting> graphsettings = super.getGraphTypeSettings();
+        if (graphsettings==null) graphsettings=new ArrayList<>();            
+        addGraphTypeSetting(graphsettings, lineWidthSetting, false);              
+        return graphsettings;
+    }
+    
+    static {
+        // Since I only have one setting it might as well be MAJOR, but change it to MINOR if you add more
+        lineWidthSetting=new DataTrackVisualizerSetting("Line Width", "lineWidth", DataTrackVisualizerSetting.MAJOR_SETTING, DataTrackVisualizerSetting.ALL, 0);
+        lineWidthSetting.addOption("Thin",1.0); // horizontal fill is the default style according to the legacy setting, so I place that as the first option
+        lineWidthSetting.addOption("Medium",1.50);         
+        lineWidthSetting.addOption("Thick",2.0);    
+        lineWidthSetting.addOption("Very Thick",2.5);                 
+    }     
+    
 }

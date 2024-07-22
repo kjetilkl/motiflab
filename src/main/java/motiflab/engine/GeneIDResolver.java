@@ -672,7 +672,7 @@ public class GeneIDResolver {
             if (month.length()>=3) month=month.substring(0, 3).toLowerCase();
             if (year.length()==2) year="20"+year;
             if (month.isEmpty() || year.isEmpty()) biomartURL=archive; // This will fail and notify the user
-            else biomartURL="http://"+month+year+".archive.ensembl.org/biomart/martservice";
+            else biomartURL="https://"+month+year+".archive.ensembl.org/biomart/martservice";
         } // note no ELSE here since we just convert the biomartURL string and will process it further below
         
         if (biomartURL.startsWith("config=")) { // Resolve gene IDs based on config file
@@ -758,8 +758,8 @@ public class GeneIDResolver {
                     if (line.startsWith("ERROR:") || line.startsWith("Query ERROR:")) throw new ParseError(line);
                     else if (line.endsWith("NOT FOUND")) line="The selected ID type might not be applicable for the selected organism";
                     engine.logMessage("Unable to parse result: "+line);
-                    // engine.logMessage("--- Full response ---",5);   
-                    // logAll(table,5);
+                    //engine.logMessage("--- Full response ---",5);   
+                    //logAll(table,5);
                     throw new ParseError("Unable to parse result: "+line);
                 }
             }
