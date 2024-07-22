@@ -2683,17 +2683,17 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             Plugin plugin=null;
             try {
                 metadata=readPluginMetaDataFromDirectory(dir); 
-                // if (metadata.containsKey("client")) { } // I thought it would be nice to have a "client" property (e.g. "client=motiflab.gui.MotifLabGUI") which can specify which clients a plugin is meant to be used with so as to avoid loading unnecessary plugins, but sadly the client is not yet defined at this point...
                 // Skip plugin unless it satisfies the inclusion/exclusion criteria
                 if (processPlugins!=null && !matchesPluginCritera(processPlugins, metadata)) continue; // this plugin is not in the "process" list
-                if (skipPlugins!=null && matchesPluginCritera(skipPlugins, metadata)) continue; // this plugin is on the "skip" list                   
-                 
+                if (skipPlugins!=null && matchesPluginCritera(skipPlugins, metadata)) continue; // this plugin is on the "skip" list  
+                // if (metadata.containsKey("client")) { } // I thought it would be nice to have a "client" property (e.g. "client=motiflab.gui.MotifLabGUI") which can specify which clients a plugin is meant to be used with so as to avoid loading unnecessary plugins, but sadly the client is not yet defined at this point...                
+                if (metadata.containsKey("requires")) checkPluginRequirements((String)metadata.get("requires")); // check if the plugin requires dependencies that do not exist          
                 plugin=instantiatePluginFromDirectory(dir);
             } catch (SystemError e) {
-                logMessage("  - Plugin \""+dir.getAbsolutePath()+"\" : CRITICAL ERROR => "+e.getMessage()+". The plugin will not be activated.");  
+                logMessage("  -> Plugin \""+dir.getAbsolutePath()+"\" : CRITICAL ERROR => "+e.getMessage()+". The plugin will not be activated!");  
                 continue; // the directory did not contain correct metadata
             }  catch (Throwable tr) {
-                logMessage("  - Plugin \""+dir.getAbsolutePath()+"\" : CRITICAL ERROR => "+tr.toString()+". The plugin will not be activated.");  
+                logMessage("  -> Plugin \""+dir.getAbsolutePath()+"\" : CRITICAL ERROR => "+tr.toString()+". The plugin will not be activated!");  
                 tr.printStackTrace(System.err);
                 continue; // the directory did not contain correct metadata
             }        
@@ -2703,16 +2703,16 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                 registerPlugin(plugin,metadata);
                 pluginsOK.add(plugin.getPluginName()); // logMessage("  - Plugin \""+plugin.getPluginName()+"\" : OK!");
             } catch (ExecutionError e) {
-                logMessage("  - Plugin \""+plugin.getPluginName()+"\" : ERROR => "+e.getMessage());                
+                logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : ERROR => "+e.getMessage());                
                 registerPlugin(plugin,metadata);                    
             } catch (SystemError se) {
-                logMessage("  - Plugin \""+plugin.getPluginName()+"\" : CRITICAL ERROR => "+se.getMessage()+". The plugin will not be activated.");
+                logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : CRITICAL ERROR => "+se.getMessage()+". The plugin will not be activated!");
             } catch (Throwable tr) {
-                logMessage("  - Plugin \""+plugin.getPluginName()+"\" : CRITICAL ERROR => "+tr.toString()+". The plugin will not be activated.");
+                logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : CRITICAL ERROR => "+tr.toString()+". The plugin will not be activated!");
                 tr.printStackTrace(System.err);
             }                                         
         }  
-        if (!pluginsOK.isEmpty()) {
+        if (!pluginsOK.isEmpty()) { // show which plugins have been loaded to the log
             int group=3; // how many to output on each line
             for (int i=0;i<pluginsOK.size();i+=group) {
                 int end=Math.min(i+group,pluginsOK.size());
@@ -2737,8 +2737,32 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             if (value.equalsIgnoreCase(pluginAttributeValue)) return true;
         }
         return false;
+    }
+
+    /**
+     * Check the configured requirements for a Plugin and throw a SystemError for the first requirement that could not be satisfied
+     * @param requires A comma-separated list of requirements for the plugin
+     * @throws SystemError 
+     */
+    public void checkPluginRequirements(String requires) throws SystemError {
+        String[] requirements=requires.split(",");
+        for (String requirement:requirements) {
+            requirement=requirement.trim();
+            if (requirement.startsWith("class:")) {
+                String requiredClass=requirement.substring("class:".length());
+                try {
+                    Class.forName(requiredClass);
+                } catch (ClassNotFoundException c) {
+                    throw new SystemError("Missing required class \""+requiredClass+"\". (Perhaps it is implemented in different plugin?)");
+                }
+            }  else if (requirement.startsWith("resource:")) {
+                String requiredResource=requirement.substring("resource:".length());                
+                String[] typeAndName=(requiredResource.contains(":"))?requiredResource.split(":",2):new String[]{null,requiredResource};
+                Object resource=getResource(typeAndName[1], typeAndName[0]);
+                if (resource==null) throw new SystemError("Missing required resource \""+requiredResource+"\". (Perhaps it is implemented in a different plugin?)");             
+            }
+        }        
     }    
-    
    
     /** Load all the classes within the provided JAR file and return the (first and hopefully only) class which implements the Plugin interface 
      *  The method will also add all JAR-files residing beneath a lib/ directory to the class loader, so that they can be loaded when required
