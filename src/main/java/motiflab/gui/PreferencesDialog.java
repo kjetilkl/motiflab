@@ -68,6 +68,7 @@ public class PreferencesDialog extends javax.swing.JDialog {
         enginePreferences=Preferences.userNodeForPackage(MotifLabEngine.class);
         guiPreferences=Preferences.userNodeForPackage(MotifLabGUI.class);
         initComponents();
+        jPanel1.remove(jPanel2); pack(); // hack to remove the deprecated "Activate TRANSFAC PRO" button
         numericTracksValueCombobox.setModel(new DefaultComboBoxModel(new String[]{"Extreme value","Average value","Center value"})); // NOTE: The order of these options must correspond to the numbers of the "static final int" fields from DataTrackVisualizer_Numeric.java
         antialiasModeCombobox.setModel(new DefaultComboBoxModel(MotifLabGUI.getAntialiasModes()));
         setupProtocolEditorPanel();
