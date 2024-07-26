@@ -27,9 +27,31 @@ import motiflab.engine.data.FeatureSequenceData;
 import motiflab.engine.data.SequenceCollection;
 
 /**
- * Interactions is a "variable style" format for representing 
- * (long-range) interactions between different chromatin regions (on the same chromosome)
- * The interactions are converted to nested-region tracks
+ * Interactions is a "variable style" BED12 (or BED13) format for representing 
+ * (long-range) interactions between different chromatin regions which may or may not be on the same chromosome.
+ * The interactions are converted to nested-region tracks.
+ * The integer value in the 10th column tells us how many regions are part of the interaction from the same chromosome.
+ * If this value is 1, it means that the interaction is between regions on different chromosomes. These will be ignored here, since we currently have no good way of dealing with them.
+ * Columns 2 and 3 give the coordinates for the "parent region" that covers all the nested regions.
+ * The nested child regions are defined by columns 11 and 12, which are nested lists of numbers whose lengths are determined by the number of linked regions from column 10.
+ * Column 12 ("childStarts") contains the start of each nested child-region relative to the start of the parent (from col 2).
+ * Column 11 ("blockSizes") contains the size of each nested child-region.
+ * An optional 13th column can provide type names for each nested child 
+ * 
+ * 1. chromosome
+ * 2. start  (of "parent region")
+ * 3. end  (of "parent region")
+ * 4. type
+ * 5. score
+ * 6. strand
+ * 7. thickStart
+ * 8. thickEnd
+ * 9. reserved
+ * 10. linked regions
+ * 11. blockSizes (comma-separated list whose length must equal the value of column 10)
+ * 12. childStarts (comma-separated list whose length must equal the value of column 10)
+ * 13. ChildrenTypes (Optional: comma-separated list whose length must equal the value of column 10)
+ * 
  * @author kjetikl
  */
 public class DataFormat_Interactions extends DataFormat {
@@ -335,6 +357,8 @@ public class DataFormat_Interactions extends DataFormat {
             }
             if (line.startsWith("#") || line.isEmpty()) continue; // assume comment line
             HashMap<String,Object> map=parseSingleLine(line, startpos, exclusiveEnd, customfields, count);
+            int interactions=(Integer)map.getOrDefault("linkedRegions",0);
+            if (interactions<2) continue; // the line probably describes an interaction between regions on different chromosomes. We will ignore these here since we cannot properly represent them (yet)
             String regionchromosome=(String)map.get("CHROMOSOME");
             int regionstart=(Integer)map.get("START"); // These should now be 1-indexed and end-inclusive (like GFF-coordinates)
             int regionend=(Integer)map.get("END");     // These should now be 1-indexed and end-inclusive (like GFF-coordinates)
@@ -354,6 +378,8 @@ public class DataFormat_Interactions extends DataFormat {
                     addRegionToTarget(targetSequence,map, count);
                 }
             } else if (target instanceof DataSegment) {
+                if (!((DataSegment)target).getChromosome().equals(regionchromosome)) continue; 
+                if (regionstart>((DataSegment)target).getSegmentEnd() || regionend<((DataSegment)target).getSegmentStart()) continue;
                 addRegionToTarget(target,map, count);
             } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for BED dataformat: "+target.getClass().getSimpleName());
         
@@ -459,7 +485,7 @@ public class DataFormat_Interactions extends DataFormat {
     }
 
     
-    /** parses a single line in a BED-file and returns a HashMap with the different properties (with values as strings!) according to the capturing groups in the formatString */
+    /** parses a single line in an BED-file and returns a HashMap with the different properties (with values as strings!) according to the capturing groups in the formatString */
     private HashMap<String,Object> parseSingleLine(String line, int startpos, boolean exclusiveEnd, String[] customfields, int lineNumber) throws ParseError {
         String[] format=new String[]{"chr","start","end","type","score","strand","thickStart","thickEnd","reserved","linkedRegions","blockSizes","chromStarts","typeChildren"};
         HashMap<String,Object> result=new HashMap<String,Object>();
@@ -529,7 +555,7 @@ public class DataFormat_Interactions extends DataFormat {
             } 
             else if (property.equalsIgnoreCase("linkedRegions")) {
                 Object newvalue=parseValue(value);
-                if (property.equalsIgnoreCase("linkedRegions")) newvalue=new Integer(((Double)newvalue).intValue());
+                if (property.equalsIgnoreCase("linkedRegions")) newvalue=((Double)newvalue).intValue();
                 result.put(property,newvalue);
             }
             else if (property.equalsIgnoreCase("typeChildren")) {

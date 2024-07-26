@@ -23,11 +23,11 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import javax.activation.DataHandler;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
@@ -69,10 +69,7 @@ import motiflab.engine.MotifLabEngine;
 import motiflab.engine.MotifLabResource;
 import motiflab.engine.Plugin;
 import motiflab.engine.dataformat.DataFormat;
-import motiflab.engine.dataformat.DataFormat_2bit;
 import motiflab.engine.dataformat.DataFormat_BED;
-import motiflab.engine.dataformat.DataFormat_BigBed;
-import motiflab.engine.dataformat.DataFormat_BigWig;
 import motiflab.engine.dataformat.DataFormat_FASTA;
 import motiflab.engine.dataformat.DataFormat_WIG;
 import motiflab.engine.datasource.DBfield;
@@ -89,7 +86,7 @@ import motiflab.engine.protocol.ParseError;
  * @author  kjetikl
  */
 public class DataTrackConfigurationDialog extends javax.swing.JDialog {
-    private final String TABLECOLUMN_NAME="Name";    
+    private final String TABLECOLUMN_NAME="Name";
     private final String TABLECOLUMN_TYPE="Type";
     private final String TABLECOLUMN_SOURCE="Provider";
     private final String TABLECOLUMN_ORGANISM="Organism";
@@ -100,9 +97,9 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
     private final String TABLECOLUMN_SERVER="Server";
     private final String TABLECOLUMN_SERVERADDRESS="Server address";
     private final String TABLECOLUMN_DELAY="Delay (ms)";
-    private final String TABLECOLUMN_MAXSPAN="Max span (bp)";    
+    private final String TABLECOLUMN_MAXSPAN="Max span (bp)";
     private final String TABLECOLUMN_MIRRORS="Mirror sites";
-    
+
     private final int SERVER_COLUMN_SERVERADDRESS=0;
     private final int SERVER_COLUMN_DELAY=1;
     private final int SERVER_COLUMN_MAXSPAN=2;
@@ -110,7 +107,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
 
     private MotifLabGUI gui;
     private MotifLabEngine engine;
-    
+
     private DefaultTableModel datatrackTableModel;
     private DefaultTableModel datasourceTableModel;
     private DefaultTableModel serverTableModel;
@@ -127,9 +124,9 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
     private DataSource currentDataSource=null;
     private boolean addDataTrack=false; // TRUE when adding, FALSE when editing
     private boolean addDataSource=false;// TRUE when adding, FALSE when editing
-    
-    private RowFilter<Object,Object> expressionRowFilter=null;    
-    
+
+    private RowFilter<Object,Object> expressionRowFilter=null;
+
     /** Creates new form DataTrackDialog */
     @SuppressWarnings("unchecked")
     public DataTrackConfigurationDialog(MotifLabGUI gui) {
@@ -138,17 +135,17 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         engine=gui.getEngine();
         initComponents();
         // Hack since Netbeans no longer allows be to edit the components in initComponents()
-        
+
         // -----------------
         cardpaneEditSourceMainCardPanel.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                BorderFactory.createEtchedBorder(), 
+                BorderFactory.createEtchedBorder(),
                 BorderFactory.createEmptyBorder(1, 10, 1, 10)
         ));
         // first make a copy (clone) of the current data configuration
         dataconfiguration=(DataConfiguration)gui.getEngine().getDataLoader().getCurrentDataConfiguration().clone();
         availableTracks=dataconfiguration.getAvailableTracks(); // reference to the actual object in the dataconfiguration
         availableServers=dataconfiguration.getServers();        // reference to the actual object in the dataconfiguration
-        
+
         datatrackTableModel=new DefaultTableModel(new String[]{TABLECOLUMN_NAME,TABLECOLUMN_TYPE,TABLECOLUMN_SOURCE,TABLECOLUMN_SUPPORTED_ORGANISMS},0);
         datatrackTable=new JTable(datatrackTableModel) {
             @Override
@@ -162,10 +159,10 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         datatrackTable.getColumn(TABLECOLUMN_TYPE).setMaxWidth(50);
         datatrackTable.getColumn(TABLECOLUMN_TYPE).setMaxWidth(50);
         datatrackTable.getColumn(TABLECOLUMN_TYPE).setCellRenderer(new DataTypeRenderer());
-        datatrackTable.getColumn(TABLECOLUMN_SUPPORTED_ORGANISMS).setCellRenderer(organismRenderer);               
+        datatrackTable.getColumn(TABLECOLUMN_SUPPORTED_ORGANISMS).setCellRenderer(organismRenderer);
         datatrackTable.setRowHeight(18);
-        cardpaneAllTracksScrollPane.setViewportView(datatrackTable);  
-      
+        cardpaneAllTracksScrollPane.setViewportView(datatrackTable);
+
         datatrackTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -173,11 +170,11 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
                if (e.getButton()==MouseEvent.BUTTON1 && e.getClickCount()==2) {
                    allTracksEditButtonClicked();
                }
-            }           
+            }
         });
         datatrackTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
-                boolean selected=(datatrackTable.getSelectedRowCount()>0);            
+                boolean selected=(datatrackTable.getSelectedRowCount()>0);
                 allTracksEditButton.setEnabled(selected);
                 allTracksRemoveButton.setEnabled(selected);
             }
@@ -185,11 +182,11 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         datatrackTable.setAutoCreateRowSorter(true);
         datatrackTable.getRowSorter().toggleSortOrder(datatrackTable.getColumn(TABLECOLUMN_NAME).getModelIndex());
 
-        datasourceTableModel=new DefaultTableModel(new String[]{TABLECOLUMN_ORGANISM,TABLECOLUMN_BUILD,TABLECOLUMN_PROTOCOL,TABLECOLUMN_DATAFORMAT,TABLECOLUMN_SERVER},0);      
+        datasourceTableModel=new DefaultTableModel(new String[]{TABLECOLUMN_ORGANISM,TABLECOLUMN_BUILD,TABLECOLUMN_PROTOCOL,TABLECOLUMN_DATAFORMAT,TABLECOLUMN_SERVER},0);
         datasourceTable=new JTable(datasourceTableModel) {
             @Override
             public boolean isCellEditable(int row, int col) {return false;}
-        };          
+        };
         datasourceTable.setFillsViewportHeight(true);
         datasourceTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         datasourceTable.setRowSelectionAllowed(true);
@@ -207,37 +204,37 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
                    editDataSource();
                }
             }
-            
+
         });
         datasourceTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {              
-                boolean selected=(datatrackTable.getSelectedRowCount()>0 || datasourceTable.getSelectedRows().length>0); // getSelectedRowCount() sometimes return 0 even if rows are selected, which is wrong!           
+            public void valueChanged(ListSelectionEvent e) {
+                boolean selected=(datatrackTable.getSelectedRowCount()>0 || datasourceTable.getSelectedRows().length>0); // getSelectedRowCount() sometimes return 0 even if rows are selected, which is wrong!
                 editTrackEditButton.setEnabled(selected);
                 editTrackRemoveButton.setEnabled(selected);
             }
-        });        
+        });
         datasourceTable.setDragEnabled(true);
         datasourceTable.setDropMode(DropMode.INSERT_ROWS);
-        datasourceTable.setTransferHandler(new TableRowTransferHandler(datasourceTable)); 
-        cardpaneEditTracksScrollPane.setViewportView(datasourceTable);      
-        
-        serverTableModel=new DefaultTableModel(new String[]{TABLECOLUMN_SERVERADDRESS,TABLECOLUMN_DELAY,TABLECOLUMN_MAXSPAN,TABLECOLUMN_MIRRORS},0);      
-        serverTable=new JTable(serverTableModel); 
+        datasourceTable.setTransferHandler(new TableRowTransferHandler(datasourceTable));
+        cardpaneEditTracksScrollPane.setViewportView(datasourceTable);
+
+        serverTableModel=new DefaultTableModel(new String[]{TABLECOLUMN_SERVERADDRESS,TABLECOLUMN_DELAY,TABLECOLUMN_MAXSPAN,TABLECOLUMN_MIRRORS},0);
+        serverTable=new JTable(serverTableModel);
         ExcelAdapter adapter=new ExcelAdapter(serverTable,true, ExcelAdapter.CONVERT_TO_INTEGER); // enables copy/paste capabilities in the table
-        serverTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE); // this will enable unfinished edits to be commited when table looses focus        
+        serverTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE); // this will enable unfinished edits to be commited when table looses focus
         serverTable.setFillsViewportHeight(true);
         serverTable.getTableHeader().setReorderingAllowed(false);
         serverTable.setRowHeight(18);
-        serversScrollPane.setViewportView(serverTable);      
+        serversScrollPane.setViewportView(serverTable);
         serverTable.setAutoCreateRowSorter(true);
         serverTable.setCellSelectionEnabled(true);
         serverTable.getRowSorter().toggleSortOrder(serverTable.getColumn(TABLECOLUMN_SERVERADDRESS).getModelIndex());
-        
-        setupTablesFromConfiguration();      
+
+        setupTablesFromConfiguration();
         editSourceDataFormatCombobox.setModel(getSupportedDataFormats(null, null)); // show all by default
         Integer[] organismsList=Organism.getSupportedOrganismIDs();
         Arrays.sort(organismsList, new Comparator<Integer>(){
-            @Override 
+            @Override
             public int compare(Integer val1, Integer val2) {
                String name1=Organism.getCommonName((val1==null)?0:val1.intValue());
                String name2=Organism.getCommonName((val2==null)?0:val2.intValue());
@@ -247,7 +244,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editSourceOrganismCombobox.setModel(new DefaultComboBoxModel(organismsList));
         OrganismComboboxRenderer organismrenderer=new OrganismComboboxRenderer();
         editSourceOrganismCombobox.setRenderer(organismrenderer);
-        
+
         editSourceProtocolCombobox.setModel(new DefaultComboBoxModel(getAllDataSourceProtocols()));
         editSourceProtocolCombobox.setRenderer(new DisableableComboRenderer());
         editSourceProtocolCombobox.setMinimumSize(new Dimension(50, 20));
@@ -255,7 +252,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editSourceProtocolCombobox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) { // protocol is changed
-                String selected=editSourceProtocolCombobox.getSelectedItem().toString();              
+                String selected=editSourceProtocolCombobox.getSelectedItem().toString();
                 Object renderer=editSourceProtocolCombobox.getRenderer();
                 if (renderer instanceof DisableableComboRenderer) {
                     if (((DisableableComboRenderer)renderer).isItemEnabled(selected)) {
@@ -263,17 +260,17 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
                     } else { // invalid selection
                         String previous=((DisableableComboRenderer)renderer).getPreviouslySelected();
                         if (previous!=null) selected=previous; //
-                        else selected=DataSource_http_GET.PROTOCOL_NAME; // select one that is always applicable     
+                        else selected=DataSource_http_GET.PROTOCOL_NAME; // select one that is always applicable
                         editSourceProtocolCombobox.setSelectedItem(selected);
                     }
-                }                 
-                // selection is OK here   
-                editSourceDataFormatCombobox.setModel(getSupportedDataFormats(null, null));       
+                }
+                // selection is OK here
+                editSourceDataFormatCombobox.setModel(getSupportedDataFormats(null, null));
                 try {editSourceDataFormatCombobox.setSelectedIndex(0);} catch (IllegalArgumentException ie) {} // force selection of first applicable data format
                 boolean useDataFormat=usesStandardDataFormat(selected);
                 setSourceDataFormatEnabled(useDataFormat);
             }
-        });    
+        });
         dataTrackPropertiesTypeCombobox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -299,9 +296,9 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editSourceDataFormatCombobox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String protocol=(String)editSourceProtocolCombobox.getSelectedItem();
-                Object selected=editSourceDataFormatCombobox.getSelectedItem();                
-                if (selected!=null) showDataFormatSettingsPanel(protocol,getDataFormatSettingsPanel((String)selected)); 
-                else showDataFormatSettingsPanel(protocol,null);               
+                Object selected=editSourceDataFormatCombobox.getSelectedItem();
+                if (selected!=null) showDataFormatSettingsPanel(protocol,getDataFormatSettingsPanel((String)selected));
+                else showDataFormatSettingsPanel(protocol,null);
                 pack();
                 // the following is a hack which (if allowed by the user) changes "hgta_doTopSubmit=1" to "hgta_doGetBed=get+BED" in the UCSC url when format is changed to Interactions
                 if (selected!=null && selected.toString().equalsIgnoreCase("Interactions")) {
@@ -315,25 +312,25 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
                     }
                 }
             }
-        });       
+        });
         SQLsourceTable=getSQLsourceTable();
         editSQLsourceTableScrollPane.setViewportView(SQLsourceTable);
         SQLsourceTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
-                boolean selected=(SQLsourceTable.getSelectedRowCount()>0);            
+                boolean selected=(SQLsourceTable.getSelectedRowCount()>0);
                 editSQLsourceRemovePropertyButton.setEnabled(selected);
             }
-        });    
+        });
         editSQLsourceAddPropertyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 addRowToSQLsourceTable();
             }
-        }); 
+        });
         editSQLsourceRemovePropertyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 removeSelectedRowsFromSQLsourceTable();
             }
-        }); 
+        });
 //        // disable the SegmentSize widget for all eternity since we do not allow "legacy" file servers to be configured
 //        editFILEsourceSegmentsizeLabel.setVisible(false);
 //        editFILEsourceSegmentsizeSpinner.setVisible(false);
@@ -341,18 +338,18 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         dataTrackPropertiesDisplaySettingsLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
         String displaySettingsHelp = "<html>A semicolon-separated list of <i>display settings</i> (protocol directives)<br>that can be used to control how the track will be displayed.<br>"
                 + "Use the placeholder \" <b>?</b> \" to refer to the track name (i.e. the \"target\").<br><br>Example:<br><tt>$multicolor(?)=true;$height(?)=100;</tt></html>";
-        dataTrackPropertiesDisplaySettingsLabel.setToolTipText(displaySettingsHelp);      
+        dataTrackPropertiesDisplaySettingsLabel.setToolTipText(displaySettingsHelp);
         dataTrackPropertiesNameLabel.setIcon(new SimpleDataPanelIcon(16, 16, SimpleDataPanelIcon.BLANK_ICON, null)); // I have to add an icon to this label as well, or else it will be misaligned for some reason
-        dataTrackPropertiesNameLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);  
-        
+        dataTrackPropertiesNameLabel.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+
         showTopMenuPanel();
         pack();
         gui.getFrame().setCursor(Cursor.getDefaultCursor());
     }
-    
+
     /**
      * Returns the names of all the different data source protocols that are being used
-     * @return 
+     * @return
      */
     private String[] getAllDataSourceProtocols() {
         ArrayList<MotifLabResource> datasources=engine.getResources("DataSource");
@@ -368,17 +365,17 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         Collections.sort(protocolnames);
         return protocolnames.toArray(datasourceprotocols);
     }
-    
+
     /**
      * Returns a template instance of a DataSource with the specified protocol
      * @param protocol
-     * @return 
+     * @return
      */
     private DataSource getDataSourceInstance(String protocol) {
        DataSource datasource=(DataSource)engine.getResource(protocol, "DataSource");
        return datasource;
     }
-    
+
      /** Returns the names of DataSource types (protocols) that support the given feature dataset type */
      public String[] getDataSourceProtocolsSupportingFeatureDataType(Class type) {
          ArrayList<String> supported=new ArrayList<String>();
@@ -389,50 +386,50 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
                 String protocolName=((DataSource)datasourceTemplate).getProtocol();
                 if (((DataSource)datasourceTemplate).supportsFeatureDataType(type)) supported.add(protocolName);
             } else engine.logMessage("WARNING: Registered Data Source template is NOT a valid Data Source, but a "+((datasourceTemplate==null)?"NULL":datasourceTemplate.toString()));
-         }         
+         }
          String[] result=new String[supported.size()];
          return supported.toArray(result);
      }
-     
+
      /** Returns the names of DataSource types (protocols) that do NOT support the given feature dataset type */
-     public String[] getDataSourceProtocolsNotSupportingFeatureDataType(Class type) {        
+     public String[] getDataSourceProtocolsNotSupportingFeatureDataType(Class type) {
          ArrayList<String> collection=new ArrayList<String>();
          collection.addAll(Arrays.asList(getAllDataSourceProtocols()));
          String[] supported=getDataSourceProtocolsSupportingFeatureDataType(type);
          collection.removeAll(Arrays.asList(supported));
          String[] result=new String[collection.size()];
          return collection.toArray(result);
-     }      
-    
+     }
+
     private DefaultComboBoxModel getAddDataTrackOptions() {
         ArrayList<String> options=new ArrayList<>();
         options.add("UCSC Genome Browser");
         options.add("DAS Registry");
         options.add("Configuration file");
         options.add("Manual entry");
-        // add plugin options        
+        // add plugin options
         ArrayList<MotifLabResource> resources=engine.getResources("DataTrackConfigurationDialog"); // Note that the resource type is different from the one in the method below
         for (MotifLabResource r:resources) {
             options.add(r.getResourceName());
-        }       
+        }
         String[] list=new String[options.size()];
-        return new DefaultComboBoxModel(options.toArray(list));  // 
+        return new DefaultComboBoxModel(options.toArray(list));  //
     }
-    
+
     private DefaultComboBoxModel getAddDataSourceOptions() {
         ArrayList<String> options=new ArrayList<>();
         options.add("Manual entry");
         options.add("UCSC Genome Browser");
-        options.add("DAS Registry");        
+        options.add("DAS Registry");
         // add plugin options
         ArrayList<MotifLabResource> resources=engine.getResources("DataSourceConfigurationDialog"); // Note that the resource type is different from the one in the method above
         for (MotifLabResource r:resources) {
             options.add(r.getResourceName());
-        }           
+        }
         String[] list=new String[options.size()];
-        return new DefaultComboBoxModel(options.toArray(list));  //         
+        return new DefaultComboBoxModel(options.toArray(list));  //
     }
-    
+
     /** Returns a comboboxmodel containing the data formats supported by the specified FeatureDataset type and DataSource protocol
      *  If any of the parameters provided are NULL, they will instead be inferred from the current selections in the GUI
      */
@@ -451,18 +448,18 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
             DataSource datasource = getDataSourceInstance(protocol);
             inputformatsList = datasource.filterProtocolSupportedDataFormats(inputformatsList);
         }
-        
+
         String[] list=new String[inputformatsList.size()];
         int i=0;
         for (DataFormat formatter:inputformatsList) {
             list[i]=formatter.getName();
             i++;
         }
-        return new DefaultComboBoxModel(list);        
+        return new DefaultComboBoxModel(list);
     }
-  
-// --- The functionality of these 3 methods have been replaced by methods in other classes    
-    
+
+// --- The functionality of these 3 methods have been replaced by methods in other classes
+
 //    private ArrayList<DataFormat> filterDataFormatsThatOnlyParseLocalFiles(ArrayList<DataFormat> list) {
 //        Iterator<DataFormat> iter=list.iterator();
 //        while (iter.hasNext()) {
@@ -470,8 +467,8 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
 //            if (format.canOnlyParseDirectlyFromLocalFile()) iter.remove();
 //        }
 //        return list;
-//    }    
-//    
+//    }
+//
 //    /** Returns the intersections between the two provided lists */
 //    private ArrayList<DataFormat> filterDataFormats(ArrayList<DataFormat> list, Class[] filter) {
 //        if (filter==null || filter.length==0) return list;
@@ -481,51 +478,51 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
 //        }
 //        return result;
 //    }
-//    
+//
 //    private boolean inClassFilter(Object o, Class[] filter) {
 //        for (Class c:filter) {
 //            if (o.getClass()==c) return true;
 //        }
 //        return false;
 //    }
-    
+
     /** */
     private void showDataFormatSettingsPanel(String protocol, JPanel panel) {
-        
+
         // The GET and FILE protocol are the only ones that support standard DataFormats thay may have additional Data format settings
         // whereas SQL, DAS and VOID protocols do not support standard DataFormats.
         // Note, however, that future DataSource plugins may also support standard DataFormats
-        
+
         // The two panels below: "additionalDataFormatSettingsPanel_GET" and "additionalDataFormatSettingsPanel_FILE"
         // are just containers that are added to the higher-level panels for each of these DataSource types (in different "cards")
 
         // The panel to define the dataformat-specific settings is provided by the second parameter to this method,
         // but this is also a "singleton" which is referenced by the global variable "dataFormatParametersPanel".
         // This (apparently) makes it easier to parse the settings afterwards.
-        
+
         // the settings panel (and hence also the global "dataFormatParametersPanel" variable) is created anew every time
-        // the DataFormat is changed (by the user selecting a different one in a combobox), since each DataFormat will have a new set of format-specific parameters. 
+        // the DataFormat is changed (by the user selecting a different one in a combobox), since each DataFormat will have a new set of format-specific parameters.
         // (The settings panel is automatically built from the parameters exported by the data format)
-        
-        // The purpose of this particular method is to add this new singleton panel to the 
+
+        // The purpose of this particular method is to add this new singleton panel to the
         // correct parent container, which can be either the GET or FILE panel cards, but may in the future also be plugin cards?
         // So, this hardcoding is maybe not be best way to deal with things.
-        
+
         additionalDataFormatSettingsPanel_GET.removeAll();
         additionalDataFormatSettingsPanel_FILE.removeAll();
         if (panel!=null) {
             if (protocol.equals(DataSource_http_GET.PROTOCOL_NAME)) {
                 additionalDataFormatSettingsPanel_GET.add(panel);
                 additionalDataFormatSettingsPanel_GET.invalidate();
-                additionalDataFormatSettingsPanel_GET.repaint();          
+                additionalDataFormatSettingsPanel_GET.repaint();
             } else if (protocol.equals(DataSource_FileServer.PROTOCOL_NAME)) {
                 additionalDataFormatSettingsPanel_FILE.add(panel);
                 additionalDataFormatSettingsPanel_FILE.invalidate();
-                additionalDataFormatSettingsPanel_FILE.repaint();       
-            }   
+                additionalDataFormatSettingsPanel_FILE.repaint();
+            }
         }
-    } 
-    
+    }
+
     /** */
     private JPanel getDataFormatSettingsPanel(String outputformatName) {
         DataFormat outputFormat=engine.getDataFormat(outputformatName);
@@ -544,10 +541,10 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
 //        editFILEsourceSegmentsizeSpinner.setEnabled(showFileSegmentSizeWidget);
         return panel;
     }
-    
-    
+
+
     /** Fills in data in the DataTracks and DataSources JTables based on the current config */
-    private void setupTablesFromConfiguration() {  
+    private void setupTablesFromConfiguration() {
          int tracknumber=datatrackTableModel.getRowCount();
          if (tracknumber>0) {
              for (int i=0;i<tracknumber;i++) datatrackTableModel.removeRow(0);
@@ -560,7 +557,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
             int[] supportedOrganisms=track.getSupportedOrganisms();
             Object[] values=new Object[]{track.getName(),track.getDataType(),track.getSourceSite(),supportedOrganisms};
             datatrackTableModel.addRow(values);
-        }           
+        }
         for (Server server:availableServers.values()) {
             String mirrors="";
             ArrayList<String> mirrorsites=server.getMirrorSites();
@@ -572,9 +569,9 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
             }
             Object[] values=new Object[]{server.getServerAddress(), new Integer(server.getServerDelay()), new Integer(server.getMaxSequenceLength()), mirrors};
             serverTableModel.addRow(values);
-        }          
+        }
     }
-    
+
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -582,7 +579,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
      * always regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
@@ -682,6 +679,8 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editDASsourceFeatureTextfield = new javax.swing.JTextField();
         editFILEsourcePanel = new javax.swing.JPanel();
         editFILEsourcePanelInner = new javax.swing.JPanel();
+        editFILEsourceModeLabel = new javax.swing.JLabel();
+        editFILEsourceModeCombox = new javax.swing.JComboBox<>();
         editFILEsourceFilenameLabel = new javax.swing.JLabel();
         editFILEsourceFilenameTextfield = new javax.swing.JTextField();
         editFILEsourceSegmentsizeLabel = new javax.swing.JLabel();
@@ -1437,9 +1436,42 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editFILEsourcePanelInner.setName("editFILEsourcePanelInner"); // NOI18N
         editFILEsourcePanelInner.setLayout(new java.awt.GridBagLayout());
 
+        editFILEsourceModeLabel.setText("Mode"); 
+        editFILEsourceModeLabel.setName("editFILEsourceModeLabel"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        editFILEsourcePanelInner.add(editFILEsourceModeLabel, gridBagConstraints);
+
+        editFILEsourceModeCombox.setModel(new DefaultComboBoxModel(new String[]{"Single file","Segmented"}));
+        editFILEsourceModeCombox.setName("editFILEsourceModeCombox"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0; 
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;       
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        editFILEsourcePanelInner.add(editFILEsourceModeCombox, gridBagConstraints); 
+        editFILEsourceModeCombox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                String selected=(String)editFILEsourceModeCombox.getSelectedItem();
+                editFILEsourceSegmentsizeSpinner.setEnabled(selected.equals("Segmented"));
+                if (selected.equals("Single file")) editFILEsourceSegmentsizeSpinner.setValue(0);
+                else {
+                    int segmentsize=100000; // default
+                    if (currentDataSource instanceof DataSource_FileServer) {
+                       segmentsize=((DataSource_FileServer)currentDataSource).getSegmentsize();
+                    }
+                    editFILEsourceSegmentsizeSpinner.setValue(segmentsize);
+                }
+            }
+        });
+        
+        
         editFILEsourceFilenameLabel.setText(resourceMap.getString("editFILEsourceFilenameLabel.text")); // NOI18N
         editFILEsourceFilenameLabel.setName("editFILEsourceFilenameLabel"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;        
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
         editFILEsourcePanelInner.add(editFILEsourceFilenameLabel, gridBagConstraints);
@@ -1448,6 +1480,8 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editFILEsourceFilenameTextfield.setText(resourceMap.getString("editFILEsourceFilenameTextfield.text")); // NOI18N
         editFILEsourceFilenameTextfield.setName("editFILEsourceFilenameTextfield"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;         
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
         editFILEsourcePanelInner.add(editFILEsourceFilenameTextfield, gridBagConstraints);
 
@@ -1455,18 +1489,18 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editFILEsourceSegmentsizeLabel.setName("editFILEsourceSegmentsizeLabel"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
         editFILEsourcePanelInner.add(editFILEsourceSegmentsizeLabel, gridBagConstraints);
 
-        editFILEsourceSegmentsizeSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(200000), Integer.valueOf(1), null, Integer.valueOf(1)));
+        editFILEsourceSegmentsizeSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(200000), Integer.valueOf(0), null, Integer.valueOf(1)));
         editFILEsourceSegmentsizeSpinner.setMinimumSize(new java.awt.Dimension(100, 26));
         editFILEsourceSegmentsizeSpinner.setName("editFILEsourceSegmentsizeSpinner"); // NOI18N
         editFILEsourceSegmentsizeSpinner.setPreferredSize(new java.awt.Dimension(100, 26));
         editFILEsourceSegmentsizeSpinner.setRequestFocusEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
         editFILEsourcePanelInner.add(editFILEsourceSegmentsizeSpinner, gridBagConstraints);
@@ -1479,6 +1513,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;        
         gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 0);
         editFILEsourcePanelInner.add(editFILEsourceBrowseButton, gridBagConstraints);
 
@@ -1759,45 +1794,45 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         getContentPane().add(cardpaneServers, "cardpaneServers");
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }
 
-private void exitWithoutSaving(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_exitWithoutSaving
-     
+private void exitWithoutSaving(java.awt.event.MouseEvent evt) {
+
      setVisible(false);
-}//GEN-LAST:event_exitWithoutSaving
+}
 
-private void configureDatatracksButtonClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configureDatatracksButtonClicked
+private void configureDatatracksButtonClicked(java.awt.event.MouseEvent evt) {
    showAllTracksPanel();
-}//GEN-LAST:event_configureDatatracksButtonClicked
+}
 
-private void configureServersSettingsButtonClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_configureServersSettingsButtonClicked
+private void configureServersSettingsButtonClicked(java.awt.event.MouseEvent evt) {
     showServersPanel();
-}//GEN-LAST:event_configureServersSettingsButtonClicked
+}
 
-private void importSettings(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_importSettings
-        File file=null;//GEN-LAST:event_importSettings
- 
+private void importSettings(java.awt.event.MouseEvent evt) {
+        File file=null;
+
       DataTrackConfigurationDialog_importDialog dialog=new DataTrackConfigurationDialog_importDialog(this, gui);
       dialog.setLocation(gui.getFrame().getWidth()/2-dialog.getWidth()/2, gui.getFrame().getHeight()/2-dialog.getHeight()/2);
       dialog.setVisible(true);
-      dialog.dispose();         
+      dialog.dispose();
 }
 
-private void exportSettings(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_exportSettings
-        File file=null;//GEN-LAST:event_exportSettings
+private void exportSettings(java.awt.event.MouseEvent evt) {
+        File file=null;
 
       DataTrackConfigurationDialog_exportDialog dialog=new DataTrackConfigurationDialog_exportDialog(this, gui);
       dialog.setLocation(gui.getFrame().getWidth()/2-dialog.getWidth()/2, gui.getFrame().getHeight()/2-dialog.getHeight()/2);
       dialog.setVisible(true);
-      dialog.dispose();  
+      dialog.dispose();
 }
 
-private void revertSettings(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_revertSettings
+private void revertSettings(java.awt.event.MouseEvent evt) {
      int choice=JOptionPane.showConfirmDialog(this, "Do you really want to revert to default settings?\nThis will discard any alterations you have made to the configuration", "Revert Settings", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-     if (choice==JOptionPane.CANCEL_OPTION) return;//GEN-LAST:event_revertSettings
+     if (choice==JOptionPane.CANCEL_OPTION) return;
      SwingWorker worker=new SwingWorker<Boolean, Void>() {
             Exception ex=null;
-            @Override 
+            @Override
             public Boolean doInBackground() {
                 configureDatatracksButton.setEnabled(false);
                 configureServerSettingsButton.setEnabled(false);
@@ -1829,19 +1864,19 @@ private void revertSettings(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_re
                 }
             }
         }; // end of SwingWorker class
-        worker.execute();      
+        worker.execute();
 }
 
-private void editTrackCancelButtonPressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_editTrackCancelButtonPressed
+private void editTrackCancelButtonPressed(java.awt.event.MouseEvent evt) {
        showAllTracksPanel();
-}//GEN-LAST:event_editTrackCancelButtonPressed
+}
 
-private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_editSourceProtocolChanged
+private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
       // This method will be called twice in succession. First to DESELECT the currently selected item, and then again to SELECT the newly chosen item
       // I only need to respond to the second case and return immediately for the first case.
-      if (evt.getStateChange()==java.awt.event.ItemEvent.DESELECTED) return; //    
-  
-      String protocol=(String)editSourceProtocolCombobox.getSelectedItem();  
+      if (evt.getStateChange()==java.awt.event.ItemEvent.DESELECTED) return; //
+
+      String protocol=(String)editSourceProtocolCombobox.getSelectedItem();
       // The first five Data Source types here are included in the standard MotifLab distribution, but other types can be added as plugins
            if (protocol.equals(DataSource_DAS.PROTOCOL_NAME)) ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "DASprotocol");
       else if (protocol.equals(DataSource_http_GET.PROTOCOL_NAME)) ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "GETprotocol");
@@ -1852,7 +1887,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             JPanel datasourcepanel=null;
             Object resource=engine.getResource(protocol, "DataSource");
             if (resource instanceof DataSource) {
-                if (currentDataSource==null || !((DataSource)resource).getClass().isAssignableFrom(currentDataSource.getClass())) {                 
+                if (currentDataSource==null || !((DataSource)resource).getClass().isAssignableFrom(currentDataSource.getClass())) {
                     try {
                         DataSource newDataSource=((DataSource)resource).getClass().newInstance();
                         int organism=Organism.HUMAN; // this default is replaced below with the value from the editor panel
@@ -1860,7 +1895,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                         if (organismObject!=null) organism=((Integer)organismObject).intValue();
                         String build=(String)editSourceBuildCombobox.getSelectedItem();
                         build=(build==null)?"":build.trim();
-                        String dataformat=(String)editSourceDataFormatCombobox.getSelectedItem();                      
+                        String dataformat=(String)editSourceDataFormatCombobox.getSelectedItem();
                         newDataSource.initializeDataSource(currentDataTrack, organism, build, dataformat);
                         datasourcepanel=newDataSource.getConfigurationPanel();
                     } catch (Exception e) {
@@ -1869,15 +1904,15 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                 } else {
                     datasourcepanel=currentDataSource.getConfigurationPanel();
                 }
-                
+
             }
             if (datasourcepanel==null) datasourcepanel=newMessagePanel("No configuration panel found for DataSource protocol: "+protocol);
             // ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).addLayoutComponent(datasourcepanel, protocol); // not working?!
             datasourcepanel.setName(protocol); // this is necessary so that we can search for it later by name
             addUniqueComponent(cardpaneEditSourceMainCardPanel, datasourcepanel, protocol);
             ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, protocol);
-    }          
-}//GEN-LAST:event_editSourceProtocolChanged
+    }
+}
 
     /** Returns a very simple JPanel containing a single JLabel with a message */
     private JPanel newMessagePanel(String message) {
@@ -1886,17 +1921,17 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
         panel.add(label);
         return panel;
     }
-    
+
     private JPanel getDataSourceConfigurationPanel(JPanel parent, String protocol) {
-        Component[] components=parent.getComponents();                  
+        Component[] components=parent.getComponents();
         for (Component c:components) {
            if (protocol.equals(c.getName()) && c instanceof JPanel) {
                return (JPanel)c;
            }
-        }        
+        }
         return null;
     }
-    
+
     /**
     * This method adds a panel with the specific name (constraint) to the parent
     * container while also removing any other child components that have the same name
@@ -1908,7 +1943,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
            if (name.equals(c.getName())) {
                removeList.add(c);
            }
-        }  
+        }
         for (Component r:removeList) {
             parent.remove(r);
         }
@@ -1916,7 +1951,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     }
 
 
-    private void addServerButtonPressed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addServerButtonPressed
+    private void addServerButtonPressed(java.awt.event.ActionEvent evt) {
             Object[] values=new Object[]{"", new Integer(0),""};
             serverTableModel.addRow(values);
                int newrow=getFirstEmptyRowInTable(serverTable);
@@ -1927,39 +1962,34 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                        serverTable.requestFocus();
                    }
                }
-    }//GEN-LAST:event_addServerButtonPressed
+    }
 
-    private void FileServerBrowseButtonPressed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileServerBrowseButtonPressed
+    private void FileServerBrowseButtonPressed(java.awt.event.ActionEvent evt) {
         JFileChooser filechooser = new JFileChooser(gui.getLastUsedDirectory()); // Using the regular JFileChooser here instead of "gui.getFileChooser(null)" since File Servers can only use local files, not data repository files
-        boolean directFile=true; // TRUE = single compressed binary file server, FALSE = legacy split files
-        String dataformatName=(String)editSourceDataFormatCombobox.getSelectedItem();
-        DataFormat format=engine.getDataFormat(dataformatName);
-        if (format instanceof DataFormat_BED || format instanceof DataFormat_FASTA || format instanceof DataFormat_WIG) {
-            directFile=false; // to support legacy split files
-        }
-        if (directFile) {
+        boolean singleFile=editFILEsourceModeCombox.getSelectedItem().equals("Single file"); // TRUE = single file server, FALSE = segmented filesr
+        if (singleFile) {
             filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             filechooser.setDialogTitle("Select fileserver file");
         } else {
             filechooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             filechooser.setDialogTitle("Select fileserver directory");
         }
-      
+
         int status=filechooser.showOpenDialog(this);
         if (status==JFileChooser.APPROVE_OPTION) {
             File selected=filechooser.getSelectedFile();
             // gui.setLastUsedDirectory(selected);
             editFILEsourceFilenameTextfield.setText(selected.getAbsolutePath());
-        }  
-    }//GEN-LAST:event_FileServerBrowseButtonPressed
+        }
+    }
 
-    private void protocolHelpButtonPressed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_protocolHelpButtonPressed
+    private void protocolHelpButtonPressed(java.awt.event.ActionEvent evt) {
         String protocol=(String)editSourceProtocolCombobox.getSelectedItem();
         StringBuilder builder = new StringBuilder();
         if (MotifLabEngine.inArray(protocol, new String[]{DataSource_http_GET.PROTOCOL_NAME, DataSource_DAS.PROTOCOL_NAME, DataSource_FileServer.PROTOCOL_NAME, DataSource_SQL.PROTOCOL_NAME, DataSource_VOID.PROTOCOL_NAME}, true)) {
             try {
                 BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/motiflab/gui/resources/helpFor"+protocol+"protocol.html"), "UTF-8"));
-                for (int c = br.read(); c != -1; c = br.read()) builder.append((char)c);        
+                for (int c = br.read(); c != -1; c = br.read()) builder.append((char)c);
             } catch (Exception e) {
                 builder.append(e.toString());
                 // e.printStackTrace(System.err);
@@ -1968,27 +1998,27 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             Object resource=engine.getResource(protocol, "DataSource");
             if (resource instanceof DataSource) {
                 String helpString=((DataSource)resource).getHelp();
-                if (helpString==null) helpString="<html><h1>"+protocol+" Data Source</h1>No documentation found for this data source protocol!</html>"; 
+                if (helpString==null) helpString="<html><h1>"+protocol+" Data Source</h1>No documentation found for this data source protocol!</html>";
                 builder.append(helpString);
             }
         }
         InfoDialog infodialog=new InfoDialog(gui, "Help", builder.toString(),600,500);
         infodialog.setVisible(true);
         infodialog.dispose();
-    }//GEN-LAST:event_protocolHelpButtonPressed
+    }
 
-    private void keyReleasedInFilterTextfield(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_keyReleasedInFilterTextfield
-        String text=trackFilterTextField.getText();                                             
+    private void keyReleasedInFilterTextfield(java.awt.event.KeyEvent evt) {
+        String text=trackFilterTextField.getText();
         int namecol=datatrackTableModel.findColumn(TABLECOLUMN_NAME);
         if (text!=null && text.isEmpty()) expressionRowFilter=null;
         else {
             text=text.replaceAll("\\W", ""); // to avoid problems with regex characters
             expressionRowFilter=RowFilter.regexFilter("(?i)"+text,namecol);
         }
-        installFilters();    
-    }//GEN-LAST:event_keyReleasedInFilterTextfield
+        installFilters();
+    }
 
-    private void sourceOrganismSelected(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sourceOrganismSelected
+    private void sourceOrganismSelected(java.awt.event.ActionEvent evt) {
         Integer org=(Integer)editSourceOrganismCombobox.getSelectedItem();
         int organism=0;
         if (org!=null) organism=org.intValue();
@@ -1996,13 +2026,13 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
         if (builds==null) builds=new String[0];
         DefaultComboBoxModel<String> buildsModel=new DefaultComboBoxModel<String>(builds);
         editSourceBuildCombobox.setModel(buildsModel);
-    }//GEN-LAST:event_sourceOrganismSelected
-    
+    }
+
     @SuppressWarnings("unchecked")
     private void installFilters() {
        ((TableRowSorter)datatrackTable.getRowSorter()).setRowFilter(expressionRowFilter);
-    }    
-    
+    }
+
     private int getFirstEmptyRowInTable(JTable table) {
         for (int i=0;i<table.getRowCount();i++) {
             Object val=table.getValueAt(i, 0);
@@ -2014,7 +2044,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     protected void saveSettingsToFile(final File configurationfile, final DataConfiguration config) {
        SwingWorker worker=new SwingWorker<Boolean, Void>() {
             Exception ex=null;
-            @Override 
+            @Override
             public Boolean doInBackground() {
                 try {
                     config.saveConfigurationToFile(configurationfile);
@@ -2032,10 +2062,10 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                 }
             }
         }; // end of SwingWorker class
-        worker.execute();       
+        worker.execute();
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify
     private javax.swing.JPanel DataFormatSettingsTopPanel;
     private javax.swing.JPanel DataFormatSettingsTopPanel_FILE;
     private javax.swing.JButton addServerButton;
@@ -2096,6 +2126,8 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     private javax.swing.JPanel editFILEsourcePanelInner;
     private javax.swing.JLabel editFILEsourceSegmentsizeLabel;
     private javax.swing.JSpinner editFILEsourceSegmentsizeSpinner;
+    private javax.swing.JLabel editFILEsourceModeLabel;
+    private javax.swing.JComboBox editFILEsourceModeCombox;
     private javax.swing.JLabel editGETsourceBaseURLlabel;
     private javax.swing.JTextField editGETsourceBaseURLtextfield;
     private javax.swing.JPanel editGETsourcePanel;
@@ -2172,27 +2204,27 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     private javax.swing.JButton serversOKButton;
     private javax.swing.JScrollPane serversScrollPane;
     private javax.swing.JTextField trackFilterTextField;
-    // End of variables declaration//GEN-END:variables
+    // End of variables declaration
 
 
     private void showTopMenuPanel() {
          currentDataTrack=null;
         ((CardLayout)getContentPane().getLayout()).show(getContentPane(), "cardpaneTopMenu");
-         getRootPane().setDefaultButton(saveChangesButton);       
-    }  
+         getRootPane().setDefaultButton(saveChangesButton);
+    }
     private void showServersPanel() {
         ((CardLayout)getContentPane().getLayout()).show(getContentPane(), "cardpaneServers");
-         getRootPane().setDefaultButton(serversOKButton);       
-    }  
+         getRootPane().setDefaultButton(serversOKButton);
+    }
 
     private void showAllTracksPanel() {
         setupTablesFromConfiguration();
          currentDataTrack=null;
         ((CardLayout)getContentPane().getLayout()).show(getContentPane(), "cardpaneAllTracks");
-         getRootPane().setDefaultButton(allTracksOKButton);       
-    }    
-    
-    private void showEditDataTrackPanel(DataTrack datatrack) {      
+         getRootPane().setDefaultButton(allTracksOKButton);
+    }
+
+    private void showEditDataTrackPanel(DataTrack datatrack) {
          if (datatrack==null) addDataTrack=true; else addDataTrack=false;
          currentDataTrack=datatrack;
          String datatrackName=(addDataTrack)?"":datatrack.getName();
@@ -2205,43 +2237,43 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
          dataTrackPropertiesDescriptionTextfield.setText(description);
          dataTrackPropertiesDescriptionTextfield.setCaretPosition(0);
          dataTrackPropertiesDisplaySettingsTextfield.setText(displayProtocol);
-         dataTrackPropertiesDisplaySettingsTextfield.setCaretPosition(0);         
+         dataTrackPropertiesDisplaySettingsTextfield.setCaretPosition(0);
          dataTrackPropertiesSourceTextfield.setText(sourceSite);
               if (datatype==null) dataTrackPropertiesTypeCombobox.setSelectedItem("Numeric");
          else if (datatype==DNASequenceDataset.class) dataTrackPropertiesTypeCombobox.setSelectedItem("Sequence");
          else if (datatype==NumericDataset.class) dataTrackPropertiesTypeCombobox.setSelectedItem("Numeric");
-         else if (datatype==RegionDataset.class) dataTrackPropertiesTypeCombobox.setSelectedItem("Region");            
+         else if (datatype==RegionDataset.class) dataTrackPropertiesTypeCombobox.setSelectedItem("Region");
          ArrayList<DataSource> sources=(addDataTrack)?new ArrayList<DataSource>():datatrack.getDatasources();
          String[] columnNames=new String[]{TABLECOLUMN_ORGANISM,TABLECOLUMN_BUILD,TABLECOLUMN_PROTOCOL,TABLECOLUMN_DATAFORMAT,TABLECOLUMN_SERVER};
          Object[][] data=new Object[sources.size()][columnNames.length];
-         for (int i=0;i<sources.size();i++) {          
+         for (int i=0;i<sources.size();i++) {
              DataSource source=sources.get(i);
              data[i]=new Object[]{new Integer(source.getOrganism()),source.getGenomeBuild(),source.getProtocol(),source.getDataFormat(),source.getServerAddress()};
          }
          datasourceTableModel=new DefaultTableModel(data,columnNames);
          datasourceTable.setModel(datasourceTableModel);
          datasourceTable.getColumn(TABLECOLUMN_ORGANISM).setCellRenderer(organismRenderer);
-         ((CardLayout)getContentPane().getLayout()).show(getContentPane(), "cardpaneEditTrack");        
+         ((CardLayout)getContentPane().getLayout()).show(getContentPane(), "cardpaneEditTrack");
          getRootPane().setDefaultButton(editTrackOKButton);
          editTrackEditButton.setEnabled(false); // this will be enabled when selecting a source
-         editTrackRemoveButton.setEnabled(false);      
-    }    
-    
+         editTrackRemoveButton.setEnabled(false);
+    }
+
     private void showEditDataSourcePanel(DataSource datasource) {
-         if (datasource==null) addDataSource=true; else addDataSource=false; 
-         currentDataSource=datasource;         
+         if (datasource==null) addDataSource=true; else addDataSource=false;
+         currentDataSource=datasource;
          String datatrackName=currentDataTrack.getName();
          int organism=(addDataSource)?Organism.HUMAN:datasource.getOrganism(); // default to HUMAN hg38 when adding new source
          String build=(addDataSource)?"hg38":datasource.getGenomeBuild();
-         if (build==null) build="";         
+         if (build==null) build="";
          String protocol=(addDataSource)?DataSource_http_GET.PROTOCOL_NAME:datasource.getProtocol();
          String dataformat=(addDataSource)?null:datasource.getDataFormat();
          if (dataformat!=null) {
-            showDataFormatSettingsPanel(protocol, getDataFormatSettingsPanel(dataformat)); 
+            showDataFormatSettingsPanel(protocol, getDataFormatSettingsPanel(dataformat));
          }
          // clear current field values
          editSourceTrackNameTextfield.setText(datatrackName);
-         editSourceOrganismCombobox.setSelectedItem(organism);         
+         editSourceOrganismCombobox.setSelectedItem(organism);
          editSourceBuildCombobox.setSelectedItem(build);
          editDASsourceBaseURLtextfield.setText("");
          editDASsourceFeatureTextfield.setText("");
@@ -2253,14 +2285,14 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
          editSQLsourcePortField.setText("");
          editSQLsourceUsernameField.setText("");
          editSQLsourcePasswordField.setText("");
-         editSQLsourceDatabaseNameField.setText("");          
-         editSQLsourceTableNameField.setText("");      
-                            
+         editSQLsourceDatabaseNameField.setText("");
+         editSQLsourceTableNameField.setText("");
+
          if (datasource==null) {
              ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "GETprotocol"); // default to GET protocol if no datasource is provided
          } else if (datasource instanceof DataSource_DAS) {
              editDASsourceBaseURLtextfield.setText(((DataSource_DAS)datasource).getBaseURL());
-             editDASsourceFeatureTextfield.setText(((DataSource_DAS)datasource).getFeature());     
+             editDASsourceFeatureTextfield.setText(((DataSource_DAS)datasource).getFeature());
              ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "DASprotocol");
          } else if (datasource instanceof DataSource_http_GET) {
              editGETsourceBaseURLtextfield.setText(((DataSource_http_GET)datasource).getBaseURL());
@@ -2268,8 +2300,12 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
              editGETsourceParametersTextfield.setCaretPosition(0);
              ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "GETprotocol");
          } else if (datasource instanceof DataSource_FileServer) {
-             editFILEsourceFilenameTextfield.setText(((DataSource_FileServer)datasource).getFilepath());
-             editFILEsourceSegmentsizeSpinner.setValue(((DataSource_FileServer)datasource).getSegmentsize());             
+             String filepath=((DataSource_FileServer)datasource).getFilepath();
+             int segmentsize=((DataSource_FileServer)datasource).getSegmentsize();
+             editFILEsourceFilenameTextfield.setText(filepath);
+             editFILEsourceSegmentsizeSpinner.setValue(segmentsize);
+             if (segmentsize>0) editFILEsourceModeCombox.setSelectedItem("Segmented");
+             editFILEsourceSegmentsizeSpinner.setEnabled(editFILEsourceModeCombox.getSelectedItem().equals("Segmented"));
              editFILEsourceFilenameTextfield.setCaretPosition(0);
              ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "FILEprotocol");
          } else if (datasource instanceof DataSource_SQL) {
@@ -2278,32 +2314,32 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
              editSQLsourcePortField.setText((portnumber>0)?(""+portnumber):"");
              editSQLsourceUsernameField.setText(((DataSource_SQL)datasource).getUsername());
              editSQLsourcePasswordField.setText(((DataSource_SQL)datasource).getPassword());
-             editSQLsourceDatabaseNameField.setText(((DataSource_SQL)datasource).getDatabaseName());          
+             editSQLsourceDatabaseNameField.setText(((DataSource_SQL)datasource).getDatabaseName());
              editSQLsourceTableNameField.setText(((DataSource_SQL)datasource).getTablename());
-             initializeSQLtableFromSource((DataSource_SQL)datasource);             
+             initializeSQLtableFromSource((DataSource_SQL)datasource);
              ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "SQLprotocol");
          } else if (datasource instanceof DataSource_VOID) {
              ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "VOIDprotocol");
-         } else if (datasource instanceof Plugin) {          
-             JPanel datasourcepanel=datasource.getConfigurationPanel();                  
+         } else if (datasource instanceof Plugin) {
+             JPanel datasourcepanel=datasource.getConfigurationPanel();
              if (datasourcepanel==null) datasourcepanel=newMessagePanel("No configuration panel found for DataSource protocol: "+protocol);
              datasourcepanel.setName(protocol); // this is necessary so that we can search for it later by name
-             addUniqueComponent(cardpaneEditSourceMainCardPanel, datasourcepanel, protocol);         
-             ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, protocol);             
-         } 
-         if (addDataSource) editSourceProtocolCombobox.setSelectedItem("GET"); // Use GET as the "default" protocol 
+             addUniqueComponent(cardpaneEditSourceMainCardPanel, datasourcepanel, protocol);
+             ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, protocol);
+         }
+         if (addDataSource) editSourceProtocolCombobox.setSelectedItem("GET"); // Use GET as the "default" protocol
          else editSourceProtocolCombobox.setSelectedItem(protocol);
          if (addDataSource) editSourceDataFormatCombobox.setSelectedIndex(0);
-         else editSourceDataFormatCombobox.setSelectedItem(dataformat);            
-         ((CardLayout)getContentPane().getLayout()).show(getContentPane(), "cardpaneEditSource"); 
+         else editSourceDataFormatCombobox.setSelectedItem(dataformat);
+         ((CardLayout)getContentPane().getLayout()).show(getContentPane(), "cardpaneEditSource");
          getRootPane().setDefaultButton(editSourceOKButton);
-    }    
-    
+    }
+
     private void setSourceDataFormatEnabled(boolean enabled) {
         editSourceDataFormatLabel.setVisible(enabled);
         editSourceDataFormatCombobox.setVisible(enabled);
     }
-    
+
     /** Returns TRUE if the given DataSource protocol uses standard Data Formats to parse track data */
     private boolean usesStandardDataFormat(String protocol) {
         DataSource ds=getDataSourceTemplate(protocol);
@@ -2317,8 +2353,8 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
        if (resource instanceof DataSource) return ((DataSource)resource);
        else return null;
     }
-    
-    
+
+
     @Action
     public void allTracksEditButtonClicked() {
        int row=datatrackTable.getSelectedRow();
@@ -2347,7 +2383,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
        DataSource source=currentDataTrack.getDatasources().get(row);
        showEditDataSourcePanel(source);
     }
-    
+
     @Action
     public void addDataSource() {
         if (currentDataTrack==null) { // setup a temp track if no track has been configured just yet
@@ -2362,22 +2398,22 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             else if (typename.equals("Numeric")) newtype=NumericDataset.class;
             else if (typename.equals("Region")) newtype=RegionDataset.class;
             String sourcesite=dataTrackPropertiesSourceTextfield.getText().trim();
-            String description=dataTrackPropertiesDescriptionTextfield.getText().trim(); 
-            String dsp=dataTrackPropertiesDisplaySettingsTextfield.getText().trim(); 
-            currentDataTrack=new DataTrack(editname, newtype, sourcesite, description);       
+            String description=dataTrackPropertiesDescriptionTextfield.getText().trim();
+            String dsp=dataTrackPropertiesDisplaySettingsTextfield.getText().trim();
+            currentDataTrack=new DataTrack(editname, newtype, sourcesite, description);
             currentDataTrack.setDisplayDirectivesProtocol(dsp.isEmpty()?null:dsp);
         }
         String selectedSource=(String)editTrackAddSourceCombobox.getSelectedItem();
              if (selectedSource.equalsIgnoreCase("UCSC Genome Browser")) addDataSourceFromUCSC();
         else if (selectedSource.equalsIgnoreCase("DAS Registry")) addDataSourceFromDAS();
-        else if (selectedSource.equalsIgnoreCase("Manual entry")) showEditDataSourcePanel(null);   
-        else { // this could be a plugin 
+        else if (selectedSource.equalsIgnoreCase("Manual entry")) showEditDataSourcePanel(null);
+        else { // this could be a plugin
             Object object=engine.getResource(selectedSource, "DataSourceConfigurationDialog");
             if (object instanceof Plugin) addDataSourceFromPlugin((Plugin)object);
             else JOptionPane.showMessageDialog(gui.getFrame(), "Unable to show configuration dialog for '"+selectedSource+"'","Error", JOptionPane.ERROR_MESSAGE);
-        }                 
+        }
     }
-    
+
     private void addDataSourceFromUCSC() {
         UCSCtrackDialog ucscdialog = new UCSCtrackDialog(gui,currentDataTrack);
         ucscdialog.setLocation(gui.getFrame().getWidth()/2-ucscdialog.getWidth()/2, gui.getFrame().getHeight()/2-ucscdialog.getHeight()/2);
@@ -2388,13 +2424,13 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             if (newsource!=null) {
                currentDataTrack.addDataSource(newsource);
                showEditDataTrackPanel(currentDataTrack);
-            }            
+            }
         } else {
-           ucscdialog.dispose(); 
-        }                        
+           ucscdialog.dispose();
+        }
     }
-    
-    private void addDataSourceFromDAS() {     
+
+    private void addDataSourceFromDAS() {
         DASRegistryDialog dasdialog = new DASRegistryDialog(gui, currentDataTrack);
         dasdialog.setLocation(gui.getFrame().getWidth()/2-dasdialog.getWidth()/2, gui.getFrame().getHeight()/2-dasdialog.getHeight()/2);
         dasdialog.setVisible(true);
@@ -2404,18 +2440,18 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             if (newsource!=null) {
                currentDataTrack.addDataSource(newsource);
                showEditDataTrackPanel(currentDataTrack);
-            }           
+            }
         } else {
-           dasdialog.dispose(); 
-        }              
-    }    
+           dasdialog.dispose();
+        }
+    }
 
     /**
      * This method can be used to display a special Data Source dialog implemented as a (configurable) plugin.
      * The plugin should have been registered as a MotifLabResource instance with type "DataSourceConfigurationDialog".
      * The plugin is provided with two values via the setPluginParameterValue() method.
      * The first is "gui" and the second is "currentDataTrack". The plugin should return a JDialog if the plugin
-     * parameter value "datasource_dialog" is requested via the getPluginParameterValue() method. 
+     * parameter value "datasource_dialog" is requested via the getPluginParameterValue() method.
      * (Note that the same plugin could be registered as both a "DataTrackConfigurationDialog" resource and a
      * "DataSourceConfigurationDialog" resource and should then be able to return both a "datatrack_dialog" and a "dataource_dialog".)
      * The dialog will be shown in a modal fashion. The dialog should contain "OK" and "Cancel" buttons
@@ -2430,8 +2466,8 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
            if (!(plugin instanceof ConfigurablePlugin)) throw new ExecutionError("Unable to obtain configuration dialog for "+plugin.getPluginName());
            if (currentDataTrack==null) throw new ExecutionError("Missing data track to configure data source for");
            ((ConfigurablePlugin)plugin).setPluginParameterValue("gui",gui); // just in case this is not properly initialized from client
-           ((ConfigurablePlugin)plugin).setPluginParameterValue("currentDataTrack",currentDataTrack);           
-           Object d = ((ConfigurablePlugin)plugin).getPluginParameterValue("datasource_dialog");           
+           ((ConfigurablePlugin)plugin).setPluginParameterValue("currentDataTrack",currentDataTrack);
+           Object d = ((ConfigurablePlugin)plugin).getPluginParameterValue("datasource_dialog");
            if (d instanceof javax.swing.JDialog) {
                javax.swing.JDialog dialog=(javax.swing.JDialog)d;
                dialog.setModal(true);
@@ -2439,16 +2475,23 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                dialog.setVisible(true);  // this should lock until the dialog closes itself
                Object newsource=((ConfigurablePlugin)plugin).getPluginParameterValue("datasource"); // the plugin should set this parameter if the user has pressed OK button to close the dialog
                dialog.dispose();
+               Object preferredSetting=((ConfigurablePlugin)plugin).getPluginParameterValue("preferred");
+               boolean preferred=(preferredSetting instanceof Boolean && ((Boolean)preferredSetting));
                if (newsource instanceof DataSource) {
-                  currentDataTrack.addDataSource((DataSource)newsource);
-                  showEditDataTrackPanel(currentDataTrack);                   
+                   if (preferred) currentDataTrack.addPreferredDataSource((DataSource)newsource);
+                   else currentDataTrack.addDataSource((DataSource)newsource);
+                   showEditDataTrackPanel(currentDataTrack);
+               } else if (newsource instanceof Collection) {
+                   if (preferred) currentDataTrack.addPreferredDataSources((Collection)newsource);
+                   else currentDataTrack.addDataSources((Collection)newsource);
+                   showEditDataTrackPanel(currentDataTrack);
                }
            } else throw new ExecutionError("Missing configuration dialog for "+plugin.getPluginName());
         } catch (ExecutionError e) {
                JOptionPane.showMessageDialog(gui.getFrame(), e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     @Action
     public void removeDataSource() {
        int row=datasourceTable.getSelectedRow();
@@ -2467,15 +2510,15 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     @Action
     public void allTracksOKButtonClickedAction() {
         showTopMenuPanel();
-    }    
+    }
     @Action
     public void allTrackAddButtonClicked() {
          String selectedSource=(String)addTrackSourceCombobox.getSelectedItem();
               if (selectedSource.equalsIgnoreCase("UCSC Genome Browser")) allTracksAddFromUCSCGenomeBrowser();
          else if (selectedSource.equalsIgnoreCase("DAS Registry")) allTracksAddFromDASRegistry();
-         else if (selectedSource.equalsIgnoreCase("Configuration file")) allTracksAddFromConfigFile();          
-         else if (selectedSource.equalsIgnoreCase("Manual entry")) showEditDataTrackPanel(null);      
-         else { // this could be a plugin 
+         else if (selectedSource.equalsIgnoreCase("Configuration file")) allTracksAddFromConfigFile();
+         else if (selectedSource.equalsIgnoreCase("Manual entry")) showEditDataTrackPanel(null);
+         else { // this could be a plugin
             Object object=engine.getResource(selectedSource, "DataTrackConfigurationDialog");
             if (object instanceof Plugin) allTracksAddFromPlugin((Plugin)object);
             else JOptionPane.showMessageDialog(gui.getFrame(), "Unable to show configuration dialog for '"+selectedSource+"'","Error", JOptionPane.ERROR_MESSAGE);
@@ -2483,7 +2526,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     }
 
 
-    
+
     private void allTracksAddFromUCSCGenomeBrowser() {
         UCSCtrackDialog ucscdialog = new UCSCtrackDialog(gui,null);
         ucscdialog.setLocation(gui.getFrame().getWidth()/2-ucscdialog.getWidth()/2, gui.getFrame().getHeight()/2-ucscdialog.getHeight()/2);
@@ -2495,14 +2538,14 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                 String newtrackname=newtrack.getName();
                 if (availableTracks.containsKey(newtrackname)) {
                     int choice=JOptionPane.showConfirmDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to replace this track?","Replace data track",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
-                    if (choice!=JOptionPane.OK_OPTION) return;                       
+                    if (choice!=JOptionPane.OK_OPTION) return;
                 }
                 availableTracks.put(newtrack.getName(), newtrack);
                 showAllTracksPanel(); // this will setup the table from the configuration
-            }            
+            }
         } else {
-           ucscdialog.dispose(); 
-        }     
+           ucscdialog.dispose();
+        }
     }
 
     private void allTracksAddFromDASRegistry() {
@@ -2516,16 +2559,16 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                 String newtrackname=newtrack.getName();
                 if (availableTracks.containsKey(newtrackname)) {
                     int choice=JOptionPane.showConfirmDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to replace this track?","Replace data track",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
-                    if (choice!=JOptionPane.OK_OPTION) return;                       
+                    if (choice!=JOptionPane.OK_OPTION) return;
                 }
                 availableTracks.put(newtrack.getName(), newtrack);
                 showAllTracksPanel(); // this will setup the table from the configuration
-            }            
+            }
         } else {
-           dasdialog.dispose(); 
-        }           
-    }  
-    
+           dasdialog.dispose();
+        }
+    }
+
     private void allTracksAddFromConfigFile() {
         DataTrackConfiguration_AddFromConfigFileDialog dialog = new DataTrackConfiguration_AddFromConfigFileDialog(this,gui);
         dialog.setLocation(gui.getFrame().getWidth()/2-dialog.getWidth()/2, gui.getFrame().getHeight()/2-dialog.getHeight()/2);
@@ -2533,18 +2576,18 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
         DataConfiguration newconfig=dialog.getConfiguration();
         int mode=dialog.getTreatDuplicatesMode();
         dialog.dispose();
-        
-        if (newconfig!=null) { // user pressed OK and no parse problems encountered  
-            StringBuilder builder=new StringBuilder();            
+
+        if (newconfig!=null) { // user pressed OK and no parse problems encountered
+            StringBuilder builder=new StringBuilder();
             builder.append("<table border=0>");
             HashMap<String,DataTrack> datatracks=newconfig.getAvailableTracks();
             for (String trackname:datatracks.keySet()) {
-                DataTrack newtrack=datatracks.get(trackname); 
+                DataTrack newtrack=datatracks.get(trackname);
                 if (!availableTracks.containsKey(trackname)) {
-                    availableTracks.put(trackname,newtrack); // no such track from before. Just add it                   
+                    availableTracks.put(trackname,newtrack); // no such track from before. Just add it
                     builder.append("<tr><td>");
                     builder.append(trackname);
-                    builder.append("</td><td><font color=\"#00BB00\">&nbsp;&nbsp;&nbsp;NEW TRACK&nbsp;&nbsp;&nbsp;</font></td><td>");  
+                    builder.append("</td><td><font color=\"#00BB00\">&nbsp;&nbsp;&nbsp;NEW TRACK&nbsp;&nbsp;&nbsp;</font></td><td>");
                     int size=newtrack.getDatasources().size();
                     builder.append(size);
                     builder.append("&nbsp;source"+((size!=1)?"s":""));
@@ -2552,33 +2595,33 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                 } else { // a track with the same name already exists. Now we must either replace the track or merge the sources (after first checking that it is actually compatible)
                     DataTrack oldTrack=availableTracks.get(trackname);
                     builder.append("<tr><td>");
-                    builder.append(trackname);                    
+                    builder.append(trackname);
                     if (mode==DataTrackConfiguration_AddFromConfigFileDialog.REPLACE_TRACK) { // replace the whole track
                         availableTracks.put(trackname, newtrack);
-                        builder.append("</td><td colspan=\"2\"><font color=\"#FF0000\">&nbsp;&nbsp;&nbsp;REPLACED TRACK&nbsp;&nbsp;&nbsp;</font></td></tr>");                            
+                        builder.append("</td><td colspan=\"2\"><font color=\"#FF0000\">&nbsp;&nbsp;&nbsp;REPLACED TRACK&nbsp;&nbsp;&nbsp;</font></td></tr>");
                         continue;
-                    }                 
+                    }
                     if (!oldTrack.getDataType().equals(newtrack.getDataType())) { // type conflict with existing track
-                        builder.append("</td><td colspan=\"2\"><font color=\"#FF0000\">&nbsp;&nbsp;&nbsp;***&nbsp;INCOMPATIBLE&nbsp;***&nbsp;&nbsp;&nbsp;</font></td></tr>");                                            
+                        builder.append("</td><td colspan=\"2\"><font color=\"#FF0000\">&nbsp;&nbsp;&nbsp;***&nbsp;INCOMPATIBLE&nbsp;***&nbsp;&nbsp;&nbsp;</font></td></tr>");
                         continue;
                     }
                     boolean doMerge=(mode==DataTrackConfiguration_AddFromConfigFileDialog.DUPLICATE_SOURCES_ADD_AS_PREFERRED || mode==DataTrackConfiguration_AddFromConfigFileDialog.DUPLICATE_SOURCES_ADD_AS_MIRRORS);
                     String mergeString=(doMerge)?"MERGED":"REPLACED";
-                    builder.append("</td><td><font color=\"#FFA500\">&nbsp;&nbsp;&nbsp;"+mergeString+"&nbsp;&nbsp;&nbsp;</font></td><td>");   
+                    builder.append("</td><td><font color=\"#FFA500\">&nbsp;&nbsp;&nbsp;"+mergeString+"&nbsp;&nbsp;&nbsp;</font></td><td>");
                     int size=newtrack.getDatasources().size();
                     builder.append(size);
                     builder.append("&nbsp;new source"+((size!=1)?"s":""));
-                    builder.append("</td></tr>");                 
+                    builder.append("</td></tr>");
                     ArrayList<DataSource> newsources=newtrack.getDatasources();
                     if (mode==DataTrackConfiguration_AddFromConfigFileDialog.DUPLICATE_SOURCES_ADD_AS_PREFERRED) {
                         oldTrack.addPreferredDataSources(newsources);
                     } else if (mode==DataTrackConfiguration_AddFromConfigFileDialog.DUPLICATE_SOURCES_ADD_AS_MIRRORS) {
                         oldTrack.addDataSources(newsources);
                     } else if (mode==DataTrackConfiguration_AddFromConfigFileDialog.DUPLICATE_SOURCES_REMOVE_OLD) {
-                        oldTrack.replaceDataSources(newsources);     
+                        oldTrack.replaceDataSources(newsources);
                     } else if (mode==DataTrackConfiguration_AddFromConfigFileDialog.DUPLICATE_SOURCES_REPLACE_ALL_SOURCES) {
-                        oldTrack.replaceAllDataSources(newsources);     
-                    }                    
+                        oldTrack.replaceAllDataSources(newsources);
+                    }
                 }
             }
             builder.append("</table>");
@@ -2589,14 +2632,14 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             infodialog.dispose();
             showAllTracksPanel(); // this will setup the table from the configuration
         }
-        
-    } 
-    
+
+    }
+
     /**
      * This method can be used to display a special Data Track dialog implemented as a (configurable) plugin.
      * The plugin should have been registered as a MotifLabResource instance with type "DataTrackConfigurationDialog".
      * The plugin is provided with a reference to the GUI via the setPluginParameterValue("gui") method.
-     * The plugin should return a JDialog if the plugin parameter value "datatrack_dialog" is requested via the getPluginParameterValue() method. 
+     * The plugin should return a JDialog if the plugin parameter value "datatrack_dialog" is requested via the getPluginParameterValue() method.
      * (Note that the same plugin could be registered as both a "DataTrackConfigurationDialog" resource and a
      * "DataSourceConfigurationDialog" resource and should then be able to return both a "datatrack_dialog" and a "dataource_dialog".)
      * The dialog will be shown in a modal fashion. The dialog should contain "OK" and "Cancel" buttons
@@ -2606,11 +2649,11 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
      * the request for the datatrack parameter value should return NULL.
      * @param plugin A plugin which should also implement ConfigurablePlugin
      */
-    private void allTracksAddFromPlugin(Plugin plugin) {       
+    private void allTracksAddFromPlugin(Plugin plugin) {
         try {
            if (!(plugin instanceof ConfigurablePlugin)) throw new ExecutionError("Unable to obtain configuration dialog for "+plugin.getPluginName());
-           ((ConfigurablePlugin)plugin).setPluginParameterValue("gui",gui); // just in case this is not properly initialized from client    
-           ((ConfigurablePlugin)plugin).setPluginParameterValue("currentDataTrack",null); // clear the currentDataTrack in the plugin (just in case)             
+           ((ConfigurablePlugin)plugin).setPluginParameterValue("gui",gui); // just in case this is not properly initialized from client
+           ((ConfigurablePlugin)plugin).setPluginParameterValue("currentDataTrack",null); // clear the currentDataTrack in the plugin (just in case)
            Object d = ((ConfigurablePlugin)plugin).getPluginParameterValue("datatrack_dialog");
            if (d instanceof javax.swing.JDialog) {
                javax.swing.JDialog dialog=(javax.swing.JDialog)d;
@@ -2619,20 +2662,48 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                dialog.setVisible(true);  // this should block until the dialog closes itself
                Object newtrack=((ConfigurablePlugin)plugin).getPluginParameterValue("datatrack"); // the plugin should set this parameter if the user has pressed OK button to close the dialog
                dialog.dispose();
-               if (newtrack instanceof DataTrack) { // if newtrack is NULL, the user has clicked the CANCEL button in the dialog
+               System.err.println("Modal dialog exited: datatrack="+newtrack);
+               if (newtrack instanceof DataTrack) { // if newtrack is NULL, the user has clicked the CANCEL button in the dialog, so we don't add it
                     String newtrackname=((DataTrack)newtrack).getName();
                     if (availableTracks.containsKey(newtrackname)) {
-                        int choice=JOptionPane.showConfirmDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to replace this track?","Replace data track",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
-                        if (choice!=JOptionPane.OK_OPTION) return;                       
+                        DataTrack existingTrack=availableTracks.get(newtrackname);
+                        if (existingTrack.getDataType()==((DataTrack) newtrack).getDataType()) {
+                            // The old and new tracks have the same type, so it should be possible to merge the new sources into the existing track
+                            int choice=JOptionPane.showOptionDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to merge sources or replace this track?", "Track exists",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE, null, new String[]{"Merge","Replace","Cancel"}, "Merge");
+                            if (choice==0) { // merge new sources into existing dataset
+                                engine.logMessage("Merging sources into existing datatrack");
+                                Object preferredSetting=((ConfigurablePlugin)plugin).getPluginParameterValue("preferred");
+                                boolean preferred=(preferredSetting instanceof Boolean && ((Boolean)preferredSetting));
+                                if (preferred) existingTrack.addPreferredDataSources(((DataTrack)newtrack).getDatasources());
+                                else existingTrack.addDataSources(((DataTrack)newtrack).getDatasources());
+                            } else if (choice==1) { // replace existing dataset
+                                engine.logMessage("Replacing existing datatrack");
+                                availableTracks.put(((DataTrack)newtrack).getName(), (DataTrack)newtrack); // replace existing track with same name
+                            } else {
+                                engine.logMessage("Cancelled");
+                                return;
+                            } // cancel
+                        } else {
+                            int choice=JOptionPane.showConfirmDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to replace this track?","Replace data track",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
+                            if (choice==JOptionPane.OK_OPTION) {
+                                engine.logMessage("Replacing existing datatrack");
+                                availableTracks.put(((DataTrack)newtrack).getName(), (DataTrack)newtrack); // replace existing track with same name
+                            } else {
+                                engine.logMessage("Cancelled");
+                                return;
+                            }
+                        }
+                    } else {
+                        engine.logMessage("Adding new datatrack");
+                        availableTracks.put(((DataTrack)newtrack).getName(), (DataTrack)newtrack); // replace existing track with same name
                     }
-                    availableTracks.put(((DataTrack)newtrack).getName(), (DataTrack)newtrack);
-                    showAllTracksPanel(); // this will setup the table from the configuration                 
+                    showAllTracksPanel(); // this will setup the table from the configuration
                }
            } else throw new ExecutionError("Missing configuration dialog for "+plugin.getPluginName());
         } catch (ExecutionError e) {
                JOptionPane.showMessageDialog(gui.getFrame(), e.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
-        }            
-    }      
+        }
+    }
 
     @Action
     public void editTrackOKButtonClickedAction() {
@@ -2654,11 +2725,11 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             if (availableTracks.containsKey(editname)) {
                 int choice=JOptionPane.showConfirmDialog(gui.getFrame(), "There is already a track named '"+editname+"'\nWould you like to replace it?","Replace existing track", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (choice==JOptionPane.CANCEL_OPTION) return;
-            }  
+            }
             currentDataTrack=new DataTrack(editname, newtype, sourcesite, description);
-            currentDataTrack.setDisplayDirectivesProtocol(dsp.isEmpty()?null:dsp);             
-            availableTracks.put(currentDataTrack.getName(), currentDataTrack); 
-        } else { // editing existing track       
+            currentDataTrack.setDisplayDirectivesProtocol(dsp.isEmpty()?null:dsp);
+            availableTracks.put(currentDataTrack.getName(), currentDataTrack);
+        } else { // editing existing track
             String currenttrackname=currentDataTrack.getName();
             String editname=dataTrackPropertiesNameTextfield.getText().trim();
             String typename=(String)dataTrackPropertiesTypeCombobox.getSelectedItem();
@@ -2669,16 +2740,16 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             if (!editname.equals(currenttrackname) && availableTracks.containsKey(editname)) {
                 int choice=JOptionPane.showConfirmDialog(gui.getFrame(), "There is already a track named '"+editname+"'\nWould you like to replace it?","Replace existing track", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (choice==JOptionPane.CANCEL_OPTION) return;
-            } 
+            }
             currentDataTrack.setName(editname);
             currentDataTrack.setDataType(newtype);
             currentDataTrack.setSourceSite(dataTrackPropertiesSourceTextfield.getText().trim());
-            currentDataTrack.setDescription(dataTrackPropertiesDescriptionTextfield.getText().trim()); 
+            currentDataTrack.setDescription(dataTrackPropertiesDescriptionTextfield.getText().trim());
             String dsp=dataTrackPropertiesDisplaySettingsTextfield.getText().trim();
-            currentDataTrack.setDisplayDirectivesProtocol(dsp.isEmpty()?null:dsp);            
+            currentDataTrack.setDisplayDirectivesProtocol(dsp.isEmpty()?null:dsp);
             if (!editname.equals(currenttrackname)) {
                 availableTracks.remove(currenttrackname);
-            }  
+            }
             availableTracks.put(editname, currentDataTrack);
         }
         //setupTablesFromConfiguration();
@@ -2688,7 +2759,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     /**
      * Returns a reference to the working copy of the data configuration employed by the dialog
      * (this can include updates compared to the installed configuration)
-     * @return 
+     * @return
      */
     public DataConfiguration getWorkingDataConfiguration() {
         return dataconfiguration;
@@ -2697,7 +2768,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     @Action
     public void saveChangesAndExitAction() {
         File configurationfile=gui.getEngine().getDataLoader().getDataConfigurationFile();
-        saveSettingsToFile(configurationfile,dataconfiguration);  
+        saveSettingsToFile(configurationfile,dataconfiguration);
         gui.getEngine().getDataLoader().installConfiguration(dataconfiguration);
         setVisible(false);
     }
@@ -2708,13 +2779,13 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
         int rows=serverTableModel.getRowCount();
         for (int i=0;i<rows;i++) {
             Object addressobject=serverTableModel.getValueAt(i, SERVER_COLUMN_SERVERADDRESS);
-            if (addressobject==null) continue;            
+            if (addressobject==null) continue;
             String address=addressobject.toString();
             Object delayObject=serverTableModel.getValueAt(i, SERVER_COLUMN_DELAY);
             String delayasstring=(delayObject!=null)?delayObject.toString():"";
             Object maxspanObject=serverTableModel.getValueAt(i, SERVER_COLUMN_MAXSPAN);
-            String maxspanstring=(maxspanObject!=null)?maxspanObject.toString():"";            
-            Object mirrorbject=serverTableModel.getValueAt(i, SERVER_COLUMN_MIRRORS);  
+            String maxspanstring=(maxspanObject!=null)?maxspanObject.toString():"";
+            Object mirrorbject=serverTableModel.getValueAt(i, SERVER_COLUMN_MIRRORS);
             String mirrorstring=(mirrorbject==null)?"":mirrorbject.toString().trim();
 
             address=address.trim();
@@ -2722,12 +2793,12 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             if (availableServers.containsKey(address)) {
                 int viewrow=serverTable.convertRowIndexToView(i);
                 JOptionPane.showMessageDialog(cardpaneTopMenu, "The address '"+address+"' at row="+(viewrow+1)+",col="+(SERVER_COLUMN_SERVERADDRESS+1)+" has been used before", "Duplicate server error", JOptionPane.ERROR_MESSAGE);
-                return;                
+                return;
             }
             mirrorstring=mirrorstring.trim();
             int delay=0;
             if (!delayasstring.isEmpty()) {
-              try {delay=Integer.parseInt(delayasstring);} 
+              try {delay=Integer.parseInt(delayasstring);}
               catch (NumberFormatException e) {
                 int viewrow=serverTable.convertRowIndexToView(i);
                 JOptionPane.showMessageDialog(cardpaneTopMenu, "The value '"+delayasstring+"' at row="+(viewrow+1)+",col="+(SERVER_COLUMN_DELAY+1)+" is not an integer number", "Number format error", JOptionPane.ERROR_MESSAGE);
@@ -2736,18 +2807,18 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
             }
             int maxspan=0;
             if (!maxspanstring.isEmpty()) {
-              try {maxspan=Integer.parseInt(maxspanstring);} 
+              try {maxspan=Integer.parseInt(maxspanstring);}
               catch (NumberFormatException e) {
                 int viewrow=serverTable.convertRowIndexToView(i);
                 JOptionPane.showMessageDialog(cardpaneTopMenu, "The value '"+maxspanstring+"' at row="+(viewrow+1)+",col="+(SERVER_COLUMN_MAXSPAN+1)+" is not an integer number", "Number format error", JOptionPane.ERROR_MESSAGE);
                 return;
               }
-            }            
+            }
             Server newserver=new Server(address,delay,maxspan);
             if (!mirrorstring.isEmpty()) {
                 String[] mirrors=mirrorstring.split(",");
                 for (String mirroraddress:mirrors) newserver.addMirror(mirroraddress);
-            }    
+            }
             availableServers.put(address, newserver);
         }
         serverTable.clearSelection();
@@ -2767,10 +2838,10 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
         if (dataFormatParametersPanel!=null) {
             dataFormatParametersPanel.setParameters();
             dataformatSettings=dataFormatParametersPanel.getParameterSettings();
-        }           
-        String protocol=(String)editSourceProtocolCombobox.getSelectedItem();  
-        
-        if (addDataSource) { // adding new data source for a track           
+        }
+        String protocol=(String)editSourceProtocolCombobox.getSelectedItem();
+
+        if (addDataSource) { // adding new data source for a track
             if (protocol.equals(DataSource_DAS.PROTOCOL_NAME)) {
                 String baseURL=editDASsourceBaseURLtextfield.getText().trim();
                 String feature=editDASsourceFeatureTextfield.getText().trim();
@@ -2787,7 +2858,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                 int segmentsize=((Integer)editFILEsourceSegmentsizeSpinner.getValue()).intValue();
                 currentDataSource=new DataSource_FileServer(currentDataTrack,organism,build, filepath, segmentsize, dataformat);
                 currentDataSource.setDataFormatSettings(dataformatSettings);
-            }    
+            }
             else if (protocol.equals(DataSource_SQL.PROTOCOL_NAME)) {
                 String baseURL=editSQLsourceServerURLField.getText().trim();
                 String portString=editSQLsourcePortField.getText().trim();
@@ -2797,7 +2868,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                 String tablename=editSQLsourceTableNameField.getText().trim();
                 int port=-1;
                 try {
-                    if (!portString.isEmpty()) port=Integer.parseInt(portString); 
+                    if (!portString.isEmpty()) port=Integer.parseInt(portString);
                 } catch (NumberFormatException ne) {
                     JOptionPane.showMessageDialog(editSQLsourcePanel, "The port number must be an integer", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
@@ -2808,11 +2879,11 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                     fields=parseSQLsourceTable();
                 } catch (ParseError pe) {
                     JOptionPane.showMessageDialog(editSQLsourcePanel, pe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                    return;                   
+                    return;
                 }
                 currentDataSource=new DataSource_SQL(currentDataTrack,organism,build, baseURL, port, databasename, tablename, username, passwordString, fields);
                 initializeSQLtableFromSource(null); // clear the table for next time
-            }             
+            }
             else if (protocol.equals(DataSource_VOID.PROTOCOL_NAME)) {
                 currentDataSource=new DataSource_VOID(currentDataTrack,organism,build);
             }
@@ -2826,13 +2897,13 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                         if (configPanel!=null) currentDataSource.updateConfigurationFromPanel(configPanel);
                     } catch (Exception re) {
                         JOptionPane.showMessageDialog(cardpaneEditSourceMainCardPanel, re.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                        return;   
+                        return;
                     }
                 }
             }
-            if (currentDataSource!=null) currentDataTrack.addDataSource(currentDataSource);          
+            if (currentDataSource!=null) currentDataTrack.addDataSource(currentDataSource);
         } else { // editing existing data source for a track
-            String currentprotocol=currentDataSource.getProtocol();            
+            String currentprotocol=currentDataSource.getProtocol();
             if (protocol.equals(currentprotocol)) { // protocol is the same as before. Just replace the current values in the datasource object
                  currentDataSource.setDataFormat(dataformat);
                  currentDataSource.setGenomeBuild(build);
@@ -2862,7 +2933,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                     String tablename=editSQLsourceTableNameField.getText().trim();
                     int port=-1;
                     try {
-                        if (!portString.isEmpty()) port=Integer.parseInt(portString); 
+                        if (!portString.isEmpty()) port=Integer.parseInt(portString);
                     } catch (NumberFormatException ne) {
                         JOptionPane.showMessageDialog(editSQLsourcePanel, "The port number must be an integer", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
@@ -2873,26 +2944,26 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                         fields=parseSQLsourceTable();
                     } catch (ParseError pe) {
                          JOptionPane.showMessageDialog(editSQLsourcePanel, pe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                        return;                   
+                        return;
                     }
-                    ((DataSource_SQL)currentDataSource).setServerAddress(baseURL);                    
-                    ((DataSource_SQL)currentDataSource).setPortNumber(port);                    
+                    ((DataSource_SQL)currentDataSource).setServerAddress(baseURL);
+                    ((DataSource_SQL)currentDataSource).setPortNumber(port);
                     ((DataSource_SQL)currentDataSource).setDatabaseName(databasename);
                     ((DataSource_SQL)currentDataSource).setTablename(tablename);
                     ((DataSource_SQL)currentDataSource).setUsername(username);
                     ((DataSource_SQL)currentDataSource).setPassword(passwordString);
-                    ((DataSource_SQL)currentDataSource).setDBfields(fields); 
-                    initializeSQLtableFromSource(null); // clear the table for next time                    
+                    ((DataSource_SQL)currentDataSource).setDBfields(fields);
+                    initializeSQLtableFromSource(null); // clear the table for next time
                  } else { // plugin data source
                       try {
                            JPanel configPanel=getDataSourceConfigurationPanel(cardpaneEditSourceMainCardPanel,protocol); // the configuration panel for this protocol should be stored as a child of cardpaneEditSourceMainCardPanel
                            if (configPanel!=null) currentDataSource.updateConfigurationFromPanel(configPanel);
                        } catch (Exception re) {
                            JOptionPane.showMessageDialog(cardpaneEditSourceMainCardPanel, re.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                           return;   
-                       }                       
-                 }                
-            } else { // protocol has been changed. We need to replace the whole datasource object 
+                           return;
+                       }
+                 }
+            } else { // protocol has been changed. We need to replace the whole datasource object
                  DataSource newsource=null;
                  if (protocol.equals(DataSource_DAS.PROTOCOL_NAME)) {
                      String baseURL=editDASsourceBaseURLtextfield.getText().trim();
@@ -2903,12 +2974,12 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                      String baseURL=editGETsourceBaseURLtextfield.getText().trim();
                      String parameter=editGETsourceParametersTextfield.getText().trim();
                      newsource=new DataSource_http_GET(currentDataTrack,organism,build,baseURL,dataformat,parameter);
-                 }  
+                 }
                  else if (protocol.equals(DataSource_FileServer.PROTOCOL_NAME)) {
                      String filepath=editFILEsourceFilenameTextfield.getText().trim();
                      int segmentsize=((Integer)editFILEsourceSegmentsizeSpinner.getValue()).intValue();
-                     newsource=new DataSource_FileServer(currentDataTrack,organism, build, filepath, segmentsize, dataformat);                     
-                 }    
+                     newsource=new DataSource_FileServer(currentDataTrack,organism, build, filepath, segmentsize, dataformat);
+                 }
                  else if (protocol.equals(DataSource_SQL.PROTOCOL_NAME)) {
                     String baseURL=editSQLsourceServerURLField.getText().trim();
                     String portString=editSQLsourcePortField.getText().trim();
@@ -2918,7 +2989,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                     String tablename=editSQLsourceTableNameField.getText().trim();
                     int port=-1;
                     try {
-                      if (!portString.isEmpty()) port=Integer.parseInt(portString); 
+                      if (!portString.isEmpty()) port=Integer.parseInt(portString);
                     } catch (NumberFormatException ne) {
                         JOptionPane.showMessageDialog(editSQLsourcePanel, "The port number must be an integer", "Error", JOptionPane.ERROR_MESSAGE);
                         return;
@@ -2929,11 +3000,11 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                         fields=parseSQLsourceTable();
                     } catch (ParseError pe) {
                          JOptionPane.showMessageDialog(editSQLsourcePanel, pe.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                        return;                   
+                        return;
                     }
                     newsource=new DataSource_SQL(currentDataTrack,organism,build, baseURL, port, databasename, tablename, username, passwordString, fields);
-                    initializeSQLtableFromSource(null); // clear the table for next time                    
-                 }                   
+                    initializeSQLtableFromSource(null); // clear the table for next time
+                 }
                  else if (protocol.equals(DataSource_VOID.PROTOCOL_NAME)) {
                      newsource=new DataSource_VOID(currentDataTrack,organism,build);
                  } else {
@@ -2946,13 +3017,13 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
                              if (configPanel!=null) newsource.updateConfigurationFromPanel(configPanel);
                          } catch (Exception re) {
                              JOptionPane.showMessageDialog(cardpaneEditSourceMainCardPanel, re.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                             return;   
+                             return;
                          }
-                     }                     
+                     }
                  }
                  if (newsource!=null && newsource.usesStandardDataFormat()) newsource.setDataFormatSettings(dataformatSettings);
                  currentDataTrack.replaceDataSource(currentDataSource, newsource);
-                 currentDataSource=newsource;                    
+                 currentDataSource=newsource;
             }
         }
         showEditDataTrackPanel(currentDataTrack);
@@ -2962,13 +3033,13 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
     public void editSourceCancelButtonClickedAction() {
         showEditDataTrackPanel(currentDataTrack);
     }
-        
+
 // ---------------------   PRIVATE CLASSES BELOW THIS LINE   ---------------------------
-    
+
   class DisableableComboRenderer extends DefaultListCellRenderer {
         private HashSet<String> disabledItems=new HashSet<String>();
         private String previouslySelected=null;
-        
+
         @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
           Component c=super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -2987,39 +3058,39 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {//GEN-FIRS
           setText((value == null) ? "" : value.toString());
           return c;
         }
-        
+
         public void setItemEnabled(String item, boolean enabled) {
             if (enabled) disabledItems.add(item);
             else disabledItems.remove(item);
-        }      
-        
+        }
+
         public boolean isItemEnabled(String item) {
             return !disabledItems.contains(item);
         }
-        
+
         public void setDisabledItems(String[] items) {
             disabledItems.clear();
             disabledItems.addAll(Arrays.asList(items));
         }
-        
+
         public String getPreviouslySelected() {
             return previouslySelected;
         }
         public void setPreviouslySelected(String item) {
             previouslySelected=item;
-        }        
-        
-  }  
-   
-    
-      
+        }
+
+  }
+
+
+
 private class DataTypeRenderer extends DefaultTableCellRenderer {
     private SimpleDataPanelIcon numericIcon;
     private SimpleDataPanelIcon regionIcon;
     private SimpleDataPanelIcon DNAIcon;
     public DataTypeRenderer() {
            super();
-           this.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);   
+           this.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
            numericIcon=new SimpleDataPanelIcon(20, 20, SimpleDataPanelIcon.NUMERIC_TRACK_GRAPH_ICON,null);
            numericIcon.setForegroundColor(java.awt.Color.BLUE);
            numericIcon.setBackgroundColor(null);
@@ -3028,10 +3099,10 @@ private class DataTypeRenderer extends DefaultTableCellRenderer {
            regionIcon.setBackgroundColor(null);
            DNAIcon=new SimpleDataPanelIcon(20, 20, SimpleDataPanelIcon.SEQUENCE_ICON_BASES,null);
            DNAIcon.setForegroundColor(java.awt.Color.BLACK);
-           
+
            setOpaque(true);
     }
-    
+
    @Override
    public void setValue(Object value) {
        if (value instanceof String) {
@@ -3049,7 +3120,7 @@ private class DataTypeRenderer extends DefaultTableCellRenderer {
    }
     } // end class DataTypeRenderer
 
-private class SupportedOrganismsRendered extends DefaultTableCellRenderer {    
+private class SupportedOrganismsRendered extends DefaultTableCellRenderer {
        public SupportedOrganismsRendered() {
            super();
        }
@@ -3064,7 +3135,7 @@ private class SupportedOrganismsRendered extends DefaultTableCellRenderer {
                    text+=Organism.getCommonName(organisms[i]);
                    if (i<organisms.length-1) text+=",";
                }
-               setText(text); 
+               setText(text);
            } else setText("<error>");
        }
 }
@@ -3081,10 +3152,10 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
                 setForeground(list.getSelectionForeground());
             } else {
                 setBackground(java.awt.Color.WHITE);
-                setForeground(list.getForeground());                
+                setForeground(list.getForeground());
             }
-            if (value==null) setText("***"); 
-            if (value instanceof String) setText((String)value); 
+            if (value==null) setText("***");
+            if (value instanceof String) setText((String)value);
             else {
                int organism=((Integer)value).intValue();
                String name=Organism.getCommonName(organism);
@@ -3092,7 +3163,7 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
             }
             return this;
         }
-    
+
 }
 
 //    @Action
@@ -3107,14 +3178,14 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
 //                String newtrackname=newtrack.getName();
 //                if (availableTracks.containsKey(newtrackname)) {
 //                    int choice=JOptionPane.showConfirmDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to replace this track?","Replace data track",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
-//                    if (choice!=JOptionPane.OK_OPTION) return;                       
+//                    if (choice!=JOptionPane.OK_OPTION) return;
 //                }
 //                availableTracks.put(newtrack.getName(), newtrack);
 //                showAllTracksPanel(); // this will setup the table from the configuration
-//            }            
+//            }
 //        } else {
-//           ucscdialog.dispose(); 
-//        }     
+//           ucscdialog.dispose();
+//        }
 //    }
 //
 //    @Action
@@ -3129,20 +3200,20 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
 //                String newtrackname=newtrack.getName();
 //                if (availableTracks.containsKey(newtrackname)) {
 //                    int choice=JOptionPane.showConfirmDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to replace this track?","Replace data track",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
-//                    if (choice!=JOptionPane.OK_OPTION) return;                       
+//                    if (choice!=JOptionPane.OK_OPTION) return;
 //                }
 //                availableTracks.put(newtrack.getName(), newtrack);
 //                showAllTracksPanel(); // this will setup the table from the configuration
-//            }            
+//            }
 //        } else {
-//           dasdialog.dispose(); 
-//        }           
+//           dasdialog.dispose();
+//        }
 //    }
 
-    
+
    private JTable getSQLsourceTable() {
        DefaultTableModel model=new DefaultTableModel(new String[]{"Property","Type","Database column","Value","Transform"}, 0);
-       JTable table=new JTable(model);           
+       JTable table=new JTable(model);
        JComboBox typeEditorCombobox = new JComboBox(new String[]{"Text","Integer","Double","Boolean"});
        table.getColumn("Type").setCellEditor(new DefaultCellEditor(typeEditorCombobox));
        table.getColumn("Transform").setCellRenderer(new DefaultTableCellRenderer() {
@@ -3150,18 +3221,18 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
             public void setValue(Object value) {
                if (value instanceof String[]) setText(MotifLabEngine.splice((String[])value, ","));
                else setText((value!=null)?value.toString():"");
-            }           
+            }
        });
        table.setFillsViewportHeight(true);
        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
        table.setRowSelectionAllowed(true);
        table.getTableHeader().setReorderingAllowed(false);
        table.setRowHeight(18);
-       table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE); // this will enable unfinished edits to be commited when table looses focus        
+       table.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE); // this will enable unfinished edits to be commited when table looses focus
        addDefaultPropertiesToSQLtable(model);
        return table;
-   } 
-   
+   }
+
    private void addRowToSQLsourceTable() {
        ((DefaultTableModel)SQLsourceTable.getModel()).addRow(new Object[]{"newProperty",convertSQLclassToString(String.class),"newProperty",null,null});
         int lastrow=SQLsourceTable.getRowCount()-1;
@@ -3171,24 +3242,24 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
         SQLsourceTable.setRowSelectionInterval(lastrow, lastrow);
         Object value=SQLsourceTable.getValueAt(lastrow, 0);
         Component comp=editor.getTableCellEditorComponent(SQLsourceTable, value, true, lastrow, 0);
-        SQLsourceTable.scrollRectToVisible(comp.getBounds());        
+        SQLsourceTable.scrollRectToVisible(comp.getBounds());
         if (comp instanceof JTextField) ((JTextField)comp).requestFocus();
    }
-   
+
    private void removeSelectedRowsFromSQLsourceTable() {
        int row=SQLsourceTable.getSelectedRow();
        if (row<0) return;
        row=SQLsourceTable.convertRowIndexToModel(row);
        ((DefaultTableModel)SQLsourceTable.getModel()).removeRow(row);
-   }   
-   
+   }
+
    private void initializeSQLtableFromSource(DataSource_SQL source) {
        DefaultTableModel model=(DefaultTableModel)SQLsourceTable.getModel();
        int rows = model.getRowCount(); // remove current entries
        for(int i=rows-1;i>=0;i--){
-           model.removeRow(i); 
-       }       
-       if (source!=null && source.getDBfields()!=null) {            
+           model.removeRow(i);
+       }
+       if (source!=null && source.getDBfields()!=null) {
             for (DBfield field:source.getDBfields()) {
                String property=field.getPropertyName();
                Object transform=field.getTransformParameter();
@@ -3196,29 +3267,29 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
                if (property.equalsIgnoreCase("chromosome") && transform instanceof Boolean && ((Boolean)transform).booleanValue()) transformString="chr-prefix";
                else if (transform instanceof String[][]) transformString=DBfield.getMapAsKeyValuePairs((String[][])transform);
                else if (transform!=null) transformString=transform.toString();
-               Object explicitValue=field.getExplicitValue();    
+               Object explicitValue=field.getExplicitValue();
                String explicitValueString=(explicitValue!=null)?explicitValue.toString():"";
-               model.addRow(new Object[]{property,convertSQLclassToString(field.getFieldType()),field.getDBfieldName(),explicitValueString,transformString}); 
+               model.addRow(new Object[]{property,convertSQLclassToString(field.getFieldType()),field.getDBfieldName(),explicitValueString,transformString});
             }
-       } else addDefaultPropertiesToSQLtable(model);         
+       } else addDefaultPropertiesToSQLtable(model);
    }
-   
-   private void addDefaultPropertiesToSQLtable(DefaultTableModel model) {     
+
+   private void addDefaultPropertiesToSQLtable(DefaultTableModel model) {
        model.addRow(new Object[]{"chromosome",convertSQLclassToString(String.class),"chr",null,null});
        model.addRow(new Object[]{"start",convertSQLclassToString(Integer.class),"start",null,null});
        model.addRow(new Object[]{"end",convertSQLclassToString(Integer.class),"end",null,null});
-       model.addRow(new Object[]{"type",convertSQLclassToString(String.class),null,"unknown",null});                 
+       model.addRow(new Object[]{"type",convertSQLclassToString(String.class),null,"unknown",null});
    }
-    
+
    private ArrayList<DBfield> parseSQLsourceTable() throws ParseError {
        ArrayList<DBfield> fields=new ArrayList<DBfield>();
        DefaultTableModel model=(DefaultTableModel)SQLsourceTable.getModel();
-       int rows = model.getRowCount(); 
+       int rows = model.getRowCount();
        boolean hasChromosome=false;
        boolean hasStart=false;
        boolean hasEnd=false;
        boolean hasType=false;
-       for (int i=0;i<rows;i++){           
+       for (int i=0;i<rows;i++){
            String propertyName=(model.getValueAt(i,0)!=null)?model.getValueAt(i,0).toString().trim():"";
            String type=(model.getValueAt(i,1)!=null)?model.getValueAt(i,1).toString().trim():"";
            String dbColumnName=(model.getValueAt(i,2)!=null)?model.getValueAt(i,2).toString().trim():"";
@@ -3240,18 +3311,18 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
                        transformValue=DBfield.parseTransformMap(transformString);
                    } else {
                        transformValue=Boolean.TRUE; // any non-null value which is not a key=value map is interpreted as TRUE (i.e. "add chr-prefix")
-                   }                                                        
-               } 
+                   }
+               }
            } else if (propertyName.equalsIgnoreCase("start")) {
                propertyName=propertyName.toLowerCase();
                hasStart=true;
                if (!type.equals("Integer")) throw new ParseError("Property 'start' must have type 'Integer'");
-               if (dbColumnName.isEmpty()) throw new ParseError("'Database column' is required for property 'start'");               
+               if (dbColumnName.isEmpty()) throw new ParseError("'Database column' is required for property 'start'");
            } else if (propertyName.equalsIgnoreCase("end")) {
                propertyName=propertyName.toLowerCase();
                hasEnd=true;
                if (!type.equals("Integer")) throw new ParseError("Property 'end' must have type 'Integer'");
-               if (dbColumnName.isEmpty()) throw new ParseError("'Database column' is required for property 'end'");               
+               if (dbColumnName.isEmpty()) throw new ParseError("'Database column' is required for property 'end'");
            } else if (propertyName.equalsIgnoreCase("type")) {
                propertyName=propertyName.toLowerCase();
                hasType=true;
@@ -3270,16 +3341,16 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
                        transformValue=new String[][]{{"direct",parts[0]},{"reverse",parts[1]}};
                    }
                }
-           } 
-           if (dbColumnName.isEmpty() && explicitValueString.isEmpty()) throw new ParseError("Either the 'Database column' or 'Value' must be specified for property '"+propertyName+"'");                              
-           if (!dbColumnName.isEmpty() && !explicitValueString.isEmpty()) throw new ParseError("'Database column' and 'Value' cannot both be specified for property '"+propertyName+"'");                              
+           }
+           if (dbColumnName.isEmpty() && explicitValueString.isEmpty()) throw new ParseError("Either the 'Database column' or 'Value' must be specified for property '"+propertyName+"'");
+           if (!dbColumnName.isEmpty() && !explicitValueString.isEmpty()) throw new ParseError("'Database column' and 'Value' cannot both be specified for property '"+propertyName+"'");
            if (type.equals("Double")) {
                if (!explicitValueString.isEmpty()) {
                    try {explicitValue=new Double(Double.parseDouble(explicitValueString));} catch (NumberFormatException ne) {throw new ParseError("'Value' should be a number for property '"+propertyName+"'");}
                }
                if (!transformString.isEmpty()) {
                    try {transformValue=new Double(Double.parseDouble(transformString));} catch (NumberFormatException ne) {throw new ParseError("'Transform' should be a number for property '"+propertyName+"'");}
-               }                           
+               }
            }
            else if (type.equals("Integer")) {
                if (!explicitValueString.isEmpty()) {
@@ -3287,22 +3358,22 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
                }
                if (!transformString.isEmpty()) {
                    try {transformValue=new Integer(Integer.parseInt(transformString));} catch (NumberFormatException ne) {throw new ParseError("'Transform' should be an integer number for property '"+propertyName+"'");}
-               }                           
+               }
            }
            else if (type.equals("Boolean")) {
                if (!explicitValueString.isEmpty()) {
                    explicitValue=explicitValueString.equalsIgnoreCase("true") || explicitValueString.equalsIgnoreCase("yes") || explicitValueString.equalsIgnoreCase("on");
-               }                          
+               }
            } else { // type equals text
                if (!explicitValueString.isEmpty()) explicitValue=explicitValueString;
                if (!(propertyName.equalsIgnoreCase("chromosome") || propertyName.equalsIgnoreCase("chr") || propertyName.equalsIgnoreCase("strand") || propertyName.equalsIgnoreCase("orientation"))) {
                    if (transformString.contains("=")) {
                        transformValue=DBfield.parseTransformMap(transformString);
                    } else {
-                       if (!transformString.isEmpty()) throw new ParseError("'Transform' should be a comma-separated list of <property-value = database-value> pairs for property '"+propertyName+"'");                          
-                   }    
+                       if (!transformString.isEmpty()) throw new ParseError("'Transform' should be a comma-separated list of <property-value = database-value> pairs for property '"+propertyName+"'");
+                   }
                }
-           }           
+           }
            Class classtype=convertStringToSQLclass(type);
            if (classtype==null) throw new ParseError("Unrecognized type '"+type+"' for property '"+propertyName+"'");
            DBfield field = new DBfield(propertyName, (dbColumnName.isEmpty())?null:dbColumnName, classtype, explicitValue, transformValue);
@@ -3311,28 +3382,28 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
                if (f.getPropertyName().equalsIgnoreCase(field.getPropertyName())) throw new ParseError("Property '"+propertyName+"' occurs multiple times in the table");
            }
            fields.add(field);
-       } 
+       }
        if (!hasChromosome) throw new ParseError("Missing required property 'chromosome' in the table");
        if (!hasStart) throw new ParseError("Missing required property 'start' in the table");
        if (!hasEnd) throw new ParseError("Missing required property 'end' in the table");
        // if (!hasType) throw new ParseError("Missing required property 'type' in the table");
        return fields;
    }
-   
+
    private String convertSQLclassToString(Class type) {
        if (type==Integer.class) return "Integer";
        else if (type==Double.class) return "Double";
-       else if (type==Boolean.class) return "Boolean";    
+       else if (type==Boolean.class) return "Boolean";
        else return "Text";
-   }   
+   }
    private Class convertStringToSQLclass(String string) {
             if (string.equalsIgnoreCase("Integer")) return Integer.class;
        else if (string.equalsIgnoreCase("Double")) return Double.class;
        else if (string.equalsIgnoreCase("Boolean")) return Boolean.class;
        else if (string.equalsIgnoreCase("Text") || string.equalsIgnoreCase("String")) return String.class;
        else return null;
-   }     
-          
+   }
+
   /** This class handles reordering of rows in the DataSources table
     * The code was found at: http://stackoverflow.com/questions/638807/how-do-i-drag-and-drop-a-row-in-a-jtable
     */
@@ -3375,13 +3446,13 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
              Integer rowFrom = (Integer) info.getTransferable().getTransferData(localObjectFlavor);
              if (rowFrom != -1 && rowFrom != index) {
                 if (index > rowFrom) index--;
-                ((DefaultTableModel)table.getModel()).moveRow(rowFrom,rowFrom,index);       
+                ((DefaultTableModel)table.getModel()).moveRow(rowFrom,rowFrom,index);
                 target.getSelectionModel().addSelectionInterval(index, index);
                 currentDataTrack.moveDataSource(rowFrom, index);
                 return true;
              }
           } catch (Exception e) {
-              JOptionPane.showMessageDialog(DataTrackConfigurationDialog.this, e.getClass().getName()+":"+e.getMessage(), "Drag 'n' drop error", JOptionPane.ERROR_MESSAGE);              
+              JOptionPane.showMessageDialog(DataTrackConfigurationDialog.this, e.getClass().getName()+":"+e.getMessage(), "Drag 'n' drop error", JOptionPane.ERROR_MESSAGE);
               //e.printStackTrace(System.err);
           }
           return false;
@@ -3394,6 +3465,6 @@ private class OrganismComboboxRenderer extends JLabel implements ListCellRendere
           }
        }
    }
-    
-   
+
+
 }

@@ -198,12 +198,12 @@ public class DataFormat_GTF extends DataFormat {
             int regionstart=(Integer)map.get("START");
             int regionend=(Integer)map.get("END");
             RegionSequenceData targetSequence=null;
-            if (target instanceof RegionSequenceData) {
+            if (target instanceof RegionSequenceData) {             
                targetSequence=(RegionSequenceData)target;
                if (!targetSequence.getChromosome().equals(regionchromosome)) continue;
                if (regionstart>targetSequence.getRegionEnd() || regionend<targetSequence.getRegionStart()) continue;
                addRegionToTarget(targetSequence,map);
-            } else if (target instanceof RegionDataset) { // add region to all applicable sequences
+            } else if (target instanceof RegionDataset) { // add region to all applicable sequences              
                 ArrayList<FeatureSequenceData> sequences=((RegionDataset)target).getAllSequences();
                 for (FeatureSequenceData seq:sequences) {
                     targetSequence=(RegionSequenceData)seq;
@@ -212,6 +212,8 @@ public class DataFormat_GTF extends DataFormat {
                     addRegionToTarget(targetSequence,map);                    
                 }
             } else if (target instanceof DataSegment) {
+                if (!((DataSegment)target).getChromosome().equals(regionchromosome)) continue; 
+                if (regionstart>((DataSegment)target).getSegmentEnd() || regionend<((DataSegment)target).getSegmentStart()) continue;               
                 addRegionToTarget(target,map);
             } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for GTF dataformat: "+target.getClass().getSimpleName());
         }

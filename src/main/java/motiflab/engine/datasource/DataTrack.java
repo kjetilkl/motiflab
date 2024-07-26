@@ -217,7 +217,10 @@ public class DataTrack implements Cloneable {
      * @return
      */
     public void addDataSource(DataSource source) {
-        if (!containsDataSource(source)) datasources.add(source);
+        if (!containsDataSource(source)) {
+            source.setDataTrack(this);
+            datasources.add(source);
+        }
     }
     
     /**
@@ -233,6 +236,9 @@ public class DataTrack implements Cloneable {
         if (containsDataSource(sources)) { // there are duplicates so trim the collection
             removeIdenticalDataSources(sources);
         }
+        for (DataSource source:sources) {
+           source.setDataTrack(this);
+        }
         datasources.addAll(sources);
     }    
     
@@ -247,7 +253,10 @@ public class DataTrack implements Cloneable {
      * @return
      */
     public void addPreferredDataSource(DataSource source) {        
-        if (!containsDataSource(source)) datasources.add(0,source);
+        if (!containsDataSource(source)) {
+            source.setDataTrack(this);
+            datasources.add(0,source);
+        }
     }
     
     /**
@@ -264,7 +273,10 @@ public class DataTrack implements Cloneable {
     public void addPreferredDataSources(Collection<DataSource> sources) {
         if (containsDataSource(sources)) { // there are duplicates so trim the collection
             removeIdenticalDataSources(sources);
-        }        
+        }
+        for (DataSource source:sources) {
+           source.setDataTrack(this); // set "parent" track, just in case
+        }       
         datasources.addAll(0,sources);
     }
     

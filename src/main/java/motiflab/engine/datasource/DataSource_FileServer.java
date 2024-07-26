@@ -30,18 +30,24 @@ import motiflab.engine.dataformat.DataFormat_WIG;
  * The FileServer class relies on data read from files on the local filesystem
  * rather than being obtained from an external network server.
  * The best way to use a FileServer is to link it to a single file in one of
- * the three efficient binary dataformats BigBed (for Region Datasets), 
+ * the three efficient binary dataformats: BigBed (for Region Datasets), 
  * BigWig (for Numeric Dataset) and 2bit (for DNA sequences). 
- * This will probably also be the only (or at least primary) 
- * use supported by the Configuration GUI.
+ * Support for whole-genome BED, Interactions and GTF files were added later,
+ * but files in these format are recommended to use as sources unless they are quite small (at most a few MB).
+ * 
  * However, the class also supports a second "legacy" mode in which plain-text
- * full-genome datafiles in either FASTA, BED or WIG formats may be split into 
+ * full-genome data files in either FASTA, BED or WIG formats (and only these!) may be split into 
  * smaller segment-files in order to access the middle of chromosomes more efficiently
  * (a sort of "poor-man's random access" file). 
  * When the dataset is split across multiple segment files, the filepath should 
- * point to a directory containing subdirectories named after the chromosome (e.g. "chr13")
+ * point to a parent directory containing subdirectories named after each chromosome (e.g. "chr13")
  * and containing files with filenames on the format "chrXXX_nnn.[fasta,wig,bed]"
- * where "nnn" is an integer number 
+ * where "XXX" is the chromosome and "nnn" is an integer number denoting the start position of the segment in that file (0-indexed) 
+ * The size of each segment file is a parameter of the data format. 
+ * If the segment size is 0, it means that the whole genome dataset is contained in a single file.
+ * If the segment size is at least as big as the largest chromosome, it means that each chromosome is contained in a single file.
+ * If the segment size is greater than 0 but smaller than the largest chromosome, it means that each chromosome is
+ * potentially split across multiple files.
  * 
  * @author kjetikl
  */
@@ -164,8 +170,9 @@ public class DataSource_FileServer extends DataSource {
     
     @Override
      public ArrayList<DataFormat> filterProtocolSupportedDataFormats(ArrayList<DataFormat> list) { 
-         // For now, the FILE DataSource protocol only supports the three DataFormats listed below
-        Class[] supported = new Class[]{DataFormat_BigBed.class, DataFormat_BigWig.class, DataFormat_2bit.class, DataFormat_FASTA.class, DataFormat_BED.class, DataFormat_GFF.class, DataFormat_GTF.class, DataFormat_Interactions.class, DataFormat_WIG.class}; 
+         // For now, the FILE DataSource protocol only supports the DataFormats explicitly listed below. 
+         // GFF is not supported, because MotifLab expects the first column of GFF to contain a sequence name rather than a chromosome
+        Class[] supported = new Class[]{DataFormat_BigBed.class, DataFormat_BigWig.class, DataFormat_2bit.class, DataFormat_FASTA.class, DataFormat_BED.class, DataFormat_GTF.class, DataFormat_Interactions.class, DataFormat_WIG.class}; 
         ArrayList<DataFormat> result=new ArrayList<>();
         for (DataFormat format:list) {
             if (inClassFilter(format, supported)) result.add(format);
@@ -221,7 +228,7 @@ public class DataSource_FileServer extends DataSource {
         else if (segmentsize==0) { // the whole genome should be in a single file
             dataformat.parseInput(filepath, segment, dataformatSettings, task);
         }
-        else { // the whole-genome data is split across
+        else { // the whole-genome data is split across multiple files in subdirectories named after each chromosome
             ArrayList<String> page=null;
                  if (type==DNASequenceDataset.class) page=getDNAData(chromosome,start,end, task.getMotifLabEngine());
             else if (type==NumericDataset.class) page=getNumericData(chromosome,start,end, task.getMotifLabEngine());

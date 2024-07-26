@@ -1,13 +1,88 @@
 <html>
     <h1>FILE protocol</h1>
-The FILE protocol can be used to retrieve data that are stored in files residing
-on your local file system as opposed to being obtained from external web servers.
-Because of its speed and because it does not rely on external servers,
+The FILE protocol can be used to retrieve data that is stored in files residing
+on your local file system, as opposed to being obtained from external web servers.
+Because of its speed and the fact that it does not rely on external servers,
 this is the preferred way of retrieving data when working with large datasets.
 <br/>
-The FILE protocol currently only supports three data formats:
-<b>BigBed</b> (for Region Datasets), <b>BigWig</b> (for Numeric Datasets) and <b>2bit</b> (for DNA Sequence Datasets).
-All of the data (i.e the whole genome) for a single track (and genome build) must be contained in a single
-file in one of these formats.
+<br/>
+The recommended way to use the FILE protocol is to link it to a single file in one of the three efficient binary data formats:
+<ul>
+    <li><b>2bit</b> (for DNA sequences)</li>    
+    <li><b>BigBed</b> (for Region Datasets)</li>  
+    <li><b>BigWig</b> (for Numeric Datasets)</li>        
+</ul>
+
+The protocol also support whole-genome files in <b>BED</b>, <b>GTF</b> and <b>Interactions</b> format,
+but such files are generally not recommended to be used as file sources unless they are quite small (at most a few MB).
+<br><br>
+In addition, the protocol can be used in a second "segmented" mode where genome data in either <b>FASTA</b>, <b>BED</b> or <b>WIG</b> formats (and only these!)
+are split into smaller segment-files in order to access the middle of chromosomes more efficiently.
+In this case, the <i>filepath</i> setting should point to a directory rather than a single file, and this directory should contain subdirectories named after each chromosome.
+Each of these directories should contain files with names on the format "<tt>chrXXX_nnn.[fasta,wig,bed]</tt>",
+where "XXX" is the chromosome and "nnn" is an integer number denoting the start position of the segment in that file (0-indexed).
+The size of each segment file is a parameter of the data format. 
+<ul>
+    <li>If the segment size is 0, it means that the data is <i>not</i> segmented, but the whole dataset is contained in a single file (and the <i>filepath</i> should point to this file)</li>
+    <li>If the segment size is at least as big as the largest chromosome, it means that the data is segmented across multiple files, but each chromosome is contained in a single file</li>
+    <li>If the segment size is greater than 0 but smaller than the largest chromosome, it means that each chromosome is potentially split across multiple files</li>
+ </ul>
+
+For instance, for a RepeatMasker region dataset where the segment size is set to 100,000,000, the human genome should be split across the following BED files.
+(Note that using a smaller segment size than this is recommended for more efficient access!)
+The <i>filepath</i> setting should then point to the top-level "repeatmasker" directory.
+
+Note that regions that span across the segment boundary (i.e. start in one segment and end in another) should be included in BOTH segments!
+<br/><br/>
+<table style="border:1px solid black">
+    <tr>
+        <td style="background-color: #fff6cc">
+            <pre>
+repeatmasker/chr1/chr1_0.bed
+repeatmasker/chr1/chr1_100000000.bed
+repeatmasker/chr1/chr1_200000000.bed
+repeatmasker/chr2/chr2_0.bed
+repeatmasker/chr2/chr2_100000000.bed
+repeatmasker/chr2/chr2_200000000.bed
+repeatmasker/chr3/chr3_0.bed
+repeatmasker/chr3/chr3_100000000.bed
+repeatmasker/chr4/chr4_0.bed
+repeatmasker/chr4/chr4_100000000.bed
+repeatmasker/chr5/chr5_0.bed
+repeatmasker/chr5/chr5_100000000.bed
+repeatmasker/chr6/chr6_0.bed
+repeatmasker/chr6/chr6_100000000.bed
+repeatmasker/chr7/chr7_0.bed
+repeatmasker/chr7/chr7_100000000.bed
+repeatmasker/chr8/chr8_0.bed
+repeatmasker/chr8/chr8_100000000.bed
+repeatmasker/chr9/chr9_0.bed
+repeatmasker/chr9/chr9_100000000.bed
+repeatmasker/chr10/chr10_0.bed
+repeatmasker/chr10/chr10_100000000.bed
+repeatmasker/chr11/chr11_0.bed
+repeatmasker/chr11/chr11_100000000.bed
+repeatmasker/chr12/chr12_0.bed
+repeatmasker/chr12/chr12_100000000.bed
+repeatmasker/chr13/chr13_0.bed
+repeatmasker/chr13/chr13_100000000.bed
+repeatmasker/chr14/chr14_0.bed
+repeatmasker/chr14/chr14_100000000.bed
+repeatmasker/chr15/chr15_0.bed
+repeatmasker/chr15/chr15_100000000.bed
+repeatmasker/chr16/chr16_0.bed
+repeatmasker/chr17/chr17_0.bed
+repeatmasker/chr18/chr18_0.bed
+repeatmasker/chr19/chr19_0.bed
+repeatmasker/chr20/chr20_0.bed
+repeatmasker/chr21/chr21_0.bed
+repeatmasker/chr22/chr22_0.bed
+repeatmasker/chrX/chrX_0.bed
+repeatmasker/chrX/chrX_100000000.bed
+repeatmasker/chrY/chrY_0.bed
+</pre>
+</td>
+</tr>
+</table>
 
 </html>

@@ -5,6 +5,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +13,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.zip.GZIPInputStream;
 
 /**
  * This class contains some static library functions to download large (>2GB) remote files 
@@ -33,47 +35,55 @@ public class FileUtilities {
      * @param output  the <code>OutputStream</code> to write to
      * @param buffer the buffer to use for the copy
      * @param listener A <code>PropertyChangeListener</code> that will receive periodic progress reports
+     * @param cancelFlag a reference to a boolean array. The copying process can be cancelled by setting the value of the first boolean in this array to TRUE 
      * @return the number of bytes copied
      * @throws NullPointerException if the input or output is null
-     * @throws IOException if an I/O error occurs
+     * @throws IOException if an I/O error occurs or 
      * @since 2.2
      */
-    public static long copyLarge(InputStream input, OutputStream output, byte[] buffer, PropertyChangeListener listener) throws IOException {
-        if (buffer==null) buffer=new byte[4*1024]; // 4KB as default buffer	
+    public static long copyLarge(InputStream input, OutputStream output, byte[] buffer, PropertyChangeListener listener, boolean[] cancelFlag) throws IOException {
+        if (buffer==null) buffer=new byte[16*1024]; // 16KB as default buffer	
         long count = 0;
         int n = 0;
         try {
-          while (EOF != (n = input.read(buffer))) {
-             output.write(buffer, 0, n);
-             count += n;
-             if (listener!=null) listener.propertyChange(new PropertyChangeEvent(input, "progress", count, count));        	
-          }
-          if (listener!=null) listener.propertyChange(new PropertyChangeEvent(input, "done", count, count)); 
+                while (EOF != (n = input.read(buffer))) {
+                output.write(buffer, 0, n);
+                count += n;
+                if (listener!=null) listener.propertyChange(new PropertyChangeEvent(input, "progress", count, count));   
+                 if (cancelFlag!=null && cancelFlag.length>0 && cancelFlag[0]) throw new IOException("cancelled");
+            }
+            if (listener!=null) listener.propertyChange(new PropertyChangeEvent(input, "done", count, count)); 
         } catch (IOException e) {
-            if (listener!=null) listener.propertyChange(new PropertyChangeEvent(e, "error", e, e));
+            if (listener!=null) {
+                if ("cancelled".equals(e.getMessage())) listener.propertyChange(new PropertyChangeEvent(e, "cancelled", e, e));
+                else listener.propertyChange(new PropertyChangeEvent(e, "error", e, e));
+            }
             throw e;
+        } finally {
+            closeQuietly(input);
+            closeQuietly(output);
         }
         return count;
     }
 
 
     /** Copies a large file (possibly greater than 2GB to a destination file */
-    public static void copyLargeURLToFile(URL source, File destination, PropertyChangeListener listener) throws IOException {
+    public static void copyLargeURLToFile(URL source, File destination, PropertyChangeListener listener, boolean[] cancelFlag) throws IOException {
         URLConnection connection = source.openConnection();
         if (connection instanceof HttpURLConnection) {
             int status = ((HttpURLConnection)connection).getResponseCode();
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
             if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")) {
                     String redirectURL = source.toString().replace("http","https");
-                    copyLargeURLToFile(new URL(redirectURL), destination, listener);
+                    copyLargeURLToFile(new URL(redirectURL), destination, listener, cancelFlag);
                     return;
             }
         }             
         InputStream input = connection.getInputStream();
-        copyLargeInputStreamToFile(input, destination, listener);
+        copyLargeInputStreamToFile(input, destination, listener, cancelFlag);
     }
 
-    public static void copyLargeURLToFile(URL source, File destination, int connectionTimeout, int readTimeout, PropertyChangeListener listener) throws IOException {
+    public static void copyLargeURLToFile(URL source, File destination, int connectionTimeout, int readTimeout, PropertyChangeListener listener, boolean[] cancelFlag) throws IOException {
         URLConnection connection = source.openConnection();
         connection.setConnectTimeout(connectionTimeout);
         connection.setReadTimeout(readTimeout);
@@ -82,20 +92,20 @@ public class FileUtilities {
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
             if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")) {
                     String redirectURL = source.toString().replace("http","https");
-                    copyLargeURLToFile(new URL(redirectURL), destination, connectionTimeout, readTimeout, listener);
+                    copyLargeURLToFile(new URL(redirectURL), destination, connectionTimeout, readTimeout, listener, cancelFlag);
                     return;
             }
         }
         InputStream input = connection.getInputStream();
-        copyLargeInputStreamToFile(input, destination, listener);
+        copyLargeInputStreamToFile(input, destination, listener, cancelFlag);
     }
 
 
-    public static void copyLargeInputStreamToFile(InputStream source, File destination, PropertyChangeListener listener) throws IOException {
+    public static void copyLargeInputStreamToFile(InputStream source, File destination, PropertyChangeListener listener, boolean[] cancelFlag) throws IOException {
         try {
             FileOutputStream output = openOutputStream(destination, false);
             try {
-                copyLarge(source, output, null, listener);
+                copyLarge(source, output, null, listener, cancelFlag);
                 output.close(); // don't swallow close Exception if copy completes normally
             } finally {
                 closeQuietly(output);
@@ -134,5 +144,17 @@ public class FileUtilities {
           }
     }    
     
+    public static void gunzipFile(File inputFile, File outputFile) throws IOException {
+        byte[] buffer = new byte[1024];  
+        try (GZIPInputStream gis = new GZIPInputStream(new FileInputStream(inputFile));
+            FileOutputStream fos = new FileOutputStream(outputFile)) {           
+            int len;
+            while ((len = gis.read(buffer)) > 0) {
+                fos.write(buffer, 0, len);
+            }           
+        } catch (IOException ex) {
+            throw ex;
+        } 
+    }
     
 }

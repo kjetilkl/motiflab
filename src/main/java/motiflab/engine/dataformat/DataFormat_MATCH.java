@@ -366,7 +366,7 @@ public class DataFormat_MATCH extends DataFormat {
                     addRegionToTarget(targetSequence,map,orientation);
                 } else if (target instanceof DataSegment) {
                     addRegionToTarget(target,map,orientation);
-                } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for Clover dataformat: "+target.getClass().getSimpleName());                
+                } else throw new ParseError("SLOPPY PROGRAMMING ERROR: non-Region data as target for MATCH dataformat: "+target.getClass().getSimpleName());                
             }
         }
         return target;
@@ -383,7 +383,7 @@ public class DataFormat_MATCH extends DataFormat {
             targetSize=((RegionSequenceData)target).getSize();
         } else if (target instanceof DataSegment) {
             targetSize=((DataSegment)target).getSize();
-        } else throw new ParseError("Target object neither RegionSequenceData nor DataSegment in DataFormat_GFF.addRegionToTarget():"+target.toString());
+        } else throw new ParseError("Target object neither RegionSequenceData nor DataSegment in DataFormat_MATCH.addRegionToTarget():"+target.toString());
         Object startValue=map.get("START");
         if (startValue instanceof Integer) start=(Integer)startValue;
         Object endValue=map.get("END");

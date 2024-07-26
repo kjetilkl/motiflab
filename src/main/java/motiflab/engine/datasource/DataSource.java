@@ -137,13 +137,26 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
          return dataTrack;
      }
      
+     public void setDataTrack(DataTrack track) {
+         this.dataTrack=track;
+         if (dataTrack!=null) this.name=dataTrack.getName();
+     }     
+          
      public String getName() {
          return name;
      }
      
+     public void setName(String name) {
+         this.name=name;
+     }     
+     
      public int getOrganism() {
          return organism;
-     }          
+     }   
+     
+     public void setOrganism(int organism) {
+         this.organism=organism;
+     }     
      
      public String getGenomeBuild() {
          return genomebuild;
@@ -151,9 +164,6 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
      
      public void setGenomeBuild(String build) {
          genomebuild=build;
-     }
-     public void setOrganism(int organism) {
-         this.organism=organism;
      }
      
      /** This should return TRUE if the DataSource relies on a standard data format (such as e.g. FASTA or GTF format)

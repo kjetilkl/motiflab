@@ -350,6 +350,8 @@ public class DataFormat_BED extends DataFormat {
                     addRegionToTarget(targetSequence,map,count);
                 }
             } else if (target instanceof DataSegment) {
+                if (!((DataSegment)target).getChromosome().equals(regionchromosome)) continue; 
+                if (regionstart>((DataSegment)target).getSegmentEnd() || regionend<((DataSegment)target).getSegmentStart()) continue;                
                 addRegionToTarget(target,map,count);
             } else if (target instanceof SequenceCollection) {
                  String type=(String)map.get("TYPE");

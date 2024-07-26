@@ -21,7 +21,7 @@ import javax.swing.SwingWorker;
  */
 public class DownloadFilesDialog extends javax.swing.JDialog {
 
-    private boolean abort=false;
+    private boolean[] abortFlag=new boolean[]{false}; // set the first value to true to cancel download
     private boolean isFinished=false;
     private boolean errors=false;
     private int totalProgress=0;
@@ -30,6 +30,7 @@ public class DownloadFilesDialog extends javax.swing.JDialog {
     private HashMap<String,Object> status=null; // the key is the URL (as string). 
                                                 // The value is either NULL (download not started), Boolean.FALSE (download in progress), Boolean.TRUE (download finished) or an Exception that ocurred during download
     private DownloadListener listener=null;
+    
     
     /** 
      * Creates new form DownloadFilesDialog 
@@ -60,7 +61,7 @@ public class DownloadFilesDialog extends javax.swing.JDialog {
      * 
      */
     public void download(ArrayList<Object[]> filesList) {
-        this.abort=false;
+        abortFlag[0]=false;
         this.isFinished=false;
         this.errors=false;
         this.files=filesList;
@@ -89,7 +90,7 @@ public class DownloadFilesDialog extends javax.swing.JDialog {
                       currentURL=url.toString();
                       status.put(currentURL, Boolean.FALSE);
                       if (listener!=null) listener.propertyChange(new PropertyChangeEvent(currentURL, "newfile", null, thisfilesize));                      
-                      motiflab.engine.util.FileUtilities.copyLargeURLToFile(url, destination, listener);  
+                      motiflab.engine.util.FileUtilities.copyLargeURLToFile(url, destination, listener, abortFlag);  
                       status.put(currentURL, Boolean.TRUE);
                    } catch (Exception e) {
                       errors=true;
@@ -124,12 +125,12 @@ public class DownloadFilesDialog extends javax.swing.JDialog {
     
     /** Returns TRUE if the download was aborted */
     public boolean isAborted() {
-        return abort;
+        return abortFlag[0];
     }       
     
     /** Abort this download (programmatically click the ABORT button) */
     public void doAbort() {
-        abort=true;
+        abortFlag[1]=true;
         abortButton.doClick();        
     }
     
@@ -322,7 +323,7 @@ public class DownloadFilesDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void abortButtonPressed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_abortButtonPressed
-        if (!isFinished) abort=true;
+        if (!isFinished) abortFlag[0]=true;
         this.setVisible(false);
     }//GEN-LAST:event_abortButtonPressed
 

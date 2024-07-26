@@ -152,7 +152,7 @@ public class DataSegment implements Serializable, Comparable<DataSegment> {
     @SuppressWarnings("unchecked")
     public void addRegion(Region region) {
         if (this.data==null || !(this.data instanceof ArrayList)) this.data=new ArrayList<Region>();
-        if (region!=null) ((ArrayList)this.data).add(region);
+        if (region!=null) ((ArrayList)this.data).add(region);        
     }
     
     /**
