@@ -2448,10 +2448,11 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
 
     /**
      * This method can be used to display a special Data Source dialog implemented as a (configurable) plugin.
-     * The plugin should have been registered as a MotifLabResource instance with type "DataSourceConfigurationDialog".
-     * The plugin is provided with two values via the setPluginParameterValue() method.
-     * The first is "gui" and the second is "currentDataTrack". The plugin should return a JDialog if the plugin
-     * parameter value "datasource_dialog" is requested via the getPluginParameterValue() method.
+     * The plugin should have been registered as a MotifLabResource instance with type "DataSourceConfigurationDialog".¨     
+     * The plugin is provided with a reference to the GUI via a call to setPluginParameterValue("gui"),
+     * a reference to this DataTrackConfigurationDialog via a call to setPluginParameterValue("DataTrackConfigurationDialog")
+     * and a reference to the current DataTrack (when editing an existing track) via a call to setPluginParameterValue("currentDataTrack").
+     * The plugin should return a JDialog if the plugin parameter value "datasource_dialog" is requested via a call to getPluginParameterValue("datasource_dialog").
      * (Note that the same plugin could be registered as both a "DataTrackConfigurationDialog" resource and a
      * "DataSourceConfigurationDialog" resource and should then be able to return both a "datatrack_dialog" and a "dataource_dialog".)
      * The dialog will be shown in a modal fashion. The dialog should contain "OK" and "Cancel" buttons
@@ -2467,6 +2468,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
            if (currentDataTrack==null) throw new ExecutionError("Missing data track to configure data source for");
            ((ConfigurablePlugin)plugin).setPluginParameterValue("gui",gui); // just in case this is not properly initialized from client
            ((ConfigurablePlugin)plugin).setPluginParameterValue("currentDataTrack",currentDataTrack);
+           ((ConfigurablePlugin)plugin).setPluginParameterValue("DataTrackConfigurationDialog",(DataTrackConfigurationDialog)this);
            Object d = ((ConfigurablePlugin)plugin).getPluginParameterValue("datasource_dialog");
            if (d instanceof javax.swing.JDialog) {
                javax.swing.JDialog dialog=(javax.swing.JDialog)d;
@@ -2638,8 +2640,10 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
     /**
      * This method can be used to display a special Data Track dialog implemented as a (configurable) plugin.
      * The plugin should have been registered as a MotifLabResource instance with type "DataTrackConfigurationDialog".
-     * The plugin is provided with a reference to the GUI via the setPluginParameterValue("gui") method.
-     * The plugin should return a JDialog if the plugin parameter value "datatrack_dialog" is requested via the getPluginParameterValue() method.
+     * The plugin is provided with a reference to the GUI via a call to setPluginParameterValue("gui"),
+     * a reference to this DataTrackConfigurationDialog via a call to setPluginParameterValue("DataTrackConfigurationDialog")
+     * and a reference to the currentDataTrack (when editing an existing track) via a call to setPluginParameterValue("currentDataTrack").
+     * The plugin should return a JDialog if the plugin parameter value "datasource_dialog" is requested via a call to getPluginParameterValue("datasource_dialog").
      * (Note that the same plugin could be registered as both a "DataTrackConfigurationDialog" resource and a
      * "DataSourceConfigurationDialog" resource and should then be able to return both a "datatrack_dialog" and a "dataource_dialog".)
      * The dialog will be shown in a modal fashion. The dialog should contain "OK" and "Cancel" buttons
@@ -2650,10 +2654,11 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
      * @param plugin A plugin which should also implement ConfigurablePlugin
      */
     private void allTracksAddFromPlugin(Plugin plugin) {
-        try {
+        try {   
            if (!(plugin instanceof ConfigurablePlugin)) throw new ExecutionError("Unable to obtain configuration dialog for "+plugin.getPluginName());
            ((ConfigurablePlugin)plugin).setPluginParameterValue("gui",gui); // just in case this is not properly initialized from client
            ((ConfigurablePlugin)plugin).setPluginParameterValue("currentDataTrack",null); // clear the currentDataTrack in the plugin (just in case)
+           ((ConfigurablePlugin)plugin).setPluginParameterValue("DataTrackConfigurationDialog",(DataTrackConfigurationDialog)this);
            Object d = ((ConfigurablePlugin)plugin).getPluginParameterValue("datatrack_dialog");
            if (d instanceof javax.swing.JDialog) {
                javax.swing.JDialog dialog=(javax.swing.JDialog)d;
@@ -2662,7 +2667,6 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
                dialog.setVisible(true);  // this should block until the dialog closes itself
                Object newtrack=((ConfigurablePlugin)plugin).getPluginParameterValue("datatrack"); // the plugin should set this parameter if the user has pressed OK button to close the dialog
                dialog.dispose();
-               System.err.println("Modal dialog exited: datatrack="+newtrack);
                if (newtrack instanceof DataTrack) { // if newtrack is NULL, the user has clicked the CANCEL button in the dialog, so we don't add it
                     String newtrackname=((DataTrack)newtrack).getName();
                     if (availableTracks.containsKey(newtrackname)) {
@@ -2671,30 +2675,24 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
                             // The old and new tracks have the same type, so it should be possible to merge the new sources into the existing track
                             int choice=JOptionPane.showOptionDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to merge sources or replace this track?", "Track exists",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE, null, new String[]{"Merge","Replace","Cancel"}, "Merge");
                             if (choice==0) { // merge new sources into existing dataset
-                                engine.logMessage("Merging sources into existing datatrack");
                                 Object preferredSetting=((ConfigurablePlugin)plugin).getPluginParameterValue("preferred");
                                 boolean preferred=(preferredSetting instanceof Boolean && ((Boolean)preferredSetting));
                                 if (preferred) existingTrack.addPreferredDataSources(((DataTrack)newtrack).getDatasources());
                                 else existingTrack.addDataSources(((DataTrack)newtrack).getDatasources());
                             } else if (choice==1) { // replace existing dataset
-                                engine.logMessage("Replacing existing datatrack");
                                 availableTracks.put(((DataTrack)newtrack).getName(), (DataTrack)newtrack); // replace existing track with same name
                             } else {
-                                engine.logMessage("Cancelled");
                                 return;
                             } // cancel
                         } else {
                             int choice=JOptionPane.showConfirmDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to replace this track?","Replace data track",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
                             if (choice==JOptionPane.OK_OPTION) {
-                                engine.logMessage("Replacing existing datatrack");
                                 availableTracks.put(((DataTrack)newtrack).getName(), (DataTrack)newtrack); // replace existing track with same name
                             } else {
-                                engine.logMessage("Cancelled");
                                 return;
                             }
                         }
                     } else {
-                        engine.logMessage("Adding new datatrack");
                         availableTracks.put(((DataTrack)newtrack).getName(), (DataTrack)newtrack); // replace existing track with same name
                     }
                     showAllTracksPanel(); // this will setup the table from the configuration

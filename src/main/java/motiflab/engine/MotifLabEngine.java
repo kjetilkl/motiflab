@@ -223,7 +223,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         importPredefinedMotifCollections(); // import information about predefined motif collections   
         importExternalPrograms(); // import external programs         
         importDataRepositories();         
-        importPlugins(null, new String[]{"type:DataSource", "load:early"});  // Data Sources and "early" plugins should already have been imported, so skip them here...            
+        importPlugins(null, new String[]{"type:DataSource", "load:early"});  // Data Sources and "early" plugins should already have been imported, so skip them here...         
     }
 
     private static Date getCorrectDate(int year, int month, int day) {
@@ -574,13 +574,18 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         return dir;
     }   
     
-  /**  Returns the directory where the given plugin is installed (or NULL if the plugin has no annotated directory)
+  /**  Returns the directory where the given plugin is installed (or will be installed)
     *  Plugins are free to use their own directories to store additional files
-    *  The plugin directory is part of the metadata annotation for the pluginre
+    *  The plugin directory is part of the metadata annotation for the plugin
     */
     public String getPluginDirectory(Plugin plugin) {
         Object dir=getPluginProperty(plugin.getPluginName(),"pluginDirectory");
-        return (dir==null)?null:dir.toString();
+        if (dir!=null) return dir.toString();
+        else { // meta-data may not have been registered yet. Try to infer directory from plugin name
+            String dirName=plugin.getPluginName().replaceAll("\\W", "_");
+            File pluginDir=new File(engine.getPluginsDirectory(), dirName);
+            return pluginDir.getAbsolutePath();
+        }
     }        
     
   /** 
@@ -2698,9 +2703,9 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                 continue; // the directory did not contain correct metadata
             }        
             // The plugin object could be instantiated. Now try to initialize it and register it with the engine. Initialization from client will be performed later
-            try {
+            try {               
                 plugin.initializePlugin(this);
-                registerPlugin(plugin,metadata);
+                registerPlugin(plugin,metadata);              
                 pluginsOK.add(plugin.getPluginName()); // logMessage("  - Plugin \""+plugin.getPluginName()+"\" : OK!");
             } catch (ExecutionError e) {
                 logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : ERROR => "+e.getMessage());                
@@ -2763,7 +2768,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             }
         }        
     }    
-   
+    
     /** Load all the classes within the provided JAR file and return the (first and hopefully only) class which implements the Plugin interface 
      *  The method will also add all JAR-files residing beneath a lib/ directory to the class loader, so that they can be loaded when required
      */
