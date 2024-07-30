@@ -159,4 +159,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <repositories>
+        <repository> <!-- The BigWig dependency has been published here -->
+            <id>github</id>
+            <url>https://maven.pkg.github.com/kjetilkl/motiflab</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+      
 </project>
