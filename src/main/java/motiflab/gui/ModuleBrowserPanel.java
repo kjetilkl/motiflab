@@ -269,9 +269,10 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
                 String newFilterColumn=(String)filterCombobox.getSelectedItem();
                 model.setFilterColumn(newFilterColumn);
                 columnModel.getColumn(FILTER_COLUMN).setHeaderValue(newFilterColumn);     
-                manualSelectionTable.getTableHeader().repaint();                
+                manualSelectionTable.getTableHeader().repaint();  
+                manualSelectionTable.repaint();                 
                 filter.updateFilter();                
-                ((TableRowSorter)manualSelectionTable.getRowSorter()).sort();
+                // ((TableRowSorter)manualSelectionTable.getRowSorter()).sort();
             }
         });            
         if (showOnlyCollectionMembersCheckbox!=null) {

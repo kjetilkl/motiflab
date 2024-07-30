@@ -285,14 +285,7 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
                 updateCountLabelText();
             }
         });          
-        filterCombobox.setSelectedIndex(0);
-        filterCombobox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                filter.updateFilter();                
-                ((TableRowSorter)manualSelectionTable.getRowSorter()).sort();
-            }
-        });        
+        filterCombobox.setSelectedIndex(0);      
         
         if (showOnlyCollectionMembersCheckbox!=null) {
             showOnlyCollectionMembersCheckbox.addActionListener(new ActionListener() {

@@ -319,8 +319,9 @@ public class MotifBrowserPanel_MultiColumn extends JPanel implements DataListene
                 model.setFilterColumn(newFilterColumn);
                 columnModel.getColumn(FILTER_COLUMN).setHeaderValue(newFilterColumn); 
                 manualSelectionTable.getTableHeader().repaint();
+                manualSelectionTable.repaint();                
                 filter.updateFilter();
-                ((TableRowSorter)manualSelectionTable.getRowSorter()).sort();
+                // ((TableRowSorter)manualSelectionTable.getRowSorter()).sort();
             }
         });              
         if (showOnlyCollectionMembersCheckbox!=null) {

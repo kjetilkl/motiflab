@@ -308,13 +308,14 @@ public class MotifBrowserPanel extends JPanel implements DataListener {
         filterCombobox.setSelectedIndex(0);
         filterCombobox.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {    
+            public void actionPerformed(ActionEvent e) { 
                 String newFilterColumn=(String)filterCombobox.getSelectedItem();
                 model.setFilterColumn(newFilterColumn);
                 columnModel.getColumn(FILTER_COLUMN).setHeaderValue(newFilterColumn); 
                 manualSelectionTable.getTableHeader().repaint();
-                filter.updateFilter();
-                ((TableRowSorter)manualSelectionTable.getRowSorter()).sort();
+                manualSelectionTable.repaint();
+                filter.updateFilter(); 
+                //((TableRowSorter)manualSelectionTable.getRowSorter()).sort(); // Do not resort, since that would apply the filter directly, and we do not want to do that until the filter value is changed
             }
         });              
         if (showOnlyCollectionMembersCheckbox!=null) {
