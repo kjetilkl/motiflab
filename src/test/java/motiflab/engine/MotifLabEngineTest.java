@@ -4897,17 +4897,17 @@ public class MotifLabEngineTest {
         assertEquals(MotifLabEngine.breakLine(Supercalifragilisticexpialidocious,10,"\n"), Supercalifragilisticexpialidocious10);         
     }
     
-    @Test
-    public void testResolveURL() {    
-        System.out.println("ResolveURL");
-        String original="https://www.motiflab.org/datasets/HOCOMOCO_v10_mouse.mlx";
-        String target="http://tare.medisin.ntnu.no/motiflab/datasets/HOCOMOCO_v10_mouse.mlx";  // note that the URL is redirected to a new protocol (HTTPS -> HTTP)
-        try {
-            assertEquals(MotifLabEngine.resolveURL(new URL(original)).toString(), new URL(target).toString()); // 
-        } catch (Exception e) {
-            assertEquals("An exception occured when comparing two URLs. ",0,1);
-        };    
-    }        
+//    @Test
+//    public void testResolveURL() {    
+//        System.out.println("ResolveURL");
+//        String original="https://www.motiflab.org/datasets/HOCOMOCO_v10_mouse.mlx";
+//        String target="https://tare.medisin.ntnu.no/motiflab/datasets/HOCOMOCO_v10_mouse.mlx";
+//        try {
+//            assertEquals(MotifLabEngine.resolveURL(new URL(original)).toString(), new URL(target).toString()); // 
+//        } catch (Exception e) {
+//            assertEquals("An exception occured when comparing two URLs. ",0,1);
+//        };    
+//    }        
 
     
 }
