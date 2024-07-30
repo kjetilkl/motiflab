@@ -30,6 +30,7 @@ import java.awt.Cursor;
 import java.awt.FontMetrics;
 import java.awt.Rectangle;
 import java.awt.Stroke;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
@@ -49,6 +50,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputListener;
 import motiflab.engine.Graph;
 import motiflab.engine.MotifLabEngine;
+import motiflab.engine.data.DNASequenceData;
 import motiflab.engine.data.DNASequenceDataset;
 import motiflab.engine.data.Data;
 import motiflab.engine.data.SequenceCollection;
@@ -102,7 +104,8 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
     public static final String ACTION_HIDE_ALL_SEQUENCES="Hide All Sequences";
     public static final String ACTION_SHOW_ALL_SEQUENCES="Show All Sequences";
     public static final String ACTION_SELECT_ALL="Select All";
-    public static final String ACTION_INVERT_SELECTION="Invert Selection";    
+    public static final String ACTION_INVERT_SELECTION="Invert Selection";  
+    public static final String ACTION_COPY_SEQUENCE="Copy Sequence";     
 
     private static final String LABEL_ZOOM="Zoom";
     private static final String LABEL_ORIENTATION="Orientation";
@@ -157,7 +160,8 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
     private Action hideAllSequencesAction;    
     private Action showAllSequencesAction;    
     private Action selectAllAction; 
-    private Action invertSelectionAction;     
+    private Action invertSelectionAction;   
+    private Action copySequenceAction;    
     
     private int labelLeftMargin=12;
     private int labelRightMargin=10;
@@ -1357,7 +1361,8 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
         alignTSSRightAction=new AbstractAction(ACTION_ALIGN_TSS_RIGHT, ALIGN_TSS_ICON) { public void actionPerformed(ActionEvent e) {VisualizationPanel parent=getVisualizationPanel(); if (parent!=null) parent.alignAllSequencesToTSSRight(); }};
         alignNoneAction=new AbstractAction(ACTION_ALIGN_NONE, ALIGN_NONE_ICON) { public void actionPerformed(ActionEvent e) {VisualizationPanel parent=getVisualizationPanel(); if (parent!=null) parent.alignAllSequencesNone(); }};
         
-        
+        copySequenceAction=new AbstractAction(ACTION_COPY_SEQUENCE, null) { public void actionPerformed(ActionEvent e) {copySequenceToClipboard();}};
+       
         constrainAction=new AbstractAction(ACTION_CONSTRAIN, CONSTRAIN_ICON) { 
             public void actionPerformed(ActionEvent e) {
                 boolean current=settings.isSequenceConstrained(sequenceName); 
@@ -1526,7 +1531,10 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
 //        
 //        inputmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, 0), "Previous Region");
 //        actionmap.put("Previous Region", new AbstractAction() {public void actionPerformed(ActionEvent e) {goToPreviousRegion();} });        
-                  
+             
+        inputmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK), ACTION_COPY_SEQUENCE);
+        actionmap.put(ACTION_COPY_SEQUENCE, copySequenceAction);
+
     }
     
     /** This method can be used to enable or disable all actions registered in this SequenceVisualizer */
@@ -1577,7 +1585,36 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
 //            DataTrackVisualizer viz=getTrackVizualizer(lastSelectedTrack);
 //             if (viz instanceof DataTrackVisualizer_Region) ((DataTrackVisualizer_Region)viz).goToPreviousRegion();
 //        }
-//    }    
+//    } 
+    
+    /**
+     * Finds the first DNA sequence track and copies the DNA sequence(s) from the selected segments to the clipboard (in the orientation shown).
+     * If multiple selections are made, the sequences will be added separated by newlines
+     */
+    private void copySequenceToClipboard() { //        
+        ArrayList<SelectionWindow>selections=settings.getSelectionWindows(sequenceName);
+        if (selections==null || selections.isEmpty()) return; 
+        DNASequenceDataset dnadataset=gui.getFeaturesPanel().getReferenceDNAtrack(null);
+        if (dnadataset==null) return;
+        DNASequenceData sequence=(DNASequenceData)dnadataset.getSequenceByName(sequenceName); 
+        StringBuilder builder=new StringBuilder();
+        int index=0;
+        for (SelectionWindow window:selections) {
+            int length=window.end-window.start+1;
+            char[] dnasequence=new char[length];
+            for (int i=0;i<length;i++) {
+                dnasequence[i]=sequence.getValueAtGenomicPosition(window.start+i);   
+            }
+            if (settings.getSequenceOrientation(sequenceName)==Sequence.REVERSE) dnasequence=MotifLabEngine.reverseSequence(dnasequence);
+            if (index>0) builder.append("\n");
+            builder.append(dnasequence);
+            index++;                  
+        }
+        String content=builder.toString();
+        gui.logMessage("DNA sequence copied to clipboard: "+(selections.size()>1?"\n":"")+content, 8);         
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(content),null);        
+    }    
+    
 // =========================================  INNER CLASSES BELOW THIS LINE  ==================================    
     
     
