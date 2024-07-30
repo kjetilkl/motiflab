@@ -97,6 +97,7 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
     
     public MotifLab(MotifLabEngine engine, ClientConsole console, boolean addShutdownHook) {
         this.engine=engine;
+        engine.setClient(this);
         clientConsole=(console!=null)?(console):new STDConsole();
         if (addShutdownHook) {
             Runtime.getRuntime().addShutdownHook(new Thread() {
