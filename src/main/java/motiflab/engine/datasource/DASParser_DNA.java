@@ -12,6 +12,7 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import motiflab.engine.util.FilterPatternInputStream;
 
 /**
  *
@@ -26,14 +27,17 @@ public class DASParser_DNA {
     int buffersize=0;
     boolean inside=true; 
 
+    // The URL to the DTD at BioDAS is not longer valid, and this will result in the saxParser throwing an error.
+    // To avoid this problem, we use a FilterPatternInputStream to remove this element from the inputStream before passing it on to the parser
+    private final String filterString="<!DOCTYPE DASDNA SYSTEM \"http://www.biodas.org/dtd/dasdna.dtd\">"; 
     
     public char[] parse(String uri, int timeout) throws Exception {
         //System.err.println("Parsing uri:"+uri);
         factory = SAXParserFactory.newInstance();
         saxParser = factory.newSAXParser();
         handler = new ElementParser();
-        URL url=new URL(uri);
-        URLConnection connection=url.openConnection();
+        URL url = new URL(uri);
+        URLConnection connection = url.openConnection();
         connection.setConnectTimeout(timeout);
         // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
         int status = ((HttpURLConnection)connection).getResponseCode();
@@ -42,8 +46,9 @@ public class DASParser_DNA {
                 String redirectURL = url.toString().replace("http","https");
                 return parse(redirectURL, timeout);
         }          
-        InputStream inputStream =connection.getInputStream();
-        saxParser.parse(inputStream, handler);
+        InputStream inputStream = connection.getInputStream();
+        FilterPatternInputStream filterStream = new FilterPatternInputStream(inputStream, filterString);
+        saxParser.parse(filterStream, handler);
         if (DNAstring==null) throw new SAXException("No DNA sequence returned");
         if (DNAstring.length()!=buffersize) throw new SAXException("Length of obtained DNA sequence ("+DNAstring.length()+" bp) does not match expected sequence segment size ("+buffersize+" bp)");
         buffersize=0;        

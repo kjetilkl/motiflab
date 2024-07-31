@@ -174,7 +174,7 @@ public class DataSource_DAS extends DataSource {
         String chromosome=segment.getChromosome();
         String start=""+segment.getSegmentStart();
         String end=""+segment.getSegmentEnd();
-        if (!(baseURL.startsWith("http://") || baseURL.startsWith("https://"))) baseURL="http://"+baseURL;
+        if (!(baseURL.startsWith("http://") || baseURL.startsWith("https://"))) baseURL="https://"+baseURL;
         //dataformat=engine.getDataFormat(dataformatName); // this is not used!!!
         int waitperiod=getServerTimeslot();
         if (waitperiod>0) {Thread.sleep(waitperiod);} // throws InterruptedException
@@ -195,7 +195,7 @@ public class DataSource_DAS extends DataSource {
             }
             data=list;            
         } else if (dataTrack.getDataType()==DNASequenceDataset.class) { 
-            String uri=baseURL+"?segment="+chromosome+":"+start+","+end;
+            String uri=baseURL+"?segment="+chromosome+":"+start+","+end;                   
             DASParser_DNA parser=new DASParser_DNA();
             char[] buffer=parser.parse(uri,timeout); 
             data=buffer;

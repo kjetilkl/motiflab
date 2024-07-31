@@ -15,6 +15,7 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import motiflab.engine.util.FilterPatternInputStream;
 
 /**
  *
@@ -34,14 +35,18 @@ public class DASParser_Region {
     double score=-Double.MAX_VALUE;
     String label=null;
     
+    // The URL to the DTD at BioDAS is not longer valid, and this will result in the saxParser throwing an error.
+    // To avoid this problem, we use a FilterPatternInputStream to remove this element from the inputStream before passing it on to the parser
+    private final String filterString="<!DOCTYPE DASGFF SYSTEM \"http://www.biodas.org/dtd/dasgff.dtd\">";     
+    
     public ArrayList<Region> parse(String uri, int timeout) throws Exception {
         //System.err.println("Parsing uri:"+uri);
         factory = SAXParserFactory.newInstance();
         saxParser = factory.newSAXParser();
         handler = new ElementParser();
-        regionlist=new ArrayList<Region>();
-        URL url=new URL(uri);
-        URLConnection connection=url.openConnection();
+        regionlist = new ArrayList<Region>();
+        URL url = new URL(uri);
+        URLConnection connection = url.openConnection();
         connection.setConnectTimeout(timeout);
         // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
         int status = ((HttpURLConnection)connection).getResponseCode();
@@ -51,7 +56,8 @@ public class DASParser_Region {
                 return parse(redirectURL, timeout);
         }         
         InputStream inputStream = connection.getInputStream();
-        saxParser.parse(inputStream, handler);
+        FilterPatternInputStream filterStream = new FilterPatternInputStream(inputStream, filterString);
+        saxParser.parse(filterStream, handler);        
         return regionlist;
     } 
     
