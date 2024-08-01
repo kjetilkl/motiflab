@@ -32,6 +32,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -58,7 +59,7 @@ import motiflab.engine.protocol.ParseError;
 public class SequenceInputDialog extends javax.swing.JDialog {
     private JTable advancedInputTable;
 //    private MotifLabGUI gui;
-    private MotifLabEngine engine;    
+    private MotifLabEngine engine;
     private DefaultTableModel advancedTableModel;
     private int MAX_SEQUENCE_LENGTH=10000;
     private GeneIDResolver idResolver;
@@ -66,7 +67,7 @@ public class SequenceInputDialog extends javax.swing.JDialog {
     private boolean smdDialogCancelled=false; // set when the user selects CANCEL in the selectMappingDialog. This should cancel all resolves
     private boolean autoCorrectNames=false;
     private AddSequencesTask addSequencesTask=null;
-    
+
     /** Creates new form SequenceInputDialog */
     public SequenceInputDialog(MotifLabEngine engine) {
         super((engine.getClient() instanceof MinimalGUI)?((MinimalGUI)engine.getClient()).getFrame():((MotifLabGUI)engine.getClient()).getFrame(), true);
@@ -98,9 +99,9 @@ public class SequenceInputDialog extends javax.swing.JDialog {
             public void actionPerformed(ActionEvent e) {
                 importManualEntriesFromFile();
             }
-        });        
+        });
         progressbar.setVisible(false);
-        Object[] columnNames=new Object[]{"Name","Organism","Build","Chr","Start","End","Gene name","Gene TSS","Gene TES","Orientation"};        
+        Object[] columnNames=new Object[]{"Name","Organism","Build","Chr","Start","End","Gene name","Gene TSS","Gene TES","Orientation"};
         advancedTableModel=new DefaultTableModel(columnNames,1);
         advancedInputTable=new JTable(advancedTableModel);
         ExcelAdapter adapter=new ExcelAdapter(advancedInputTable,true, ExcelAdapter.CONVERT_TO_DOUBLE_OR_INTEGER); // enables copy/paste capabilities in the table
@@ -114,8 +115,8 @@ public class SequenceInputDialog extends javax.swing.JDialog {
         dnaSequenceSourceCombobox.setModel(new DefaultComboBoxModel(dnaSourceList));
         DefaultTableCellRenderer organismRenderer=new SequenceTableRenderer_Organism();
         DefaultTableCellRenderer orientationRenderer=new SequenceTableRenderer_Orientation();
-        DefaultTableCellRenderer rightRenderer=new SequenceTableRenderer_RightAlign();      
-        DefaultTableCellRenderer numberRenderer=new SequenceTableRenderer_number();           
+        DefaultTableCellRenderer rightRenderer=new SequenceTableRenderer_RightAlign();
+        DefaultTableCellRenderer numberRenderer=new SequenceTableRenderer_number();
         advancedInputTable.getColumn("Organism").setCellRenderer(organismRenderer);
         advancedInputTable.getColumn("Orientation").setCellRenderer(orientationRenderer);
         advancedInputTable.getColumn("Chr").setCellRenderer(rightRenderer);
@@ -133,8 +134,8 @@ public class SequenceInputDialog extends javax.swing.JDialog {
         for (int i=0;i<supportedOrganism.length;i++) {
             organismNames[i]=Organism.getCommonName(supportedOrganism[i]);
         }
-        Arrays.sort(organismNames);        
-        organismCombobox.setModel(new DefaultComboBoxModel(organismNames));   
+        Arrays.sort(organismNames);
+        organismCombobox.setModel(new DefaultComboBoxModel(organismNames));
         organismCombobox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -150,10 +151,10 @@ public class SequenceInputDialog extends javax.swing.JDialog {
             }
         });
         if (idResolver.isOrganismSupported(9606)) { // select human as default
-           organismCombobox.setSelectedItem(Organism.getCommonName(9606)); 
+           organismCombobox.setSelectedItem(Organism.getCommonName(9606));
         } else organismCombobox.setSelectedIndex(0);
-        
-        organismComboboxBED.setModel(new DefaultComboBoxModel(organismNames));   
+
+        organismComboboxBED.setModel(new DefaultComboBoxModel(organismNames));
         organismComboboxBED.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -169,20 +170,20 @@ public class SequenceInputDialog extends javax.swing.JDialog {
             }
         });
         if (idResolver.isOrganismSupported(9606)) { // select human as default
-           organismComboboxBED.setSelectedItem(Organism.getCommonName(9606)); 
-        } else organismComboboxBED.setSelectedIndex(0);      
+           organismComboboxBED.setSelectedItem(Organism.getCommonName(9606));
+        } else organismComboboxBED.setSelectedIndex(0);
         exampleBEDbutton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 showBEDExample();
             }
-        }); 
+        });
         importBEDbutton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 importBEDbuttonPressed();
             }
-        }); 
+        });
         genomeBuildCombobox.setToolTipText("<html><img src=\""+getClass().getResource("/motiflab/gui/resources/icons/warning16.png")+"\"><br> <font color=red><b>NOTE:</b></font> MotifLab queries various Ensembl BioMart services<br> to determine the genomic locations of genes. By default the most<br> recent BioMart is queried, but some older genome builds might require<br> the use of older archived BioMart services. Be sure to use the correct<br> version of BioMart for each genome build! These can be set by selecting<br>\"Configure Organisms and Identifiers\" from the \"Configure\" menu. </html>");
-        
+
         // initialize with settings used on previous occasion
         try {
             Object settingsObject=engine.loadSystemObject("SequenceDialogSettings.ser");
@@ -194,14 +195,14 @@ public class SequenceInputDialog extends javax.swing.JDialog {
                 if (settings.length>3 && settings[3]!=null) organismComboboxBED.setSelectedItem(settings[3]);
                 if (settings.length>4 && settings[4]!=null) genomeBuildComboboxBED.setSelectedItem(settings[4]);
             }
-        } catch (Exception e) {}           
+        } catch (Exception e) {}
     }
 
-    
+
     private ComboBoxModel getIDtypeModel() {
         return new DefaultComboBoxModel(new String[]{"Ensembl Gene"}); // this is just a default which is not used!
     }
-    
+
     public void disableAutoFetchDNA() {
         loadDNAtrackCheckbox.setSelected(false);
         loadDNAtrackCheckbox.setVisible(false);
@@ -211,14 +212,13 @@ public class SequenceInputDialog extends javax.swing.JDialog {
         dnaTrackNameTextfield.setVisible(false);
         fromLabel.setVisible(false);
     }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
      * always regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         fileOrInput = new javax.swing.ButtonGroup();
@@ -803,6 +803,8 @@ public class SequenceInputDialog extends javax.swing.JDialog {
         jPanel15.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         jLabel4.setText(resourceMap.getString("jLabel4.text")); // NOI18N
+        jLabel4.setIcon(resourceMap.getIcon("jLabel4.icon"));   
+        jLabel4.setHorizontalTextPosition(SwingConstants.LEADING);
         jLabel4.setToolTipText(resourceMap.getString("jLabel4.toolTipText")); // NOI18N
         jLabel4.setName("jLabel4"); // NOI18N
         jPanel15.add(jLabel4);
@@ -885,9 +887,9 @@ public class SequenceInputDialog extends javax.swing.JDialog {
         getContentPane().add(tabPanel, java.awt.BorderLayout.CENTER);
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
+    }
 
-private void onOKClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onOKClicked
+private void onOKClicked(java.awt.event.ActionEvent evt) {
     okButton.setEnabled(false);
     errorMessageLabel.setText("");
     if (loadDNAtrackCheckbox.isSelected()) {
@@ -897,45 +899,45 @@ private void onOKClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onOK
            JOptionPane.showMessageDialog(this, nameError, "Illegal DNA datatrack name: "+targetName, JOptionPane.ERROR_MESSAGE);
            okButton.setEnabled(true);
            return;
-        }    
-    }       
+        }
+    }
     // save current settings to initialize dialog with the same selections next time
     String[] settings=new String[]{
        (String)identifierTypeCombobox.getSelectedItem(),
        (String)organismCombobox.getSelectedItem(),
-       (String)genomeBuildCombobox.getSelectedItem(),    
+       (String)genomeBuildCombobox.getSelectedItem(),
        (String)organismComboboxBED.getSelectedItem(),
-       (String)genomeBuildComboboxBED.getSelectedItem()       
+       (String)genomeBuildComboboxBED.getSelectedItem()
     };
     try {engine.storeSystemObject(settings, "SequenceDialogSettings.ser");} catch (Exception e) {}
     // now create the sequence objects
     AddSequencesTask task=null;
-    if (tabPanel.getSelectedComponent()==GeneIDsTab) { 
+    if (tabPanel.getSelectedComponent()==GeneIDsTab) {
         String problem=checkGeneIDsTabEntry();
         if (problem!=null) {
             errorMessageLabel.setText(problem);
-            okButton.setEnabled(true);            
+            okButton.setEnabled(true);
             return;
         }
         parseGeneIDEntries(); //
-    } else if (tabPanel.getSelectedComponent()==BEDtab) { 
+    } else if (tabPanel.getSelectedComponent()==BEDtab) {
         String problem=checkBEDTabEntry();
         if (problem!=null) {
             errorMessageLabel.setText(problem);
-            okButton.setEnabled(true);            
+            okButton.setEnabled(true);
             return;
         }
         Sequence[] sequences=parseBEDEntries(); //
         task=new AddSequencesTask(engine,sequences);
-        exitAndLoad(task);        
+        exitAndLoad(task);
     } else { // Advanced Dialog -> Manual entry of all information
         removeBlankRows();
         String problem=checkAdvancedTabEntry();
         if (problem!=null) {
             errorMessageLabel.setText(problem);
-            okButton.setEnabled(true);            
+            okButton.setEnabled(true);
             return;
-        }  
+        }
         Object[][] data=parseManualEntryTable(); // add data directly
         Sequence[] sequences=new Sequence[data.length];
         for (int i=0;i<sequences.length;i++) {
@@ -943,8 +945,8 @@ private void onOKClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onOK
         }
         task=new AddSequencesTask(engine,sequences);
         exitAndLoad(task);
-    }      
-}//GEN-LAST:event_onOKClicked
+    }
+}
 
 /** This method can be used by the MinimalGUI client to retrieve the AddSequencesTask prepared by this dialog */
 public AddSequencesTask getAddSequencesTask() {
@@ -952,13 +954,13 @@ public AddSequencesTask getAddSequencesTask() {
 }
 
 private void exitAndLoad(AddSequencesTask task) {
-    this.setVisible(false);    
+    this.setVisible(false);
     MotifLabGUI gui=null;
     if (engine.getClient() instanceof MotifLabGUI) gui=(MotifLabGUI)engine.getClient();
     if (gui!=null) {
         addSequencesTask=null; // this is not needed
         gui.launchAddSequencesTask(task, (includeSequenceInProtocolCheckbox.isSelected() && gui.isRecording()));
-        if (loadDNAtrackCheckbox.isSelected()) launchLoadDNATrack(gui);     
+        if (loadDNAtrackCheckbox.isSelected()) launchLoadDNATrack(gui);
     } else {
         addSequencesTask=task; // allows the task to be retrieved later by the client
     }
@@ -976,9 +978,9 @@ private void launchLoadDNATrack(MotifLabGUI gui) {
     newDNATrackTask.setParameter(OperationTask.OPERATION_NAME, operation.getName());
     newDNATrackTask.setParameter(OperationTask.TARGET_NAME, targetName);
     newDNATrackTask.setParameter(OperationTask.SOURCE_NAME, targetName);
-    newDNATrackTask.setParameter(Operation_new.DATA_TYPE, DNASequenceDataset.getType());    
+    newDNATrackTask.setParameter(Operation_new.DATA_TYPE, DNASequenceDataset.getType());
     newDNATrackTask.setParameter(Operation_new.PARAMETERS,Operation_new.DATA_TRACK_PREFIX+dnaTrackSource);
-    gui.launchOperationTask(newDNATrackTask, gui.isRecording());    
+    gui.launchOperationTask(newDNATrackTask, gui.isRecording());
 }
 
 
@@ -992,16 +994,16 @@ private void importManualEntriesFromFile() {
         try {
            loadManualEntryFileInBackground(selected);
         } catch (Exception e) {}
-    }    
+    }
 }
 
 
 
-private void onCancelClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onCancelClicked
+private void onCancelClicked(java.awt.event.ActionEvent evt) {
       this.setVisible(false);
-}//GEN-LAST:event_onCancelClicked
+}
 
-private void onBrowseButtonPressed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onBrowseButtonPressed
+private void onBrowseButtonPressed(java.awt.event.ActionEvent evt) {
 
     JFileChooser filechooser = (engine.getClient() instanceof MinimalGUI)?((MinimalGUI)engine.getClient()).getFileChooser(null):((MotifLabGUI)engine.getClient()).getFileChooser(null);//  JFileChooser(gui.getLastUsedDirectory());
     filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -1013,9 +1015,9 @@ private void onBrowseButtonPressed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
            loadFileInBackground(selected);
         } catch (Exception e) {}
     }
-}//GEN-LAST:event_onBrowseButtonPressed
+}
 
-private void importBEDbuttonPressed() {                                       
+private void importBEDbuttonPressed() {
     JFileChooser filechooser = (engine.getClient() instanceof MinimalGUI)?((MinimalGUI)engine.getClient()).getFileChooser(null):((MotifLabGUI)engine.getClient()).getFileChooser(null);//  JFileChooser(gui.getLastUsedDirectory());
     filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     int status=filechooser.showOpenDialog(null);
@@ -1026,32 +1028,30 @@ private void importBEDbuttonPressed() {
            loadBEDFileInBackground(selected);
         } catch (Exception e) {} // the error is reported elsewhere
     }
-}  
+}
 
-private void idTextAreaFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_idTextAreaFocusGained
+private void idTextAreaFocusGained(java.awt.event.FocusEvent evt) {
     // fromListRadioButton.setSelected(true);
-}//GEN-LAST:event_idTextAreaFocusGained
+}
 
-private void showExample(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_showExample
-    String example=//GEN-LAST:event_showExample
-    ""; // auto-generated code prehibits deletion of first line...
+private void showExample(java.awt.event.MouseEvent evt) {
     exampleShown++;
-    example=exampleSequences[exampleShown%exampleSequences.length];
+    String example=exampleSequences[exampleShown%exampleSequences.length];
     geneIdentifiersTextarea.setText(example);
 }
 
-private void smdOKclicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_smdOKclicked
+private void smdOKclicked(java.awt.event.MouseEvent evt) {
       selectMappingDialog.setVisible(false);
-}//GEN-LAST:event_smdOKclicked
+}
 
-private void showAdvancedExample(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAdvancedExample
+private void showAdvancedExample(java.awt.event.ActionEvent evt) {
 // TODO add your handling code here:
-         Object[][] list=new Object[][]{//GEN-LAST:event_showAdvancedExample
-                    {"NTNG1",Organism.HUMAN,"hg18","1",new Integer(107482152),new Integer(107484352),"NTNG1",new Integer(107484152),new Integer(107827603),new Integer(1)},
-                    {"RPRM",Organism.HUMAN,"hg18","2",new Integer(154043368),new Integer(154045568),"RPRM",new Integer(154043568),new Integer(154042098),new Integer(-1)},
-                    {"CUX2",Organism.HUMAN,"hg18","12",new Integer(109954212),new Integer(109956412),"CUX2",new Integer(109956212),new Integer(110272739),new Integer(1)},
-                    {"HAPLN4",Organism.HUMAN,"hg18","19",new Integer(19244978),new Integer(19247178),"HAPLN4",new Integer(19245178),new Integer(19226557),new Integer(-1)},
-                    {"NTNG2",Organism.HUMAN,"hg18","9",new Integer(134025155),new Integer(134027355),"NTNG2",new Integer(134027155),new Integer(134109742),new Integer(1)},
+         Object[][] list=new Object[][]{
+                    {"NTNG1",Organism.HUMAN,"hg38","1",new Integer(107482152),new Integer(107484352),"NTNG1",new Integer(107484152),new Integer(107827603),new Integer(1)},
+                    {"RPRM",Organism.HUMAN,"hg38","2",new Integer(154043368),new Integer(154045568),"RPRM",new Integer(154043568),new Integer(154042098),new Integer(-1)},
+                    {"CUX2",Organism.HUMAN,"hg38","12",new Integer(109954212),new Integer(109956412),"CUX2",new Integer(109956212),new Integer(110272739),new Integer(1)},
+                    {"HAPLN4",Organism.HUMAN,"hg38","19",new Integer(19244978),new Integer(19247178),"HAPLN4",new Integer(19245178),new Integer(19226557),new Integer(-1)},
+                    {"NTNG2",Organism.HUMAN,"hg38","9",new Integer(134025155),new Integer(134027355),"NTNG2",new Integer(134027155),new Integer(134109742),new Integer(1)},
                     };
          advancedInputTable.setModel(advancedTableModel);
          while (advancedTableModel.getRowCount()>0) {
@@ -1059,15 +1059,17 @@ private void showAdvancedExample(java.awt.event.ActionEvent evt) {//GEN-FIRST:ev
          }
          for (int i=0;i<list.length;i++) {
              advancedTableModel.addRow(list[i]);
-         }         
+         }
 }
 
-private void showBEDExample() {                             
-    String example=
+private void showBEDExample() {
+    final String example=
               "# Enter sequence coordinates in three columns separated by TABs or commas.\n"
             + "# If TABs are used for column separation, all commas will be removed (they can optionally be used for digit grouping in large numbers).\n"
             + "# The first column is the chromosome (optionally prefixed with \"chr\").\n"
             + "# The second and third columns are genomic start and end coordinates within the chromosome.\n"
+            + "# Note that in the BED-format, the first coordinate in the genome starts at 0 and the end-coordinate is excluded,\n"
+            + "# but in GFF-format the coordinates begin at 1 and both the start and end-coordinates are included.\n"
             + "# If TABs are used (or only one column is entered), the location can alternatively be provided on the format 'chr:start-end'.\n"
             + "# If the coordinate in the second column is larger than the third column, the sequence is assumed to be on the reverse strand.\n"
             + "# Three more columns can optionally be added specifying a name for the sequence, a score (not used) and the orientation to use.\n"
@@ -1077,7 +1079,7 @@ private void showBEDExample() {
             +  "12\t109954212\t109956412\n"
             +  "chr19\t   19244978\t  19247178\n"
             +  "chr9\t134025155\t134027355\n"
-            +  "chr2:154,143,368-154,145,568\n"      
+            +  "chr2:154,143,368-154,145,568\n"
             ;
     BEDTextArea.setText(example);
 }
@@ -1092,15 +1094,15 @@ private void removeBlankRows() {
             if (val!=null && !val.toString().isEmpty()) {empty=false;break;}
         }
         if (empty) {advancedTableModel.removeRow(i);i--;rows--;}
-    }    
+    }
 }
 
 /**
  * Checks if the input in the Advanced tab table is correctly formatted
  * If errors are encountered a message string describing the problem is returned.
  * If everything is OK a null value is returned
- * Note that some "errors" might be fixed, for instance of the sequence has 
- * no associated TSS or TES, these will be set to the start and end positions respectively 
+ * Note that some "errors" might be fixed, for instance of the sequence has
+ * no associated TSS or TES, these will be set to the start and end positions respectively
  * If the sequence has no name but has a gene, the name of the gene will be used as the name
  * of the sequence, etc.
  */
@@ -1117,7 +1119,7 @@ private String checkAdvancedTabEntry() {
     int TSSColumn=7;
     int TESColumn=8;
     int orientationColumn=9;
-    
+
     for (int i=0;i<rows;i++) {
         Object nameValue=advancedTableModel.getValueAt(i, nameColumn);
         Object organismValue=advancedTableModel.getValueAt(i, organismColumn);
@@ -1152,7 +1154,7 @@ private String checkAdvancedTabEntry() {
 //            advancedTableModel.setValueAt(newvalue,i, TESColumn);
 //            TESValue=newvalue;
               TESValue=null;
-              advancedTableModel.setValueAt(TESValue,i, TESColumn);            
+              advancedTableModel.setValueAt(TESValue,i, TESColumn);
         }
         if (TESValue!=null && !(TESValue instanceof Integer)) return "Row "+(i+1)+": TES is not an integer value";
         if (chrValue==null) return "Row "+(i+1)+": Missing chromosome specification";
@@ -1212,10 +1214,10 @@ private String checkGeneIDsTabEntry() {
                     || anchorString.equalsIgnoreCase("TES")
                     || anchorString.equalsIgnoreCase("Transcription End Site")
                     || anchorString.equalsIgnoreCase("gene")
-                    || anchorString.equalsIgnoreCase("full gene")                    
+                    || anchorString.equalsIgnoreCase("full gene")
              )) return "Unsupported anchor site: "+anchorString;
-            
-        }         
+
+        }
     }
     // check default settings also
     int fromPos=((Integer)upstreamSpinner.getValue()).intValue();
@@ -1236,11 +1238,11 @@ private String checkBEDTabEntry() {
         line=line.trim();
         if (line.startsWith("#") || line.isEmpty()) continue; // regard as comment
         if (line.contains("\t") || line.matches("^(\\w+)\\s*:\\s*([0-9,]+)\\s*\\-\\s*([0-9,]+)$")) line=line.replaceAll(",",""); // if columns are TAB-separated or the entry only consists of "chr:start-end" allow commas to be used for grouping
-        else line=line.replaceAll(",","\t"); // 
+        else line=line.replaceAll(",","\t"); //
         if (line.matches("^(\\w+)\\s*:\\s*(\\d+)\\s*\\-\\s*(\\d+).*")) { // the location is on the format chr:start-end. Replace the : and - with TABs to create three columns instead of one
             line=line.replaceFirst("\\s*:\\s*","\t");
             line=line.replaceFirst("\\s*\\-\\s*","\t");
-        }          
+        }
         String[] elements=line.split("\\s+");
         if (elements.length<3) return "There should be at least 3 columns on each line (found "+elements.length+")";
         int startpos=0;
@@ -1258,49 +1260,49 @@ private String checkBEDTabEntry() {
             if (endpos<0) throw new NumberFormatException();
         } catch (NumberFormatException e) {
             return "Not a valid end position: "+positionString;
-        }      
+        }
         int length=(endpos>=startpos)?(endpos-startpos+1):(startpos-endpos+1);
-        if (length>MAX_SEQUENCE_LENGTH)  return "\""+elements[0]+":"+elements[1]+"-"+elements[2]+"\": Sequence exceeds (selfimposed) maximum length of "+MAX_SEQUENCE_LENGTH+" bp";     
+        if (length>MAX_SEQUENCE_LENGTH)  return "\""+elements[0]+":"+elements[1]+"-"+elements[2]+"\": Sequence exceeds (selfimposed) maximum length of "+MAX_SEQUENCE_LENGTH+" bp";
     }
     return null;
 }
 
-/** 
+/**
  * Parses the entries in the textarea under the "BED" tab,
  */
 private Sequence[] parseBEDEntries() {
     String organismName=(String)organismComboboxBED.getSelectedItem();
     int defaultOrganism=Organism.getTaxonomyID(organismName);
     String defaultBuild=(String)genomeBuildComboboxBED.getSelectedItem();
-    String coordinateSystem=(String)BEDcoordinateSystemCombobox.getSelectedItem();    
+    String coordinateSystem=(String)BEDcoordinateSystemCombobox.getSelectedItem();
     boolean zeroIndexed=coordinateSystem.equals("BED");
     boolean exclusiveEnd=coordinateSystem.equals("BED");
     String text=BEDTextArea.getText();
     String[] lines=text.split("\n");
-    int digits=(""+lines.length).length(); // how many digits does it take to number all lines 
+    int digits=(""+lines.length).length(); // how many digits does it take to number all lines
     ArrayList<Sequence> sequences=new ArrayList<Sequence>();
     int count=0;
     for (String line:lines) {
         line=line.trim();
-        if (line.isEmpty() || line.startsWith("#")) continue;        
+        if (line.isEmpty() || line.startsWith("#")) continue;
         if (line.contains("\t") || line.matches("^(\\w+)\\s*:\\s*([0-9,]+)\\s*\\-\\s*([0-9,]+)$")) line=line.replaceAll(",",""); // if columns are TAB-separated or the entry only consists of "chr:start-end" allow commas to be used for grouping
-        else line=line.replaceAll(",","\t"); // 
-        
+        else line=line.replaceAll(",","\t"); //
+
         if (line.matches("^(\\w+)\\s*:\\s*(\\d+)\\s*\\-\\s*(\\d+).*")) { // the location is on the format chr:start-end. Replace the : and - with TABs to create three columns instead of one
             line=line.replaceFirst("\\s*:\\s*","\t");
             line=line.replaceFirst("\\s*\\-\\s*","\t");
-        }               
+        }
         count++;
         String suffix=""+count;
         while (suffix.length()<digits) suffix="0"+suffix;
-        String sequenceName="Sequence"+suffix;        
+        String sequenceName="Sequence"+suffix;
         String[] elements=line.split("\\s+");
         int start=0,end=0;
         String chr=elements[0];
         if (chr.toLowerCase().startsWith("chr")) chr=elements[0].substring(3);
         try {
             start=Integer.parseInt(elements[1]);
-        } catch(NumberFormatException e) {engine.logMessage("ERROR: Invalid 'Start' position value : "+elements[1]);}        
+        } catch(NumberFormatException e) {engine.logMessage("ERROR: Invalid 'Start' position value : "+elements[1]);}
         try {
             end=Integer.parseInt(elements[2]);
         } catch(NumberFormatException e) {engine.logMessage("ERROR: Invalid 'End' position value : "+elements[2]);}
@@ -1311,7 +1313,7 @@ private Sequence[] parseBEDEntries() {
         if (exclusiveEnd) {
             end--;
         }
-        
+
         int orientation=Sequence.DIRECT;
         if (start>end) {
             int swap=start;
@@ -1320,14 +1322,14 @@ private Sequence[] parseBEDEntries() {
             orientation=Sequence.REVERSE;
         } else if (elements.length>=6) {
             if (elements[5].startsWith("-")) orientation=Sequence.REVERSE;
-        }        
-        
+        }
+
         String geneName=sequenceName;
         if (elements.length>=4) { // if a fourth column is present, use this for both sequence name and gene name
-            geneName=elements[3];            
+            geneName=elements[3];
             sequenceName=geneName;
-        } 
-        if (!assignNewNamesToBEDregionsCheckbox.isSelected()) sequenceName="chr"+chr+"_"+elements[1]+"_"+elements[2]; 
+        }
+        if (!assignNewNamesToBEDregionsCheckbox.isSelected()) sequenceName="chr"+chr+"_"+elements[1]+"_"+elements[2];
         sequences.add(new Sequence(sequenceName, defaultOrganism, defaultBuild, chr, start, end, geneName, null, null, orientation));
     }
     Sequence[] seqarray=new Sequence[sequences.size()];
@@ -1335,7 +1337,7 @@ private Sequence[] parseBEDEntries() {
     return seqarray;
 }
 
-/** 
+/**
  * Parses the gene ID entries in the textarea under the "GeneIDs" tab,
  * obtains information about TSS, TES etc. for each Gene ID.
  * The method returns "right away" but spawns an asynchroneous background
@@ -1363,44 +1365,44 @@ private void parseGeneIDEntries() {
         GeneIdentifier geneidentifier=new GeneIdentifier(elements[0], defaultFormat, defaultOrganism, defaultBuild);
         if (elements.length>=2) {
             geneidentifier.format=elements[1];
-        } 
+        }
         if (elements.length>=3) {
             String buildString=elements[2];
             int organism=Organism.getOrganismForGenomeBuild(buildString); // this should not fail (return 0) if checkGeneIDsTabEntry() returns OK
-            geneidentifier.build=buildString;            
-            geneidentifier.organism=organism;            
-        } 
+            geneidentifier.build=buildString;
+            geneidentifier.organism=organism;
+        }
         Object[] posInfo=(elements.length>=4)?new Object[]{null,null,null}:null;
         if (elements.length>=4) {
             try {
                 int position=Integer.parseInt(elements[3]);
                 posInfo[0]=new Integer(position);
-            } catch(NumberFormatException e) {engine.logMessage("ERROR: Invalid integer number : "+elements[3]);}        
-        } 
+            } catch(NumberFormatException e) {engine.logMessage("ERROR: Invalid integer number : "+elements[3]);}
+        }
         if (elements.length>=5) {
             try {
                 int position=Integer.parseInt(elements[4]);
                 posInfo[1]=new Integer(position);
-            } catch(NumberFormatException e) {engine.logMessage("ERROR: Invalid integer number : "+elements[4]);}        
-        }   
+            } catch(NumberFormatException e) {engine.logMessage("ERROR: Invalid integer number : "+elements[4]);}
+        }
         if (elements.length>=6) {
-            posInfo[2]=elements[5]; // anchor       
-        }         
+            posInfo[2]=elements[5]; // anchor
+        }
         list.add(geneidentifier);
         if (posInfo!=null) posInfoMap.put(geneidentifier, posInfo);
-        
+
     }
     resolveIDsInBackground(list, posInfoMap, includeGOcheckbox.isSelected());
 }
 
-/** 
+/**
  * This method is called on the EDT after gene IDs have been successfully resolved and a list
  * of GeneIDMappings is returned. This list must be processed to ensure that all genes are
  * present and the user must decide how to handle possible duplicate matches.
  * Once these issues have been dealt with, an AddSequencesTask can be scheduled for execution
  */
 private void processResolvedGeneIDs(ArrayList<GeneIdentifier> idlist, ArrayList<GeneIDmapping> resolvedlist, HashMap<GeneIdentifier,Object[]> positionInfo, boolean includeGO) throws ParseError {
-    // for (GeneIDmapping mapping:resolvedlist) {gui.debugMessage("Resolved:  "+mapping.geneID+" => "+mapping.geneName+"   "+mapping.chromosome+":"+mapping.TSS+"-"+mapping.TES+" ("+mapping.strand+")");} 
+    // for (GeneIDmapping mapping:resolvedlist) {gui.debugMessage("Resolved:  "+mapping.geneID+" => "+mapping.geneName+"   "+mapping.chromosome+":"+mapping.TSS+"-"+mapping.TES+" ("+mapping.strand+")");}
     int missing=0;
     ArrayList<Object[]> result=new ArrayList<Object[]>(idlist.size());
     // check that all gene IDs have indeed been resolved
@@ -1420,11 +1422,11 @@ private void processResolvedGeneIDs(ArrayList<GeneIdentifier> idlist, ArrayList<
        if (list.size()>1) { // multiple candidate mappings for a single gene ID
            list=selectCorrectMappings(list,geneid.identifier);
            if (list==null && smdDialogCancelled) {smdDialogCancelled=false; throw new ParseError("Aborted!");} // abort resolve
-       } 
+       }
        //gui.debugMessage("Size of resolvedlist="+list.size());
        for (GeneIDmapping mapping:list) { // add all those mappings that are left for this ID
            //gui.debugMessage("AFTER:"+mapping.toString());
-           Object[] sequenceInfo=new Object[12];  
+           Object[] sequenceInfo=new Object[12];
            Object[] posInfo=positionInfo.get(geneid);
            sequenceInfo[0]=(autoCorrectNames)?MotifLabEngine.convertToLegalSequenceName(mapping.geneID):mapping.geneID; // the gene ID will be used as sequence name
            sequenceInfo[1]=new Integer(geneid.organism);
@@ -1437,10 +1439,10 @@ private void processResolvedGeneIDs(ArrayList<GeneIdentifier> idlist, ArrayList<
            sequenceInfo[8]=new Integer(mapping.TES);
            sequenceInfo[9]=new Integer(mapping.strand);
            sequenceInfo[10]=geneid.format;
-           sequenceInfo[11]=(includeGO)?mapping.GOterms:null;         
+           sequenceInfo[11]=(includeGO)?mapping.GOterms:null;
            fillInStartAndEndPositions(sequenceInfo,posInfo);
            result.add(sequenceInfo);
-           //gui.debugMessage("SequenceInfo:   "+sequenceInfo[0].toString()+" "+sequenceInfo[1].toString()+" "+sequenceInfo[2].toString()+" "+sequenceInfo[3].toString()+" "+sequenceInfo[4].toString()+" "+sequenceInfo[5].toString()+" "+sequenceInfo[6].toString()+" "+sequenceInfo[7].toString()+" "+sequenceInfo[8].toString());                 
+           //gui.debugMessage("SequenceInfo:   "+sequenceInfo[0].toString()+" "+sequenceInfo[1].toString()+" "+sequenceInfo[2].toString()+" "+sequenceInfo[3].toString()+" "+sequenceInfo[4].toString()+" "+sequenceInfo[5].toString()+" "+sequenceInfo[6].toString()+" "+sequenceInfo[7].toString()+" "+sequenceInfo[8].toString());
        }
     } // end for each geneID
     Object[][] data=new Object[result.size()][12];
@@ -1454,13 +1456,13 @@ private void processResolvedGeneIDs(ArrayList<GeneIdentifier> idlist, ArrayList<
            Collection<String> GOterms=(Collection<String>)data[i][11];
            if (!GOterms.isEmpty()) {
                try {sequences[i].setGOterms(GOterms);} catch (ParseError e) {} // The terms should have been checked many times already, so just ignore errors at this point
-           }                   
+           }
         }
     }
     AddSequencesTask task=new AddSequencesTask(engine,sequences);
-    exitAndLoad(task);    
+    exitAndLoad(task);
 }
-        
+
 
 
 /** Goes through a list of GeneIDmapping and returns only those entries that correspond to the given gene id */
@@ -1473,7 +1475,7 @@ private ArrayList<GeneIDmapping> getEntriesForID(ArrayList<GeneIDmapping> list, 
 }
 
 /** Fills in upstream and downstream coordinates based on user selections and gene orientation
- *  @param sequenceInfo 
+ *  @param sequenceInfo
  *  @param position This can be either NULL or an array with 3 entries (some or all of which can be null)
  *  unless null, the first and second entries should be Integers and the third should be a String
  */
@@ -1489,36 +1491,36 @@ private void fillInStartAndEndPositions(Object[] sequenceInfo, Object[] position
     if (anchor.equalsIgnoreCase("Transcription Start Site") || anchor.equalsIgnoreCase("TSS")) {
         if (((Integer)sequenceInfo[9]).intValue()==Sequence.DIRECT) {
            sequenceInfo[4]=tss+upstream;
-           sequenceInfo[5]=tss+downstream;           
+           sequenceInfo[5]=tss+downstream;
         } else { // Reverse Strand
            sequenceInfo[4]=tss-downstream;
-           sequenceInfo[5]=tss-upstream;                
+           sequenceInfo[5]=tss-upstream;
         }
     } else if (anchor.equalsIgnoreCase("Transcription End Site") || anchor.equalsIgnoreCase("TES")) {
         if (((Integer)sequenceInfo[9]).intValue()==Sequence.DIRECT) {
            sequenceInfo[4]=tes+upstream;
-           sequenceInfo[5]=tes+downstream;           
+           sequenceInfo[5]=tes+downstream;
         } else { // Reverse Strand
            sequenceInfo[4]=tes-downstream;
-           sequenceInfo[5]=tes-upstream;                
-        }        
+           sequenceInfo[5]=tes-upstream;
+        }
     } else if (anchor.equalsIgnoreCase("gene") || anchor.equalsIgnoreCase("full gene") || anchor.equalsIgnoreCase("transcript")) {
         if (((Integer)sequenceInfo[9]).intValue()==Sequence.DIRECT) {
            sequenceInfo[4]=tss+upstream;
-           sequenceInfo[5]=tes+downstream;           
+           sequenceInfo[5]=tes+downstream;
         } else { // Reverse Strand
            sequenceInfo[4]=tes-downstream;
-           sequenceInfo[5]=tss-upstream;                
-        }        
+           sequenceInfo[5]=tss-upstream;
+        }
     } else {
         throw new ParseError("Unsupported anchor site: "+anchor);
     }
     if ((Integer)sequenceInfo[4]<=0) sequenceInfo[4]=1; // do not let the sequence coordinates be negative
     if ((Integer)sequenceInfo[5]<=0) sequenceInfo[5]=1; // do not let the sequence coordinates be negative
     int seqlength=(Integer)sequenceInfo[5]-(Integer)sequenceInfo[4]+1;
-    if (seqlength>MAX_SEQUENCE_LENGTH)  throw new ParseError("Sequence '"+sequenceInfo[0]+"' exceeds (selfimposed) maximum length of "+MAX_SEQUENCE_LENGTH+" bp");   
+    if (seqlength>MAX_SEQUENCE_LENGTH)  throw new ParseError("Sequence '"+sequenceInfo[0]+"' exceeds (selfimposed) maximum length of "+MAX_SEQUENCE_LENGTH+" bp");
 }
- 
+
 
 /** This method is used whenever multiple mappings are returned for a single gene ID
  * (I am not sure if this is possible but I will account for it anyway). A dialog is
@@ -1540,22 +1542,22 @@ private ArrayList<GeneIDmapping> selectCorrectMappings(ArrayList<GeneIDmapping> 
         String chromosome=(mapping.chromosome.startsWith("chr")?"":"chr")+mapping.chromosome+":"+start+"-"+end;
         chromosome=padToLength(chromosome, 30, true);
         string+=chromosome+"       ";
-        string+=((mapping.strand==Sequence.DIRECT)?"Direct          ":"Reverse          ");              
+        string+=((mapping.strand==Sequence.DIRECT)?"Direct          ":"Reverse          ");
         model.addElement(string);
     }
-    smdList.setSelectedIndex(0);    
+    smdList.setSelectedIndex(0);
     selectMappingDialog.pack();
     int height=selectMappingDialog.getHeight();
     int width=selectMappingDialog.getWidth();
     java.awt.Dimension size=new Dimension(width,height);
     if (engine.getClient() instanceof MotifLabGUI) size=((MotifLabGUI)engine.getClient()).getFrame().getSize();
     else if (engine.getClient() instanceof MinimalGUI) size=((MinimalGUI)engine.getClient()).getFrame().getSize();
-    selectMappingDialog.setLocation((int)((size.width-width)/2),(int)((size.height-height)/2));         
+    selectMappingDialog.setLocation((int)((size.width-width)/2),(int)((size.height-height)/2));
     selectMappingDialog.setVisible(true);
     // proceeds here once the user clicks OK or Cancel (or double-clicks on an entry) ! (selectMappingDialog is a modal dialog)
     if (smdDialogCancelled) return null; // user pressed CANCEL button
     int[] indices=smdList.getSelectedIndices();
-    for (int index:indices) {        
+    for (int index:indices) {
         GeneIDmapping mapping=list.get(index);
         if (indices.length>1) mapping.geneID=mapping.geneID+"_"+(index+1); // if multiple mappings are selected for the same gene ID, add a suffix (eg ENSG00023423_2) to discriminate the sequences (the mapping.geneID will be used as sequence name later on)
         result.add(mapping);
@@ -1574,7 +1576,7 @@ private String padToLength(String string, int size, boolean front) {
 
 
 
-/** 
+/**
  * Parses the manual entries in the table under the "coordinates" tab and returns
  * a 2D Object matrix containing the data needed to specify sequences
  */
@@ -1586,7 +1588,7 @@ private Object[][] parseManualEntryTable() {
        for (int j=0;j<columns;j++) {
         result[i][j]=advancedTableModel.getValueAt(i, j);
        }
-    }   
+    }
     return result;
 }
 
@@ -1596,10 +1598,10 @@ private void loadManualEntryFileInBackground(final File file) {
             Exception ex=null;
             StringBuilder text=new StringBuilder();
             ArrayList<Object[]> entries=new ArrayList<Object[]>();
-            @Override 
+            @Override
             public Boolean doInBackground() {
                 progressbar.setVisible(true);
-                progressbar.setIndeterminate(true);            
+                progressbar.setIndeterminate(true);
                 BufferedReader inputStream=null;
                 try {
                     InputStream stream=MotifLabEngine.getInputStreamForFile(file);
@@ -1628,8 +1630,8 @@ private void loadManualEntryFileInBackground(final File file) {
                                try {int end=Integer.parseInt(fields[5]);lineEntries[5]=new Integer(end);} catch (NumberFormatException e){}
                                lineEntries[6]=fields[6]; // gene name
                                try {int tss=Integer.parseInt(fields[7]);lineEntries[7]=new Integer(tss);} catch (NumberFormatException e){}
-                               try {int tes=Integer.parseInt(fields[8]);lineEntries[8]=new Integer(tes);} catch (NumberFormatException e){}                             
-                               if (fields[9].equalsIgnoreCase("Reverse") || fields[9].equalsIgnoreCase("-") || fields[9].equalsIgnoreCase("-1")) lineEntries[9]=new Integer(-1); else lineEntries[9]=new Integer(1);                                    
+                               try {int tes=Integer.parseInt(fields[8]);lineEntries[8]=new Integer(tes);} catch (NumberFormatException e){}
+                               if (fields[9].equalsIgnoreCase("Reverse") || fields[9].equalsIgnoreCase("-") || fields[9].equalsIgnoreCase("-1")) lineEntries[9]=new Integer(-1); else lineEntries[9]=new Integer(1);
                                entries.add(lineEntries);
                            } else if (fields.length==8) {
                                Object[] lineEntries=new Object[10];
@@ -1642,13 +1644,13 @@ private void loadManualEntryFileInBackground(final File file) {
                                try {int end=Integer.parseInt(fields[4]);lineEntries[5]=new Integer(end);} catch (NumberFormatException e){}
                                lineEntries[6]=fields[0]; // gene name
                                try {int tss=Integer.parseInt(fields[5]);lineEntries[7]=new Integer(tss);} catch (NumberFormatException e){}
-                               try {int tes=Integer.parseInt(fields[6]);lineEntries[8]=new Integer(tes);} catch (NumberFormatException e){}                             
-                               if (fields[7].equalsIgnoreCase("Reverse") || fields[7].equalsIgnoreCase("-") || fields[7].equalsIgnoreCase("-1")) lineEntries[9]=new Integer(-1); else lineEntries[9]=new Integer(1);                                    
+                               try {int tes=Integer.parseInt(fields[6]);lineEntries[8]=new Integer(tes);} catch (NumberFormatException e){}
+                               if (fields[7].equalsIgnoreCase("Reverse") || fields[7].equalsIgnoreCase("-") || fields[7].equalsIgnoreCase("-1")) lineEntries[9]=new Integer(-1); else lineEntries[9]=new Integer(1);
                                entries.add(lineEntries);
                            } else throw new ParseError(errMsg("Expected 8 or 10 fields separated by TAB or comma on each line, but found",line));
-                      }                     
+                      }
                     }
-                } catch (Exception e) { 
+                } catch (Exception e) {
                     ex=e;
                     return Boolean.FALSE;
                 } finally {
@@ -1656,16 +1658,16 @@ private void loadManualEntryFileInBackground(final File file) {
                 }
                 return Boolean.TRUE;
             }
-                       
+
             @Override
             public void done() { // this method is invoked on the EDT!
-                progressbar.setIndeterminate(false); 
+                progressbar.setIndeterminate(false);
                 progressbar.setVisible(false);
                 if (ex instanceof ParseError) {
                     String message=ex.getMessage();
                     JOptionPane.showMessageDialog(SequenceInputDialog.this, message, "Import Error", JOptionPane.ERROR_MESSAGE);
-                } 
-                else if (ex!=null) errorMessageLabel.setText(ex.getMessage());      
+                }
+                else if (ex!=null) errorMessageLabel.setText(ex.getMessage());
                 else {
                     try { // remove current contents
                        while (advancedTableModel.getRowCount()>0) advancedTableModel.removeRow(0);
@@ -1676,31 +1678,31 @@ private void loadManualEntryFileInBackground(final File file) {
                 }
             }
         }; // end of SwingWorker class
-        
+
         worker.execute();
-    } 
+    }
 
     private String errMsg(String message, String line) {
-        if (line.length()>80) line=line.substring(0,80)+" [...]";  
-        return message+":\n\n"+line;              
+        if (line.length()>80) line=line.substring(0,80)+" [...]";
+        return message+":\n\n"+line;
     }
-            
+
     /** Loads a file (hopefully containing gene IDs) and displays it in the textarea */
     private void loadFileInBackground(final File file) {
         SwingWorker worker=new SwingWorker<Boolean, Void>() {
             Exception ex=null;
             StringBuilder text=new StringBuilder();
-            @Override 
+            @Override
             public Boolean doInBackground() {
                 progressbar.setVisible(true);
-                progressbar.setIndeterminate(true);            
+                progressbar.setIndeterminate(true);
                 BufferedReader inputStream=null;
                 try {
                     InputStream stream=MotifLabEngine.getInputStreamForFile(file);
                     inputStream=new BufferedReader(new InputStreamReader(new BufferedInputStream(stream)));
                     String line;
                     while((line=inputStream.readLine())!=null) {text.append(line.trim());text.append("\n");}
-                } catch (IOException e) { 
+                } catch (IOException e) {
                     ex=e;
                     return Boolean.FALSE;
                 } finally {
@@ -1710,31 +1712,31 @@ private void loadManualEntryFileInBackground(final File file) {
             }
             @Override
             public void done() { // this method is invoked on the EDT!
-                progressbar.setIndeterminate(false); 
+                progressbar.setIndeterminate(false);
                 progressbar.setVisible(false);
                 if (ex!=null) errorMessageLabel.setText(ex.getMessage());
-                else geneIdentifiersTextarea.setText(text.toString());                
+                else geneIdentifiersTextarea.setText(text.toString());
             }
         }; // end of SwingWorker class
         worker.execute();
-    } 
-    
+    }
+
     /** Loads a file (hopefully containing BED coordinates) and displays it in the textarea in the BED tab*/
     private void loadBEDFileInBackground(final File file) {
         SwingWorker worker=new SwingWorker<Boolean, Void>() {
             Exception ex=null;
             StringBuilder text=new StringBuilder();
-            @Override 
+            @Override
             public Boolean doInBackground() {
                 progressbar.setVisible(true);
-                progressbar.setIndeterminate(true);            
+                progressbar.setIndeterminate(true);
                 BufferedReader inputStream=null;
                 try {
                     InputStream stream=MotifLabEngine.getInputStreamForFile(file);
                     inputStream=new BufferedReader(new InputStreamReader(new BufferedInputStream(stream)));
                     String line;
                     while((line=inputStream.readLine())!=null) {text.append(line.trim());text.append("\n");}
-                } catch (IOException e) { 
+                } catch (IOException e) {
                     ex=e;
                     return Boolean.FALSE;
                 } finally {
@@ -1744,35 +1746,35 @@ private void loadManualEntryFileInBackground(final File file) {
             }
             @Override
             public void done() { // this method is invoked on the EDT!
-                progressbar.setIndeterminate(false); 
+                progressbar.setIndeterminate(false);
                 progressbar.setVisible(false);
                 if (ex!=null) errorMessageLabel.setText(ex.getMessage());
-                else BEDTextArea.setText(text.toString());                
+                else BEDTextArea.setText(text.toString());
             }
         }; // end of SwingWorker class
         worker.execute();
-    }    
+    }
 
 
     private void resolveIDsInBackground(final ArrayList<GeneIdentifier> list, final HashMap<GeneIdentifier, Object[]> posInfoMap, final boolean includeGO) {
         SwingWorker worker=new SwingWorker<Boolean, Void>() {
             Exception ex=null;
             ArrayList<GeneIDmapping> resolvedList=null;
-            @Override 
+            @Override
             public Boolean doInBackground() {
                 progressbar.setVisible(true);
-                progressbar.setIndeterminate(true);            
+                progressbar.setIndeterminate(true);
                 try {
                     resolvedList=idResolver.resolveIDs(list, includeGO);
-                } catch (Exception e) { 
+                } catch (Exception e) {
                     ex=e;
                     return Boolean.FALSE;
-                } 
+                }
                 return Boolean.TRUE;
             }
             @Override
             public void done() { // this method is invoked on the EDT!
-                progressbar.setIndeterminate(false); 
+                progressbar.setIndeterminate(false);
                 progressbar.setVisible(false);
                 if (ex!=null) {
                     String errorMessage=ex.getMessage();
@@ -1782,14 +1784,14 @@ private void loadManualEntryFileInBackground(final File file) {
                         int errorCode=0;
                         int pos="Server returned HTTP response code: ".length();
                         String responseCodeString=errorMessage.substring(pos,errorMessage.indexOf(' ', pos));
-                        String url = errorMessage.substring(errorMessage.indexOf("for URL: ", pos)+"for URL: ".length());                       
+                        String url = errorMessage.substring(errorMessage.indexOf("for URL: ", pos)+"for URL: ".length());
                         try {errorCode=Integer.parseInt(responseCodeString);}catch(NumberFormatException nfe) {}
                         // rephrase errorMessage based on HTTP response code
                         //if (errorCode==500) errorMessage="ERROR: BioMart server is temporary unavailable: "+url;
                     }
                     if (ex instanceof java.io.FileNotFoundException) errorMessage="Biomart service not found: "+errorMessage;
                     errorMessageLabel.setText(errorMessage);
-                    okButton.setEnabled(true);  
+                    okButton.setEnabled(true);
                     // ex.printStackTrace(System.err);
                 }
                 else if (resolvedList==null) {
@@ -1803,14 +1805,14 @@ private void loadManualEntryFileInBackground(final File file) {
                         errorMessageLabel.setText(e.getMessage());
                         okButton.setEnabled(true);
                     }
-                }             
+                }
             }
         }; // end of SwingWorker class
         worker.execute();
-    } 
+    }
 
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify
     private javax.swing.JTextArea BEDTextArea;
     private javax.swing.JComboBox BEDcoordinateSystemCombobox;
     private javax.swing.JPanel BEDtab;
@@ -1904,7 +1906,7 @@ private void loadManualEntryFileInBackground(final File file) {
     private javax.swing.JPanel topPanel;
     private javax.swing.JLabel upstreamLabel;
     private javax.swing.JSpinner upstreamSpinner;
-    // End of variables declaration//GEN-END:variables
+    // End of variables declaration
 
 
 
@@ -1912,7 +1914,7 @@ private class SequenceTableRenderer_Organism extends DefaultTableCellRenderer {
 
     public SequenceTableRenderer_Organism() {
            super();
-           this.setHorizontalAlignment(this.LEFT);              
+           this.setHorizontalAlignment(this.LEFT);
        }
     public void setValue(Object value) {
            if (value==null) {setText("");}
@@ -1930,7 +1932,7 @@ private class SequenceTableRenderer_Organism extends DefaultTableCellRenderer {
 private class SequenceTableRenderer_RightAlign extends DefaultTableCellRenderer {
     public SequenceTableRenderer_RightAlign() {
            super();
-           this.setHorizontalAlignment(this.RIGHT);              
+           this.setHorizontalAlignment(this.RIGHT);
        }
     public void setValue(Object value) {
            if (value!=null)setText(value.toString());
@@ -1941,7 +1943,7 @@ private class SequenceTableRenderer_RightAlign extends DefaultTableCellRenderer 
 private class SequenceTableRenderer_number extends DefaultTableCellRenderer {
     public SequenceTableRenderer_number() {
            super();
-           this.setHorizontalAlignment(this.RIGHT);              
+           this.setHorizontalAlignment(this.RIGHT);
        }
     public void setValue(Object value) {
            if (value==null) {setText("");}
@@ -1950,19 +1952,19 @@ private class SequenceTableRenderer_number extends DefaultTableCellRenderer {
                     setText(value.toString());
                }  else {
                     setForeground(java.awt.Color.RED);
-                    setText("* * *");                   
+                    setText("* * *");
                }
-           
+
        }
 }// end class SequenceTableRenderer_number
 
 private class SequenceTableRenderer_Orientation extends DefaultTableCellRenderer {
     public SequenceTableRenderer_Orientation() {
            super();
-           this.setHorizontalAlignment(this.LEFT);              
+           this.setHorizontalAlignment(this.LEFT);
        }
     public void setValue(Object value) {
-           if (value==null || value.toString().isEmpty()) {setText("");} 
+           if (value==null || value.toString().isEmpty()) {setText("");}
            else if (value instanceof Integer) {
                setForeground(java.awt.Color.BLACK);
                if (((Integer)value).intValue()==Sequence.REVERSE) setText("Reverse");
@@ -2046,17 +2048,17 @@ private class CellEditor_Orientation extends AbstractCellEditor implements Table
             }
             return component;
         }
-    
+
 }
 
-private class CellEditor_Organism extends AbstractCellEditor implements TableCellEditor {   
+private class CellEditor_Organism extends AbstractCellEditor implements TableCellEditor {
         JComboBox component;
-    
+
         public CellEditor_Organism() {
              component=new JComboBox(Organism.getSupportedOrganisms());
              component.setEditable(true);
         }
-        
+
         public Object getCellEditorValue() {
             String name=(String)component.getSelectedItem();
             if (name.startsWith("NCBI:")) name=name.substring(5);
@@ -2064,7 +2066,7 @@ private class CellEditor_Organism extends AbstractCellEditor implements TableCel
             if (taxid!=0) return new Integer(taxid);
             try {
                 int val=Integer.parseInt(name);
-                return new Integer(val);                
+                return new Integer(val);
             } catch(NumberFormatException e) {}
             return new Integer(0);
         }
@@ -2075,25 +2077,32 @@ private class CellEditor_Organism extends AbstractCellEditor implements TableCel
                 if (value instanceof Integer) component.setSelectedItem(Organism.getCommonName(((Integer)value).intValue()));
                 else {
                     try {
-                        int organism=Integer.parseInt((value.toString()));                        
+                        int organism=Integer.parseInt((value.toString()));
                         component.setSelectedItem(Organism.getCommonName(organism));
                     }
                     catch (NumberFormatException ne) {component.setSelectedIndex(0);}
                 }
             }
             return component;
-        }    
+        }
 }
 
 /*
  *
  */
 private static String[]exampleSequences=new String[] {
-    "NTNG1\tHGNC Symbol\thg18\n56475\tEntrez Gene\thg18\nENSG00000111249\tEnsembl Gene\thg18\nENSG00000187664\tEnsembl Gene\thg18\nENSG00000196358\tEnsembl Gene\thg18\n",
+    "NTNG1\tHGNC Symbol\thg38\n"
+        + "SPIB\tHGNC Symbol\thg38\n"
+        + "NM_001258406\tRefSeq mRNA\thg38\n"
+        + "NM_003998\tRefSeq mRNA\thg38\n"
+        + "P35579\tUniProtKB Gene ID\thg38\n"
+        + "TSPAN6\tUniProtKB Gene Symbol\thg38\n"   
+        + "ENSG00000111249\tEnsembl Gene\thg38\n"
+        + "ENSG00000187664\tEnsembl Gene\thg38\n"
+        + "ENSG00000196358\tEnsembl Gene\thg38\n",
     "#Human smooth muscle genes markers\nENSG00000035403\nENSG00000100345\nENSG00000107796\nENSG00000130176\nENSG00000133026\nENSG00000149591\nENSG00000154553\nENSG00000163017\nENSG00000163431\nENSG00000175084",
     "#Human genes expressed in liver tissue\nENSG00000017427\nENSG00000115718\nENSG00000116833\nENSG00000118271\nENSG00000129965\nENSG00000131482\nENSG00000163631\nENSG00000167910\nENSG00000173531"
 };
-    
 }
 
 

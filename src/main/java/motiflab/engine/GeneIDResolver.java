@@ -499,6 +499,16 @@ public class GeneIDResolver {
     
     /** Returns a direct URL string to a database web page for the given identifier */
     public String getWebLink(String idformat, String identifier) {
+        return getWebLink(idformat, identifier , null);
+    }
+    
+    /** Returns a direct URL string to a database web page for the given identifier and attributes
+    * @param idformat
+    * @param identifier
+    * @param attributes a list of attribute pairs where the first is the template "{xx}" and the second is the value to replace the template with
+    * @return 
+    */
+    public String getWebLink(String idformat, String identifier, String[][] attributes) {
         String weblink=webLinkTemplate.get(idformat);
         if (weblink==null) weblink=webLinkTemplate.get(idformat.toLowerCase()); // just in case
         if (weblink==null) return null;
@@ -508,7 +518,11 @@ public class GeneIDResolver {
             } catch (ParseError p) {weblink=null;}
         }                 
         if (weblink==null || weblink.isEmpty()) return null;
-        return weblink.replace("{ID}", identifier);
+        weblink=weblink.replace("{ID}", identifier);
+        if (attributes!=null) {
+            for (String[] attribute:attributes) weblink=weblink.replace(attribute[0], attribute[1]);
+        }
+        return weblink;
     } 
     
     public String getMatchingWebLink(String template, String identifier) throws ParseError {
@@ -689,11 +703,14 @@ public class GeneIDResolver {
             url=new URL(website+"biomartProxy.cgi"); // NOTE: It is not possible to use "www.motiflab.org" since the resulting redirection will for some reason change the request method from POST to GET at the server side :(
             database=biomartURL.substring("webfile=".length()); 
             xml=getXMLQueryString(idformat, database, useVirtualSchema, useConfigVersion, biomartAttributes, list, useTranscript, false, includeGO); 
-            page=getPageUsingHttpPost(url,xml,engine.getNetworkTimeout());
+            page=getPageUsingHttpPost(url,xml,engine.getNetworkTimeout());                  
         } else {
             url=new URL(biomartURL); 
             xml=getXMLQueryString(idformat, database, useVirtualSchema, useConfigVersion, biomartAttributes, list, useTranscript, isOldBiomart(url), includeGO);         
             page=getPageUsingHttpPost(url,xml,engine.getNetworkTimeout());
+//            engine.logMessage("Fetching from BioMart:"+url.toString());
+//            engine.logMessage("QUERY:"+xml);
+//            engine.logMessage("Return:"+page);
         }
         //System.err.println(xml);        
         return parseResults(page);        
@@ -767,7 +784,7 @@ public class GeneIDResolver {
             if (elements.length<numproperties) throw new ParseError("Expected "+numproperties+" columns in gene ID mapping table, got "+elements.length+": "+line); // allow for optional GO column(s)
             try {
                 GeneIDmapping newmapping=null;
-                int start=Integer.parseInt(elements[3]);
+                int start=Integer.parseInt(elements[3]); // coordinates are 1-based and inclusive!
                 int end=Integer.parseInt(elements[4]);
                 int strand=Sequence.DIRECT;
                 if (elements[5].startsWith("-") || elements[5].toLowerCase().startsWith("rev")) strand=Sequence.REVERSE;
