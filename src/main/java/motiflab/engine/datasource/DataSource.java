@@ -26,6 +26,7 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
      public static final String PATTERN_TEMPLATE_CHROMOSOME="$CHROMOSOME";
      public static final String PATTERN_TEMPLATE_START="$START";
      public static final String PATTERN_TEMPLATE_END="$END";
+     public static final String PATTERN_TEMPLATE_START_ZERO="$STARTZERO";  
                
      protected String name; // The name of the datatrack obtained by this data source
      protected DataTrack dataTrack;

@@ -199,12 +199,13 @@ public class DataSource_http_GET extends DataSource {
     public DataSegment loadDataSegment(DataSegment segment, ExecutableTask task) throws Exception {
         int timeout=dataloader.getEngine().getNetworkTimeout();
         String chromosome=segment.getChromosome();
-        String start=""+segment.getSegmentStart();
-        String end=""+segment.getSegmentEnd();
+        int start=segment.getSegmentStart();
+        int end=segment.getSegmentEnd();
         String resolvedParameterString=parameterStringTemplate;
         resolvedParameterString=resolvedParameterString.replace(PATTERN_TEMPLATE_CHROMOSOME, chromosome);
-        resolvedParameterString=resolvedParameterString.replace(PATTERN_TEMPLATE_START, start);
-        resolvedParameterString=resolvedParameterString.replace(PATTERN_TEMPLATE_END, end); 
+        resolvedParameterString=resolvedParameterString.replace(PATTERN_TEMPLATE_START_ZERO, ""+(start-1)); // allow ZERO-indexed coordinate to be used        
+        resolvedParameterString=resolvedParameterString.replace(PATTERN_TEMPLATE_START, ""+start);      
+        resolvedParameterString=resolvedParameterString.replace(PATTERN_TEMPLATE_END, ""+end); 
         if (!(baseURL.startsWith("http://") || baseURL.startsWith("https://"))) baseURL="https://"+baseURL;
         URL url=new URL(baseURL+"?"+resolvedParameterString);        
         resolveDataFormat(); // sets the 'dataformat' property for this source
