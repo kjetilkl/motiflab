@@ -127,7 +127,10 @@ public class DisplaySettingTask extends ExecutableTask {
 
     private void execute() throws InterruptedException, ExecutionError {
         VisualizationSettings settings=getMotifLabClient().getVisualizationSettings();
-        if (settings==null) return;
+        if (settings==null) {
+            getMotifLabClient().logMessage("WARNING: Unable to execute Display Setting task because the VisualizationSettings object is missing ",5);
+            return;
+        }
         resolveNames();
         //System.err.println("DisplaySetting: "+settingName+"("+targets+"|"+targetNames+")="+value);
         if (settingName.equalsIgnoreCase("visible")) { // I'm just setting "everything" to the new value without checking the type
