@@ -175,7 +175,9 @@ public class AddSequencesTask extends ExecutableTask {
             if (engine.dataExists(sequenceName, Sequence.class)) engine.logMessage("Warning: Adding new sequence with the same name as an existing sequence ("+sequenceName+"). The new sequence will replace the old");
             engine.storeDataItem(sequence);
             //System.err.println("Adding sequence '"+sequenceName+"' ("+(i+1)+"/"+numberOfSequences+")");
+            engine.getClient().getVisualizationSettings().zoomToFitSequence(sequenceName, false);
         }   
+        engine.getClient().getVisualizationSettings().redraw();
         return true;
     }
     
