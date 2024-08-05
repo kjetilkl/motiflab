@@ -52,8 +52,8 @@ public class ImportantNotificationParser {
         int status = ((HttpURLConnection)connection).getResponseCode();
         String location = ((HttpURLConnection)connection).getHeaderField("Location");
         if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
-                String redirectURL = url.toString().replace("http","https");
-                return parseNotifications(redirectURL, minLevel, minIndex);
+                ((HttpURLConnection)connection).disconnect();
+                return parseNotifications(location, minLevel, minIndex);
         }        
         InputStream inputStream = connection.getInputStream();
         try {

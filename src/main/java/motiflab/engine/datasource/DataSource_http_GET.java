@@ -256,8 +256,8 @@ public class DataSource_http_GET extends DataSource {
         int status = ((HttpURLConnection)connection).getResponseCode();
         String location = ((HttpURLConnection)connection).getHeaderField("Location");
         if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
-                String redirectURL = url.toString().replace("http","https");
-                return getPage(new URL(redirectURL), timeout, task);
+                ((HttpURLConnection)connection).disconnect();
+                return getPage(new URL(location), timeout, task);
         }        
         InputStream inputStream=connection.getInputStream();
         BufferedReader dataReader = new BufferedReader(new InputStreamReader(inputStream));

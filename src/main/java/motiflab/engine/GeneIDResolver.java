@@ -708,11 +708,10 @@ public class GeneIDResolver {
             url=new URL(biomartURL); 
             xml=getXMLQueryString(idformat, database, useVirtualSchema, useConfigVersion, biomartAttributes, list, useTranscript, isOldBiomart(url), includeGO);         
             page=getPageUsingHttpPost(url,xml,engine.getNetworkTimeout());
-//            engine.logMessage("Fetching from BioMart:"+url.toString());
-//            engine.logMessage("QUERY:"+xml);
-//            engine.logMessage("Return:"+page);
-        }
-        //System.err.println(xml);        
+//            engine.logMessage("Fetching from BioMart: "+url.toString());
+//            engine.logMessage("QUERY: "+xml);
+//            engine.logMessage("Return: "+page);
+        }       
         return parseResults(page);        
     }
     
@@ -826,14 +825,15 @@ public class GeneIDResolver {
         InputStream inputStream = null;
         BufferedReader dataReader = null;
         PrintWriter writer = null;
+        URL redirect = MotifLabEngine.checkHTTPredirectToHTTPS(url);
+        if (redirect!=null) url=redirect;      
         HttpURLConnection connection=(HttpURLConnection)url.openConnection();
         connection.setConnectTimeout(timeout);
-
         connection.setDoOutput(true);
         connection.setDoInput(true);
         connection.setUseCaches(false);
         connection.setAllowUserInteraction(false);
-        connection.setRequestMethod("POST");
+        connection.setRequestMethod("POST");                  
         //connection.setRequestProperty("Content-type", "text/xml; charset=UTF-8");  
         try {
             message="query="+message;
@@ -873,6 +873,12 @@ public class GeneIDResolver {
         BufferedReader dataReader = null;
         URLConnection connection=url.openConnection();
         connection.setConnectTimeout(timeout);
+        int status = ((HttpURLConnection)connection).getResponseCode();
+        String location = ((HttpURLConnection)connection).getHeaderField("Location");
+        if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+                ((HttpURLConnection)connection).disconnect();
+                return getPageUsingHttpGET(new URL(location), timeout);
+        }                   
         inputStream=connection.getInputStream();
         dataReader = new BufferedReader(new InputStreamReader(inputStream));
         String line;

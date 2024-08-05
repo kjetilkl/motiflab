@@ -74,8 +74,8 @@ public class FileUtilities {
             int status = ((HttpURLConnection)connection).getResponseCode();
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
             if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")) {
-                    String redirectURL = source.toString().replace("http","https");
-                    copyLargeURLToFile(new URL(redirectURL), destination, listener, cancelFlag);
+                    ((HttpURLConnection)connection).disconnect();
+                    copyLargeURLToFile(new URL(location), destination, listener, cancelFlag);
                     return;
             }
         }             
@@ -91,8 +91,8 @@ public class FileUtilities {
             int status = ((HttpURLConnection)connection).getResponseCode();
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
             if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")) {
-                    String redirectURL = source.toString().replace("http","https");
-                    copyLargeURLToFile(new URL(redirectURL), destination, connectionTimeout, readTimeout, listener, cancelFlag);
+                    ((HttpURLConnection)connection).disconnect();
+                    copyLargeURLToFile(new URL(location), destination, connectionTimeout, readTimeout, listener, cancelFlag);
                     return;
             }
         }

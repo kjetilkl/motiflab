@@ -77,8 +77,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     public static final String CONCURRENT_THREADS="concurrentThreadCount"; 
     public static final String PREFERENCES_AUTO_CORRECT_SEQUENCE_NAMES="autocorrectSequenceNames";  
 
-    private static String version="2.0.0"; // 
-    private static Date releaseDate=getCorrectDate(2019, 4, 8); // Note: Official release date for v2.0.0 has not been determined yet...
+    private static String version="2.0.-1"; // 
+    private static Date releaseDate=getCorrectDate(2024, 7, 30); // Note: Official release date for v2.0.0 has not been determined yet...
     
     private DataStorage storage;
     private HashSet<MessageListener> messagelisteners=new HashSet<MessageListener>();
@@ -354,7 +354,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
      * @throws motiflab.engine.ExecutionError
      */
     public void executeProtocolTask(ProtocolTask task, boolean silent) throws ParseError, ExecutionError, InterruptedException {
-        task.setMotifLabClient(client);     
+        task.setMotifLabClient(client);          
         if (client instanceof java.beans.PropertyChangeListener) task.addPropertyChangeListener((java.beans.PropertyChangeListener)client);                
         try {      
             if (!silent) logMessage("Executing protocol");
@@ -3845,11 +3845,12 @@ public static Class getClassForName(String classname) throws ClassNotFoundExcept
         try {
             File vizConfigFile=new File(getMotifLabDirectory()+File.separator+"startup.config");                    
             if (vizConfigFile.exists()) {
+                logMessage("Executing startup protocol",5);
                 StandardProtocol vizSettingsProtocol=new StandardProtocol(this, new BufferedInputStream(new FileInputStream(vizConfigFile)));
                 executeProtocol(vizSettingsProtocol,true);
-            }
+            } else logMessage("WARNING: Unable to execute startup configuration protocol: FILE DOES NOT EXIST",5);
         } catch (Exception e) {
-            logMessage("WARNING: Unable to execute startup configuration protocol: "+e.toString());
+            logMessage("WARNING: Unable to execute startup configuration protocol: "+e.toString(),5);
             if (e instanceof NullPointerException) e.printStackTrace(System.err);
         }                
     }    
@@ -4649,8 +4650,8 @@ public void removeAllResources() {
             int status = ((HttpURLConnection)connection).getResponseCode();
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
             if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
-                    String redirectURL = url.toString().replace("http","https");
-                    return getPage(new URL(redirectURL));
+                    ((HttpURLConnection)connection).disconnect();
+                    return getPage(new URL(location));
             } 
         }
         inputStream=connection.getInputStream();
@@ -4677,8 +4678,8 @@ public void removeAllResources() {
 	int status = ((HttpURLConnection)connection).getResponseCode();
 	String location = ((HttpURLConnection)connection).getHeaderField("Location");
 	if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
-		String redirectURL = url.toString().replace("http","https");
-	        getPage(new URL(redirectURL), document);
+		((HttpURLConnection)connection).disconnect();
+	        getPage(new URL(location), document);
                 return;
 	}        
         inputStream=connection.getInputStream();
@@ -4705,8 +4706,8 @@ public void removeAllResources() {
             int status = ((HttpURLConnection)connection).getResponseCode();
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
             if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
-                    String redirectURL = url.toString().replace("http","https");
-                    return getPageAsList(new URL(redirectURL));
+                    ((HttpURLConnection)connection).disconnect();
+                    return getPageAsList(new URL(location));
             }        
         }
         inputStream=connection.getInputStream();
@@ -4725,6 +4726,24 @@ public void removeAllResources() {
         return lines;
     }     
     
+    /**
+     * This function will return a redirect URL if the original URL is a HTTP site 
+     * that is redirected to an HTTPS site by the remote server
+     * If no redirection from HTTP to HTTPS takes place, the value NULL will be returned.
+     * @param url 
+     */
+    public static URL checkHTTPredirectToHTTPS(URL url) throws MalformedURLException, IOException {
+        URLConnection connection=url.openConnection();
+        // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
+        int status = ((HttpURLConnection)connection).getResponseCode();
+        String location = ((HttpURLConnection)connection).getHeaderField("Location");
+        if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+             return new URL(location);
+        }
+        return null;
+    }
+    
+    
     /** Retrieves a web page given an URL address using an http POST-request */    
     public static ArrayList<String> getPageUsingHttpPost(URL url, Map<String,Object> parameters, int timeout) throws Exception {    
         ArrayList<String> document=new ArrayList<String>();
@@ -4741,7 +4760,8 @@ public void removeAllResources() {
        
         OutputStream outputStream=null;
         HttpURLConnection connection=null;
-
+        URL redirect = MotifLabEngine.checkHTTPredirectToHTTPS(url);
+        if (redirect!=null) url=redirect;
         //connection.setRequestProperty("Content-type", "text/xml; charset=UTF-8");  
         try {
             connection = (HttpURLConnection)url.openConnection();
@@ -4882,7 +4902,21 @@ public void removeAllResources() {
     */
    public static InputStream getInputStreamForDataSource(Object source) throws IOException {
        if (source instanceof File) return getInputStreamForFile((File)source);
-       else if (source instanceof URL) return ((URL)source).openStream();
+       else if (source instanceof URL) {
+           URL url=(URL)source;
+           URLConnection connection=url.openConnection();
+            // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
+            if (connection instanceof HttpURLConnection) {
+                int status = ((HttpURLConnection)connection).getResponseCode();
+                String location = ((HttpURLConnection)connection).getHeaderField("Location");
+                if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+                    ((HttpURLConnection)connection).disconnect();
+                    return getInputStreamForDataSource(new URL(location));
+                } else return connection.getInputStream();
+            } 
+            else if (connection!=null) return connection.getInputStream();
+            else throw new IOException("Unable to open stream: "+source);
+       }
        else throw new IOException("SYSTEM ERROR: '"+((source!=null)?source.toString():"null")+"' is not a File or URL");
    }    
     

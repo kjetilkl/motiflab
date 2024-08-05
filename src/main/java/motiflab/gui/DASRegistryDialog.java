@@ -643,8 +643,8 @@ private class DASRegistryParser {
         int status = ((HttpURLConnection)connection).getResponseCode();
         String location = ((HttpURLConnection)connection).getHeaderField("Location");
         if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
-                String redirectURL = url.toString().replace("http","https");
-                parse(redirectURL);
+                ((HttpURLConnection)connection).disconnect();
+                parse(location);
                 return;
         }        
         InputStream inputStream = connection.getInputStream();

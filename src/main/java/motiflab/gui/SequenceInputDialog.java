@@ -1788,6 +1788,8 @@ private void loadManualEntryFileInBackground(final File file) {
                         try {errorCode=Integer.parseInt(responseCodeString);}catch(NumberFormatException nfe) {}
                         // rephrase errorMessage based on HTTP response code
                         //if (errorCode==500) errorMessage="ERROR: BioMart server is temporary unavailable: "+url;
+                    } else {
+                        engine.logMessage(errorMessage);
                     }
                     if (ex instanceof java.io.FileNotFoundException) errorMessage="Biomart service not found: "+errorMessage;
                     errorMessageLabel.setText(errorMessage);

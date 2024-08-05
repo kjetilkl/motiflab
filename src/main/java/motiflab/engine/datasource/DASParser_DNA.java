@@ -43,8 +43,8 @@ public class DASParser_DNA {
         int status = ((HttpURLConnection)connection).getResponseCode();
         String location = ((HttpURLConnection)connection).getHeaderField("Location");
         if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
-                String redirectURL = url.toString().replace("http","https");
-                return parse(redirectURL, timeout);
+                ((HttpURLConnection)connection).disconnect();
+                return parse(location, timeout);
         }          
         InputStream inputStream = connection.getInputStream();
         FilterPatternInputStream filterStream = new FilterPatternInputStream(inputStream, filterString);
