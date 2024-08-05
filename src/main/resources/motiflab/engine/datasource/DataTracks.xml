@@ -124,6 +124,30 @@
          <dataformat name="WIG"/>
       </DataSource>
    </DataTrack>
+   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_HMEC" source="tare.medisin.ntnu.no" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHmecHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHmecHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg18" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHmecHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
+   </DataTrack>
    <DataTrack description="GM128 H3K4me3 S (wgEncodeBroadChipSeqSignalGm12878H3k4me3)" name="H3K4me3_Gm12878_sig" source="UCSC Genome Browser" type="numeric">
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
@@ -942,6 +966,23 @@
          <dataformat name="WIG"/>
       </DataSource>
    </DataTrack>
+   <DataTrack description="Pol2 ChIA-PET interactions from NB4 cells (rep 1)" name="Interactions_NB4_rep1" source="ENCODE Broad" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetNb4Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetNb4Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
+   </DataTrack>
    <DataTrack description="Transcription start sites (TSS) in the human genome predicted by SwitchGear Genomics" name="SwitchgearTSS" source="UCSC Genome Browser" type="region">
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
@@ -950,6 +991,23 @@
          </Protocol>
          <dataformat name="GTF"/>
       </DataSource>
+   </DataTrack>
+   <DataTrack description="Pol2 ChIA-PET interactions from HeLaS3 cells (rep 1)" name="Interactions_HeLaS3_rep1" source="ENCODE Broad" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetHelas3Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetHelas3Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
    </DataTrack>
    <DataTrack description="GM128 H3K4me3 P (wgEncodeBroadChipSeqPeaksGm12878H3k4me3)" name="H3K4me3_Gm12878_peak" source="UCSC Genome Browser" type="region">
       <DataSource build="hg18" organism="9606">
@@ -968,7 +1026,31 @@
          </Protocol>
          <dataformat name="Interactions"/>
       </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$expanded(?)=true;$setting("?.dropshadow")=true;$setting("?.visualizeNestedRegions")=true;$setting("?.connectorType")=Angled Line;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;$setting("?.expandedRegionsHeight")=35;$setting("?.expandedRegionsRowSpacing")=4;</DisplayDirectives>
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=ncbiRefSeq_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$expanded(?)=true;$showStrand(?)=true;$setting("?.dropshadow")=true;$setting("?.visualizeNestedRegions")=true;$setting("?.connectorType")=Angled Line;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;$setting("?.expandedRegionsHeight")=20;$setting("?.expandedRegionsRowSpacing")=4;</DisplayDirectives>
+   </DataTrack>
+   <DataTrack description="Pol2 ChIA-PET interactions from HCT116 cells (rep 1)" name="Interactions_HCT116_rep1" source="ENCODE Broad" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetHct116Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetHct116Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
    </DataTrack>
    <DataTrack description="Predicted nucleosome occupancy (SVM trained on data from MDA-kb2 cell line)" name="Nucleosomes_Dennis" source="UCSC Genome Browser" type="numeric">
       <DataSource build="hg18" organism="9606">
@@ -1065,6 +1147,30 @@
          <dataformat name="WIG"/>
       </DataSource>
    </DataTrack>
+   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_NHEK" source="tare.medisin.ntnu.no" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmNhekHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmNhekHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg18" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmNhekHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
+   </DataTrack>
    <DataTrack description="HMEC (wgEncodeBroadChipSeqSignalHmecH3k4me1)" name="H3K4me1_HMEC_sig" source="UCSC Genome Browser" type="numeric">
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
@@ -1097,6 +1203,30 @@
          <dataformat name="BED"/>
       </DataSource>
    </DataTrack>
+   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_HSMM" source="tare.medisin.ntnu.no" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHsmmHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHsmmHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg18" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHsmmHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
+   </DataTrack>
    <DataTrack description="Vertebrate Multiz Alignment &amp; PhastCons Conservation (28 Species)" name="Multiz28wayConsPlacMammal" source="UCSC Genome Browser" type="numeric">
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
@@ -1105,6 +1235,30 @@
          </Protocol>
          <dataformat name="WIG"/>
       </DataSource>
+   </DataTrack>
+   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_NHLF" source="tare.medisin.ntnu.no" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmNhlfHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmNhlfHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg18" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmNhlfHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
    </DataTrack>
    <DataTrack description="Microsatellites are sequences of at least 15 perfect di-nucleotide or tri-nucleotide repeats" name="Microsatellite" source="UCSC Genome Browser" type="region">
       <DataSource build="hg18" organism="9606">
@@ -1165,6 +1319,30 @@
          </Protocol>
          <dataformat name="BED"/>
       </DataSource>
+   </DataTrack>
+   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_HUVEC" source="tare.medisin.ntnu.no" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHuvecHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHuvecHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg18" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHuvecHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
    </DataTrack>
    <DataTrack description="ChIP-Seq peaks for histone mark H3K4me1 in several cell lines" name="H3K4me1" source="tare.medisin.ntnu.no" type="region">
       <DataSource build="hg18" organism="9606">
@@ -1304,6 +1482,23 @@
          <dataformat name="GTF"/>
       </DataSource>
    </DataTrack>
+   <DataTrack description="Pol2 ChIA-PET interactions from MCF-7 cells (rep 1)" name="Interactions_MCF7_rep1" source="ENCODE Broad" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
+   </DataTrack>
    <DataTrack description="HepG2 H3K27ac P (wgEncodeBroadChipSeqPeaksHepg2H3k27ac)" name="H3K27ac_HepG2_peak" source="UCSC Genome Browser" type="region">
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
@@ -1312,6 +1507,23 @@
          </Protocol>
          <dataformat name="GTF"/>
       </DataSource>
+   </DataTrack>
+   <DataTrack description="Pol2 ChIA-PET interactions from MCF-7 cells (rep 2)" name="Interactions_MCF7_rep2" source="ENCODE Broad" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep2_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep2_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
    </DataTrack>
    <DataTrack description="Vertebrate Multiz Alignment &amp; Conservation (17 Species)" name="Multiz17wayCons" source="UCSC Genome Browser" type="numeric">
       <DataSource build="hg18" organism="9606">
@@ -1584,6 +1796,40 @@
          <dataformat name="WIG"/>
       </DataSource>
    </DataTrack>
+   <DataTrack description="Pol2 ChIA-PET interactions from MCF-7 cells (rep 3)" name="Interactions_MCF7_rep3" source="ENCODE Broad" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep3_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep3_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
+   </DataTrack>
+   <DataTrack description="Pol2 ChIA-PET interactions from MCF-7 cells (rep 4)" name="Interactions_MCF7_rep4" source="ENCODE Broad" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep4_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep4_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
+   </DataTrack>
    <DataTrack description="Phylogenetic conservation scores (as calculated by the PhyloP algorithm) for 28 organisms" name="PhyloP28way" source="UCSC Genome Browser" type="numeric">
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
@@ -1601,6 +1847,23 @@
          </Protocol>
          <dataformat name="WIG"/>
       </DataSource>
+   </DataTrack>
+   <DataTrack description="Pol2 ChIA-PET interactions from K562 cells (rep 1)" name="Interactions_K562_rep1" source="ENCODE Broad" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetK562Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeGisChiaPetK562Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="Interactions"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
    </DataTrack>
    <DataTrack description="Histone mark H3K27ac assembled from 8 different cell lines (wgEncodeBroadChipSeqPeaks_celltype_H3k27ac)" name="H3K27ac" source="tare.medisin.ntnu.no" type="region">
       <DataSource build="hg18" organism="9606">
@@ -1913,6 +2176,78 @@
          </Protocol>
          <dataformat name="BED"/>
       </DataSource>
+   </DataTrack>
+   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_HepG2" source="tare.medisin.ntnu.no" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHepg2HMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHepg2HMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg18" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmHepg2HMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
+   </DataTrack>
+   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_Gm12878" source="tare.medisin.ntnu.no" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmGm12878HMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmGm12878HMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg18" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmGm12878HMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
+   </DataTrack>
+   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_K562" source="tare.medisin.ntnu.no" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmK562HMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmK562HMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DataSource build="hg18" organism="9606">
+         <Protocol type="GET">
+            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
+            <Parameter>datatrack=wgEncodeBroadHmmK562HMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
+         </Protocol>
+         <dataformat name="BED"/>
+      </DataSource>
+      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
    </DataTrack>
    <DataTrack description="DNA sequence track" name="DNA" source="UCSC Genome Browser" type="sequence">
       <DataSource build="hg38" organism="9606">
@@ -2231,57 +2566,6 @@
          <dataformat name="FASTA"/>
       </DataSource>
    </DataTrack>
-   <DataTrack description="Pol2 ChIA-PET interactions from HCT116 cells (rep 1)" name="Interactions_HCT116_rep1" source="ENCODE Broad" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetHct116Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetHct116Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
-   </DataTrack> 
-   <DataTrack description="Pol2 ChIA-PET interactions from HeLaS3 cells (rep 1)" name="Interactions_HeLaS3_rep1" source="ENCODE Broad" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetHelas3Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetHelas3Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
-   </DataTrack>    
-   <DataTrack description="Pol2 ChIA-PET interactions from K562 cells (rep 1)" name="Interactions_K562_rep1" source="ENCODE Broad" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetK562Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetK562Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
-   </DataTrack>
    <DataTrack description="Pol2 ChIA-PET interactions from K562 cells (rep 2)" name="Interactions_K562_rep2" source="ENCODE Broad" type="region">
       <DataSource build="hg38" organism="9606">
          <Protocol type="GET">
@@ -2299,91 +2583,6 @@
       </DataSource>
       <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
    </DataTrack>
-   <DataTrack description="Pol2 ChIA-PET interactions from MCF-7 cells (rep 1)" name="Interactions_MCF7_rep1" source="ENCODE Broad" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
-   </DataTrack>
-   <DataTrack description="Pol2 ChIA-PET interactions from MCF-7 cells (rep 2)" name="Interactions_MCF7_rep2" source="ENCODE Broad" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep2_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep2_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
-   </DataTrack>   
-   <DataTrack description="Pol2 ChIA-PET interactions from MCF-7 cells (rep 3)" name="Interactions_MCF7_rep3" source="ENCODE Broad" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep3_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep3_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
-   </DataTrack>   
-   <DataTrack description="Pol2 ChIA-PET interactions from MCF-7 cells (rep 4)" name="Interactions_MCF7_rep4" source="ENCODE Broad" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep4_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetMcf7Pol2InteractionsRep4_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
-   </DataTrack>      
-   <DataTrack description="Pol2 ChIA-PET interactions from NB4 cells (rep 1)" name="Interactions_NB4_rep1" source="ENCODE Broad" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetNb4Pol2InteractionsRep1_hg38&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeGisChiaPetNb4Pol2InteractionsRep1_hg19&amp;amp;chr=$CHROMOSOME&amp;amp;start=$START&amp;amp;end=$END&amp;amp;&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="Interactions"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$setting("?.visualizeNestedRegions")=false;$setting("?.connectorType")=Ribbon;$height(?)=150;$setting("?.drawregionborders")=1;$setting("?.scaleConnectors")=true;</DisplayDirectives>
-   </DataTrack>   
    <DataTrack description="HMEC H3K4me1 P (wgEncodeBroadChipSeqPeaksHmecH3k4me1)" name="H3K4me1_HMEC_peak" source="UCSC Genome Browser" type="region">
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
@@ -2393,87 +2592,6 @@
          <dataformat name="GTF"/>
       </DataSource>
    </DataTrack>
-   <DataTrack description="HSMM H3K4me1 P (wgEncodeBroadChipSeqPeaksHsmmH3k4me1)" name="H3K4me1_HSMM_peak" source="UCSC Genome Browser" type="region">
-      <DataSource build="hg18" organism="9606">
-         <Protocol type="GET">
-            <URL>https://genome.ucsc.edu/cgi-bin/hgTables</URL>
-            <Parameter>clade=mammal&amp;org=Human&amp;db=hg18&amp;hgta_group=regulation&amp;hgta_track=wgEncodeBroadChipSeq&amp;hgta_table=wgEncodeBroadChipSeqPeaksHsmmH3k4me1&amp;hgta_regionType=range&amp;hgta_outputType=gff&amp;hgta_doTopSubmit=1&amp;position=chr$CHROMOSOME:$START-$END</Parameter>
-         </Protocol>
-         <dataformat name="GTF"/>
-      </DataSource>
-   </DataTrack>
-   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_Gm12878" source="tare.medisin.ntnu.no" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmGm12878HMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmGm12878HMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg18" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmGm12878HMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
-   </DataTrack>   
-   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_HepG2" source="tare.medisin.ntnu.no" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHepg2HMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHepg2HMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg18" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHepg2HMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
-   </DataTrack>     
-   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_HMEC" source="tare.medisin.ntnu.no" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHmecHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHmecHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg18" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHmecHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
-   </DataTrack>   
    <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_H1" source="tare.medisin.ntnu.no" type="region">
       <DataSource build="hg38" organism="9606">
          <Protocol type="GET">
@@ -2497,125 +2615,14 @@
          <dataformat name="BED"/>
       </DataSource>
       <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
-   </DataTrack>   
-   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_HSMM" source="tare.medisin.ntnu.no" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHsmmHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHsmmHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg18" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHsmmHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
    </DataTrack>
-   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_HUVEC" source="tare.medisin.ntnu.no" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHuvecHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHuvecHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
+   <DataTrack description="HSMM H3K4me1 P (wgEncodeBroadChipSeqPeaksHsmmH3k4me1)" name="H3K4me1_HSMM_peak" source="UCSC Genome Browser" type="region">
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmHuvecHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
+            <URL>https://genome.ucsc.edu/cgi-bin/hgTables</URL>
+            <Parameter>clade=mammal&amp;org=Human&amp;db=hg18&amp;hgta_group=regulation&amp;hgta_track=wgEncodeBroadChipSeq&amp;hgta_table=wgEncodeBroadChipSeqPeaksHsmmH3k4me1&amp;hgta_regionType=range&amp;hgta_outputType=gff&amp;hgta_doTopSubmit=1&amp;position=chr$CHROMOSOME:$START-$END</Parameter>
          </Protocol>
-         <dataformat name="BED"/>
+         <dataformat name="GTF"/>
       </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
-   </DataTrack>    
-   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_K562" source="tare.medisin.ntnu.no" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmK562HMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmK562HMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg18" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmK562HMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
-   </DataTrack>   
-   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_NHEK" source="tare.medisin.ntnu.no" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmNhekHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmNhekHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg18" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmNhekHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
-   </DataTrack>  
-   <DataTrack description="ENCODE Chromatin State Segmentation by HMM from Broad Institute, MIT and MGH" name="ChromatinState_NHLF" source="tare.medisin.ntnu.no" type="region">
-      <DataSource build="hg38" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmNhlfHMM_hg38&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmNhlfHMM_hg19&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END&amp;segmentsize=0</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DataSource build="hg18" organism="9606">
-         <Protocol type="GET">
-            <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
-            <Parameter>datatrack=wgEncodeBroadHmmNhlfHMM&amp;chr=$CHROMOSOME&amp;start=$START&amp;end=$END</Parameter>
-         </Protocol>
-         <dataformat name="BED"/>
-      </DataSource>
-      <DisplayDirectives>$multicolor(?)=true;$regionColor(1 Active Promoter,1_Active_Promoter)=#FF0000;$regionColor(2 Weak Promoter,2_Weak_Promoter)=#FF6969;$regionColor(3 Poised Promoter,3_Poised_Promoter)=#CF0BC6;$regionColor(4 Strong Enhancer,4_Strong_Enhancer)=#FACA00;$regionColor(5 Strong Enhancer,5_Strong_Enhancer)=#FACA00;$regionColor(6 Weak Enhancer,6_Weak_Enhancer)=#FFFC04;$regionColor(7 Weak Enhancer,7_Weak_Enhancer)=#FFFC04;$regionColor(8 Insulator,8_Insulator)=#0ABEFE;$regionColor(9 Txn Transition,9_Txn_Transition)=#00B050;$regionColor(10 Txn Elongation,10_Txn_Elongation)=#00B050;$regionColor(11 Weak Txn,11_Weak_Txn)=#99FF66;$regionColor(12 Repressed,12_Repressed)=#7F7F7F;$regionColor(13 Heterochrom/lo,13_Heterochrom/lo)=#D0D0D0;$regionColor(14 Repetitive/CNV,14_Repetitive/CNV)=#D0D0D0;$regionColor(15 Repetitive/CNV,15_Repetitive/CNV)=#D0D0D0;</DisplayDirectives>
-   </DataTrack>   
+   </DataTrack>
 </root>
