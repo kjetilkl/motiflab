@@ -77,7 +77,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     public static final String CONCURRENT_THREADS="concurrentThreadCount"; 
     public static final String PREFERENCES_AUTO_CORRECT_SEQUENCE_NAMES="autocorrectSequenceNames";  
 
-    private static String version="2.0.-1"; // 
+    private static String version="2.0.0.-7"; // 
     private static Date releaseDate=getCorrectDate(2024, 7, 30); // Note: Official release date for v2.0.0 has not been determined yet...
     
     private DataStorage storage;
@@ -297,7 +297,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     }       
     
     /** Compares to "version strings". The strings can contain numbers separated by dots.  E.g. "2", "2.1" or "2.0.12". 
-     *  Negative numbers are allowed and these will be considered to be smaller (i.e. "older") than positive numbers. E.g. "2.1" is a newer version than "2.-1". 
+     *  Negative numbers are allowed and these will be considered to be smaller (i.e. "older") than positive numbers. E.g. "2.1" is a newer version than "2.-1".
+     *  If one version has more dot-separated numbers than the other, the second is assumed to have the value 0 for these numbers. 
      *  @param version1 The first version string 
      *  @param version2 The second version string
      *  @return
@@ -312,24 +313,19 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         if (version1.equals(version2)) return 0;
         String[] thisVersionString=version1.split("\\.");
         String[] otherVersionString=version2.split("\\.");
-        int[] thisVersion=new int[thisVersionString.length];
-        int[] otherVersion=new int[otherVersionString.length];
+        int size=Math.max(thisVersionString.length, otherVersionString.length);
+        int[] thisVersion=new int[size];
+        int[] otherVersion=new int[size];
         for (int i=0;i<thisVersionString.length;i++) {
             thisVersion[i]=Integer.parseInt(thisVersionString[i]);
         }
         for (int i=0;i<otherVersionString.length;i++) {
             otherVersion[i]=Integer.parseInt(otherVersionString[i]);
         }             
-        int l=(thisVersion.length<=otherVersion.length)?thisVersion.length:otherVersion.length;
-        for (int i=0;i<l;i++) {
+        for (int i=0;i<size;i++) {
             if (thisVersion[i]>otherVersion[i]) return 1;
             if (thisVersion[i]<otherVersion[i]) return -1;
         }
-        // so far all the major and minor version numbers are equal but one could have more numbers than the other
-        if (thisVersion.length>otherVersion.length && thisVersion[thisVersion.length-1]>0) return 1; // this version could be "1.1.13" whereas the other is "1.1"  (however, check also for negative numbers in last position!)
-        if (thisVersion.length>otherVersion.length && thisVersion[thisVersion.length-1]<0) return -1; // sort 2.0.-8 before 2.0
-        if (thisVersion.length<otherVersion.length && otherVersion[otherVersion.length-1]>0) return -1;
-        if (thisVersion.length<otherVersion.length && otherVersion[otherVersion.length-1]<0) return 1;
         return 0;
     }    
     

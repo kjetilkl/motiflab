@@ -225,6 +225,9 @@ public class MotifLabEngineTest {
         assertEquals(MotifLabEngine.compareVersions("2.0.0.1","2.0.1"), -1);   
         assertEquals(MotifLabEngine.compareVersions("2.0.0","2.0.-1"), 1);         
         assertEquals(MotifLabEngine.compareVersions("2","2.0.-1"), 1);                        
+        assertEquals(MotifLabEngine.compareVersions("2.0.-1","2"), -1);  
+        assertEquals(MotifLabEngine.compareVersions("2.0.-1","2.0.-2"), 1);         
+        assertEquals(MotifLabEngine.compareVersions("2.0.-1","2.0.0.-7"), -1);          
     }    
 //
 //    /**
