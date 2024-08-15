@@ -266,6 +266,7 @@ public class RegionBrowserPanel extends JPanel {
         moduleLogorenderer=new ModuleLogo(settings);       
         if (isModuleTrack) columnModel.getColumn(LOGO_COLUMN).setCellRenderer(moduleLogorenderer);
         else if (isMotifTrack) columnModel.getColumn(LOGO_COLUMN).setCellRenderer(motifLogorenderer);
+        if (isModuleTrack) regionTable.setRowHeight(32);
         Sorter sorter=new Sorter();
         ((TableRowSorter)regionTable.getRowSorter()).setComparator(FILTER_COLUMN, sorter);              
         ((TableRowSorter)regionTable.getRowSorter()).setComparator(REGION_COLUMN, sorter);      
