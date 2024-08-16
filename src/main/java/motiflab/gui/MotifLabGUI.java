@@ -74,6 +74,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TimeZone;
 import java.util.prefs.Preferences;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
@@ -4391,8 +4393,28 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         else if (type==OutputData.class) {prefix="Output";}
         else if (Analysis.class.isAssignableFrom(type)) {prefix="Analysis";}
         if (type!=null) {
-            counter=engine.countDataItemsOfType(type);
-            if (type!=SequenceCollection.class) counter++; // this will start the SequenceCollection counter at 1 even thought there is already a (default) SequenceCollection registered
+            boolean foundNumbers = false;
+            ArrayList<Data> datalist=engine.getAllDataItemsOfTypeMatchingExpression("^"+prefix+"\\d.*",type);
+            if (!datalist.isEmpty()) {
+                ArrayList<String> namelist=new ArrayList<>(datalist.size());
+                for (Data data:datalist) {namelist.add(data.getName());}
+                MotifLabEngine.sortNaturalOrder(namelist, false);
+                String lastName = namelist.get(0);
+                Pattern pattern = Pattern.compile("\\d+");
+                Matcher matcher = pattern.matcher(lastName);
+                if (matcher.find()) {
+                    String numbers = matcher.group(0);
+                    try {
+                        counter=Integer.parseInt(numbers);
+                        foundNumbers=true;} 
+                    catch (NumberFormatException ne) {}
+                    counter++;
+                }   
+            }
+            if (datalist.isEmpty() || !foundNumbers) {
+               counter=engine.countDataItemsOfType(type);
+               if (type!=SequenceCollection.class) counter++; // this will start the SequenceCollection counter at 1 even thought there is already a (default) SequenceCollection registered               
+            }            
         }
         String name;
         if (type==Motif.class || type==Module.class) name=prefix+motifcounterformat.format(counter);
