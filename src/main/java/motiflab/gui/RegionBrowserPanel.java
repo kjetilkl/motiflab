@@ -808,11 +808,11 @@ private class Filter extends RowFilter<Object,Object> {
 /** This private class implements the context menu */
 private class RegionTableContextMenu extends JPopupMenu implements ActionListener {
      private final String EDIT_REGION="Edit this region";
-     private final String SHOW="Show";
-     private final String HIDE="Hide";
-     private final String SHOW_ONLY_SELECTED="Show Only Selected";   
-     private final String SHOW_ALL="Show All";  
-     private final String HIDE_ALL="Hide All";      
+     private final String SHOW="Show Region Type";
+     private final String HIDE="Hide Region Type";
+     private final String SHOW_ONLY_SELECTED="Show Only Selected Region Type";   
+     private final String SHOW_ALL="Show All Region Types";  
+     private final String HIDE_ALL="Hide All Region Types";      
      private final String SELECT_SHOWN_REGION_TYPES="Select Shown Region Types";
      private final String SELECT_ONLY_SHOWN_REGION_TYPES="Select Only Shown Region Types";
      private final String SELECT_REGION_TYPES_FROM="Select Region Types From";
