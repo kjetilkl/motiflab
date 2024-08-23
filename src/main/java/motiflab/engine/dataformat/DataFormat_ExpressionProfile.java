@@ -36,7 +36,7 @@ public class DataFormat_ExpressionProfile extends DataFormat {
         addOptionalParameter("Sequence name delimiter","Tab", new String[]{"Space","Tab","Comma","Semicolon","Equals","Colon"},"The character that separates the name of the sequence from the expression values");
         addOptionalParameter("Condition delimiter","Tab", new String[]{"Space","Tab","Comma","Semicolon","Colon"},"The character that separates expression values for different conditions");
         addOptionalParameter("Header",HEADER_NONE, new String[]{HEADER_NONE,HEADER_COLUMN_NAMES,HEADER_HASH_COLUMN_NAMES},"Output an optional header in the first line");
-        setParameterFilter("Header","output");
+        //setParameterFilter("Header","output");
     }
 
     @Override
@@ -133,7 +133,7 @@ public class DataFormat_ExpressionProfile extends DataFormat {
         StringBuilder outputString=new StringBuilder();
         if (header.equals(HEADER_COLUMN_NAMES) || header.equals(HEADER_HASH_COLUMN_NAMES)) {
             if (header.equals(HEADER_HASH_COLUMN_NAMES)) outputString.append("#");
-            outputString.append("Sequencename");
+            outputString.append("Sequence");
             int count=expressionprofile.getNumberOfConditions();
             for (int j=0;j<count;j++) {
                 outputString.append((j==0)?sequencenamedelimiter:delimiter); 

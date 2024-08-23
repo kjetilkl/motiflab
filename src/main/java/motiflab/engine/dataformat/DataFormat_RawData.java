@@ -73,6 +73,7 @@ public class DataFormat_RawData extends DataFormat {
         setProgress(5);
         outputobject.setShowAsHTML(false);
         ((Analysis)dataobject).formatRaw(outputobject, engine, settings, task, this);
+        setProgress(99);
         return outputobject;
     }    
     

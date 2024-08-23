@@ -54,17 +54,19 @@ public class CompareClustersToCollectionAnalysis extends Analysis {
     public String[] getSourceProxyParameters() {return new String[]{"Partition","Collection"};}   
     
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Sort by",String.class,SORT_BY_PVALUE, new String[]{SORT_BY_CLUSTER,SORT_BY_PVALUE},null,false,false),
-        };
+    public Parameter[] getOutputParameters(String dataformat) {
+        if (dataformat.equals(HTML) || dataformat.equals(EXCEL) || dataformat.equals(RAWDATA)) {
+            return new Parameter[] {
+                 new Parameter("Sort by",String.class,SORT_BY_PVALUE, new String[]{SORT_BY_CLUSTER,SORT_BY_PVALUE},null,false,false),
+            };
+        } else return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Sort by")) return new String[]{"HTML","RawData"};        
-        return null;
-    }       
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Sort by")) return new String[]{"HTML","RawData"};        
+//        return null;
+//    }       
 
     @Override
     public String[] getResultVariables() {
@@ -141,7 +143,7 @@ public class CompareClustersToCollectionAnalysis extends Analysis {
         String sortBy=SORT_BY_PVALUE;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortBy=(String)settings.getResolvedParameter("Sort by",defaults,engine);
           } 
           catch (ExecutionError e) {throw e;} 
@@ -193,7 +195,7 @@ public class CompareClustersToCollectionAnalysis extends Analysis {
         String sortBy=SORT_BY_PVALUE;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortBy=(String)settings.getResolvedParameter("Sort by",defaults,engine);
           } 
           catch (ExecutionError e) {throw e;} 
@@ -204,6 +206,8 @@ public class CompareClustersToCollectionAnalysis extends Analysis {
 
         DecimalFormat decimalformatter=new DecimalFormat("0.0");
         task.setStatusMessage("Executing operation: output");
+        outputobject.append("#Comparing clusters to collection\n",RAWDATA);
+        outputobject.append("#\n",RAWDATA);
         outputobject.append("#Comparison between clusters in '"+partitionName+"' and collection '"+collectionName+"' (size="+collectionSize+")",RAWDATA);
         outputobject.append(" with respect to a total of "+backgroundCollectionSize+" entries",RAWDATA);
         if (backgroundCollectionName!=null) outputobject.append(" from collection '"+backgroundCollectionName+"'",RAWDATA);

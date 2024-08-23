@@ -40,16 +40,16 @@ import motiflab.gui.GenericMotifBrowserPanel;
 import motiflab.gui.MotifLogo;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -124,23 +124,25 @@ public class MotifOccurrenceAnalysis extends Analysis {
     }       
     
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Include",MotifCollection.class,null,new Class[]{MotifCollection.class},"Only include data from this collection",false,false),
-             new Parameter("Sort by",String.class,SORT_BY_SEQUENCE_OCCURRENCES, new String[]{SORT_BY_MOTIF,SORT_BY_SEQUENCE_OCCURRENCES,SORT_BY_TOTAL_OCCURRENCES, SORT_BY_P_VALUE},"Sorting order for the results table",false,false),
-             new Parameter("Logos",String.class,MOTIF_LOGO_NO, new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_SHARED,MOTIF_LOGO_TEXT},"Include sequence logos in the table",false,false),
-             new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif will be output as the first column",false,false),       
-             new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false)       
-        };
+    public Parameter[] getOutputParameters(String dataformat) {             
+        Parameter incPar  = new Parameter("Include",MotifCollection.class,null,new Class[]{MotifCollection.class},"Only include data from this collection",false,false);
+        Parameter sortPar = new Parameter("Sort by",String.class,SORT_BY_SEQUENCE_OCCURRENCES, new String[]{SORT_BY_MOTIF,SORT_BY_SEQUENCE_OCCURRENCES,SORT_BY_TOTAL_OCCURRENCES, SORT_BY_P_VALUE},"Sorting order for the results table",false,false);
+        Parameter logos   = new Parameter("Logos",String.class,getMotifLogoDefaultOption(dataformat),getMotifLogoOptions(dataformat),"Include motif sequence logos in the table",false,false);
+        Parameter colPar  = new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif will be output as the first column",false,false); 
+        Parameter legend  = new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false);       
+        if (dataformat.equals(HTML)) return new Parameter[]{incPar,sortPar,logos,colPar};
+        if (dataformat.equals(EXCEL)) return new Parameter[]{incPar,sortPar,logos,legend};
+        if (dataformat.equals(RAWDATA)) return new Parameter[]{incPar,sortPar,logos};
+        return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Color boxes")) return new String[]{HTML};
-        if (parameter.equals("Legend")) return new String[]{EXCEL};
-        if (parameter.equals("Include") || parameter.equals("Sort by") || parameter.equals("Logos")) return new String[]{HTML,RAWDATA,EXCEL};        
-        return null;
-    }      
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Color boxes")) return new String[]{HTML};
+//        if (parameter.equals("Legend")) return new String[]{EXCEL};
+//        if (parameter.equals("Include") || parameter.equals("Sort by") || parameter.equals("Logos")) return new String[]{HTML,RAWDATA,EXCEL};        
+//        return null;
+//    }      
 
     @Override
     public String[] getResultVariables() {
@@ -344,11 +346,11 @@ public class MotifOccurrenceAnalysis extends Analysis {
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
         Color [] basecolors=vizSettings.getBaseColors();
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean showColorBoxes=false;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              include=(MotifCollection)settings.getResolvedParameter("Include",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
@@ -357,7 +359,7 @@ public class MotifOccurrenceAnalysis extends Analysis {
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+        boolean showSequenceLogos=includeLogosInOutput(showSequenceLogosString);
         ArrayList<Object[]> resultList=assembleList(sortorder,include,engine);
         engine.createHTMLheader("Motif Occurrence Analysis", null, null, true, true, true, outputobject);
         outputobject.append("<h1 class=\"headline\">Motif Occurrence Analysis</h1>\n",HTML);
@@ -479,10 +481,10 @@ public class MotifOccurrenceAnalysis extends Analysis {
     public OutputData formatRaw(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         String sortorder=SORT_BY_MOTIF;
         MotifCollection include=null;
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              include=(MotifCollection)settings.getResolvedParameter("Include",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
@@ -490,7 +492,7 @@ public class MotifOccurrenceAnalysis extends Analysis {
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));      
+        boolean showSequenceLogos=includeLogosInOutput(showSequenceLogosString);      
         ArrayList<Object[]> resultList=assembleList(sortorder,include,engine);
         outputobject.append("# Motif occurrence analysis with motifs from '"+motifCollectionName+"' and sites from '"+motifTrackName+"'",RAWDATA);
         if (withinRegionsTrackName!=null) {            
@@ -564,7 +566,7 @@ public class MotifOccurrenceAnalysis extends Analysis {
     public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         String sortorder=SORT_BY_MOTIF;
         MotifCollection include=null;
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean includeLegend=true;
         int logoheight=19;
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
@@ -572,30 +574,31 @@ public class MotifOccurrenceAnalysis extends Analysis {
         boolean border=(Boolean)vizSettings.getSettingAsType("motif.border", Boolean.TRUE);        
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);        
         if (settings!=null) {
-          try {
-             Parameter[] defaults=getOutputParameters();
-             sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
-             include=(MotifCollection)settings.getResolvedParameter("Include",defaults,engine);
-             showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);             
-             includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine);
-          }
-          catch (ExecutionError e) {throw e;}
-          catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
+            try {
+                Parameter[] defaults=getOutputParameters(format);
+                sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
+                include=(MotifCollection)settings.getResolvedParameter("Include",defaults,engine);
+                showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);             
+                includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine);
+            }
+            catch (ExecutionError e) {throw e;}
+            catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showLogosAsImages=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED));           
-        boolean showSequenceLogos=(showLogosAsImages || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));      
+        
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);         
+        boolean showLogosAsImages = includeLogosInOutputAsImages(showSequenceLogosString);              
+     
         ArrayList<Object[]> resultList=assembleList(sortorder,include,engine);
         int rownum=0;
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName());
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Motif occurrences");
         CreationHelper helper = (showLogosAsImages)?workbook.getCreationHelper():null;
         Drawing drawing = (showLogosAsImages)?sheet.createDrawingPatriarch():null;       
         
-        CellStyle title=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, (short)0, HSSFCellStyle.ALIGN_LEFT, false);      
-        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);
-        CellStyle tableheader=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_CENTER, true);      
-        CellStyle significant=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, HSSFColor.CORAL.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle verysignificant=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, HSSFColor.RED.index, HSSFCellStyle.ALIGN_RIGHT, false);      
+        CellStyle title=getExcelTitleStyle(workbook);
+        CellStyle tableheader=getExcelTableHeaderStyle(workbook);      
+        CellStyle significant=createExcelStyle(workbook, BorderStyle.NONE, vizSettings.getSystemColor("significant"), HorizontalAlignment.RIGHT, false); //   
+        CellStyle verysignificant=createExcelStyle(workbook, BorderStyle.NONE, vizSettings.getSystemColor("verysignificant"), HorizontalAlignment.RIGHT, false);    
         
         // Make room for the header which will be added later
 
@@ -664,13 +667,19 @@ public class MotifOccurrenceAnalysis extends Analysis {
                         int width=motif.getLength();
                         if (width>maxlogowidth) maxlogowidth=width;
                         byte[] image=getMotifLogoImageAsByteArray(sequencelogo, logoheight, border, "png");
-                        int imageIndex=workbook.addPicture(image, HSSFWorkbook.PICTURE_TYPE_PNG);
+                        int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
                         ClientAnchor anchor = helper.createClientAnchor();
                         anchor.setCol1(logocolumn);
                         anchor.setRow1(rownum);
-                        anchor.setAnchorType(ClientAnchor.MOVE_DONT_RESIZE);
+                        anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
                         Picture pict=drawing.createPicture(anchor, imageIndex);	
                         pict.resize();
+                        int offsetX=25000;
+                        int offsetY=25000;
+                        anchor.setDx1(offsetX);
+                        anchor.setDy1(offsetY);    
+                        anchor.setDx2(anchor.getDx2()+offsetX);
+                        anchor.setDy2(anchor.getDy2()+offsetY);                        
                     } catch (Exception e) {e.printStackTrace(System.err);}
                 }
                 else outputStringValuesInCells(row, new String[]{motif.getConsensusMotif()}, logocolumn);
@@ -684,9 +693,8 @@ public class MotifOccurrenceAnalysis extends Analysis {
             }
         }
         format.setProgress(95);  
-        for (short i=0;i<col;i++) {
-            sheet.autoSizeColumn(i);               
-        }
+
+        autoSizeExcelColumns(sheet, 0, col-1, 800);
         if (!showLogosAsImages) sheet.autoSizeColumn((short)logocolumn);   
              
         // Add the header on top of the page
@@ -732,7 +740,7 @@ public class MotifOccurrenceAnalysis extends Analysis {
         }
         
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);

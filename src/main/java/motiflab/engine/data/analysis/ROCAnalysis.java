@@ -15,8 +15,11 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -36,8 +40,28 @@ import motiflab.engine.ParameterSettings;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.Parameter;
 import motiflab.engine.TaskRunner;
+import static motiflab.engine.data.analysis.Analysis.EXCEL;
 import motiflab.engine.dataformat.DataFormat;
 import motiflab.gui.VisualizationSettings;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.XDDFLineProperties;
+import org.apache.poi.xddf.usermodel.XDDFSolidFillProperties;
+import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFLineChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -84,7 +108,7 @@ public class ROCAnalysis extends Analysis {
         addParameter("Score property",String.class, "score",null,"The property that will be used to sort the regions in descending order",false,false);
         addParameter("Feature property",String.class, "",null,"If defined, regions will be devided into groups based on the value of this property and a ROC curve will be derived for each group",false,false);
         addParameter("Class property",String.class, "",null,"A boolean or text property that classifies the region as belonging to either the positive or negative class",true,false);
-        addParameter("Positive class",String.class, "true",null,"If the 'Class property' is a text property, this parameter should specify the value denoting positive regions",true,false);
+        addParameter("Positive class",String.class, "true",null,"If the 'Class property' is NOT a boolean property, a region will be regarded as a positive instance if the value of the Class property equals the value entered here",true,false);
         addParameter("Sequences",SequenceCollection.class, null,new Class[]{SequenceCollection.class},"If specified, the analysis will be limited to the sequences in this collection",false,false);
         addParameter("Threshold",String.class, "Above or equal",new String[]{"Above or equal","Strictly above"},"Decides whether to classify all positions with a score 'above or equal' to a threshold as positive instances or just those with scores 'strictly above' the threshold",false,false);
     }
@@ -92,20 +116,21 @@ public class ROCAnalysis extends Analysis {
     @Override
     public String[] getSourceProxyParameters() {return new String[]{"Target track","Priors track"};} 
     
-    /** Returns a list of output parameters that can be set when an Analysis is output */
+
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
+    public Parameter[] getOutputParameters(String dataformat) {
+        if (dataformat.equals(HTML)) return new Parameter[] {
               new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false),
               new Parameter("Include legend",String.class,"",null,"<html>This argument can be used to include a legend box as part of the figure itself.<br>If used, this argument should be either a single positive value or three values separated by comma.<br>The first value will be the %-scale the legend box should be displayed at.<br>The optional second and third values are interpreted as a coordinate at which to display the legend box.<br>Positive coordinates are offset down and to the right relative to an origin in the upper left corner.<br>Negative values are offset left and upwards relative to an origin in the lower right corner.</html>",false,false)
         };
+        else return new Parameter[0];
     }
 
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Graph scale") || parameter.equals("Include legend")) return new String[]{"HTML"};
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Graph scale") || parameter.equals("Include legend")) return new String[]{"HTML"};
+//        return null;
+//    }     
     
     @Override
     public String getAnalysisName() {
@@ -288,7 +313,7 @@ public class ROCAnalysis extends Analysis {
         double[] includeLegend=null;             
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
              legendScaleString=(String)settings.getResolvedParameter("Include legend",defaults,engine);             
           }
@@ -366,11 +391,12 @@ public class ROCAnalysis extends Analysis {
         outputobject.append("<td style=\"border-width: 0px;\" valign=\"top\" align=\"center\"><img src=\"file:///"+rocImageFile.getAbsolutePath()+"\" /></td>\n",HTML);
         outputobject.append("<td style=\"border-width: 0px;\" valign=\"top\" align=\"center\"><img src=\"file:///"+precisionRecallImageFile.getAbsolutePath()+"\" /></td>\n",HTML);
         outputobject.append("</tr>\n</table>\n",HTML);
-        outputobject.append("These graphs summarize the ability of the region property \"<span class=\"dataitem\">"+scoreProperty+"</span>\" to discriminate between <font color=\"#FF0000\">"+truePositive+" positive</font> and <font color=\"#0000FF\">"+trueNegative+" negative</font> regions in <span class=\"dataitem\">"+regionDatasetName+"</span>.<br><br>\n",HTML);
+        outputobject.append("These graphs summarize the ability of the region property \"<span class=\"dataitem\">"+scoreProperty+"</span>\" to discriminate between <font color=\"#FF0000\">"+truePositive+" positive</font> and <font color=\"#0000FF\">"+trueNegative+" negative</font> regions in <span class=\"dataitem\">"+regionDatasetName+"</span>.\n",HTML);
+        outputobject.append("True positive regions are those whose value of the \"<span class=\"dataitem\">"+classProperty+"</span>\" property equals \""+positiveClassValue+"\". All other regions are considered to be true negatives.<br><br>",HTML);
         outputobject.append("The evaluation assumes that all regions with a value of <span class=\"dataitem\">"+scoreProperty+"</span> ",HTML);
         if (aboveOrEqual) outputobject.append("greater than or equal to",HTML);
         else outputobject.append("strictly greater than",HTML);
-        outputobject.append(" some threshold are <i>predicted</i> as positive while regions scoring ",HTML);
+        outputobject.append(" some varying threshold are <i>predicted</i> as positive, while regions scoring ",HTML);
         if (aboveOrEqual) outputobject.append("below",HTML);
         else outputobject.append("equal to or below",HTML);        
         outputobject.append(" the threshold are <i>predicted</i> as negative.<br><br>",HTML);
@@ -447,6 +473,13 @@ public class ROCAnalysis extends Analysis {
         ArrayList<String> names=new ArrayList<String>(ROCmap.size());
         for (String s:ROCmap.keySet()) names.add(s);
         Collections.sort(names, new AUCSortComparator());
+        VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();        
+        if (featureProperty.equals("type")) { // filter based on visibility if the featureProperty is type
+            for (Iterator<String> iterator = names.iterator(); iterator.hasNext();) {
+                String type = iterator.next();
+                if (!vizSettings.isRegionTypeVisible(type)) iterator.remove();
+            }            
+        }        
         File rocImageFile=outputobject.createDependentFile(engine,"png");
         try {
             saveMultipleROCGraphAsImage(rocImageFile, engine, scale, legendscale);
@@ -457,22 +490,27 @@ public class ROCAnalysis extends Analysis {
         outputobject.append("<div align=\"center\">\n",HTML);       
         outputobject.append("<h2 class=\"headline\">ROC curves showing the ability of property \""+scoreProperty+"\" to discriminate between positive and negative regions in "+regionDatasetName+"</h2>",HTML);
         outputobject.append("Regions where grouped by the property \""+featureProperty+"\". ",HTML);
+        outputobject.append("True positive regions are those whose value of the \"<span class=\"dataitem\">"+classProperty+"</span>\" property equals \""+positiveClassValue+"\". All other regions are considered to be true negatives.<br><br>",HTML);
+        outputobject.append("The evaluation assumes that all regions with a value of <span class=\"dataitem\">"+scoreProperty+"</span> ",HTML);
+        if (aboveOrEqual) outputobject.append("greater than or equal to",HTML);
+        else outputobject.append("strictly greater than",HTML);
+        outputobject.append(" some varying threshold are <i>predicted</i> as positive while regions scoring ",HTML);
+        if (aboveOrEqual) outputobject.append("below",HTML);
+        else outputobject.append("equal to or below",HTML);        
+        outputobject.append(" the threshold are <i>predicted</i> as negative.<br><br>",HTML);        
         outputobject.append("Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":""),HTML);
         if (sequenceCollectionName!=null) outputobject.append(" from collection <span class=\"dataitem\">"+sequenceCollectionName+"</span>",HTML);
         outputobject.append("<br>",HTML);
         outputobject.append("<table>",HTML);
         outputobject.append("<tr><td style=\"border-width: 0px;\" align=\"center\"><img src=\"file:///"+rocImageFile.getAbsolutePath()+"\" /><br><h2>ROC<h2></td><td style=\"border-width: 0px;\" width=\"30\"></td>",HTML);
         outputobject.append("<td style=\"border-width: 0px;\">\n<table class=\"sortable\">\n",HTML);
-        outputobject.append("<tr><th colspan=2>Feature</th><th class=\"sorttable_numeric\">AUC</th></tr>\n",HTML);
-        VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
+        outputobject.append("<tr><th colspan=2>"+featureProperty+"</th><th class=\"sorttable_numeric\">AUC</th></tr>\n",HTML);
         for (int i=0;i<names.size();i++) {
             String featurename=names.get(i);
             double AUCvalue=AUCmap.get(featurename);
             Color useColor=Color.BLACK;
-            if (vizSettings!=null) {
-                if (!vizSettings.isRegionTypeVisible(featurename)) continue;
-                useColor=vizSettings.getFeatureColor(featurename);
-            } else useColor=getPaletteColor(i);
+            if (featureProperty.equals("type")) useColor=vizSettings.getFeatureColor(featurename);
+            else useColor=getPaletteColor(i);
             String colorString=VisualizationSettings.convertColorToHTMLrepresentation(useColor);             
             outputobject.append("<tr><td><div style=\"width:10px;height:10px;border:1px solid #000;background-color:"+colorString+";\"></div></td><td style=\"color:"+colorString+"\">"+featurename+"&nbsp;&nbsp;&nbsp;</td><td class=\"num\" style=\"color:"+colorString+"\">"+decimalformatter.format(AUCvalue)+"</td></tr>\n",HTML);
         }
@@ -482,10 +520,302 @@ public class ROCAnalysis extends Analysis {
         outputobject.append("</body>\n</html>\n",HTML);
         if (format!=null) format.setProgress(100);
         return outputobject;
-
-
     }
 
+   @Override
+    public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        if (ROCmap==null) return formatExcelsingleFeature(outputobject, engine, settings, task, format);
+        else return formatExcelmultipleFeatures(outputobject, engine, settings, task, format);
+    }
+    
+    private OutputData formatExcelsingleFeature(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        XSSFWorkbook workbook=null;
+        try {
+            InputStream stream = CompareRegionDatasetsAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_ROC.xlsx");
+            workbook = new XSSFWorkbook(stream);
+            stream.close();
+            XSSFSheet sheet = workbook.getSheetAt(0);   // just use the first sheet 
+          
+            int toprow=100; // the data starts at row 101 (1-indexed) in the Excel template
+            
+            if (format!=null) format.setProgress(10); 
+            
+            // Set up data for ROC-curve
+            for (int i=0;i<=resolution;i++) {
+                // double xValue = ((double)i)/100.0;
+                double rocValue = ROCvalues[i];
+                Row row = sheet.getRow(toprow+i);
+                int column = 1; // this is determined by the Excel template file    
+                row.getCell(column).setCellValue(rocValue);
+            }        
+            if (format!=null) format.setProgress(30);  
+            
+            // set up data for Precision-Recall curve
+            for (int i=0;i<=resolution;i++) {
+                double recall = ((double)i)/100.0;
+                double precision = PrecisionRecallvalues[i];
+                Row row = sheet.getRow(toprow+i);
+                int column = 3; // this is determined by the Excel template file    
+                row.getCell(column++).setCellValue(recall);
+                row.getCell(column++).setCellValue(precision);                
+            }             
+            if (format!=null) format.setProgress(50); 
+            
+            // set up data for all the statistics curves    
+            long truePositive=positiveCount.get(null);
+            long trueNegative=negativeCount.get(null);             
+            double[] sensitivity=getStatistic("sensitivity");
+            double[] specificity=getStatistic("specificity");
+            double[] ppv=getStatistic("PPV");
+            double[] npv=getStatistic("NPV");
+            double[] fpr=getStatistic("false positive rate");
+            double[] fnr=getStatistic("false negative rate");
+            double[] fdr=getStatistic("false discovery rate");
+            double[] fomr=getStatistic("false omission rate");
+            double[] acc=getStatistic("accuracy");
+            double[] perf=getStatistic("performance");
+            double[] discr=getStatistic("discrimination");
+            double[] avgsnsp=getStatistic("averageSnSp");        
+            double[] fmeasure=getStatistic("F-measure");           
+            double step=(maxScoreValue-minScoreValue)/(double)resolution;
+
+            for (int i=0;i<=resolution;i++) {
+                Row row = sheet.getRow(i+toprow); // 
+                double threshold=minScoreValue+(i*step);
+                int column=6; // this is determined by the Excel template file
+                row.getCell(column++).setCellValue(threshold);
+                row.getCell(column++).setCellValue(sensitivity[i]);
+                row.getCell(column++).setCellValue(specificity[i]);
+                row.getCell(column++).setCellValue(fpr[i]);
+                row.getCell(column++).setCellValue(avgsnsp[i]);
+                row.getCell(column++).setCellValue(discr[i]); 
+                row.getCell(column++).setCellValue(fmeasure[i]); 
+                row.getCell(column++).setCellValue(ppv[i]);
+                row.getCell(column++).setCellValue(npv[i]); 
+                row.getCell(column++).setCellValue(fdr[i]); 
+                row.getCell(column++).setCellValue(fnr[i]);
+                row.getCell(column++).setCellValue(fomr[i]); 
+                row.getCell(column++).setCellValue(perf[i]);
+                row.getCell(column++).setCellValue(acc[i]);
+            } 
+            if (format!=null) format.setProgress(70);            
+            // histograms
+            int numberOfBins=100; // this is hardcoded in the analysis below
+            double binSize = (maxScoreValue-minScoreValue)/((double)numberOfBins);           
+            for (int i=0;i<numberOfBins;i++) {
+                Row row = sheet.getRow(i+toprow); //
+                double binstart=minScoreValue+(binSize*i);
+                int column=21; // this is determined by the Excel template file 
+                row.getCell(column++).setCellValue(binstart);            
+                row.getCell(column++).setCellValue(positiveBins[i]);    
+                row.getCell(column++).setCellValue(negativeBins[i]);  
+                row.getCell(column++).setCellValue((double)positiveBins[i]/(double)truePositive);  
+                row.getCell(column++).setCellValue((double)negativeBins[i]/(double)trueNegative);              
+            }        
+            if (format!=null) format.setProgress(90);              
+            // Add all the text
+            String title = "Evaluation of property \""+scoreProperty+"\" for descriminating between positive and negative regions in \""+regionDatasetName+"\"";
+            String subtitle = "Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":"");
+            if (sequenceCollectionName!=null) subtitle+=" from collection \""+sequenceCollectionName+"\"";            
+            sheet.getRow(0).getCell(0).setCellValue(title);
+            sheet.getRow(2).getCell(1).setCellValue(subtitle);
+                                               
+            int rowIndex=22;
+            DecimalFormat decimalformatter=new DecimalFormat("0.#####");            
+            String line1 = "These graphs summarize the ability of the region propery \""+scoreProperty+"\" to discriminate between "+truePositive+" positive";
+            String line2 = "and "+trueNegative+" negative regions in \""+regionDatasetName+"\". True positive regions are those whose value of the \""+classProperty+"\" property equals \""+positiveClassValue+"\".";
+            String line3= "All other regions are considered to be true negatives.";            
+            String line4 = "The evaluation assumes that all bases with a value of \""+scoreProperty+"\" ";
+            line4 += ((aboveOrEqual)?"greater than or equal to":"strictly greater than")+" some threshold";
+            String line5= "are predicted as positive regions, while bases scoring "+((aboveOrEqual)?"below":"equal to or below");
+            line5+=" the threshold are predicted as negative.";
+            String line6 = "The performance of this property, as evaluated by the Area Under The Curve of the ROC-graph, is "+decimalformatter.format(AUC)+", which is "+getEvaluationOfAUC(AUC)+".";            
+            String line7 = "The graphs on the right show how different performance statistics vary according to different threshold levels on the X-axis.";
+            
+            setCellValue(sheet, rowIndex++, 0, line1);
+            setCellValue(sheet, rowIndex++, 0, line2);
+            setCellValue(sheet, rowIndex++, 0, line3);
+            setCellValue(sheet, rowIndex++, 0, line4);
+            setCellValue(sheet, rowIndex++, 0, line5);
+            setCellValue(sheet, rowIndex++, 0, line6);            
+            setCellValue(sheet, rowIndex++, 0, "");  
+            setCellValue(sheet, rowIndex++, 0, line7);         
+            
+            if (optimalThresholdBestSnSpsum.size()==1) {
+                double[] range=optimalThresholdBestSnSpsum.get(0);
+                String lineOptimal="The best trade-off between sensitivity and specificity is obtained with the ";
+                if (range[0]==range[1]) lineOptimal+="threshold "+decimalformatter.format(range[0])+".";
+                else lineOptimal+="threshold in the range ["+decimalformatter.format(range[0])+","+decimalformatter.format(range[1])+"].";
+                setCellValue(sheet, rowIndex++, 0, lineOptimal);
+            } else {
+                String lineOptimal="The distribution of \""+scoreProperty+"\" allows for multiple different thresholds which can achieve optimal trade-off between sensitivity and specificity:";
+                setCellValue(sheet, rowIndex++, 0, lineOptimal);
+                for (double[] range:optimalThresholdBestSnSpsum) {
+                   if (range[0]==range[1]) setCellValue(sheet, rowIndex++, 1, decimalformatter.format(range[0]));
+                   else setCellValue(sheet, rowIndex++, 1, decimalformatter.format(range[0])+" - "+decimalformatter.format(range[1]));;
+                }
+            }           
+            if (optimalThresholdBestAccuracy.size()==1) {
+                double[] range=optimalThresholdBestAccuracy.get(0);
+                String lineOptimal="The highest obtainable accuracy (% of all correctly predicted bases) is "+decimalformatter.format(bestAccuracy);
+                if (range[0]==range[1]) lineOptimal+=" with the threshold "+decimalformatter.format(range[0])+".";
+                else lineOptimal+=" with a threshold in the range ["+decimalformatter.format(range[0])+","+decimalformatter.format(range[1])+"].";
+                setCellValue(sheet, rowIndex++, 0, lineOptimal);
+            } else {
+                String lineOptimal="The highest obtainable accuracy (% of all correctly predicted bases) is "+decimalformatter.format(bestAccuracy)+".";
+                lineOptimal+="The distribution of  \""+scoreProperty+"\" allows for multiple different thresholds which can achieve optimal accuracy:";
+                setCellValue(sheet, rowIndex++, 0, lineOptimal);
+                for (double[] range:optimalThresholdBestAccuracy) {
+                   if (range[0]==range[1]) setCellValue(sheet, rowIndex++, 1, decimalformatter.format(range[0]));
+                   else setCellValue(sheet, rowIndex++, 1, decimalformatter.format(range[0])+" - "+decimalformatter.format(range[1]));;
+                }
+            }   
+//            String line7 = "Note that the optimal accuracy-threshold can differ from the threshold for best sensitivity/specificity if the ratio";
+//            String line8 = "between the number of positive versus negative regions is skewed. ";
+//            line8+= "In this dataset the inside-to-outside ratio is ";
+//            if (inside<outside) line8+="1:"+decimalformatter.format((double)outside/(double)inside)+".";
+//            else line8+=decimalformatter.format((double)inside/(double)outside)+":1.";  
+//            setCellValue(sheet, rowIndex++, 0, line7);
+//            setCellValue(sheet, rowIndex++, 0, line8);             
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw new ExecutionError(e.getMessage());
+        }
+       
+        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
+        try {
+            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
+            workbook.write(stream);
+            stream.close();
+        } catch (Exception e) {
+            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+        }
+        outputobject.setBinary(true);        
+        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
+        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
+        return outputobject;   
+    }
+    
+    private Cell setCellValue(XSSFSheet sheet, int row, int column, String value) {
+        Row r = sheet.getRow(row);
+        if (r==null) r=sheet.createRow(row);
+        Cell cell = r.getCell(column);
+        if (cell==null) cell=r.createCell(column);
+        cell.setCellValue(value);
+        return cell;
+    }
+    
+    private Cell setCellValue(XSSFSheet sheet, int row, int column, double value) {
+        Row r = sheet.getRow(row);
+        if (r==null) r=sheet.createRow(row);
+        Cell cell = r.getCell(column);
+        if (cell==null) cell=r.createCell(column);
+        cell.setCellValue(value);
+        return cell;
+    }    
+
+    private OutputData formatExcelmultipleFeatures(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        XSSFWorkbook workbook=null;
+        try {
+            InputStream stream = CompareRegionDatasetsAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_ROC_multiple.xlsx");
+            workbook = new XSSFWorkbook(stream);
+            stream.close();
+            XSSFSheet sheet = workbook.getSheetAt(0);   // 
+            XSSFSheet datasheet = workbook.getSheetAt(1);   // 
+            // update the data range of the histogram
+            XSSFDrawing drawing = ((XSSFSheet)sheet).createDrawingPatriarch();           
+            XSSFChart rocChart = drawing.getCharts().get(0);
+            // Access the chart data
+            XDDFChartData data = rocChart.getChartSeries().get(0);
+            CellStyle tableheaderstyle = getExcelTableHeaderStyle(workbook);
+                     
+            if (format!=null) format.setProgress(10);   
+            ArrayList<String> names=new ArrayList<String>(ROCmap.size());
+            for (String s:ROCmap.keySet()) names.add(s);
+            Collections.sort(names, new AUCSortComparator());
+            VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
+            if (featureProperty.equals("type")) { // filter based on visibility if the featureProperty is type
+                for (Iterator<String> iterator = names.iterator(); iterator.hasNext();) {
+                    String type = iterator.next();
+                    if (!vizSettings.isRegionTypeVisible(type)) iterator.remove();
+                }            
+            }   
+            int toprow=1; //
+            int numdatarows=101;
+            XDDFDataSource<Double> xValues = XDDFDataSourcesFactory.fromNumericCellRange(datasheet, new CellRangeAddress(toprow, toprow+numdatarows-1, 0, 0)); // X values
+            
+            int row = 8; // determined by the Excel template file
+            int column = 8; // determined by the Excel template file
+            int datacolumn = 2;
+            Color bgcolor = new Color(255,255,220);
+            CellStyle valueCellStyle=createExcelStyle(workbook, BorderStyle.THIN, null, bgcolor, HorizontalAlignment.RIGHT, VerticalAlignment.CENTER);
+            for (int i=0;i<names.size();i++) {
+                String featurename=names.get(i);
+                Color useColor=Color.BLACK;
+                if (featureProperty.equals("type")) useColor=vizSettings.getFeatureColor(featurename);
+                else useColor=getPaletteColor(i);                
+                double AUCvalue=AUCmap.get(featurename);
+                CellStyle style=createExcelStyle(workbook, BorderStyle.THIN, useColor, bgcolor, HorizontalAlignment.LEFT, VerticalAlignment.CENTER);                
+                setCellValue(sheet, row, column, featurename).setCellStyle(style);
+                setCellValue(sheet, row, column+1, AUCvalue).setCellStyle(valueCellStyle);
+                double[] values=ROCmap.get(featurename);
+                // add data to the second sheet
+                for (int j=0;j<=resolution;j++) {
+                    setCellValue(datasheet,toprow+j,datacolumn,values[j]);
+                } 
+                XDDFNumericalDataSource<Double> newSeriesData = XDDFDataSourcesFactory.fromNumericCellRange(datasheet, new CellRangeAddress(toprow, toprow+numdatarows-1, datacolumn, datacolumn));                
+                XDDFLineChartData.Series newSeries = (XDDFLineChartData.Series) data.addSeries(xValues, newSeriesData);
+                newSeries.setTitle(featurename, null);   
+                XDDFSolidFillProperties fillProperties = getExcelFillColor(useColor);
+                XDDFLineProperties lineProperties = new XDDFLineProperties();
+                lineProperties.setFillProperties(fillProperties);
+                lineProperties.setWidth(2.0);
+                newSeries.setLineProperties(lineProperties);
+                newSeries.setMarkerStyle(MarkerStyle.NONE);
+                newSeries.setSmooth(true);           
+
+                setCellValue(datasheet,toprow-1,datacolumn,featurename).setCellStyle(tableheaderstyle); // header (not really used)
+                datacolumn++;
+                row++;
+            }       
+            rocChart.plot(data);            
+            if (format!=null) format.setProgress(90);              
+            // Add all the text            
+            String title = "ROC analysis";
+            String line1 = "These ROC curves show the ability of region property \""+scoreProperty+"\" to discriminate between positive and negative regions in \""+regionDatasetName+"\" (grouped by \""+featureProperty+"\")";
+            String line2 = "True positive regions are those whose value of the \""+classProperty+"\" property equals \""+positiveClassValue+"\". All other regions are considered to be true negatives.";
+            String line3 = "Regions that score "+((aboveOrEqual)?"above or equal to":"stricly above")+" a varying threshold of the property \""+scoreProperty+"\" are PREDICTED as positive instances.";
+            String line4 = "Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":"");
+            if (sequenceCollectionName!=null) line3+=" from collection \""+sequenceCollectionName+"\"";            
+            sheet.getRow(0).getCell(0).setCellValue(title);
+            sheet.getRow(2).getCell(1).setCellValue(line1);
+            sheet.getRow(3).getCell(1).setCellValue(line2); 
+            sheet.getRow(4).getCell(1).setCellValue(line3);
+            sheet.getRow(5).getCell(1).setCellValue(line4);   
+            
+            sheet.getRow(7).getCell(8).setCellValue(featureProperty); // Replace the generic "feature" header in the template with the name of the actual feature
+            
+        } catch (Exception e) {
+            // e.printStackTrace(System.err);
+            throw new ExecutionError(e.getMessage());
+        }
+       
+        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
+        try {
+            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
+            workbook.write(stream);
+            stream.close();
+        } catch (Exception e) {
+            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+        }
+        outputobject.setBinary(true);        
+        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
+        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
+        return outputobject;             
+    }   
 
 
 
@@ -497,10 +827,11 @@ public class ROCAnalysis extends Analysis {
 
     private OutputData formatRAWsingleFeature(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         DecimalFormat decimalformatter=new DecimalFormat("0.#####");
-        outputobject.append("#Evaluation of the ability of property \""+scoreProperty+"\" to discriminate between positive and negative regions in \""+regionDatasetName+"\"\n",RAWDATA);
+        outputobject.append("#Evaluation of the ability of region property \""+scoreProperty+"\" to discriminate between positive and negative regions in \""+regionDatasetName+"\".\n",RAWDATA);
+        outputobject.append("#True positive regions are those whose value of the \""+classProperty+"\" property equals \""+positiveClassValue+"\". All other regions are considered to be true negatives.\n",RAWDATA);        
+        outputobject.append("#Regions that score "+((aboveOrEqual)?"above or equal to":"stricly above")+" a varying threshold of the property \""+scoreProperty+"\" are PREDICTED as positive instances.\n",RAWDATA);
         outputobject.append("#Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":""),RAWDATA);
-        if (sequenceCollectionName!=null) outputobject.append(" from collection '"+sequenceCollectionName+"'",RAWDATA);
-        outputobject.append("#Regions that score "+((aboveOrEqual)?"above or equal to":"stricly above")+" a threshold are considered positive instances\n",RAWDATA);
+        if (sequenceCollectionName!=null) outputobject.append(" from collection '"+sequenceCollectionName+"'",RAWDATA);        
         outputobject.append("\n",RAWDATA);
         outputobject.append("AUC="+AUC+"\n",RAWDATA);
         if (optimalThresholdBestSnSpsum.size()==1) {
@@ -524,6 +855,77 @@ public class ROCAnalysis extends Analysis {
                else outputobject.append("Best accuracy threshold=["+decimalformatter.format(range[0])+" - "+decimalformatter.format(range[1])+"\n",HTML);
            }
         }
+        outputobject.append("\n\n",RAWDATA);
+        if (format!=null) format.setProgress(20);   
+        outputobject.append("#X-value\tROC\n",RAWDATA);   
+        for (int i=0;i<=resolution;i++) {
+            double xValue = ((double)i)/100.0;
+            double rocValue = ROCvalues[i];
+            outputobject.append(xValue+"\t"+rocValue+"\n", RAWDATA);
+        }        
+        
+        outputobject.append("\n\n",RAWDATA);
+        
+        if (format!=null) format.setProgress(40);   
+        outputobject.append("#Recall\tPrecision\n",RAWDATA);
+        for (int i=0;i<=resolution;i++) {
+            double recall = ((double)i)/100.0;
+            double precision = PrecisionRecallvalues[i];
+            outputobject.append(recall+"\t"+precision+"\n", RAWDATA);
+        }     
+        
+        outputobject.append("\n\n",RAWDATA);
+        
+        if (format!=null) format.setProgress(60);
+        outputobject.append("\n\n",RAWDATA);
+        outputobject.append("#Threshold\tSn\tSp\tFPR\tAvg Sn&Sp\tDist Sn-FDR\tF-measure\tPPV\tNPV\tFDR\tFNR\tFOR\tPerformace\tAccuracy\n",RAWDATA);
+        double[] sensitivity=getStatistic("sensitivity");
+        double[] specificity=getStatistic("specificity");
+        double[] ppv=getStatistic("PPV");
+        double[] npv=getStatistic("NPV");
+        double[] fpr=getStatistic("false positive rate");
+        double[] fnr=getStatistic("false negative rate");
+        double[] fdr=getStatistic("false discovery rate");
+        double[] fomr=getStatistic("false omission rate");
+        double[] acc=getStatistic("accuracy");
+        double[] perf=getStatistic("performance");
+        double[] discr=getStatistic("discrimination");
+        double[] avgsnsp=getStatistic("averageSnSp");        
+        double[] fmeasure=getStatistic("F-measure");           
+        double step=(maxScoreValue-minScoreValue)/(double)resolution;
+        for (int i=0;i<=resolution;i++) {
+            double threshold=minScoreValue+(i*step);
+            outputobject.append(""+threshold,RAWDATA);
+            outputobject.append("\t"+sensitivity[i],RAWDATA);
+            outputobject.append("\t"+specificity[i],RAWDATA); 
+            outputobject.append("\t"+fpr[i],RAWDATA);
+            outputobject.append("\t"+avgsnsp[i],RAWDATA);
+            outputobject.append("\t"+discr[i],RAWDATA); 
+            outputobject.append("\t"+fmeasure[i],RAWDATA); 
+            outputobject.append("\t"+ppv[i],RAWDATA);
+            outputobject.append("\t"+npv[i],RAWDATA); 
+            outputobject.append("\t"+fdr[i],RAWDATA); 
+            outputobject.append("\t"+fnr[i],RAWDATA);
+            outputobject.append("\t"+fomr[i],RAWDATA); 
+            outputobject.append("\t"+perf[i],RAWDATA); 
+            outputobject.append("\t"+acc[i],RAWDATA);    
+            outputobject.append("\n",RAWDATA);   
+        }        
+         if (format!=null) format.setProgress(80);       
+        // histograms
+        int numberOfBins=100; // this is hardcoded in the analysis below
+        double binSize = (maxScoreValue-minScoreValue)/((double)numberOfBins); 
+        outputobject.append("\n\n#Histogram\n",RAWDATA);
+        outputobject.append("#Threshold\tPositive\tNegative\tPositive normalized\tNegative normalized\n",RAWDATA);              
+        for (int i=0;i<numberOfBins;i++) {
+            double binstart=minScoreValue+(binSize*i);
+            outputobject.append(""+binstart,RAWDATA);            
+            outputobject.append("\t"+positiveBins[i],RAWDATA);    
+            outputobject.append("\t"+negativeBins[i],RAWDATA);  
+            outputobject.append("\t"+((double)positiveBins[i]/(double)positiveCount.get(null)),RAWDATA);  
+            outputobject.append("\t"+((double)negativeBins[i]/(double)negativeCount.get(null)),RAWDATA);   
+            outputobject.append("\n",RAWDATA);             
+        }             
         if (format!=null) format.setProgress(100);
         return outputobject;
     }
@@ -532,8 +934,11 @@ public class ROCAnalysis extends Analysis {
         ArrayList<String> names=new ArrayList<String>(ROCmap.size());
         for (String s:ROCmap.keySet()) names.add(s);
         Collections.sort(names, new AUCSortComparator());
-        VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
-        outputobject.append("#ROC curves for the discriminatory capability of property \""+regionDatasetName+"\" for different groups of regions in \""+regionDatasetName+"\" (grouped by \""+featureProperty+"\"), as measured by the Area Under the Curve (AUC) of a ROC-curve\n",RAWDATA);
+        VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();       
+        outputobject.append("#Evaluation of the ability of region property \""+scoreProperty+"\" to discriminate between positive and negative regions in "+regionDatasetName+", as measured by the Area Under the Curve (AUC) of the ROC-curves.\n",RAWDATA);
+        outputobject.append("#Regions where grouped by the property \""+featureProperty+"\".\n",RAWDATA);
+        outputobject.append("#True positive regions are those whose value of the \""+classProperty+"\" property equals \""+positiveClassValue+"\". All other regions are considered to be true negatives.\n",RAWDATA);        
+        outputobject.append("#Regions that score "+((aboveOrEqual)?"above or equal to":"stricly above")+" a varying threshold of the property \""+scoreProperty+"\" are PREDICTED as positive instances.\n",RAWDATA);       
         outputobject.append("#Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":""),RAWDATA);
         if (sequenceCollectionName!=null) outputobject.append(" from collection '"+sequenceCollectionName+"'",RAWDATA);
         outputobject.append("\n",RAWDATA);
@@ -655,25 +1060,18 @@ public class ROCAnalysis extends Analysis {
         PrecisionRecallvalues=new double[resolution+1];
         double[] precision=getStatistic("PPV");
         double[] recall=getStatistic("sensitivity");
-        double minRecall=1;
-        double maxRecall=0;
-        int minRecallIndex=resolution;
-        int maxRecallIndex=0;
-        for (int i=0;i<=resolution;i++) {  
-            if (recall[i]>=maxRecall) {maxRecall=recall[i];if (i>maxRecallIndex);maxRecallIndex=i;}
-            if (recall[i]<=minRecall) {minRecall=recall[i];if (i<minRecallIndex);minRecallIndex=i;}
+        double lastvalid=0;    
+        for (int i=resolution;i>=0;i--) {  
             ArrayList<Integer> thresholds=getThresholdsForRecallRange((double)i/(double)resolution,(double)(i+1)/(double)resolution,recall);
-            double bestPrecision=getHighestPrecisionForThreshold(thresholds,precision);
-            PrecisionRecallvalues[i]=bestPrecision;
-            // System.err.println("["+i+"]{"+threshold+"} TP="+TPFPTNFN[i][0]+", FP="+TPFPTNFN[i][1]+", TN="+TPFPTNFN[i][2]+", FN="+TPFPTNFN[i][3]+"    besttotal="+besttotal+"    bestAccuracy="+bestaccuracy);
+            if (thresholds.isEmpty()) {
+                PrecisionRecallvalues[i]=lastvalid; // for missing values, interpolate with last valid value
+            } else  {
+                double bestPrecision=getHighestPrecisionForThreshold(thresholds,precision);
+                PrecisionRecallvalues[i]=bestPrecision;
+                lastvalid=bestPrecision;
+            }
         }
-        double lastvalid=0;
-        // interpolate missing values
-        for (int i=maxRecallIndex;i>=minRecallIndex;i--) {
-             double current=PrecisionRecallvalues[i];
-             if (current!=-Double.MAX_VALUE) lastvalid=current;
-             else PrecisionRecallvalues[i]=lastvalid;
-        }        
+        
         task.setProgress(95); //
         task.setStatusMessage("Executing analysis: "+getAnalysisName()+"  (Finding optimal thresholds)");
         if (Thread.interrupted() || task.getStatus().equals(ExecutableTask.ABORTED)) throw new InterruptedException();
@@ -773,7 +1171,17 @@ public class ROCAnalysis extends Analysis {
     
     private void calculateROCsForMultipleGroups(ArrayList<Sequence> sequences, RegionDataset regionTrack, OperationTask task) throws Exception {
         int totalsize=0; // this is used for progress...
-        HashSet<String> types=regionTrack.getAllRegionTypes();        
+        // HashSet<String> types=regionTrack.getAllRegionTypes();
+        HashSet<String> types = new HashSet<>();
+        for (FeatureSequenceData seq: regionTrack.getAllSequences()) {
+            RegionSequenceData regionSeq = (RegionSequenceData)seq;
+            for (Region region:regionSeq.getAllRegions()) {
+                Object value = region.getProperty(featureProperty);
+                if (value==null) types.add("undefined");
+                else types.add(value.toString());
+                // if (types.size()>1000)) break; // set a hard limit on the number of groups?
+            }
+        }       
         int sequencesSize=sequences.size(); // number of sequences to process
         int steps=types.size()*sequencesSize;
         
@@ -801,9 +1209,9 @@ public class ROCAnalysis extends Analysis {
                     }
                 }
             } catch (Exception e) {  
-               taskRunner.shutdownNow(); // Note: this will abort all executing tasks (even those that did not cause the exception), but that is OK. 
-               if (e instanceof java.util.concurrent.ExecutionException) throw (Exception)e.getCause(); 
-               else throw e; 
+                taskRunner.shutdownNow(); // Note: this will abort all executing tasks (even those that did not cause the exception), but that is OK. 
+                if (e instanceof java.util.concurrent.ExecutionException) throw (Exception)e.getCause(); 
+                else throw e; 
             }       
             if (countOK!=sequencesSize) {
                 throw new ExecutionError("Some mysterious error occurred while performing analysis: "+getAnalysisName());
@@ -1189,21 +1597,21 @@ public class ROCAnalysis extends Analysis {
         ArrayList<String> names=new ArrayList<String>(ROCmap.size());
         for (String s:ROCmap.keySet()) names.add(s);
         Collections.sort(names, new AUCSortComparator());
-        Color useColor=Color.BLACK;
-        int visiblecount=0;
         VisualizationSettings settings=engine.getClient().getVisualizationSettings();        
-        for (int i=0;i<names.size();i++) {
-            if (settings==null || settings.isTrackVisible(names.get(i))) visiblecount++;
-        } 
-        String[] sortedNames=new String[visiblecount];
-        Color[] sortedColors=new Color[visiblecount];
+        if (featureProperty.equals("type")) { // filter based on visibility if the featureProperty is type
+            for (Iterator<String> iterator = names.iterator(); iterator.hasNext();) {
+                String type = iterator.next();
+                if (!settings.isRegionTypeVisible(type)) iterator.remove();
+            }            
+        }
+        Color useColor=Color.BLACK;
+        String[] sortedNames=new String[names.size()];
+        Color[] sortedColors=new Color[names.size()];
         int index=0;
         for (int i=0;i<names.size();i++) {
             String featurename=names.get(i);
-            if (settings!=null) {
-                if (!settings.isRegionTypeVisible(featurename)) continue;
-                useColor=settings.getFeatureColor(featurename);
-            } else useColor=getPaletteColor(i);
+            if (featureProperty.equals("type")) useColor=settings.getFeatureColor(featurename);
+            else useColor=getPaletteColor(i);
             sortedNames[index]=featurename+" = "+decimalformatter.format(AUCmap.get(featurename));
             sortedColors[index]=useColor;
             double[] ROC=ROCmap.get(featurename);
@@ -1467,6 +1875,8 @@ public class ROCAnalysis extends Analysis {
             double FP=TPFPTNFN[i][1];
             double TN=TPFPTNFN[i][2];
             double FN=TPFPTNFN[i][3];
+            // If no positive predictions or no negative predictions are made, division by zero will occurr for some statistics, resulting in NaN values.
+            // This happens at edge-cases, where all bases are predicted as being either positive or negative. (threshold is at minimum or maximum value)            
                  if (statistic.equalsIgnoreCase("sensitivity")) result[i]=TP/(TP+FN);
             else if (statistic.equalsIgnoreCase("specificity")) result[i]=TN/(FP+TN);
             else if (statistic.equalsIgnoreCase("PPV")) result[i]=TP/(TP+FP);
@@ -1477,10 +1887,11 @@ public class ROCAnalysis extends Analysis {
             else if (statistic.equalsIgnoreCase("false ommision rate")) result[i]=1-TN/(TN+FN);
             else if (statistic.equalsIgnoreCase("accuracy")) result[i]=(TP+TN)/(TP+FP+TN+FN);
             else if (statistic.equalsIgnoreCase("performance")) result[i]=TP/(TP+FP+FN);
-            else if (statistic.equalsIgnoreCase("correlation")) result[i]=0;
+//          else if (statistic.equalsIgnoreCase("correlation")) result[i]=0; // not used yet
             else if (statistic.equalsIgnoreCase("discrimination")) result[i]=Math.abs(TP/(TP+FN)-(1-TN/(FP+TN))); // distance between sensitivity and FPR
             else if (statistic.equalsIgnoreCase("averageSnSp")) result[i]=((TP/(TP+FN))+(TN/(FP+TN)))/2; // average of Sn and Sp
             else if (statistic.equalsIgnoreCase("F-measure")) result[i]=(2*TP)/(2*TP+FN+FP); // harmonic mean of precision (PPV) and recall (sensitivity)
+            if (Double.isNaN(result[i])) result[i]=0; // to avoid NaN values                 
         }
         return result;
     }

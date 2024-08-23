@@ -4461,6 +4461,25 @@ public class VisualizationSettings implements ListDataListener, ExtendedDataList
    public static Color brighter(Color color) {
        return brighter(color, 0.7f);
    }
+   
+    /** Blends two colors as if they were paints/pigments (subtractive mixing) */
+    public static Color blendColors (Color color1, Color color2) {
+        float[] HSB1=Color.RGBtoHSB(color1.getRed(), color1.getGreen(), color1.getBlue(), null);
+        float[] HSB2=Color.RGBtoHSB(color2.getRed(), color2.getGreen(), color2.getBlue(), null);       
+        float minH=(HSB1[0]<HSB2[0])?HSB1[0]:HSB2[0];
+        float maxH=(HSB1[0]>HSB2[0])?HSB1[0]:HSB2[0];
+        float distUP=maxH-minH;
+        float distDOWN=(1-maxH+minH);
+        float newH=0;
+        if (distUP<=distDOWN) {
+           newH=minH+distUP/2.0f;
+        } else {
+           newH=minH-distDOWN/2.0f; 
+        }   
+        if (newH<0) newH=1+newH; //
+        if (newH>=1) newH=newH-1; //          
+        return Color.getHSBColor(newH, (HSB1[1]+HSB2[1])/2.0f, (HSB1[2]+HSB2[2])/2.0f);
+    }     
 
    public static Color parseColor(String colorstring) throws ParseError {
              if (colorstring.equalsIgnoreCase("BLACK")) return BLACK;

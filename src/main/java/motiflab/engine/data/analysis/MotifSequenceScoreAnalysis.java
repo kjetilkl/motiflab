@@ -82,18 +82,20 @@ public class MotifSequenceScoreAnalysis extends Analysis {
     }     
     
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Sort by",String.class,SORT_BY_AVERAGE, new String[]{SORT_BY_MOTIF,SORT_BY_MIN,SORT_BY_MAX, SORT_BY_AVERAGE,SORT_BY_RANGE},"Sorting order for the results table",false,false),
-             new Parameter("Logos",String.class,MOTIF_LOGO_NO, new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_SHARED,MOTIF_LOGO_TEXT},"Include sequence logos in the table",false,false),
-        };
+    public Parameter[] getOutputParameters(String dataformat) {  
+        if (dataformat.equals(HTML) || dataformat.equals(EXCEL) || dataformat.equals(RAWDATA)) {
+            return new Parameter[] {
+                new Parameter("Sort by",String.class,SORT_BY_AVERAGE, new String[]{SORT_BY_MOTIF,SORT_BY_MIN,SORT_BY_MAX, SORT_BY_AVERAGE,SORT_BY_RANGE},"Sorting order for the results table",false,false),
+                new Parameter("Logos",String.class,getMotifLogoDefaultOption(dataformat), getMotifLogoOptions(dataformat),"Include motif sequence logos in the table",false,false)
+            };
+        } else return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Sort by") || parameter.equals("Logos")) return new String[]{"HTML","RawData"};        
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Sort by") || parameter.equals("Logos")) return new String[]{"HTML","RawData"};        
+//        return null;
+//    }     
 
     @Override
     public String[] getResultVariables() {
@@ -224,17 +226,17 @@ public class MotifSequenceScoreAnalysis extends Analysis {
         String sortorder=SORT_BY_MOTIF;
         Color [] basecolors=engine.getClient().getVisualizationSettings().getBaseColors();
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
           }
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
 
         ArrayList<Object[]> resultList=assembleList(sortorder);
         engine.createHTMLheader("Motif-Sequence Score Analysis", null, null, true, true, true, outputobject);
@@ -306,17 +308,17 @@ public class MotifSequenceScoreAnalysis extends Analysis {
     @Override
     public OutputData formatRaw(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         String sortorder=SORT_BY_MOTIF;
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
           }
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
 
         ArrayList<Object[]> resultList=assembleList(sortorder);
         outputobject.append("# Motif-Sequence score analysis with motifs from '"+motifCollectionName+"' and sites from '"+motifTrackName+"'",RAWDATA);

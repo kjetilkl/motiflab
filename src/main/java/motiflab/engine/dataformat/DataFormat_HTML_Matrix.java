@@ -49,7 +49,7 @@ public class DataFormat_HTML_Matrix extends DataFormat {
     public DataFormat_HTML_Matrix() {      
         addOptionalParameter("Orientation",VERTICAL, new String[]{VERTICAL,HORIZONTAL},"<html>Vertical: matrix has N rows and 4 columns<br>Horizontal: matrix has 4 rows and N columns</html>");
         addOptionalParameter("Header","ID", new String[]{"ID","ID-Name","ID Name"},"Which properties of a motif to include in the header");
-        addOptionalParameter("Logos",Analysis.MOTIF_LOGO_NO, new String[]{Analysis.MOTIF_LOGO_NO,Analysis.MOTIF_LOGO_NEW,Analysis.MOTIF_LOGO_SHARED,Analysis.MOTIF_LOGO_TEXT},"Include sequence logos");            
+        addOptionalParameter("Logos", Analysis.getMotifLogoDefaultOption(HTML), Analysis.getMotifLogoOptions(HTML),"Include sequence logos");            
         addOptionalParameter("Headline", "", null,"Add an optional headline which will be displayed at the top of the page");          
     }
         
@@ -104,7 +104,7 @@ public class DataFormat_HTML_Matrix extends DataFormat {
         String orientation;
         String header="ID";
         String headline="";
-        String showSequenceLogosString=Analysis.MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         if (settings!=null) {
           try{
              Parameter[] defaults=getParameters();
@@ -134,7 +134,7 @@ public class DataFormat_HTML_Matrix extends DataFormat {
         int logoheight=24;
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
         Color [] basecolors=vizSettings.getBaseColors();//new Color[]{Color.GREEN,Color.BLUE,new Color(220,220,0),Color.RED};           
-        if (showSequenceLogosString.equals(Analysis.MOTIF_LOGO_NEW) || showSequenceLogosString.equals(Analysis.MOTIF_LOGO_SHARED)) {
+        if (Analysis.includeLogosInOutputAsImages(showSequenceLogosString)) {
             sequenceLogo=new MotifLogo(basecolors,(int)(logoheight*1.25));
             sequenceLogo.setDrawBorder(false); // The border does not always fit the the image size, so I will draw it myself later on
         }  
@@ -185,7 +185,7 @@ public class DataFormat_HTML_Matrix extends DataFormat {
         
         outputobject.append("<table bgcolor=\"#FFF0D1\" style=\"table-layout: fixed;\">", HTML);
         outputobject.append("<tr><td bgcolor=\"#F0FFD1\" colspan="+tableColumns+"><b>"+headerstring+"</b></td></tr>", HTML);
-        if (!(logoFormat.equals(Analysis.MOTIF_LOGO_NO))) {
+        if (Analysis.includeLogosInOutput(logoFormat)) {
              String logotag=getSequenceLogoTag(motif, outputobject, sequencelogo, logoheight, logoFormat);
              outputobject.append("<tr><td bgcolor=\"#F0FFD1\" colspan="+tableColumns+">"+logotag+"</td></tr>", HTML);
         }
@@ -238,8 +238,8 @@ public class DataFormat_HTML_Matrix extends DataFormat {
      *  be inserted in HTML-documents to display the image
      */
     protected String getSequenceLogoTag(Motif motif, OutputData outputobject, MotifLogo sequencelogo, int sequenceLogoHeight, String logoFormat) {
-        if (logoFormat.equals(Analysis.MOTIF_LOGO_NO)) return "";
-        else if (logoFormat.equals(Analysis.MOTIF_LOGO_TEXT)) return motif.getConsensusMotif();
+        if (!Analysis.includeLogosInOutput(logoFormat)) return "";
+        else if (Analysis.includeLogosInOutputAsText(logoFormat)) return motif.getConsensusMotif();
         File imagefile=null;
         VisualizationSettings settings=engine.getClient().getVisualizationSettings();
         String imageFormat=(String)settings.getSettingAsType("motif.imageFormat","gif");
@@ -248,7 +248,7 @@ public class DataFormat_HTML_Matrix extends DataFormat {
         if (!(imageFormat.equals("gif") || imageFormat.equals("png") || imageFormat.equals("svg"))) imageFormat="gif";     
         if (imageFormat.equals("svg")) imageFormat="gif"; // because SVG does not work properly
         boolean border=(Boolean)settings.getSettingAsType("motif.border",Boolean.TRUE);          
-        if (logoFormat.equals(Analysis.MOTIF_LOGO_SHARED)) {
+        if (Analysis.includeLogosInOutputAsSharedImages(logoFormat)) {
             String logofileID=motif.getName();
             boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
             OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, imageFormat,true); // returns new or existing shared dependency

@@ -174,7 +174,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             public void run() {
                shutdown();
             }
-        });        
+        });         
     }
     
     /**

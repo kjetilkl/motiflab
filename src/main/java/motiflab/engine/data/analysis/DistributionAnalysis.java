@@ -44,11 +44,23 @@ import motiflab.gui.OutputPanel;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.AxisPosition;
+import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartAxis;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFValueAxis;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTBarChart;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTPlotArea;
 
 /**
  *
@@ -115,18 +127,19 @@ public class DistributionAnalysis extends Analysis {
 
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {        
+    public Parameter[] getOutputParameters(String dataformat) {        
          Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","svg","pdf","eps"},"The image format to use for the graph",false,false);                                 
          Parameter boxplotpar=new Parameter("Box plot",String.class, BOTH,new String[]{NONE,MEDIAN_QUARTILES,MEAN_STD,BOTH},"Which statistics to show using box plots",false,false);        
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-         return new Parameter[]{boxplotpar,imageformat,scalepar};
+         if (dataformat.equals(HTML)) return new Parameter[]{boxplotpar,imageformat,scalepar};
+         else return new Parameter[0];
     }    
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Graph scale") || parameter.equals("Image format") || parameter.equals("Box plot")) return new String[]{HTML};
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Graph scale") || parameter.equals("Image format") || parameter.equals("Box plot")) return new String[]{HTML};
+//        return null;
+//    }     
     
     @Override
     public String getAnalysisName() {
@@ -249,7 +262,7 @@ public class DistributionAnalysis extends Analysis {
         String imageFormat="png";
         if (settings!=null) {
           try {
-                 Parameter[] defaults=getOutputParameters();
+                 Parameter[] defaults=getOutputParameters(format);
                  String plotString=(String)settings.getResolvedParameter("Box plot",defaults,engine);
                       if (plotString.equals(NONE)) plots=PLOT_NONE;
                  else if (plotString.equals(MEDIAN_QUARTILES)) plots=PLOT_MEDIAN_QUARTILES;
@@ -358,59 +371,15 @@ public class DistributionAnalysis extends Analysis {
     
     @Override
     public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
-        Workbook workbook=null;
+        XSSFWorkbook workbook=null;
         try {
             String template=(regionDatasetName==null)?"AnalysisTemplate_Distribution_justInside":"AnalysisTemplate_Distribution";
-            InputStream stream = DistributionAnalysis.class.getResourceAsStream("resources/"+template+".xlt");
-            workbook = WorkbookFactory.create(stream);
+            InputStream stream = DistributionAnalysis.class.getResourceAsStream("resources/"+template+".xlsx");
+            workbook = (XSSFWorkbook)WorkbookFactory.create(stream);
             stream.close();
-
-                             
-            // setup the data for the histogram                                      
-            double[][] histogram=getHistogramValues();
-            int bins=insideBins.length; 
-            Sheet histogramsheet = workbook.getSheetAt(1);
-
-            for (int i=0;i<bins;i++) { // insert histogram values into Sheet2
-                Row row=histogramsheet.getRow(i);
-                if (row==null) row=histogramsheet.createRow(i);
-                Cell cell=row.getCell(0);
-                if (cell==null) cell=row.createCell(0);
-                cell.setCellValue(histogram[i][0]);
-                cell=row.getCell(1);
-                if (cell==null) cell=row.createCell(1);                
-                if (regionDatasetName!=null) { // if we should include "outside" then this is placed before "inside" (although the order is opposite in histogram[][])
-                    cell.setCellValue(histogram[i][2]); // [sic]
-                    cell=row.getCell(2);
-                    if (cell==null) cell=row.createCell(2);
-                }
-                cell.setCellValue(histogram[i][1]); // [sic]                   
-            }
-            Name xRange = workbook.getName("RangeX"); //              
-            String xRange_reference = "Sheet2!$A$1:$A$"+bins;   //Set new range for named range                       
-            xRange.setRefersToFormula(xRange_reference); //Assign to named range
-
-            String insideCol=(regionDatasetName!=null)?"C":"B";
-            Name valuesInsideCell = workbook.getName("ValuesInside");                            
-            String valuesInsideCell_reference = "Sheet2!$"+insideCol+"$1:$"+insideCol+"$"+bins;   //Set new range for named range                       
-            valuesInsideCell.setRefersToFormula(valuesInsideCell_reference); //Assign to named range
-
-            if (regionDatasetName!=null) {
-                Name valuesOutsideCell = workbook.getName("ValuesOutSide"); // [sic]                            
-                String valuesOutsideCell_reference = "Sheet2!$B$1:$B$"+bins;   //Set new range for named range                       
-                valuesOutsideCell.setRefersToFormula(valuesOutsideCell_reference); //Assign to named range
-            }
-            // Now update the "front page"
-            Sheet sheet = workbook.getSheetAt(0);              
-            sheet.setForceFormulaRecalculation(true);
-            String descriptionString="Distribution of values for \""+numericDatasetName+"\"";
-            if (regionDatasetName!=null) descriptionString+=" inside versus outside \""+regionDatasetName+"\" regions";
-            sheet.getRow(0).getCell(0).setCellValue(descriptionString);           
-            String numberOfSequencesString="Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":"");
-            if (sequenceCollectionName!=null) numberOfSequencesString+=" from collection \""+sequenceCollectionName+"\"";
-            sheet.getRow(2).getCell(1).setCellValue(numberOfSequencesString);
             
-            // the matrix
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            // Update the statistics matrix
             int offset=(regionDatasetName==null)?1:2;
             sheet.getRow(6).getCell(offset+0).setCellValue(insideRegionsBaseCount);
             sheet.getRow(6).getCell(offset+1).setCellValue(insideMin);
@@ -431,20 +400,89 @@ public class DistributionAnalysis extends Analysis {
                 sheet.getRow(7).getCell(offset+6).setCellValue(outsideFirstQuartile);
                 sheet.getRow(7).getCell(offset+7).setCellValue(outsideThirdQuartile);
             }            
+            forceExcelFormulaRecalculation(workbook,null);             
             
+            // setup the data for the histogram                                      
+            double[][] histogram=getHistogramValues();
+            int bins=insideBins.length; 
+            XSSFSheet histogramsheet = workbook.getSheet(" ");
+
+            for (int i=0;i<bins;i++) { // insert histogram values into Sheet2. If only one set of values is defined, these are considered to be "inside"
+                Row row=histogramsheet.getRow(i);
+                if (row==null) row=histogramsheet.createRow(i);
+                Cell cell=row.getCell(0);
+                if (cell==null) cell=row.createCell(0);
+                cell.setCellValue(histogram[i][0]);
+                cell=row.getCell(1);
+                if (cell==null) cell=row.createCell(1);                
+                if (regionDatasetName!=null) { // if we should include "outside" then this is placed before "inside" (although the order is opposite in histogram[][])
+                    cell.setCellValue(histogram[i][2]); // [sic] !!
+                    cell=row.getCell(2);
+                    if (cell==null) cell=row.createCell(2);
+                }
+                cell.setCellValue(histogram[i][1]); // [sic] !!                   
+            }
+            
+            // update the data range of the histogram
+            XSSFDrawing drawing = ((XSSFSheet)sheet).createDrawingPatriarch();           
+            XSSFChart histogramChart = drawing.getCharts().get(0);
+            List<XDDFChartData> data = histogramChart.getChartSeries();
+
+            // Define new data ranges
+           if (data.get(0).getSeriesCount()>1) {
+                String newRange = "' '!$C$1:$C$"+bins;
+                XDDFBarChartData.Series series1 = (XDDFBarChartData.Series)data.get(0).getSeries(0);                
+                series1.getCTBarSer().getVal().getNumRef().setF(newRange);                
+               
+                XDDFBarChartData.Series series2 = (XDDFBarChartData.Series)data.get(0).getSeries(1);
+                String newRange2 = "' '!$B$1:$B$"+bins;
+                series2.getCTBarSer().getVal().getNumRef().setF(newRange2);                
+           } else {
+                String newRange = "' '!$B$1:$B$"+bins;
+                XDDFBarChartData.Series series1 = (XDDFBarChartData.Series)data.get(0).getSeries(0);                
+                series1.getCTBarSer().getVal().getNumRef().setF(newRange);               
+           }     
+            
+            // Set the minimum and maximum X-values for box-and-whiskers plot
+            for (int i=1;i<drawing.getCharts().size();i++) {
+                XSSFChart boxchart = drawing.getCharts().get(i);
+                XDDFValueAxis xAxis = null;
+                for (XDDFChartAxis axis : boxchart.getAxes()) {
+                    if (axis.getPosition() == AxisPosition.BOTTOM) {
+                        xAxis = (XDDFValueAxis) axis;
+                        break;
+                    }
+                }
+                if (xAxis != null) {
+                    double minValue = (regionDatasetName==null)?insideMin:(Math.min(insideMin, outsideMin));
+                    double maxValue = (regionDatasetName==null)?insideMax:(Math.max(insideMax, outsideMax));                               
+                    xAxis.setMinimum(minValue); // 
+                    xAxis.setMaximum(maxValue); //
+                }
+            }
+            
+            // Now update the tables and the description in the header
+            sheet.setForceFormulaRecalculation(true);
+            String descriptionString="Distribution of values for \""+numericDatasetName+"\"";
+            if (regionDatasetName!=null) descriptionString+=" inside versus outside \""+regionDatasetName+"\" regions";
+            sheet.getRow(0).getCell(0).setCellValue(descriptionString);           
+            String numberOfSequencesString="Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":"");
+            if (sequenceCollectionName!=null) numberOfSequencesString+=" from collection \""+sequenceCollectionName+"\"";
+            sheet.getRow(2).getCell(1).setCellValue(numberOfSequencesString);
+                        
         } catch (Exception e) {
             e.printStackTrace(System.err);
             throw new ExecutionError(e.getMessage());
         }
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
             stream.close();
         } catch (Exception e) {
             throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
-        }
+        }        
         outputobject.setBinary(true);        
         outputobject.setDirty(true); // this is not set automatically since I don't append to the document
         outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document

@@ -61,7 +61,7 @@ public class DataFormat_Excel extends DataFormat {
     
     @Override
     public String getSuffix() {
-        return "xls";
+        return "xlsx";
     }
 
     @Override
@@ -79,6 +79,7 @@ public class DataFormat_Excel extends DataFormat {
         setProgress(5);
         outputobject.setBinary(true);
         ((Analysis)dataobject).formatExcel(outputobject, engine, settings, task, this);
+        task.setProgress(95);
         return outputobject;
     }
 

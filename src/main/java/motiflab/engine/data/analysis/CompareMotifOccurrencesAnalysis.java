@@ -45,18 +45,20 @@ import motiflab.gui.OutputPanel;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.MotifLogo;
 import motiflab.gui.VisualizationSettings;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -330,11 +332,11 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
         MotifCollection include=null;
         String sortorder=SORT_BY_MOTIF;
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean showColorBoxes=false;
         if (outputSettings!=null) {
           try {
-                 Parameter[] defaults=getOutputParameters();
+                 Parameter[] defaults=getOutputParameters(format);
                  include=(MotifCollection)outputSettings.getResolvedParameter("Include",defaults,engine);                  
                  sortorder=(String)outputSettings.getResolvedParameter("Sort by",defaults,engine);
                  showSequenceLogosString=(String)outputSettings.getResolvedParameter("Logos",defaults,engine);
@@ -343,7 +345,7 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
           catch (ExecutionError e) {throw e;} 
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         } 
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
         engine.createHTMLheader("Motif Occurrence Comparison", null, null, true, true, true, outputobject);
         formatSummary(outputobject,false);
         outputobject.append("<br />\n<table class=\"sortable\">\n",HTML);
@@ -454,7 +456,7 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
     public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         String sortorder=SORT_BY_MOTIF;
         MotifCollection include=null;
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean includeLegend=true;
         int logoheight=19;
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
@@ -463,7 +465,7 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);        
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              include=(MotifCollection)settings.getResolvedParameter("Include",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);             
@@ -472,47 +474,53 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showLogosAsImages=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED));           
-        boolean showSequenceLogos=(showLogosAsImages || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));      
+
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
+        boolean showLogosAsImages = includeLogosInOutputAsImages(showSequenceLogosString);        
         int rownum=0;
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName());
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Compare Motif Occurrences");
         CreationHelper helper = (showLogosAsImages)?workbook.getCreationHelper():null;
         Drawing drawing = (showLogosAsImages)?sheet.createDrawingPatriarch():null;       
         
-        CellStyle title=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, (short)0, HSSFCellStyle.ALIGN_LEFT, false);      
-        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);
-        CellStyle tableheader=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_CENTER, true);      
+        CellStyle title = getExcelTitleStyle(workbook);
+        CellStyle tableheader = getExcelTableHeaderStyle(workbook);
         
-        CellStyle groupA_UP=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.RED.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle groupB_sigUP=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.CORAL.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle groupC_same=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.YELLOW.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle groupD_sigDOWN=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_GREEN.index, HSSFCellStyle.ALIGN_RIGHT, false);          
-        CellStyle groupE_DOWN=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.BRIGHT_GREEN.index, HSSFCellStyle.ALIGN_RIGHT, false);          
-        CellStyle groupF_notpresent=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.WHITE.index, HSSFCellStyle.ALIGN_RIGHT, false);          
+        Color OVERREP_TARGET_DEFAULT_COLOR = vizSettings.getSystemColor("onlyintarget");
+        Color OVERREP_TARGET_COLOR = vizSettings.getSystemColor("overrepintarget");
+        Color OVERREP_CONTROL_DEFAULT_COLOR = vizSettings.getSystemColor("onlyincontrol");
+        Color OVERREP_CONTROL_COLOR = vizSettings.getSystemColor("overrepincontrol");
+        Color SAME_RATE_COLOR = vizSettings.getSystemColor("samerate");
+        Color NOT_PRESENT_COLOR = vizSettings.getSystemColor("notpresent");        
         
-        CellStyle groupA_UP_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.RED.index, HSSFCellStyle.ALIGN_CENTER, false);      
-        CellStyle groupB_sigUP_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.CORAL.index, HSSFCellStyle.ALIGN_CENTER, false);      
-        CellStyle groupC_same_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.YELLOW.index, HSSFCellStyle.ALIGN_CENTER, false);      
-        CellStyle groupD_sigDOWN_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_GREEN.index, HSSFCellStyle.ALIGN_CENTER, false);          
-        CellStyle groupE_DOWN_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.BRIGHT_GREEN.index, HSSFCellStyle.ALIGN_CENTER, false);          
-        CellStyle groupF_notpresent_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.WHITE.index, HSSFCellStyle.ALIGN_CENTER, false);          
+        CellStyle groupA_UP=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_TARGET_DEFAULT_COLOR, HorizontalAlignment.RIGHT, false);      
+        CellStyle groupB_sigUP=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_TARGET_COLOR, HorizontalAlignment.RIGHT, false);      
+        CellStyle groupC_same=createExcelStyle(workbook, BorderStyle.THIN, SAME_RATE_COLOR, HorizontalAlignment.RIGHT, false);      
+        CellStyle groupD_sigDOWN=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_CONTROL_COLOR, HorizontalAlignment.RIGHT, false);          
+        CellStyle groupE_DOWN=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_CONTROL_DEFAULT_COLOR, HorizontalAlignment.RIGHT, false);          
+        CellStyle groupF_notpresent=createExcelStyle(workbook, BorderStyle.THIN, NOT_PRESENT_COLOR, HorizontalAlignment.RIGHT, false);          
         
+        CellStyle groupA_UP_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_TARGET_DEFAULT_COLOR, HorizontalAlignment.CENTER, false);      
+        CellStyle groupB_sigUP_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_TARGET_COLOR, HorizontalAlignment.CENTER, false);      
+        CellStyle groupC_same_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, SAME_RATE_COLOR, HorizontalAlignment.CENTER, false);      
+        CellStyle groupD_sigDOWN_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_CONTROL_COLOR, HorizontalAlignment.CENTER, false);          
+        CellStyle groupE_DOWN_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_CONTROL_DEFAULT_COLOR, HorizontalAlignment.CENTER, false);          
+        CellStyle groupF_notpresent_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, NOT_PRESENT_COLOR, HorizontalAlignment.CENTER, false);     
+              
         groupA_UP_LEGEND.setWrapText(true);
         groupB_sigUP_LEGEND.setWrapText(true);
         groupC_same_LEGEND.setWrapText(true);
         groupD_sigDOWN_LEGEND.setWrapText(true);
         groupE_DOWN_LEGEND.setWrapText(true);
         groupF_notpresent_LEGEND.setWrapText(true);
-        groupA_UP_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupB_sigUP_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupC_same_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupD_sigDOWN_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupE_DOWN_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupF_notpresent_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);        
+        groupA_UP_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupB_sigUP_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupC_same_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupD_sigDOWN_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupE_DOWN_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupF_notpresent_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);        
         
-        // Make room for the header which will be added later
-        
+        // Make room for the header which will be added later       
         Row row = null;
         int headerrows=(statisticalTest.equalsIgnoreCase("Binomial"))?10:9;
         if (includeLegend) {
@@ -580,13 +588,19 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
                         int width=motif.getLength();
                         if (width>maxlogowidth) maxlogowidth=width;
                         byte[] image=getMotifLogoImageAsByteArray(sequencelogo, logoheight, border, "png");
-                        int imageIndex=workbook.addPicture(image, HSSFWorkbook.PICTURE_TYPE_PNG);
+                        int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
                         ClientAnchor anchor = helper.createClientAnchor();
                         anchor.setCol1(logocolumn);
                         anchor.setRow1(rownum);
-                        anchor.setAnchorType(ClientAnchor.MOVE_DONT_RESIZE);
+                        anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
                         Picture pict=drawing.createPicture(anchor, imageIndex);	
                         pict.resize();
+                        int offsetX=25000;
+                        int offsetY=25000;
+                        anchor.setDx1(offsetX);
+                        anchor.setDy1(offsetY);    
+                        anchor.setDx2(anchor.getDx2()+offsetX);
+                        anchor.setDy2(anchor.getDy2()+offsetY);                           
                     } catch (Exception e) {e.printStackTrace(System.err);}
                 }
                 else outputStringValuesInCells(row, new String[]{motif.getConsensusMotif()}, logocolumn);
@@ -595,9 +609,7 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
             format.setProgress(prog,motifs.size());
         }           
         format.setProgress(95);  
-        for (short i=0;i<col;i++) {
-            sheet.autoSizeColumn(i);               
-        }
+        autoSizeExcelColumns(sheet, 0, col-1, 800);
         if (!showLogosAsImages) sheet.autoSizeColumn((short)logocolumn);   
         
         // Add the header on top of the page
@@ -663,10 +675,10 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
                 };
                 for (CellRangeAddress range:merged) {
                     sheet.addMergedRegion(range);
-                    RegionUtil.setBorderBottom(HSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells
-                    RegionUtil.setBorderTop(HSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells
-                    RegionUtil.setBorderLeft(HSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells
-                    RegionUtil.setBorderRight(HSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells                                   
+                    RegionUtil.setBorderBottom(BorderStyle.THIN, range, sheet); // borders must be updated on merged cells
+                    RegionUtil.setBorderTop(BorderStyle.THIN, range, sheet); // borders must be updated on merged cells
+                    RegionUtil.setBorderLeft(BorderStyle.THIN, range, sheet); // borders must be updated on merged cells
+                    RegionUtil.setBorderRight(BorderStyle.THIN, range, sheet); // borders must be updated on merged cells                                   
                 }               
                 int[] widths=new int[]{3500,5000,3500,5000,3500,3500};
                 for (int i=0;i<widths.length;i++) {
@@ -693,7 +705,7 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
         }       
         
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -714,10 +726,10 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
     public OutputData formatRaw(OutputData outputobject, MotifLabEngine engine, ParameterSettings outputSettings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         MotifCollection include=null;
         String sortorder=SORT_BY_MOTIF;
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         if (outputSettings!=null) {
           try {
-                 Parameter[] defaults=getOutputParameters();
+                 Parameter[] defaults=getOutputParameters(format);
                  include=(MotifCollection)outputSettings.getResolvedParameter("Include",defaults,engine);
                  sortorder=(String)outputSettings.getResolvedParameter("Sort by",defaults,engine);
                  showSequenceLogosString=(String)outputSettings.getResolvedParameter("Logos",defaults,engine);
@@ -725,7 +737,7 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
 
         ArrayList<String> motifs=new ArrayList<String>(results.size());
         if (include!=null) {
@@ -1044,25 +1056,27 @@ public class CompareMotifOccurrencesAnalysis extends Analysis {
 
 
     
-    /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Include",MotifCollection.class,null,new Class[]{MotifCollection.class},"Only include data from this collection",false,false),
-             new Parameter("Sort by",String.class,SORT_BY_EXPRESSION,new String[]{SORT_BY_MOTIF,SORT_BY_EXPRESSION},null,false,false),
-             new Parameter("Logos",String.class,MOTIF_LOGO_NO, new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_SHARED,MOTIF_LOGO_TEXT},"Include sequence logos in the table",false,false),
-             new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif will be output as the first column",false,false),
-             new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false)       
-        };
+    public Parameter[] getOutputParameters(String dataformat) {
+        Parameter includePar = new Parameter("Include",MotifCollection.class,null,new Class[]{MotifCollection.class},"Only include data from this collection",false,false);
+        Parameter sortByPar = new Parameter("Sort by",String.class,SORT_BY_EXPRESSION,new String[]{SORT_BY_MOTIF,SORT_BY_EXPRESSION},null,false,false);
+        Parameter logos = new Parameter("Logos",String.class,getMotifLogoDefaultOption(dataformat), getMotifLogoOptions(dataformat),"Include motif sequence logos in the table",false,false);
+        Parameter colorsPar = new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif will be output as the first column",false,false);
+        Parameter legendPar = new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false);       
+        if (dataformat.equals(HTML)) return new Parameter[] {includePar, sortByPar, logos, colorsPar};
+        if (dataformat.equals(EXCEL)) return new Parameter[] {includePar, sortByPar, legendPar, logos};
+        if (dataformat.equals(RAWDATA)) return new Parameter[] {includePar, sortByPar, logos};
+        return new Parameter[0];        
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Color boxes")) return new String[]{HTML};
-        if (parameter.equals("Legend")) return new String[]{EXCEL};
-        if (parameter.equals("Include") || parameter.equals("Logos") || parameter.equals("Sort by")) return new String[]{HTML,RAWDATA,EXCEL};        
-        return null;
-    }       
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Color boxes") || parameter.equals("Logos HTML")) return new String[]{HTML};
+//        if (parameter.equals("Legend") || parameter.equals("Logos Excel")) return new String[]{EXCEL};
+//        if (parameter.equals("Logos Raw")) return new String[]{RAWDATA};        
+//        if (parameter.equals("Include") || parameter.equals("Sort by")) return new String[]{HTML,RAWDATA,EXCEL};
+//        return null;
+//    }       
     
     private class SortOrderComparator implements Comparator<String> {
         private ExpressionOrderComparator expressionComparator=new ExpressionOrderComparator();

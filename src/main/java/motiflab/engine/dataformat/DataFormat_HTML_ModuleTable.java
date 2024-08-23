@@ -67,7 +67,7 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
         addParameter("Format", "ID,Size,Logo", null,builder.toString(),true,false);
         //addOptionalParameter("Logo height",24, new Integer[]{0,200},"<html>Height of sequence logos (if included in the table)</html>");
         addOptionalParameter("Logo max width",0, new Integer[]{0,10000},"<html>Maximum width of sequence logos<br>If this is set, logos will be scaled to fit within the limit.<br>A value of 0 means no limit</html>");
-        addOptionalParameter("Logos",Analysis.MOTIF_LOGO_SHARED, new String[]{Analysis.MOTIF_LOGO_SHARED,Analysis.MOTIF_LOGO_NEW,Analysis.MOTIF_LOGO_TEXT},"Should the image files create for logos have standard names (moduleID.gif) or be unique to each output");           
+        addOptionalParameter("Logos",Analysis.getMotifLogoDefaultOption(HTML), Analysis.getMotifLogoOptions(HTML),"Should the image files create for logos have standard names (moduleID.gif) or be unique to each output");           
         addOptionalParameter("Multiline",Boolean.TRUE, new Boolean[]{true,false},"If selected, list-properties will be split over several lines");        
         addOptionalParameter("Headline", "", null,"Add an optional headline which will be displayed at the top of the page");
         //addOptionalParameter("Sort by","Motif ID", new String[]{"Motif ID","Short name","Long name","Size","Information content","Classification"},null);        
@@ -127,7 +127,7 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
         int sequenceLogoMaxWidth=0; 
         boolean multiline=true;        
         String headline="";
-        String showSequenceLogosString=Analysis.MOTIF_LOGO_SHARED;
+        String showSequenceLogosString="";
         if (settings!=null) {
           try{
              Parameter[] defaults=getParameters();
@@ -273,12 +273,12 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
      *  be inserted in HTML-documents to display the image
      */
     protected String getModuleLogoTag(Module module, OutputData outputobject, String logoFormat, int maxwidth, MotifLabEngine engine) {
-        if (logoFormat.equalsIgnoreCase(Analysis.MOTIF_LOGO_NO)) return "";
+        if (!Analysis.includeLogosInOutput(logoFormat)) return "";
         else if (module==null) return "?";        
-        else if (logoFormat.equalsIgnoreCase(Analysis.MOTIF_LOGO_TEXT)) return escapeHTML(module.getModuleLogo());
+        else if (Analysis.includeLogosInOutputAsText(logoFormat)) return escapeHTML(module.getModuleLogo());
         else { 
             File imagefile=null;
-            if (logoFormat.equalsIgnoreCase(Analysis.MOTIF_LOGO_SHARED)) {
+            if (Analysis.includeLogosInOutputAsSharedImages(logoFormat)) {
                 String logofileID=module.getName();
                 boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
                 OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, "gif",true); // returns new or existing shared dependency

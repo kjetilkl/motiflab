@@ -4,6 +4,7 @@
 
 package motiflab.engine.dataformat;
 
+import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,19 +20,28 @@ import motiflab.engine.data.ExpressionProfile;
 import motiflab.engine.data.OutputData;
 import motiflab.engine.data.Sequence;
 import motiflab.engine.data.SequenceCollection;
-import motiflab.engine.data.SequenceNumericMap;
 import motiflab.engine.protocol.ParseError;
-
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
+import motiflab.gui.VisualizationSettings;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.ConditionalFormattingThreshold;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFColorScaleFormatting;
+import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingRule;
+import org.apache.poi.xssf.usermodel.XSSFConditionalFormattingThreshold;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFSheetConditionalFormatting;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -47,9 +57,11 @@ public class DataFormat_ExcelProfile extends DataFormat {
         addOptionalParameter("Value columns", "", null, "<html>This parameter can be used to explicitly specify which columns to retrieve from the Excel sheet.<br>The columns can be stated as a list of comma-separated numbers or by using dashes to specify a range.<br>E.g. a parameter value of \"3,4,6-8,9-11,14\" will retrieve the columns 3,4,6,7,8,9,10,11 and 14.<br>If left unspecified, all columns to the right of the key column will be retrieved.</html>");
         addOptionalParameter("Include entries",null, new Class[]{SequenceCollection.class},"Specifies which entries to include in the output. The default is to include data for all sequences.");
         addOptionalParameter("Header",Boolean.FALSE, new Boolean[]{Boolean.FALSE,Boolean.TRUE},"<html>For output: include the column headers in the first row.<br>For input: Use the values in the first row as column headers.</html>");
+        addOptionalParameter("Color",Boolean.FALSE, new Boolean[]{Boolean.FALSE,Boolean.TRUE},"<html>Add a background color to each cell depending on the value</html>");
         setParameterFilter("Include entries","output");   
         setParameterFilter("Key column","input");   
-        setParameterFilter("Value columns","input");           
+        setParameterFilter("Value columns","input");  
+        setParameterFilter("Color","output");
     }
 
     @Override
@@ -90,7 +102,7 @@ public class DataFormat_ExcelProfile extends DataFormat {
 
     @Override
     public String getSuffix() {
-        return "xls";
+        return "xlsx";
     }
 
     @Override
@@ -106,12 +118,14 @@ public class DataFormat_ExcelProfile extends DataFormat {
         ExpressionProfile profile=(ExpressionProfile)dataobject;
         SequenceCollection includeEntries;
         boolean header=false;
+        boolean useColors=false;
         setProgress(5);
         if (settings!=null) {
           try{
              Parameter[] defaults=getParameters();
              includeEntries=(SequenceCollection)settings.getResolvedParameter("Include entries",defaults,engine);
-             header=(Boolean)settings.getResolvedParameter("Header",defaults,engine);             
+             header=(Boolean)settings.getResolvedParameter("Header",defaults,engine);    
+             useColors=(Boolean)settings.getResolvedParameter("Color",defaults,engine); 
           } catch (ExecutionError e) {
              throw e;
           } catch (Exception ex) {
@@ -122,26 +136,27 @@ public class DataFormat_ExcelProfile extends DataFormat {
            header=(Boolean)getDefaultValueForParameter("Header");           
         }
         
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName()); 
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet(outputobject.getName()); 
 
         int rownum = 0;
         if (header) {
-            HSSFCellStyle style = workbook.createCellStyle();
-            style.setBorderBottom(HSSFCellStyle.BORDER_THIN);  
-            style.setBorderTop(HSSFCellStyle.BORDER_THIN);
-            style.setBorderLeft(HSSFCellStyle.BORDER_THIN);  
-            style.setBorderRight(HSSFCellStyle.BORDER_THIN);   
-            style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-            style.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);  
-            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-            HSSFFont font = workbook.createFont();
-            font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);  
+            XSSFCellStyle style = workbook.createCellStyle();
+            style.setBorderBottom(BorderStyle.THIN);
+            style.setBorderTop(BorderStyle.THIN);
+            style.setBorderLeft(BorderStyle.THIN);
+            style.setBorderRight(BorderStyle.THIN);
+            style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            style.setFillForegroundColor(new XSSFColor(new Color(255,255,200),null));
+            style.setAlignment(HorizontalAlignment.CENTER);
+            XSSFFont font = workbook.createFont();
+            font.setBold(true);
             style.setFont(font);
             Row row = sheet.createRow(rownum++);  
             int cellnumber=0;
             Cell headercell = row.createCell(cellnumber++);
-            headercell.setCellStyle(style); // just an empty cell in top-left corner
+            headercell.setCellValue("Sequence");
+            headercell.setCellStyle(style);
             for (int j=0;j<profile.getNumberOfConditions();j++) {
                headercell = row.createCell(cellnumber++);
                headercell.setCellValue(profile.getHeader(j));  
@@ -151,7 +166,7 @@ public class DataFormat_ExcelProfile extends DataFormat {
         if (includeEntries==null) includeEntries=engine.getDefaultSequenceCollection();
         ArrayList<Sequence> sequences=includeEntries.getAllSequencesInDefaultOrder(engine); 
         int size=sequences.size();            
-        int i=0;           
+        int i=0; 
         for (Sequence sequence:sequences) { // for each entry
               String sequencename=sequence.getName();
               Row row = sheet.createRow(rownum++);
@@ -159,9 +174,9 @@ public class DataFormat_ExcelProfile extends DataFormat {
               keycell.setCellValue(sequencename);
               int cellnumber=1;
               for (int j=0;j<profile.getNumberOfConditions();j++) {
-                   Cell headercell = row.createCell(cellnumber++);
+                   Cell valuecell = row.createCell(cellnumber++);
                    Double value=profile.getValue(sequencename,j);
-                   if (value!=null) headercell.setCellValue(value);  
+                   if (value!=null) valuecell.setCellValue(value); 
               }
               if (task!=null) task.checkExecutionLock(); // checks to see if this task should suspend execution
               if (Thread.interrupted() || (task!=null && task.getStatus().equals(ExecutableTask.ABORTED))) throw new InterruptedException();
@@ -169,9 +184,35 @@ public class DataFormat_ExcelProfile extends DataFormat {
               setProgress(i+1,size);
               i++;
         }
+        if (useColors) {
+           // apply conditional formatting with colorscale
+            XSSFSheetConditionalFormatting sheetCF = sheet.getSheetConditionalFormatting();
+            XSSFConditionalFormattingRule rule = sheetCF.createConditionalFormattingColorScaleRule();
+            XSSFColorScaleFormatting colorScale = rule.getColorScaleFormatting();
+            colorScale.setNumControlPoints(3);
+            
+            VisualizationSettings visualizationSettings=task.getMotifLabClient().getVisualizationSettings();
+            XSSFColor minColor = new XSSFColor(visualizationSettings.getExpressionColorDownregulated(),new DefaultIndexedColorMap());
+            XSSFColor midColor = new XSSFColor(visualizationSettings.getExpressionColorBackground(),new DefaultIndexedColorMap());
+            XSSFColor maxColor = new XSSFColor(visualizationSettings.getExpressionColorUpregulated(),new DefaultIndexedColorMap());
+            colorScale.setColors(new XSSFColor[]{minColor,midColor,maxColor});
+            double[] valuesRange=profile.getValuesRange();
+            double minvalue=(valuesRange!=null)?valuesRange[0]:-3.0;
+            double maxvalue=(valuesRange!=null)?valuesRange[1]:3.0;
+            ConditionalFormattingThreshold[] thresholds=colorScale.getThresholds();
+            thresholds[0].setRangeType(ConditionalFormattingThreshold.RangeType.NUMBER);
+            thresholds[0].setValue(minvalue);           
+            thresholds[1].setRangeType(ConditionalFormattingThreshold.RangeType.NUMBER);
+            thresholds[1].setValue(0.0);
+            thresholds[2].setRangeType(ConditionalFormattingThreshold.RangeType.NUMBER);
+            thresholds[2].setValue(maxvalue); 
+            colorScale.setThresholds(thresholds);
+            CellRangeAddress[] regions = { new CellRangeAddress((header)?1:0,rownum-1,1,profile.getNumberOfConditions()) }; 
+            sheetCF.addConditionalFormatting(regions, rule);                       
+        }
         sheet.autoSizeColumn((short)0);
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,getSuffix());        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -185,7 +226,7 @@ public class DataFormat_ExcelProfile extends DataFormat {
         return outputobject;
     }
 
-
+    
     @Override
     public Data parseInput(ArrayList<String> input, Data target, ParameterSettings settings, ExecutableTask task) throws ParseError, InterruptedException {
         throw new ParseError("Inappropriate use of parseInput(ArrayList<String>...) method in ExcelProfile format");

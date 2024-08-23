@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
-import java.util.Iterator;
-import java.util.List;
 import javax.imageio.ImageIO;
 import motiflab.engine.task.ExecutableTask;
 import motiflab.engine.ExecutionError;
@@ -39,23 +37,12 @@ import motiflab.engine.data.OutputData;
 import motiflab.engine.data.SequenceCollection;
 import motiflab.engine.dataformat.DataFormat;
 import org.apache.commons.math3.distribution.HypergeometricDistribution;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFPatriarch;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFTextbox;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Drawing;
-import org.apache.poi.ss.usermodel.Picture;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xddf.usermodel.text.XDDFTextBody;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFShape;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFSimpleShape;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -98,17 +85,18 @@ public class CompareCollectionsAnalysis extends Analysis {
     
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {
+    public Parameter[] getOutputParameters(String dataformat) {
          Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","svg","pdf","eps"},"The image format to use for the graph",false,false);                       
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-         return new Parameter[]{imageformat,scalepar};
+         if (dataformat.equals(HTML)) return new Parameter[]{imageformat,scalepar};
+         else return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{HTML};       
-        return null;
-    }       
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{HTML};       
+//        return null;
+//    }       
 
     @Override
     public String[] getResultVariables() {
@@ -194,7 +182,7 @@ public class CompareCollectionsAnalysis extends Analysis {
         String imageFormat="png";
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              imageFormat=(String)settings.getResolvedParameter("Image format",defaults,engine);
              scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);             
           } 
@@ -365,133 +353,116 @@ public class CompareCollectionsAnalysis extends Analysis {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
     
-    // @Override
-    public OutputData formatExcelOld(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
-        if (format!=null) format.setProgress(5);
-        int totalA=contingencyTable[FIRST_SIZE];
-        int totalB=contingencyTable[SECOND_SIZE];
-        int total=contingencyTable[BACKGROUND_SIZE];
-        int A_B=contingencyTable[FIRST_INTERSECTION_SECOND];
-        int A_notB=totalA-A_B;
-        int notA_B=totalB-A_B;
-        int notA_notB=total-contingencyTable[FIRST_UNION_SECOND];
-
-        int scalepercent=100;
-        if (settings!=null) {
-          try {
-             Parameter[] defaults=getOutputParameters();
-             scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
-          } 
-          catch (ExecutionError e) {throw e;} 
-          catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
-        } 
-        double scale=(scalepercent==100)?1.0:(((double)scalepercent)/100.0);
-
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName());
-        CreationHelper helper = workbook.getCreationHelper();
-        Drawing drawing = sheet.createDrawingPatriarch();       
-        
-        CellStyle title=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, (short)0, HSSFCellStyle.ALIGN_LEFT, false);      
-        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);
-                
-        CellStyle table_GRAY=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.GREY_25_PERCENT.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle table_RED=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.CORAL.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle table_YELLOW=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle table_BLUE=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.PALE_BLUE.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle table_VIOLET=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LAVENDER.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle table_SUMMARY=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.GOLD.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-            
-        int tablestartrow=6;
-        int tablestartcol=1;
-        try {
-            Row row=sheet.createRow(4);
-            row.setHeight((short)3200);
-            byte[] image=saveVennDiagramAsImage(null, scale, 300, 200);
-            int imageIndex=workbook.addPicture(image, HSSFWorkbook.PICTURE_TYPE_PNG);
-            ClientAnchor anchor = helper.createClientAnchor();
-            anchor.setCol1(1);
-            anchor.setRow1(4);
-            anchor.setAnchorType(ClientAnchor.MOVE_DONT_RESIZE);
-            Picture pict=drawing.createPicture(anchor, imageIndex);	
-            pict.resize(); 
-        } catch (Exception e) {
-            outputStringValueInCell(sheet.createRow(4), 1, "Error when creating image!", null); 
-            e.printStackTrace(System.err);
-        }        
-        if (format!=null) format.setProgress(50);   
-        Row row=sheet.createRow(tablestartrow); 
-        outputStringValuesInCells(row, new String[]{" "," "+firstCollectionName+" "," \u00AC"+firstCollectionName+" "," Total "}, tablestartcol, table_GRAY);  
-        row=sheet.createRow(tablestartrow+1); 
-        outputStringValueInCell(row, tablestartcol, " "+secondCollectionName+" ", table_GRAY);  
-        outputNumericValueInCell(row, tablestartcol+1, A_B, table_VIOLET);
-        outputNumericValueInCell(row, tablestartcol+2, A_notB, table_RED);
-        outputNumericValueInCell(row, tablestartcol+3, totalA, table_SUMMARY);
-        row=sheet.createRow(tablestartrow+2); 
-        outputStringValueInCell(row, tablestartcol, " \u00AC"+secondCollectionName+" ", table_GRAY);
-        outputNumericValueInCell(row, tablestartcol+1, notA_B, table_BLUE);
-        outputNumericValueInCell(row, tablestartcol+2, notA_notB, table_YELLOW);
-        outputNumericValueInCell(row, tablestartcol+3, (total-totalA), table_SUMMARY);        
-        row=sheet.createRow(tablestartrow+3); 
-        outputStringValueInCell(row, tablestartcol, " Total ", table_GRAY); 
-        outputNumericValueInCell(row, tablestartcol+1, totalB, table_SUMMARY);
-        outputNumericValueInCell(row, tablestartcol+2, (total-totalB), table_SUMMARY);
-        outputNumericValueInCell(row, tablestartcol+3, total, table_SUMMARY);         
-        
-        sheet.autoSizeColumn((short)0);
-        sheet.autoSizeColumn((short)1);
-        sheet.autoSizeColumn((short)2);
-        sheet.autoSizeColumn((short)3);
-        sheet.autoSizeColumn((short)4);        
-        
-        row=sheet.createRow(tablestartrow+5);
-        outputNumericValueInCell(row, tablestartcol, (((double)A_B/(double)totalA)*100.0), null);
-        outputStringValueInCell(row, tablestartcol+1, "% of \""+firstCollectionName+"\" overlaps with \""+secondCollectionName+"\"", null);
-        row=sheet.createRow(tablestartrow+6);
-        outputNumericValueInCell(row, tablestartcol, (((double)A_B/(double)totalB)*100.0), null);        
-        outputStringValueInCell(row, tablestartcol+1, "% of \""+secondCollectionName+"\" overlaps with \""+firstCollectionName+"\"", null);
-        
-        row=sheet.createRow(tablestartrow+8);
-        outputStringValueInCell(row, tablestartcol, "p-value (overlap>=observed) = ", null);
-        outputNumericValueInCell(row, tablestartcol+3, pvalueAtLeastObservedOverlap, null);
-        row=sheet.createRow(tablestartrow+9);
-        outputStringValueInCell(row, tablestartcol, "p-value (overlap<=observed) = ", null);
-        outputNumericValueInCell(row, tablestartcol+3, pvalueAtMostObservedOverlap, null);
-         
-        outputStringValueInCell(sheet.createRow(0), 0, "Compare collections analysis", title);
-        StringBuilder firstLine=new StringBuilder();
-        firstLine.append("Comparison between ");
-        firstLine.append(collectionType.toLowerCase());
-        firstLine.append(" collections \"");
-        firstLine.append(firstCollectionName);
-        firstLine.append("\" and \"");
-        firstLine.append(secondCollectionName);
-        firstLine.append("\" with respect to a total of ");
-        firstLine.append(total);
-        firstLine.append(" entries");
-        if (backgroundCollectionName!=null) {            
-            firstLine.append(" from collection \"");
-            firstLine.append(backgroundCollectionName);
-            firstLine.append("\"");
-        }
-        outputStringValueInCell(sheet.createRow(2), 0, firstLine.toString(), null);
-        
-        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
-        try {
-            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
-            workbook.write(stream);
-            stream.close();
-        } catch (Exception e) {
-            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
-        }
-        if (format!=null) format.setProgress(100);        
-        outputobject.setBinary(true);        
-        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
-        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document       
-        return outputobject;
-    }    
-
+//    // @Override
+//    public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+//        if (format!=null) format.setProgress(5);
+//        int totalA=contingencyTable[FIRST_SIZE];
+//        int totalB=contingencyTable[SECOND_SIZE];
+//        int total=contingencyTable[BACKGROUND_SIZE];
+//        int A_B=contingencyTable[FIRST_INTERSECTION_SECOND];
+//        int A_notB=totalA-A_B;
+//        int notA_B=totalB-A_B;
+//        int notA_notB=total-contingencyTable[FIRST_UNION_SECOND];
+//
+//        XSSFWorkbook workbook = new XSSFWorkbook();
+//        XSSFSheet sheet = workbook.createSheet("Compare Collections");
+//        CreationHelper helper = workbook.getCreationHelper();
+//        Drawing drawing = sheet.createDrawingPatriarch();       
+//        
+//        CellStyle title=getExcelTitleStyle(workbook);
+//                
+//        CellStyle table_GRAY=createExcelStyle(workbook, BorderStyle.THIN, new Color(204,204,204), HorizontalAlignment.RIGHT, false);      
+//        CellStyle table_RED=createExcelStyle(workbook, BorderStyle.THIN, new Color(255,160,160), HorizontalAlignment.RIGHT, false);      
+//        CellStyle table_YELLOW=createExcelStyle(workbook, BorderStyle.THIN, new Color(255,255,160), HorizontalAlignment.RIGHT, false);      
+//        CellStyle table_BLUE=createExcelStyle(workbook, BorderStyle.THIN, new Color(160,160,255), HorizontalAlignment.RIGHT, false);      
+//        CellStyle table_VIOLET=createExcelStyle(workbook, BorderStyle.THIN, new Color(240,160,255), HorizontalAlignment.RIGHT, false);      
+//        CellStyle table_SUMMARY=createExcelStyle(workbook, BorderStyle.THIN, new Color(238,238,204), HorizontalAlignment.RIGHT, false);      
+//            
+//        int tablestartrow=15;
+//        int tablestartcol=1;
+//        try {
+//            Row row=sheet.createRow(4);
+//            byte[] image=saveVennDiagramAsImage(null, 1.0, 300, 200);
+//            int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
+//            ClientAnchor anchor = helper.createClientAnchor();
+//            anchor.setCol1(1);
+//            anchor.setRow1(4);
+//            anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_AND_RESIZE);
+//            Picture pict=drawing.createPicture(anchor, imageIndex);	            
+//            pict.resize(); 
+//        } catch (Exception e) {
+//            outputStringValueInCell(sheet.createRow(4), 1, "Error when creating image!", null); 
+//            e.printStackTrace(System.err);
+//        }
+//        if (format!=null) format.setProgress(50);       
+//        Row row=sheet.createRow(tablestartrow); 
+//        outputStringValuesInCells(row, new String[]{" "," "+firstCollectionName+" "," \u00AC"+firstCollectionName+" "," Total "}, tablestartcol, table_GRAY);  
+//        row=sheet.createRow(tablestartrow+1); 
+//        outputStringValueInCell(row, tablestartcol, " "+secondCollectionName+" ", table_GRAY);  
+//        outputNumericValueInCell(row, tablestartcol+1, A_B, table_VIOLET);
+//        outputNumericValueInCell(row, tablestartcol+2, A_notB, table_RED);
+//        outputNumericValueInCell(row, tablestartcol+3, totalA, table_SUMMARY);
+//        row=sheet.createRow(tablestartrow+2); 
+//        outputStringValueInCell(row, tablestartcol, " \u00AC"+secondCollectionName+" ", table_GRAY);
+//        outputNumericValueInCell(row, tablestartcol+1, notA_B, table_BLUE);
+//        outputNumericValueInCell(row, tablestartcol+2, notA_notB, table_YELLOW);
+//        outputNumericValueInCell(row, tablestartcol+3, (total-totalA), table_SUMMARY);        
+//        row=sheet.createRow(tablestartrow+3); 
+//        outputStringValueInCell(row, tablestartcol, " Total ", table_GRAY); 
+//        outputNumericValueInCell(row, tablestartcol+1, totalB, table_SUMMARY);
+//        outputNumericValueInCell(row, tablestartcol+2, (total-totalB), table_SUMMARY);
+//        outputNumericValueInCell(row, tablestartcol+3, total, table_SUMMARY);         
+//        
+//        autoSizeExcelColumns(sheet, 0, 4, 800);
+//        
+//        row=sheet.createRow(tablestartrow+5);
+//        outputNumericValueInCell(row, tablestartcol, (((double)A_B/(double)totalA)*100.0), null);
+//        outputStringValueInCell(row, tablestartcol+1, "% of \""+firstCollectionName+"\" overlaps with \""+secondCollectionName+"\"", null);
+//        row=sheet.createRow(tablestartrow+6);
+//        outputNumericValueInCell(row, tablestartcol, (((double)A_B/(double)totalB)*100.0), null);        
+//        outputStringValueInCell(row, tablestartcol+1, "% of \""+secondCollectionName+"\" overlaps with \""+firstCollectionName+"\"", null);
+//        
+//        row=sheet.createRow(tablestartrow+8);
+//        outputStringValueInCell(row, tablestartcol, "p-value (overlap>=observed) = ", null);
+//        outputNumericValueInCell(row, tablestartcol+3, pvalueAtLeastObservedOverlap, null);
+//        row=sheet.createRow(tablestartrow+9);
+//        outputStringValueInCell(row, tablestartcol, "p-value (overlap<=observed) = ", null);
+//        outputNumericValueInCell(row, tablestartcol+3, pvalueAtMostObservedOverlap, null);
+//         
+//        outputStringValueInCell(sheet.createRow(0), 0, "Compare collections analysis", title);
+//        StringBuilder firstLine=new StringBuilder();
+//        firstLine.append("Comparison between ");
+//        firstLine.append(collectionType.toLowerCase());
+//        firstLine.append(" collections \"");
+//        firstLine.append(firstCollectionName);
+//        firstLine.append("\" and \"");
+//        firstLine.append(secondCollectionName);
+//        firstLine.append("\" with respect to a total of ");
+//        firstLine.append(total);
+//        firstLine.append(" entries");
+//        if (backgroundCollectionName!=null) {            
+//            firstLine.append(" from collection \"");
+//            firstLine.append(backgroundCollectionName);
+//            firstLine.append("\"");
+//        }
+//        outputStringValueInCell(sheet.createRow(2), 0, firstLine.toString(), null);
+//        
+//        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
+//        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
+//        try {
+//            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
+//            workbook.write(stream);
+//            stream.close();
+//        } catch (Exception e) {
+//            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+//        }
+//        if (format!=null) format.setProgress(100);        
+//        outputobject.setBinary(true);        
+//        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
+//        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document       
+//        return outputobject;
+//    }    
+    
     @Override
     public OutputData formatRaw(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         task.checkExecutionLock(); // checks to see if this task should suspend execution
@@ -531,13 +502,13 @@ public class CompareCollectionsAnalysis extends Analysis {
         int A_notB=totalA-A_B;
         int notA_B=totalB-A_B;
         int notA_notB=total-contingencyTable[FIRST_UNION_SECOND];
-        Workbook workbook=null;
+        XSSFWorkbook workbook=null;
         try {
-            InputStream stream = CompareRegionDatasetsAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_CompareCollections.xlt");
-            workbook = WorkbookFactory.create(stream);
+            InputStream stream = CompareRegionDatasetsAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_CompareCollections.xlsx");
+            workbook = new XSSFWorkbook(stream);
             stream.close();
-            Sheet sheet = workbook.getSheetAt(0);   // just use the first sheet  
-            
+            XSSFSheet sheet = workbook.getSheetAt(0);   // just use the first sheet 
+          
             sheet.setForceFormulaRecalculation(true);
             String descriptionString="Comparison between "+collectionType.toLowerCase()+" collections \""+firstCollectionName+"\" and \""+secondCollectionName+"\" with respect to a total of "+total+" entries";
             if (backgroundCollectionName!=null) descriptionString+=" from collection \""+backgroundCollectionName+"\"";
@@ -561,7 +532,29 @@ public class CompareCollectionsAnalysis extends Analysis {
             
             sheet.getRow(20).getCell(2).setCellValue(totalB);
             sheet.getRow(20).getCell(3).setCellValue(total-totalB);
-            sheet.getRow(20).getCell(4).setCellValue(total);            
+            sheet.getRow(20).getCell(4).setCellValue(total);  
+                      
+            // update numbers in the Venn diagram
+            XSSFDrawing drawing = ((XSSFSheet)sheet).getDrawingPatriarch();    
+            for (XSSFShape shape: drawing.getShapes()) {                 
+                if (shape instanceof XSSFSimpleShape){
+                    String str = ((XSSFSimpleShape)shape).getText();
+                    XDDFTextBody body = ((XSSFSimpleShape)shape).getTextBody();
+                    if (str==null) continue;
+                    String newText=null;
+                         if (str.equals("S1")) newText=(""+A_notB);
+                    else if (str.equals("S2")) newText=(""+notA_B);
+                    else if (str.equals("U12")) newText=(""+A_B);
+                    else if (str.equals("Total")) newText=("Total = "+total);
+                    else if (str.equals("Union")) newText=("Union = "+contingencyTable[FIRST_UNION_SECOND]);
+                    else if (str.equals("Total_FirstSet")) newText=(firstCollectionName+" ("+totalA+")");
+                    else if (str.equals("Total_SecondSet")) newText=(secondCollectionName+" ("+totalB+")");
+                    else if (str.equals("NotInSet")) newText=(""+notA_notB);
+                    if (newText!=null) body.setText(newText);                 
+                }
+            }  
+            
+            // autoSizeExcelColumns(sheet, 1, 3, 800); // Unfortunately, scaling seems to mess up the drawing as well
             
             // Overlap and p-values
             sheet.getRow(23).getCell(1).setCellValue((double)A_B/(double)totalA);
@@ -572,37 +565,13 @@ public class CompareCollectionsAnalysis extends Analysis {
             sheet.getRow(26).getCell(3).setCellValue(pvalueAtLeastObservedOverlap);
             sheet.getRow(27).getCell(3).setCellValue(pvalueAtMostObservedOverlap);
             
-            // update numbers in the Venn diagram
-            HSSFPatriarch pat = ((HSSFSheet)sheet).getDrawingPatriarch();
-            List children = pat.getChildren();
-            Iterator it = children.iterator(); 
-            while(it.hasNext()) {           
-                Object shape = it.next();
-                if (shape instanceof HSSFTextbox){
-                  HSSFTextbox textbox = (HSSFTextbox)shape;
-                  HSSFRichTextString richString = textbox.getString();
-                  String str = richString.getString();
-                  String newText=null;
-                       if (str.equals("S1")) newText=(""+A_notB);
-                  else if (str.equals("S2")) newText=(""+notA_B);
-                  else if (str.equals("U12")) newText=(""+A_B);
-                  else if (str.equals("Total")) newText=("Total = "+total);
-                  else if (str.equals("Union")) newText=("Union = "+contingencyTable[FIRST_UNION_SECOND]);
-                  else if (str.equals("Total_FirstSet")) newText=(firstCollectionName+" ("+totalA+")");
-                  else if (str.equals("Total_SecondSet")) newText=(secondCollectionName+" ("+totalB+")");
-                  else if (str.equals("NotInSet")) newText=(""+notA_notB);
-                  if (newText!=null) textbox.setString(replaceText(richString,newText,(HSSFWorkbook)workbook));
-                }
-             }              
-                             
-            // HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
-            
+            // XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);            
         } catch (Exception e) {
             throw new ExecutionError(e.getMessage());
         }
        
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -616,17 +585,6 @@ public class CompareCollectionsAnalysis extends Analysis {
         return outputobject;        
     }      
     
-        
-    private HSSFRichTextString replaceText(HSSFRichTextString oldString, String newString, HSSFWorkbook workbook) {
-       short fontIndex=oldString.getFontAtIndex(0);
-       HSSFFont font=(HSSFFont)workbook.getFontAt(fontIndex);
-       short colorIndex = font.getColor();
-       HSSFColor color = font.getHSSFColor(workbook);  
-       HSSFRichTextString newrichText=new HSSFRichTextString(newString);
-       //font.setColor(colorIndex);
-       newrichText.applyFont(font);
-       return newrichText;                  
-    }
 
     @Override
     protected Dimension getDefaultDisplayPanelDimensions() {

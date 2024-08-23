@@ -8,6 +8,10 @@ package motiflab.engine.data.analysis;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import javax.swing.JTable;
 import motiflab.engine.data.*;
 import java.util.ArrayList;
@@ -29,15 +33,29 @@ import motiflab.engine.task.OperationTask;
 import motiflab.engine.Parameter;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.MotifLabEngine;
+import static motiflab.engine.data.analysis.Analysis.EXCEL;
 import motiflab.engine.dataformat.DataFormat;
 import motiflab.gui.GenericBrowserPanel;
 import motiflab.gui.GenericModuleBrowserPanel;
 import motiflab.gui.GenericMotifBrowserPanel;
 import motiflab.gui.GenericSequenceBrowserPanel;
+import motiflab.gui.ModuleLogo;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.MotifLogo;
 import motiflab.gui.ToolTipHeader;
 import motiflab.gui.VisualizationSettings;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Picture;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * This class represents a diverse set of analyses that are created by collating 
@@ -157,21 +175,26 @@ public class CollatedAnalysis extends Analysis {
     }
 
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-            new Parameter("Include",DataCollection.class,null,new Class[]{DataCollection.class},"Only include data from this collection",false,false),
-            new Parameter("Logos",String.class,MOTIF_LOGO_NO, new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_SHARED,MOTIF_LOGO_TEXT},"Include graphical logos in the table",false,false),
-            new Parameter("Only markup",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, columns will not show regular values, only markup classes",false,false),
-            new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif, module or sequence will be output as the first column",false,false)
-        };
+    public Parameter[] getOutputParameters(String dataformat) {
+        // Unfortunately, it is not possible to filter the "Include" parameter below based on collateType, 
+        // because the operation dialog bases the parameters on a template-analysis (where the collateType is not set) rather than the actual analysis object             
+        Parameter incPar  = new Parameter("Include",DataCollection.class,null,new Class[]{DataCollection.class},"Only include data from this collection",false,false);
+        Parameter logos   = new Parameter("Logos",String.class,getMotifLogoDefaultOption(dataformat), getMotifLogoOptions(dataformat),"Include graphical logos in the table",false,false);
+        Parameter markPar = new Parameter("Only markup",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, columns will not show regular values, only markup classes",false,false);
+        Parameter colPar  = new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif, module or sequence will be output as the first column",false,false);
+        Parameter legend  = new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false);          
+        if (dataformat.equals(HTML)) return new Parameter[]{incPar,logos,markPar,colPar};
+        else if (dataformat.equals(EXCEL)) return new Parameter[]{incPar,logos,markPar,legend};
+        else if (dataformat.equals(RAWDATA)) return new Parameter[]{incPar,logos,markPar};
+        else return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Only markup") || parameter.equals("Color boxes")) return new String[]{"HTML"};
-        if (parameter.equals("Include") || parameter.equals("Logos")) return new String[]{"HTML","RawData"};        
-        return null;
-    }    
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Only markup") || parameter.equals("Color boxes")) return new String[]{"HTML"};
+//        if (parameter.equals("Include") || parameter.equals("Logos")) return new String[]{"HTML","RawData"};        
+//        return null;
+//    }    
 
     @Override
     public String[] getResultVariables() {
@@ -418,24 +441,25 @@ public class CollatedAnalysis extends Analysis {
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
         Color [] basecolors=vizSettings.getBaseColors();
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean showOnlyMarkup=false;
         boolean showColorBoxes=false;
         DataCollection include=null;
         if (settings!=null) {
-          try {
-             Parameter[] defaults=getOutputParameters();
-             showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
-             showOnlyMarkup=(Boolean)settings.getResolvedParameter("Only markup",defaults,engine);
-             showColorBoxes=(Boolean)settings.getResolvedParameter("Color boxes",defaults,engine);
-             include=(DataCollection)settings.getResolvedParameter("Include",defaults,engine);             
-          }
-          catch (ExecutionError e) {throw e;}
-          catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
+            try {
+                Parameter[] defaults=getOutputParameters(format);
+                showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
+                showOnlyMarkup=(Boolean)settings.getResolvedParameter("Only markup",defaults,engine);
+                showColorBoxes=(Boolean)settings.getResolvedParameter("Color boxes",defaults,engine);
+                include=(DataCollection)settings.getResolvedParameter("Include",defaults,engine);             
+            }
+            catch (ExecutionError e) {throw e;}
+            catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
         if (include!=null && include.getMembersClass()!=collateType) include=null; // ignore non-compatible collection
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
-        showSequenceLogos=(showSequenceLogos && (collateType==Motif.class || collateType==Module.class));
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
+        showSequenceLogos = (showSequenceLogos && (collateType==Motif.class || collateType==Module.class));
+        
         engine.createHTMLheader((headline!=null)?headline:"Collated Analysis", null, null, true, true, true, outputobject);
         outputobject.append("<h1 class=\"headline\">",HTML);
         outputobject.append((headline!=null)?headline:"Collated Analysis",HTML);
@@ -544,24 +568,261 @@ public class CollatedAnalysis extends Analysis {
        
 
     @Override
+    public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        AnnotatedValueRenderer histogramrenderer=new AnnotatedValueRenderer(engine.getClient().getVisualizationSettings());
+        VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
+        Color [] basecolors=vizSettings.getBaseColors();
+        boolean border=(Boolean)vizSettings.getSettingAsType("motif.border", Boolean.TRUE);        
+        MotifLogo sequencelogo = (collateType==Motif.class)?new MotifLogo(basecolors,sequencelogoSize):null;
+        ModuleLogo modulelogo = (collateType==Module.class)?new ModuleLogo(vizSettings):null;
+        int logoheight = (collateType==Module.class)?28:19;        
+        String showSequenceLogosString="";
+        boolean showOnlyMarkup=false;
+        boolean includeLegend=false;
+        DataCollection include=null;
+        if (settings!=null) {
+            try {
+                Parameter[] defaults=getOutputParameters(format);
+                showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
+                showOnlyMarkup=(Boolean)settings.getResolvedParameter("Only markup",defaults,engine);
+                includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine); 
+                include=(DataCollection)settings.getResolvedParameter("Include",defaults,engine);             
+            }
+            catch (ExecutionError e) {throw e;}
+            catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
+        }
+        if (include!=null && include.getMembersClass()!=collateType) include=null; // ignore non-compatible collection
+        boolean showLogos = includeLogosInOutput(showSequenceLogosString);
+        showLogos = (showLogos && (collateType==Motif.class || collateType==Module.class));
+        boolean showLogosAsText = (showLogos && includeLogosInOutputAsText(showSequenceLogosString));
+        
+        int rownum=0;
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Collated Analysis");
+        CreationHelper helper = workbook.getCreationHelper();
+        Drawing drawing = sheet.createDrawingPatriarch();         
+                   
+        CellStyle title = getExcelTitleStyle(workbook);
+        CellStyle tableheader = getExcelTableHeaderStyle(workbook);
+        CellStyle normalStyle=createExcelStyle(workbook, BorderStyle.NONE, null, HorizontalAlignment.GENERAL, false);      
+        normalStyle.setVerticalAlignment(VerticalAlignment.CENTER);        
+        
+        // Make room for the header which will be added later
+        Row row = null;
+        int headerrows=3;
+        if (includeLegend) {
+            for (int j=0;j<headerrows;j++) {
+               row = sheet.createRow(j); 
+            }
+            rownum=headerrows-1; // -1 because it will be incremented later on...
+        }     
+        Cell cell;
+        int column=0;  
+        int columnCount=0; // number of columns not including logos
+        int maxlogowidth=0;
+        row = sheet.createRow(rownum);
+        ArrayList<Integer> dontResizeColumns = new ArrayList<>(2);
+        
+        // header row
+        if (collateType==Motif.class) {
+            cell = row.createCell(column++); cell.setCellValue("ID"); cell.setCellStyle(tableheader);
+            cell = row.createCell(column++); cell.setCellValue("Name"); cell.setCellStyle(tableheader);
+            cell = row.createCell(column++); cell.setCellValue("Class"); cell.setCellStyle(tableheader);           
+        } else {
+            cell = row.createCell(column++); cell.setCellValue("ID"); cell.setCellStyle(tableheader);
+        }
+        for (int j=0;j<columns.size();j++) { // collated columns here                        
+            cell = row.createCell(column); cell.setCellValue(columns.get(j)); cell.setCellStyle(tableheader);
+            Class type = columnTypes.get(j);
+            if (type == double[].class) { // this column contains a histogram
+                sheet.setColumnWidth(column, 3800);
+                dontResizeColumns.add(column);
+            } 
+            column++;
+        }      
+        if (showLogos) {
+            cell = row.createCell(column); cell.setCellValue("Logo"); cell.setCellStyle(tableheader);
+            sheet.setColumnWidth(column, 10000);
+            dontResizeColumns.add(column);
+            column++;            
+        }
+        columnCount=column;         
+               
+        ArrayList<String> rows=new ArrayList<String>(entryNames.size());
+        if (include!=null) {
+           for (String entry:include.getValues()) {
+               if (entryNames.contains(entry)) rows.add(entry);
+           }
+        } else rows.addAll(entryNames);
+        Collections.sort(rows);
+        HashMap<String,CellStyle> markupStyles = new HashMap<>();
+
+        for (int i=0;i<rows.size();i++) {
+            rownum++;            
+            column = 0;
+            String dataname=rows.get(i);
+            // if (include!=null && !include.contains(dataname)) continue; // this should be redundant now
+            row = sheet.createRow(rownum);
+            column = outputPrefixColumnsExcel(row, column, dataname, normalStyle, engine); // either 3 or 1 column depending on the collation type
+            for (int j=0;j<columns.size();j++) {
+                cell = row.createCell(column);
+                cell.setCellStyle(normalStyle);
+                Object cellData=getCellData(j, dataname);
+                Object value=(cellData instanceof AnnotatedValue)?((AnnotatedValue)cellData).getValue():cellData;
+                String markup=(cellData instanceof AnnotatedValue)?((AnnotatedValue)cellData).getMarkup():null;
+                
+                // set background color based on markup     
+                if (markup!=null) {
+                    if (!markupStyles.containsKey(markup)) {
+                        Color color = vizSettings.getSystemColor(markup);
+                        CellStyle style = createExcelStyle(workbook, null, color, null, false);
+                        style.setVerticalAlignment(VerticalAlignment.CENTER);
+                        markupStyles.put(markup, style);
+                    }
+                    cell.setCellStyle(markupStyles.get(markup));
+                }                
+                if (!showOnlyMarkup) {
+                    if (value instanceof Number) {
+                        double number = ((Number)value).doubleValue();
+                        if (!Double.isNaN(number)) cell.setCellValue( number );
+                    } else if (value instanceof String) {
+                        cell.setCellValue((String)value);
+                    } else if (value instanceof double[]) { // render as a histogram
+                        try {
+                            byte[] image=histogramrenderer.outputHistogramToByteArray( (double[])value );
+                            int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
+                            ClientAnchor picanchor = helper.createClientAnchor();
+                            picanchor.setCol1(column);
+                            picanchor.setRow1(rownum);
+                            picanchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
+                            Picture pict=drawing.createPicture(picanchor, imageIndex);	
+                            pict.resize();
+                            int offsetX=25000;
+                            int offsetY=25000;                    
+                            picanchor.setDx1(offsetX);
+                            picanchor.setDy1(offsetY);    
+                            picanchor.setDx2(picanchor.getDx2()+offsetX);
+                            picanchor.setDy2(picanchor.getDy2()+offsetY);                
+                        } catch (IOException e) {throw new ExecutionError(e.getMessage());}                        
+                    } else if (value!=null) {
+                        cell.setCellValue(""+value);
+                    }
+                }
+                column++;
+            }
+            if (showLogos) {
+                Data data=engine.getDataItem(dataname);                
+                cell = row.createCell(column);
+                if (data instanceof Motif && showLogosAsText) {
+                    cell.setCellValue( ((Motif)data).getConsensusMotif() );
+                } else if (data instanceof Motif) {
+                     Motif motif = (Motif)data;                    
+                     try {          
+                        sequencelogo.setMotif(motif);
+                        int width=motif.getLength();
+                        if (width>maxlogowidth) maxlogowidth=width;
+                        byte[] image=getMotifLogoImageAsByteArray(sequencelogo, logoheight, border, "png");
+                        int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
+                        ClientAnchor picanchor = helper.createClientAnchor();
+                        picanchor.setCol1(column);
+                        picanchor.setRow1(rownum);
+                        picanchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
+                        Picture pict=drawing.createPicture(picanchor, imageIndex);	
+                        pict.resize();
+                        int offsetX=25000;
+                        int offsetY=25000;
+                        picanchor.setDx1(offsetX);
+                        picanchor.setDy1(offsetY);    
+                        picanchor.setDx2(picanchor.getDx2()+offsetX);
+                        picanchor.setDy2(picanchor.getDy2()+offsetY);                         
+                    } catch (Exception e) {throw new ExecutionError(e.getMessage());}                   
+                } else if (data instanceof Module && showLogosAsText) {                   
+                    cell.setCellValue( ((Module)data).getModuleLogo() );
+                } else if (data instanceof Module) {
+                    Module module = (Module)data;
+                    try {
+                        row.setHeightInPoints((short)(logoheight));                        
+                        modulelogo.setModule(module);                        
+                        byte[] image=getModuleLogoImageAsByteArray(modulelogo, logoheight, false, "png");
+                        int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
+                        ClientAnchor anchor = helper.createClientAnchor();
+                        anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
+                        anchor.setCol1(column);
+                        anchor.setRow1(rownum);                                                
+                        Picture pict=drawing.createPicture(anchor, imageIndex);	
+                        pict.resize();   
+                        // now offset the image a little bit down and to the left to avoid overlap with the Excel cell borders
+                        int offsetX=25000;
+                        int offSetY=25000;
+                        anchor.setDx1(anchor.getDx1()+offsetX); // top-left
+                        anchor.setDy1(anchor.getDy1()+offSetY); // top-left  
+                        anchor.setDx2(anchor.getDx2()+offsetX); // bottom-right
+                        anchor.setDy2(anchor.getDy2()+offSetY); // bottom-right
+                    } catch (Exception e) {throw new ExecutionError(e.getMessage(),e);}                    
+                }                                     
+            }
+
+            if (i%100==0) {
+                task.checkExecutionLock(); // checks to see if this task should suspend execution
+                if (Thread.interrupted() || task.getStatus().equals(ExecutableTask.ABORTED)) throw new InterruptedException();
+                Thread.yield();
+            }
+            task.setStatusMessage("Executing operation: output ("+(i+1)+"/"+rows.size()+")");
+            format.setProgress(i, rows.size()); //
+        }
+        // resize columns to fit (but not the ones containing images)
+        for (int i=0; i<columnCount; i++) {
+            if (dontResizeColumns.contains(i)) continue;
+            sheet.autoSizeColumn(i);
+            try {sheet.setColumnWidth(i, sheet.getColumnWidth(i)+800); } // add some padding
+            catch (java.lang.IllegalArgumentException argX) {}
+        }        
+       
+        if (includeLegend) {        
+            sheet.createFreezePane(0,headerrows,0,headerrows);
+            row=sheet.getRow(0);
+            outputStringValueInCell(row, 0, headline, title);
+            // StringBuilder firstLine=new StringBuilder();
+            // firstLine.append("Add more information here?");
+            // row=sheet.getRow(2);
+            // outputStringValueInCell(row, 0, firstLine.toString(), null); 
+        }
+        
+        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
+        try {
+            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
+            workbook.write(stream);
+            stream.close();
+        } catch (Exception e) {
+            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+        }
+        outputobject.setBinary(true);        
+        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
+        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
+        format.setProgress(95);
+        return outputobject;
+    }
+    
+    @Override
     public OutputData formatRaw(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {      
-        AnnotatedValueRenderer histogramrenderer=new AnnotatedValueRenderer(null);
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        AnnotatedValueRenderer histogramrenderer=new AnnotatedValueRenderer(engine.getClient().getVisualizationSettings());
+        String showSequenceLogosString="";
         boolean showOnlyMarkup=false;
         DataCollection include=null;
         if (settings!=null) {
-          try {
-             Parameter[] defaults=getOutputParameters();
-             showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
-             showOnlyMarkup=(Boolean)settings.getResolvedParameter("Only markup",defaults,engine);
-             include=(DataCollection)settings.getResolvedParameter("Include",defaults,engine);              
-          }
-          catch (ExecutionError e) {throw e;}
-          catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
+            try {
+                Parameter[] defaults=getOutputParameters(format);
+                showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
+                showOnlyMarkup=(Boolean)settings.getResolvedParameter("Only markup",defaults,engine);
+                include=(DataCollection)settings.getResolvedParameter("Include",defaults,engine);              
+            }
+            catch (ExecutionError e) {throw e;}
+            catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
         if (include!=null && include.getMembersClass()!=collateType) include=null; // ignore non-compatible collection        
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
-        showSequenceLogos=(showSequenceLogos && (collateType==Motif.class || collateType==Module.class));
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
+        showSequenceLogos = (showSequenceLogos && (collateType==Motif.class || collateType==Module.class));
         ArrayList<String> rows=new ArrayList<String>(entryNames.size());;
         if (include!=null) {
            for (String entry:include.getValues()) {
@@ -653,6 +914,27 @@ public class CollatedAnalysis extends Analysis {
             output.append("</td>", HTML);
         } // not anything more interresting for Module or Sequence so far
     }
+    
+    private int outputPrefixColumnsExcel(Row row, int column, String dataname, CellStyle style, MotifLabEngine engine) {
+        if (collateType==Motif.class) {
+            Cell cell = row.createCell(column++);
+            cell.setCellValue(dataname);           
+            cell = row.createCell(column++);
+            Data object=engine.getDataItem(dataname);
+            String motifname=(object instanceof Motif)?((Motif)object).getShortName():null;            
+            cell.setCellValue((motifname!=null)?motifname:"");
+            cell.setCellStyle(style);           
+            cell = row.createCell(column++);
+            String classname=(object instanceof Motif)?((Motif)object).getClassification():null;
+            cell.setCellValue((classname!=null)?classname:"unknown");  
+            cell.setCellStyle(style);            
+        } else {
+            Cell cell = row.createCell(column++);
+            cell.setCellValue(dataname);
+            cell.setCellStyle(style);            
+        } // not anything more interresting for Module or Sequence so far
+        return column;
+    }    
 
     @Override
     public void runAnalysis(OperationTask task) throws Exception {

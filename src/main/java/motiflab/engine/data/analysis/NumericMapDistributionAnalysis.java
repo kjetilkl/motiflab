@@ -22,7 +22,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -34,31 +36,24 @@ import motiflab.engine.task.OperationTask;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.Parameter;
+import static motiflab.engine.data.analysis.Analysis.EXCEL;
 import motiflab.engine.dataformat.DataFormat;
+import motiflab.engine.util.Excel_BoxplotMaker;
 import motiflab.gui.OutputPanel;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
-import org.apache.poi.hssf.usermodel.HSSFChart;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.util.AreaReference;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Name;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xddf.usermodel.chart.AxisPosition;
+import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFCategoryDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartAxis;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFValueAxis;
+import org.apache.poi.xssf.usermodel.*;
 
-//import org.apache.batik.svggen.SVGGraphics2D;
-//import org.apache.batik.dom.GenericDOMImplementation;
-
-//import org.freehep.graphics2d.VectorGraphics;
-//import org.freehep.graphicsio.gif.GIFGraphics2D;
-//import org.freehep.graphicsio.pdf.PDFGraphics2D;
-//import org.freehep.graphicsio.ps.PSGraphics2D;
-//import org.freehep.graphicsio.svg.SVGGraphics2D;
 
 /**
  *
@@ -76,7 +71,7 @@ public class NumericMapDistributionAnalysis extends Analysis {
     private HashMap<String,int[]> bins; // the key is a cluster name or collection name (or the special string "*DEFAULT*"). The value is bin counts
     private ArrayList<String> clusterNames=null; // names of clusters if the values are grouped by a Partition. Name of Collection if grouped by Collection. else NULL
     private ArrayList<Color> clusterColors=null;
-    private boolean  doNormalize=true;
+    private boolean doNormalize=true;
 
     private final String[] variables = new String[]{};
 
@@ -103,18 +98,19 @@ public class NumericMapDistributionAnalysis extends Analysis {
     
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {        
+    public Parameter[] getOutputParameters(String dataformat) {        
          Parameter boxplotpar=new Parameter("Box plot",String.class, BOTH,new String[]{NONE,MEDIAN_QUARTILES,MEAN_STD,BOTH},"Which statistics to show using box plots",false,false);        
          Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","svg","pdf","eps"},"The image format to use for the graph",false,false);        
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-         return new Parameter[]{boxplotpar,imageformat,scalepar};
+         if (dataformat.equals(HTML)) return new Parameter[]{boxplotpar,imageformat,scalepar};
+         else return new Parameter[0];
     }
 
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Box plot") || parameter.equals("Image format") || parameter.equals("Graph scale")) return new String[]{"HTML"};
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Box plot") || parameter.equals("Image format") || parameter.equals("Graph scale")) return new String[]{"HTML"};
+//        return null;
+//    }     
     
     @Override
     public String getAnalysisName() {
@@ -247,24 +243,24 @@ public class NumericMapDistributionAnalysis extends Analysis {
         else if (DataPartition.class.isAssignableFrom(dataGroupClass)) outputobject.append("<h2 class=\"headline\">Distribution of values for '"+numericMapName+"' for clusters in '"+dataGroupName+"'</h2>\n",HTML);
         else outputobject.append("<h2 class=\"headline\">A problem of type #204 has occurred<h2>\n"+dataGroupClass.toString(),HTML);
         if (dataGroupClass!=null && DataPartition.class.isAssignableFrom(dataGroupClass) && clusterNames.isEmpty()) {
-           outputobject.append("<br /><br />... "+dataGroupName+" contains no clusters ...<br /><br />",HTML);
+            outputobject.append("<br /><br />... "+dataGroupName+" contains no clusters ...<br /><br />",HTML);
         } else {
             int plots=PLOT_BOTH;
             int scalepercent=100;
             String imageFormat="png";
             if (settings!=null) {
-              try {
-                     Parameter[] defaults=getOutputParameters();
-                     String plotString=(String)settings.getResolvedParameter("Box plot",defaults,engine);
-                          if (plotString.equals(NONE)) plots=PLOT_NONE;
-                     else if (plotString.equals(MEDIAN_QUARTILES)) plots=PLOT_MEDIAN_QUARTILES;
-                     else if (plotString.equals(MEAN_STD)) plots=PLOT_MEAN_STD;
-                     else if (plotString.equals(BOTH)) plots=PLOT_BOTH;
-                     scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
-                     imageFormat=(String)settings.getResolvedParameter("Image format",defaults,engine);
-              } 
-              catch (ExecutionError e) {throw e;} 
-              catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
+                try {
+                    Parameter[] defaults=getOutputParameters(format);
+                    String plotString=(String)settings.getResolvedParameter("Box plot",defaults,engine);
+                        if (plotString.equals(NONE)) plots=PLOT_NONE;
+                    else if (plotString.equals(MEDIAN_QUARTILES)) plots=PLOT_MEDIAN_QUARTILES;
+                    else if (plotString.equals(MEAN_STD)) plots=PLOT_MEAN_STD;
+                    else if (plotString.equals(BOTH)) plots=PLOT_BOTH;
+                    scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
+                    imageFormat=(String)settings.getResolvedParameter("Image format",defaults,engine);
+                } 
+                catch (ExecutionError e) {throw e;} 
+                catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
             } 
             double scale=(scalepercent==100)?1.0:(((double)scalepercent)/100.0);
             if (clusterColors==null) clusterColors=assignClusterColors(clusterNames, engine.getClient().getVisualizationSettings()); // assign new colors
@@ -347,112 +343,223 @@ public class NumericMapDistributionAnalysis extends Analysis {
         if (format!=null) format.setProgress(100);
         return outputobject;
     }
-    
-   @Override
+
+    @Override
     public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
-        Workbook workbook=null;
+        if (clusterNames==null || clusterNames.size()==1) return formatExcelSingleGroup(outputobject, engine, settings, task, format);
+        else return formatExcelMultipleGroups(outputobject, engine, settings, task, format);
+    }
+    
+    private OutputData formatExcelSingleGroup(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        XSSFWorkbook workbook=null;
         try {
-            InputStream stream = CompareRegionDatasetsAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_MapDistribution.xlt");
-            workbook = WorkbookFactory.create(stream);
+            InputStream stream = DistributionAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_NumericMapDistribution.xlsx");
+            workbook = (XSSFWorkbook)WorkbookFactory.create(stream);
             stream.close();
-                             
-//            // setup the data for the histogram                                      
-            HashMap<String,double[]> histogram=getHistogramValues();
-            ArrayList<String> list=new ArrayList<String>(histogram.size());
-            list.add("*xRange*");
-            if (clusterNames!=null && !clusterNames.isEmpty()) list.addAll(clusterNames);
-            else list.add(DEFAULT_GROUP);
-            
-            int binCount=histogram.get("*xRange*").length;         
-            Sheet histogramsheet = workbook.getSheetAt(1);
-
-            for (int i=0;i<binCount;i++) { // insert histogram values into Sheet2
-                Row row=histogramsheet.getRow(i);
-                if (row==null) row=histogramsheet.createRow(i);
-                for (int j=0;j<list.size();j++) {
-                    String series=list.get(j);
-                    Cell cell=row.getCell(j);
-                    if (cell==null) cell=row.createCell(j);
-                    double value=histogram.get(series)[i];
-                    cell.setCellValue(value);
-                }                
-            }
-            Sheet sheet = workbook.getSheetAt(0);  
-            sheet.setForceFormulaRecalculation(true);
-            HSSFChart chart=HSSFChart.getSheetCharts((HSSFSheet)sheet)[0];            
-            
-            Name xRange = workbook.getName("RangeX"); //              
-            String xRange_reference = "Sheet2!$A$1:$A$"+binCount;   //Set new range for named range                       
-            xRange.setRefersToFormula(xRange_reference); //Assign to named range
-
-            if (clusterNames!=null && !clusterNames.isEmpty()) {
-                int j=0;
-                for (String clusterName:clusterNames) {
-                    j++;
-                    Name valuesRange = workbook.createName();
-                    valuesRange.setNameName("Histogram_"+clusterName);
-                    String colName=Analysis.getExcelColumnNameForIndex(j);
-                    String valuesRange_reference = "Sheet2!$"+colName+"$1:$"+colName+"$"+binCount;   //Set new range for named range                       
-                    valuesRange.setRefersToFormula(valuesRange_reference); //Assign to named range                    
-                    HSSFChart.HSSFSeries series = chart.createSeries();                    
-                    AreaReference aref = new AreaReference(valuesRange.getRefersToFormula());
-                    CellReference firstCell=aref.getFirstCell();
-                    CellReference lastCell=aref.getLastCell();
-                    CellRangeAddress range=new CellRangeAddress(firstCell.getRow(), lastCell.getRow(), firstCell.getCol(), lastCell.getCol());
-                    series.setValuesCellRange(range);  
-                    series.setSeriesTitle(clusterName);
-                }
-            }
-            else {
-                Name valuesRange = workbook.createName();
-                valuesRange.setNameName("Histogram_");
-                String valuesRange_reference = "Sheet2!$B$1:$B$"+binCount;   //Set new range for named range                       
-                valuesRange.setRefersToFormula(valuesRange_reference); //Assign to named range
-                HSSFChart.HSSFSeries series = chart.createSeries();
-                AreaReference aref = new AreaReference(valuesRange.getRefersToFormula());
-                CellReference firstCell=aref.getFirstCell();
-                CellReference lastCell=aref.getLastCell();
-                CellRangeAddress range=new CellRangeAddress(firstCell.getRow(), lastCell.getRow(), firstCell.getCol(), lastCell.getCol());
-                series.setValuesCellRange(range);    
-                series.setSeriesTitle("Histogram");
-            }           
-                             
-            String descriptionString="A problem of type #204 has occurred";
-                 if (dataGroupClass==null) descriptionString="Distribution of values for \""+numericMapName+"\"";
-            else if (DataCollection.class.isAssignableFrom(dataGroupClass)) descriptionString="Distribution of values for \""+numericMapName+"\" in collection \""+dataGroupName+"\"";
-            else if (DataPartition.class.isAssignableFrom(dataGroupClass)) descriptionString="Distribution of values for \""+numericMapName+"\" for clusters in \""+dataGroupName+"\"";
-
-            sheet.getRow(0).getCell(0).setCellValue(descriptionString);
-            
-            int rowIndex=4;
-            CellStyle useStyle=sheet.getRow(rowIndex).getCell(2).getCellStyle();
-            if (clusterNames!=null && !clusterNames.isEmpty()) {
-                int i=0;
-                for (String clusterName:clusterNames) {
-                    double[] clusterResults=statistics.get(clusterName);
-                    double[] result=new double[]{clusterResults[0],clusterResults[1],clusterResults[2],clusterResults[4],clusterResults[6],clusterResults[5],clusterResults[7],clusterResults[8]}; // count,min,max,sum,avg,median,stdev,1st quartile,3rd quartile
-                    Row row=sheet.getRow(rowIndex+i);
-                    if (row==null) row=sheet.createRow(rowIndex+i);
-                    outputStringValueInCell(row, 1, clusterName, useStyle);
-                    outputNumericValuesInCells(row, result, 2, useStyle);
-                    i++;
-                }
-            } else {               
-                double[] results=statistics.get(DEFAULT_GROUP);  
-                double[] result=new double[]{results[0],results[1],results[2],results[4],results[6],results[5],results[7],results[8]}; // count,min,max,sum,avg,median,stdev,1st quartile,3rd quartile                   
-                Row row=sheet.getRow(rowIndex);
-                if (row==null) row=sheet.createRow(rowIndex);
-                outputStringValueInCell(row, 1, "   ", useStyle);
-                outputNumericValuesInCells(row, result, 2, useStyle);                          
+            XSSFSheet sheet = workbook.getSheetAt(0);           
+            String title = "Distribution of values for numeric map \""+numericMapName+"\"";   
+            String group = (clusterNames==null)?DEFAULT_GROUP:clusterNames.get(0); //            
+            if (dataGroupName!=null) {
+                if (DataCollection.class.isAssignableFrom(dataGroupClass)) title+=" in collection \""+dataGroupName+"\"";
+                else if (DataPartition.class.isAssignableFrom(dataGroupClass)) title+=" for cluster \""+group+"\" from partition \""+dataGroupName+"\"";
+                
             } 
-            sheet.autoSizeColumn((short)1);
-            
+            formatStatisticExcel(group, workbook.getSheetAt(0), title);   
+            sheet.getRow(0).getCell(0).setCellValue(title);
+            if (format!=null) format.setProgress(90);          
         } catch (Exception e) {
             e.printStackTrace(System.err);
             throw new ExecutionError(e.getMessage());
         }
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
+        try {
+            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
+            workbook.write(stream);
+            stream.close();
+        } catch (Exception e) {
+            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+        }        
+        outputobject.setBinary(true);        
+        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
+        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
+        return outputobject;        
+    } 
+    
+    private void formatStatisticExcel(String name, XSSFSheet sheet, String title) {
+        double[] clusterResults=statistics.get(name);        
+        Row row = sheet.getRow(4); // the row index is determined by the Excel template file
+        int column=1;
+        row.getCell(column++).setCellValue((int)clusterResults[0]); // size         
+        row.getCell(column++).setCellValue(clusterResults[1]); // min 
+        row.getCell(column++).setCellValue(clusterResults[2]); // max
+        row.getCell(column++).setCellValue(clusterResults[4]); // average
+        row.getCell(column++).setCellValue(clusterResults[6]); // std dev
+        row.getCell(column++).setCellValue(clusterResults[5]); // median
+        row.getCell(column++).setCellValue(clusterResults[7]); // 1st quartile
+        row.getCell(column++).setCellValue(clusterResults[8]); // 3rd quartile
+          
+        int datarow = 99;
+        int size = (int)clusterResults[0];
+        int[] databins = bins.get(name);
+        int bincount = databins.length;        
+        double minValue = clusterResults[1];
+        double maxValue = clusterResults[2];
+        double binrange = (maxValue-minValue)/(double)bincount;
+        double binstart = minValue;
+        
+        Cell cell;
+        for (int i=0;i<bincount;i++) {
+            int rowIndex = datarow+i;
+            row = sheet.getRow(rowIndex);
+            if (row==null) row=sheet.createRow(rowIndex);
+            cell = row.getCell(0);
+            if (cell==null) cell=row.createCell(0);
+            cell.setCellValue(binstart);
+            cell = row.getCell(1);
+            if (cell==null) cell=row.createCell(1);
+            cell.setCellValue(databins[i]/(double)size);                        
+            binstart+=binrange;
+        }
+        // clear remaining example data from analysis template sheet
+        for (int i=datarow+bincount;i<210;i++) {
+           row = sheet.getRow(i);
+           if (row==null) break;
+           cell = row.getCell(0);
+           if (cell!=null) cell.setBlank();  
+           cell = row.getCell(1);
+           if (cell!=null) cell.setBlank();                  
+        } 
+        forceExcelFormulaRecalculation(sheet.getWorkbook(),sheet);        
+        
+        XSSFDrawing drawing = ((XSSFSheet)sheet).createDrawingPatriarch();
+        XSSFChart histogramChart = drawing.getCharts().get(0);
+        List<XDDFChartData> data = histogramChart.getChartSeries();        
+
+        XDDFCategoryDataSource categories = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(datarow, datarow+bincount, 0, 0));
+        XDDFNumericalDataSource values = XDDFDataSourcesFactory.fromNumericCellRange(sheet,new CellRangeAddress(datarow, datarow+bincount, 1, 1));       
+        XDDFBarChartData.Series series1 = (XDDFBarChartData.Series)data.get(0).getSeries(0); 
+        series1.replaceData(categories, values);
+        histogramChart.plot(histogramChart.getChartSeries().get(0));
+     
+        // Define new data ranges
+        int datarowPlusOne=datarow+1;
+        String sheetname = sheet.getSheetName();
+        String newXRange = "'"+sheetname+"'!$A$"+datarowPlusOne+":$A$"+(datarowPlusOne+bincount-1);
+        String newValueRange = "'"+sheetname+"'!$B$"+datarowPlusOne+":$B$"+(datarowPlusOne+bincount-1);        
+        // Check if the category axis is null
+        if (series1.getCTBarSer().getCat() == null) {series1.getCTBarSer().addNewCat();}
+        if (series1.getCTBarSer().getCat().getNumRef() != null) {
+            series1.getCTBarSer().getCat().getNumRef().setF(newXRange);
+        }
+        else if (series1.getCTBarSer().getCat().getStrRef()!= null) {
+            series1.getCTBarSer().getCat().getStrRef().setF(newXRange);
+        }
+        else {
+            series1.getCTBarSer().getCat().addNewNumRef();
+            series1.getCTBarSer().getCat().getNumRef().setF(newXRange);
+        }
+        series1.getCTBarSer().getVal().getNumRef().setF(newValueRange);       
+        
+        // Set the minimum and maximum X-values for box-and-whiskers plot
+        for (int i=1;i<drawing.getCharts().size();i++) {
+            XSSFChart boxchart = drawing.getCharts().get(i);
+            XDDFValueAxis xAxis = null;
+            for (XDDFChartAxis axis : boxchart.getAxes()) {
+                if (axis.getPosition() == AxisPosition.BOTTOM) {
+                    xAxis = (XDDFValueAxis) axis;
+                    break;
+                }
+            }
+            if (xAxis != null) {                               
+                xAxis.setMinimum(minValue); // 
+                xAxis.setMaximum(maxValue); //
+            }
+        }
+        // update title
+        sheet.getRow(0).getCell(0).setCellValue(title);      
+    }    
+    
+    private OutputData formatExcelMultipleGroups(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet summarySheet = workbook.createSheet("Numeric Map Distribution");
+        CellStyle tableheaderStyle=getExcelTableHeaderStyle(workbook);
+        CellStyle tableCellStyleInteger=createExcelStyle(workbook, BorderStyle.THIN, null, HorizontalAlignment.CENTER, false);
+        CellStyle tableCellStyle=createExcelStyle(workbook, BorderStyle.THIN, null, HorizontalAlignment.CENTER, false);     
+        tableCellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00000"));
+        
+        // Output summary statistics on first sheet
+        int rowIndex=0;
+        Row row = summarySheet.createRow(rowIndex++);
+        Cell cell = row.createCell(0);
+        cell.setCellValue(" "); // the title will be added later after columns have been sized
+        cell.setCellStyle(getExcelTitleStyle(workbook));
+        rowIndex++;
+        row = summarySheet.createRow(rowIndex++);
+        int cellIndex=0;
+        for (String header:new String[]{"Group","Size","Min","Max","Average","Std.dev.","Median","1st Quartile","3rd Quartile"}) {
+            cell = row.createCell(cellIndex++);
+            cell.setCellValue(header);
+            cell.setCellStyle(tableheaderStyle);
+        }
+        int firstRow = rowIndex;
+        int groupCount = clusterNames.size();
+        double globalMin = Double.MAX_VALUE;
+        double globalMax = -Double.MAX_VALUE;       
+        for (int i=0;i<groupCount;i++) {
+            String clusterName = clusterNames.get(i);
+            Color clusterColor = clusterColors.get(i);
+            double[] values = statistics.get(clusterName);
+            int size = (int)values[0];
+            double min = values[1];
+            double max = values[2]; 
+            double sum = values[3]; // not used
+            double average = values[4]; 
+            double median = values[5]; 
+            double stddev = values[6]; 
+            double quart1 = values[7]; 
+            double quart3 = values[8]; 
+            if (min<globalMin) globalMin = min;
+            if (max>globalMax) globalMax = max;
+            
+            CellStyle groupStyle = createExcelStyle(workbook, BorderStyle.THIN, clusterColor, HorizontalAlignment.LEFT, false); 
+            
+            row = summarySheet.createRow(rowIndex++);
+            outputStringValueInCell(row, 0, clusterName, groupStyle);
+            outputNumericValueInCell(row, 1, size, tableCellStyleInteger);  
+            outputNumericValuesInCells(row, new double[]{min,max,average,stddev,median,quart1,quart3}, 2, tableCellStyle);  
+            
+        }
+        autoSizeExcelColumns(summarySheet, 0, 8, 1000, 3500);
+        String title = "Distribution of values for numeric map \""+numericMapName+"\" for clusters in \""+dataGroupName+"\"";
+        summarySheet.getRow(0).getCell(0).setCellValue(title);
+        
+        rowIndex+=2;
+        row = summarySheet.createRow(rowIndex);
+        row.createCell(0).setCellValue("In the boxplots below, the blue boxes show the 1st, 2nd (median) and 3rd quartiles, the whiskers show the minimum and maximum values, the yellow diamond shows the average (mean) value and the red lines the standard deviations from the mean");
+        
+        // Create boxplots
+        XSSFSheet doodleSheet = workbook.createSheet(" ");      
+        int chartRow=rowIndex+2;
+        int chartColumn=0;
+        int chartWidth=(int)Math.floor(groupCount*1.0)+1; //
+        int chartHeight=(36-chartRow); // there is room for about 36 rows without scrolling, so this will size the chart according to free space
+        if (chartHeight<10) chartHeight=20;
+        if (chartWidth<5) chartWidth=5;
+        int lastRow = firstRow + groupCount - 1;
+        Excel_BoxplotMaker boxplot = new Excel_BoxplotMaker(summarySheet, doodleSheet, chartColumn, chartRow, chartWidth, chartHeight, false);
+        boxplot.setupDataFromColumns(firstRow, lastRow, 0, 2, 3, 6, 7, 8);
+        boxplot.setYrange(globalMin, globalMax);
+        boxplot.addLabels(" ", "Groups", "Values");     
+        boxplot.addExtraPointsFromColumnSum(4, 5, false, firstRow, lastRow, "Std+", Excel_BoxplotMaker.PointStyle.DASH, (short)12, Color.RED);  
+        boxplot.addExtraPointsFromColumnSum(4, 5, true, firstRow, lastRow, "Std-", Excel_BoxplotMaker.PointStyle.DASH, (short)12, Color.RED); 
+        boxplot.addExtraPointsFromColumn(4, firstRow, lastRow, "Mean", Excel_BoxplotMaker.PointStyle.DIAMOND, (short)12, Color.YELLOW);        
+        boxplot.addExtraPointsFromColumn(2, firstRow, lastRow, "Min", Excel_BoxplotMaker.PointStyle.DASH, (short)20, Color.BLACK);
+        boxplot.addExtraPointsFromColumn(3, firstRow, lastRow, "Max", Excel_BoxplotMaker.PointStyle.DASH, (short)20, Color.BLACK);  
+        boxplot.drawBoxplot();
+        
+        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -463,10 +570,9 @@ public class NumericMapDistributionAnalysis extends Analysis {
         outputobject.setBinary(true);        
         outputobject.setDirty(true); // this is not set automatically since I don't append to the document
         outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
-        return outputobject;        
-    }          
-
-    
+        if (format!=null) format.setProgress(100);
+        return outputobject; 
+    }       
 
     @Override
     public void runAnalysis(OperationTask task) throws Exception {

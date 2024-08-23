@@ -11,13 +11,17 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -29,10 +33,30 @@ import motiflab.engine.task.OperationTask;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.Parameter;
+import static motiflab.engine.data.analysis.Analysis.EXCEL;
 import motiflab.engine.dataformat.DataFormat;
 import motiflab.gui.OutputPanel;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.AxisPosition;
+import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFCategoryDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartAxis;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFValueAxis;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTAxDataSource;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumRef;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTStrRef;
 
 /**
  *
@@ -72,17 +96,18 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
     public String[] getSourceProxyParameters() {return new String[]{"Motif Collection"};}    
     
     @Override
-    public Parameter[] getOutputParameters() {        
+    public Parameter[] getOutputParameters(String dataformat) {        
          Parameter boxplotpar=new Parameter("Box plot",String.class, BOTH,new String[]{NONE,MEDIAN_QUARTILES,MEAN_STD,BOTH},"Which statistics to show using box plots",false,false);        
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-         return new Parameter[]{boxplotpar,scalepar};
+         if (dataformat.equals(HTML)) return new Parameter[]{boxplotpar,scalepar};
+         return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Box plot") || parameter.equals("Graph scale")) return new String[]{"HTML"};
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Box plot") || parameter.equals("Graph scale")) return new String[]{"HTML"};
+//        return null;
+//    }     
 
     @Override
     public String getAnalysisName() {
@@ -153,7 +178,7 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
         int scalepercent=100;
         if (settings!=null) {
           try {
-                 Parameter[] defaults=getOutputParameters();
+                 Parameter[] defaults=getOutputParameters(format);
                  String plotString=(String)settings.getResolvedParameter("Box plot",defaults,engine);
                       if (plotString.equals(NONE)) plots=PLOT_NONE;
                  else if (plotString.equals(MEDIAN_QUARTILES)) plots=PLOT_MEDIAN_QUARTILES;
@@ -168,21 +193,24 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
         engine.createHTMLheader("Motif Collection Statistics", null, null, false, true, true, outputobject);
         outputobject.append("<h1 class=\"headline\">Statistics for motifs in '"+motifCollectionName+"' ("+collectionsize+" motif"+((collectionsize==1)?"":"s")+")\n",HTML);
         outputobject.append("<br />\n<h2>Motif size (bp)</h2>\n",HTML);
-        formatStatisticInHTML(statistics.get("length"), Color.red, plots, scale, outputobject, engine);
+        formatStatisticInHTML("length", Color.red, plots, scale, outputobject, engine);
         if (format!=null) format.setProgress(33);
         outputobject.append("<br />\n<h2>IC-content</h2>\n",HTML);
-        formatStatisticInHTML(statistics.get("IC"), Color.blue, plots, scale,  outputobject, engine);
+        formatStatisticInHTML("IC", Color.blue, plots, scale,  outputobject, engine);
         if (format!=null) format.setProgress(66);
         outputobject.append("<br />\n<h2>GC-content</h2>\n",HTML);
-        formatStatisticInHTML(statistics.get("GC"), Color.green, plots, scale,  outputobject, engine);
+        formatStatisticInHTML("GC", Color.green, plots, scale,  outputobject, engine);
         outputobject.append("</body>\n</html>\n",HTML);
         if (format!=null) format.setProgress(100);
         return outputobject;
     }
 
 
-    private void formatStatisticInHTML(Statistic statistic, Color color, int plots, double scale, OutputData outputobject,  MotifLabEngine engine) {
+    private void formatStatisticInHTML(String name, Color color, int plots, double scale, OutputData outputobject,  MotifLabEngine engine) {
+        Statistic statistic = statistics.get(name);
         DecimalFormat decimalFormat=new DecimalFormat("#.###");
+        DecimalFormat percentageFormat=new DecimalFormat("#%");
+        DecimalFormat useFormat=("GC".equals(name))?percentageFormat:decimalFormat;
         File imagefile=outputobject.createDependentFile(engine,"png");
         try {
             saveGraphAsImage(imagefile,statistic,color, plots, scale);
@@ -198,7 +226,7 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
         outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\" />\n",HTML);
         outputobject.append("<table>\n",HTML);
         outputobject.append("<tr><th width=\"90\" style=\"background-color:"+colorstring+"\">Min</th><th width=\"90\" style=\"background-color:"+colorstring+"\">Max</th><th width=\"90\" style=\"background-color:"+colorstring+"\">Median</th><th width=\"90\" style=\"background-color:"+colorstring+"\">1st Quartile</th><th width=\"90\" style=\"background-color:"+colorstring+"\">3rd Quartile</th><th width=\"90\" style=\"background-color:"+colorstring+"\">Average</th><th width=\"90\" style=\"background-color:"+colorstring+"\">Std. dev.</th></tr>\n",HTML);
-        outputobject.append("<tr><td class=\"num\">"+decimalFormat.format(statistic.min)+"</td><td class=\"num\">"+decimalFormat.format(statistic.max)+"</td><td class=\"num\">"+decimalFormat.format(statistic.median)+"</td><td class=\"num\">"+decimalFormat.format(statistic.firstQuartile)+"</td><td class=\"num\">"+decimalFormat.format(statistic.thirdQuartile)+"</td><td class=\"num\">"+decimalFormat.format(statistic.average)+"</td><td class=\"num\">"+decimalFormat.format(statistic.std)+"</td></tr>\n",HTML);
+        outputobject.append("<tr><td class=\"num\">"+useFormat.format(statistic.min)+"</td><td class=\"num\">"+useFormat.format(statistic.max)+"</td><td class=\"num\">"+useFormat.format(statistic.median)+"</td><td class=\"num\">"+useFormat.format(statistic.firstQuartile)+"</td><td class=\"num\">"+useFormat.format(statistic.thirdQuartile)+"</td><td class=\"num\">"+useFormat.format(statistic.average)+"</td><td class=\"num\">"+useFormat.format(statistic.std)+"</td></tr>\n",HTML);
         outputobject.append("</table>\n<br>\n",HTML);
         outputobject.append("<table>\n",HTML);
         outputobject.append("<tr><th style=\"text-align:left\"><nobr>Value range</nobr></th>",HTML);
@@ -270,11 +298,137 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
         for (int i=0;i<statistic.bins.length;i++) {
            if (i>0) outputobject.append("\t",RAWDATA);
            outputobject.append(""+statistic.bins[i],RAWDATA);
-
         }
         outputobject.append("\n",RAWDATA);
     }
 
+    @Override
+    public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        XSSFWorkbook workbook=null;
+        try {
+            InputStream stream = DistributionAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_MotifCollectionStatistics.xlsx");
+            workbook = (XSSFWorkbook)WorkbookFactory.create(stream);
+            stream.close();
+            
+            String title = "Statistics for motifs in "+motifCollectionName+" ("+collectionsize+" motifs)";
+            formatStatisticExcel("length", workbook.getSheetAt(0), title);
+            if (format!=null) format.setProgress(30);
+            formatStatisticExcel("IC", workbook.getSheetAt(1), title);
+            if (format!=null) format.setProgress(60);
+            formatStatisticExcel("GC", workbook.getSheetAt(2), title);   
+            if (format!=null) format.setProgress(90);
+            
+        } catch (Exception e) {
+            // e.printStackTrace(System.err);
+            throw new ExecutionError(e.getMessage());
+        }
+        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
+        try {
+            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
+            workbook.write(stream);
+            stream.close();
+        } catch (Exception e) {
+            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+        }        
+        outputobject.setBinary(true);        
+        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
+        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
+        return outputobject;        
+    } 
+    
+    private void formatStatisticExcel(String name, XSSFSheet sheet, String title) {
+        Statistic statistic = statistics.get(name);
+        Row row = sheet.getRow(6);
+        int column=1;
+        row.getCell(column++).setCellValue(statistic.min);
+        row.getCell(column++).setCellValue(statistic.max);
+        row.getCell(column++).setCellValue(statistic.average);
+        row.getCell(column++).setCellValue(statistic.std);
+        row.getCell(column++).setCellValue(statistic.median);
+        row.getCell(column++).setCellValue(statistic.firstQuartile);
+        row.getCell(column++).setCellValue(statistic.thirdQuartile);
+        
+        int datarow = 99;
+        int bincount = statistic.bins.length;
+        Cell cell;
+        double minValue = statistic.startbin;
+        double maxValue = 0;
+        double binrange = statistic.binrange;
+        double binstart = minValue;
+        for (int i=0;i<bincount;i++) {
+            int rowIndex = datarow+i;
+            row = sheet.getRow(rowIndex);
+            if (row==null) row=sheet.createRow(rowIndex);
+            cell = row.getCell(0);
+            if (cell==null) cell=row.createCell(0);
+            cell.setCellValue(binstart);
+            cell = row.getCell(1);
+            if (cell==null) cell=row.createCell(1);
+            cell.setCellValue(statistic.bins[i]);                        
+            binstart+=binrange;
+            maxValue=binstart;
+        }
+        // clear remaining example data from analysis template sheet
+        for (int i=datarow+bincount;i<200;i++) {
+           row = sheet.getRow(i);
+           if (row==null) break;
+           cell = row.getCell(0);
+           if (cell!=null) cell.setBlank();  
+           cell = row.getCell(1);
+           if (cell!=null) cell.setBlank();                  
+        } 
+        forceExcelFormulaRecalculation(sheet.getWorkbook(),sheet);        
+        
+        XSSFDrawing drawing = ((XSSFSheet)sheet).createDrawingPatriarch();
+        XSSFChart histogramChart = drawing.getCharts().get(0);
+        List<XDDFChartData> data = histogramChart.getChartSeries();        
+
+        XDDFCategoryDataSource categories = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(datarow, datarow+bincount, 0, 0));
+        XDDFNumericalDataSource values = XDDFDataSourcesFactory.fromNumericCellRange(sheet,new CellRangeAddress(datarow, datarow+bincount, 1, 1));       
+        XDDFBarChartData.Series series1 = (XDDFBarChartData.Series)data.get(0).getSeries(0); 
+        series1.replaceData(categories, values);
+        histogramChart.plot(histogramChart.getChartSeries().get(0));
+     
+        // Define new data ranges
+        int datarowPlusOne=datarow+1;
+        String sheetname = sheet.getSheetName();
+        String newXRange = "'"+sheetname+"'!$A$"+datarowPlusOne+":$A$"+(datarowPlusOne+bincount-1);
+        String newValueRange = "'"+sheetname+"'!$B$"+datarowPlusOne+":$B$"+(datarowPlusOne+bincount-1);        
+        // Check if the category axis is null
+        if (series1.getCTBarSer().getCat() == null) {series1.getCTBarSer().addNewCat();}
+        if (series1.getCTBarSer().getCat().getNumRef() != null) {
+            series1.getCTBarSer().getCat().getNumRef().setF(newXRange);
+        }
+        else if (series1.getCTBarSer().getCat().getStrRef()!= null) {
+            series1.getCTBarSer().getCat().getStrRef().setF(newXRange);
+        }
+        else {
+            series1.getCTBarSer().getCat().addNewNumRef();
+            series1.getCTBarSer().getCat().getNumRef().setF(newXRange);
+        }
+        series1.getCTBarSer().getVal().getNumRef().setF(newValueRange);       
+        
+        // Set the minimum and maximum X-values for box-and-whiskers plot
+        for (int i=1;i<drawing.getCharts().size();i++) {
+            XSSFChart boxchart = drawing.getCharts().get(i);
+            XDDFValueAxis xAxis = null;
+            for (XDDFChartAxis axis : boxchart.getAxes()) {
+                if (axis.getPosition() == AxisPosition.BOTTOM) {
+                    xAxis = (XDDFValueAxis) axis;
+                    break;
+                }
+            }
+            if (xAxis != null) {                               
+                xAxis.setMinimum(minValue); // 
+                xAxis.setMaximum(maxValue); //
+            }
+        }
+        // update title
+        sheet.getRow(0).getCell(0).setCellValue(title);      
+    }
+
+     
     @Override
     public void runAnalysis(OperationTask task) throws Exception {
         MotifCollection motifs=(MotifCollection)task.getParameter("Motif Collection");
@@ -300,7 +454,7 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
 
 
    /**
-    * Creates a histogram chart based on a Statistics oject and saves it to file (if file is given)
+    * Creates a histogram chart based on a Statistics object and saves it to file (if file is given)
     * @param file A file to save the image to
     */
     private BufferedImage saveGraphAsImage(File file, Statistic statistic, Color color, int plots, double scale) throws IOException {

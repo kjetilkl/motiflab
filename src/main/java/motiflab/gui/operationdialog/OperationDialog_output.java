@@ -308,6 +308,7 @@ public class OperationDialog_output extends OperationDialog {
     private void showParametersPanel(JPanel panel) {
         additionalParametersPanel.removeAll();
         additionalParametersPanel.add(panel);
+        additionalParametersPanel.repaint();
     }
    
     /** */
@@ -321,7 +322,7 @@ public class OperationDialog_output extends OperationDialog {
         if (Analysis.class.isAssignableFrom(sourceDataclass)) {
             Analysis analysis=engine.getAnalysisForClass(sourceDataclass);
             if (analysis!=null) {
-                formatparameters=analysis.getOutputParameters();
+                formatparameters=analysis.getOutputParameters(outputformatName);
                 formatparameters=filterOutputParameters(analysis, formatparameters, outputformatName); // discard output parameters that are not applicable for this data format
             } else formatparameters=outputFormat.getParameters();
         }

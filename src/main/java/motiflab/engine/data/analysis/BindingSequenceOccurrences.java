@@ -44,12 +44,14 @@ import motiflab.gui.GenericMotifBrowserPanel;
 import motiflab.gui.MotifLogo;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -76,11 +78,12 @@ public class BindingSequenceOccurrences extends Analysis {
 
 
     private static final int MOTIF=0;
-    private static final int TFBS=1;
-    private static final int TOTAL=2;
-    private static final int SEQUENCE_SUPPORT=3;    
-    private static final int MATCH_SCORE=4;     
-    private static final int LOGO=5;
+    private static final int NAME=1;    
+    private static final int TFBS=2;
+    private static final int TOTAL=3;
+    private static final int SEQUENCE_SUPPORT=4;    
+    private static final int MATCH_SCORE=5;     
+    private static final int LOGO=6;
 
     
     public BindingSequenceOccurrences() {
@@ -110,21 +113,25 @@ public class BindingSequenceOccurrences extends Analysis {
     }       
     
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Sort by",String.class,SORT_BY_TOTAL_OCCURRENCES, new String[]{SORT_BY_BINDING_SEQUENCE,SORT_BY_SEQUENCE_OCCURRENCES,SORT_BY_TOTAL_OCCURRENCES},"Sorting order for the results table",false,false),
-             new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false),       
-             new Parameter("Logos",String.class,MOTIF_LOGO_NO, new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_TEXT},"Include sequence logos in the table",false,false)            
-        };
+    public Parameter[] getOutputParameters(String dataformat) {      
+        Parameter sortByPar = new Parameter("Sort by",String.class,SORT_BY_TOTAL_OCCURRENCES, new String[]{SORT_BY_BINDING_SEQUENCE,SORT_BY_SEQUENCE_OCCURRENCES,SORT_BY_TOTAL_OCCURRENCES},"Sorting order for the results table",false,false);
+        Parameter legendPar = new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false);       
+        Parameter logos = new Parameter("Logos",String.class,getMotifLogoDefaultOption(dataformat), getMotifLogoOptions(dataformat),"Include motif sequence logos in the table",false,false);         
+        
+        if (dataformat.equals(HTML)) return new Parameter[] {sortByPar,logos};
+        if (dataformat.equals(EXCEL)) return new Parameter[] {sortByPar,legendPar,logos};
+        if (dataformat.equals(RAWDATA)) return new Parameter[] {sortByPar,logos};
+        return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Legend")) return new String[]{EXCEL};
-        if (parameter.equals("Sort by") ) return new String[]{HTML,RAWDATA,EXCEL};        
-        if (parameter.equals("Logos") ) return new String[]{HTML,EXCEL};        
-        return null;
-    }      
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Legend")) return new String[]{EXCEL};
+//        if (parameter.equals("Sort by") ) return new String[]{HTML,RAWDATA,EXCEL};        
+//        if (parameter.equals("Logos HTML") ) return new String[]{HTML};
+//        if (parameter.equals("Logos Excel") ) return new String[]{EXCEL};      
+//        return null;
+//    }      
 
     @Override
     public String[] getResultVariables() {
@@ -252,17 +259,17 @@ public class BindingSequenceOccurrences extends Analysis {
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
         Color [] basecolors=vizSettings.getBaseColors();
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);   
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);             
           }
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
         
         ArrayList<Object[]> resultList=assembleList(sortorder);
         engine.createHTMLheader("Binding Sequence Occurrence Analysis", null, null, true, true, true, outputobject);
@@ -290,7 +297,8 @@ public class BindingSequenceOccurrences extends Analysis {
         outputobject.append("<br>\n",HTML);
         outputobject.append("<table class=\"sortable\">\n",HTML);
         outputobject.append("<tr>",HTML);             
-        outputobject.append("<th>Motifs</th>",HTML);
+        outputobject.append("<th>Motif</th>",HTML);
+        outputobject.append("<th>Name</th>",HTML);        
         outputobject.append("<th>TFBS</th>",HTML);
         outputobject.append("<th>Total</th>",HTML);
         outputobject.append("<th>Sequences</th>",HTML);
@@ -301,30 +309,35 @@ public class BindingSequenceOccurrences extends Analysis {
         DecimalFormat decimalformatter=DataFormat.getDecimalFormatter(3);
         for (int i=0;i<resultList.size();i++) {
             Object[] entry=resultList.get(i);
-            String motifname=(String)entry[0];
+            String motifID=(String)entry[0];
+            String motifname="???";            
             String tfbs=(String)entry[1];
             int seqcount=(Integer)entry[2];
             int totalcount=(Integer)entry[3];
             double matchscore=(Double)entry[4];
             Motif motif=null;
-            if (engine.dataExists(motifname, Motif.class)) motif=(Motif)engine.getDataItem(motifname);            
+            if (engine.dataExists(motifID, Motif.class)) {
+                motif=(Motif)engine.getDataItem(motifID);
+                motifname=motif.getShortName();
+            }            
             outputobject.append("<tr>",HTML);          
-            outputobject.append("<td>"+escapeHTML(motifname)+"</td>",HTML);
+            outputobject.append("<td>"+escapeHTML(motifID)+"</td>",HTML);
+            outputobject.append("<td>"+escapeHTML(motifname)+"</td>",HTML);            
             outputobject.append("<td>"+tfbs+"</td>",HTML);
             outputobject.append("<td class=\"num\">"+totalcount+"</td>",HTML);
             outputobject.append("<td class=\"num\">"+seqcount+"</td>",HTML);
             outputobject.append("<td class=\"num\">"+(int)((double)seqcount*100f/(double)sequenceCollectionSize)+"%</td>",HTML);
             outputobject.append("<td class=\"num\">"+decimalformatter.format(matchscore)+"</td>",HTML);
             if (showSequenceLogos) {
-              if (motif instanceof Motif) {
-                 sequencelogo.setMotif((Motif)motif);
-                 sequencelogo.setBindingSequence(tfbs);
-                 outputobject.append("<td title=\"",HTML);
-                 outputobject.append(sequencelogo.getMotifInfoTooltip(),HTML);
-                 outputobject.append("\">",HTML);
-                 outputobject.append(getMotifLogoTag((Motif)motif, outputobject, sequencelogo, showSequenceLogosString, engine),HTML);
-                 outputobject.append("</td>",HTML);
-              } else outputobject.append("<td>?</td>",HTML);
+                if (motif instanceof Motif) {
+                    sequencelogo.setMotif((Motif)motif);
+                    sequencelogo.setBindingSequence(tfbs);
+                    outputobject.append("<td title=\"",HTML);
+                    outputobject.append(sequencelogo.getMotifInfoTooltip(),HTML);
+                    outputobject.append("\">",HTML);
+                    outputobject.append(getMotifLogoTag((Motif)motif, outputobject, sequencelogo, showSequenceLogosString, engine),HTML);
+                    outputobject.append("</td>",HTML);
+                } else outputobject.append("<td>?</td>",HTML);
             }            
             outputobject.append("</tr>\n",HTML);
             if (i%30==0) {
@@ -345,7 +358,7 @@ public class BindingSequenceOccurrences extends Analysis {
         String sortorder=SORT_BY_BINDING_SEQUENCE;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
           }
           catch (ExecutionError e) {throw e;}
@@ -361,17 +374,22 @@ public class BindingSequenceOccurrences extends Analysis {
         outputobject.append(" on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":""),RAWDATA);
         if (sequenceCollectionName!=null) outputobject.append(" from collection '"+sequenceCollectionName+"'",RAWDATA);
 
-        outputobject.append("\n\n#motif name, binding sequence, total occurrences, number of sequences containing motif, total number of sequences, percentage of sequences containing motif, match score",RAWDATA);
+        outputobject.append("\n\n#motif ID, motif name, binding sequence, total occurrences, number of sequences containing motif, total number of sequences, percentage of sequences containing motif, match score",RAWDATA);
         outputobject.append("\n",RAWDATA);     
         DecimalFormat decimalformatter=DataFormat.getDecimalFormatter(3);
         for (int i=0;i<resultList.size();i++) {
             Object[] entry=resultList.get(i);
-            String motifname=(String)entry[0];
+            String motifID=(String)entry[0];
+            String motifname="???";
+            if (engine.dataExists(motifID, Motif.class)) {
+                Motif motif=(Motif)engine.getDataItem(motifID);
+                motifname=motif.getShortName();
+            }              
             String tfbs=(String)entry[1];
             int seqcount=(Integer)entry[2];
             int totalcount=(Integer)entry[3];
             double matchscore=(Double)entry[4];
-            outputobject.append(motifname+"\t"+tfbs+"\t"+totalcount+"\t"+seqcount+"\t"+sequenceCollectionSize+"\t"+(int)((double)seqcount*100/(double)sequenceCollectionSize)+"%"+"\t"+decimalformatter.format(matchscore),RAWDATA);
+            outputobject.append(motifID+"\t"+motifname+"\t"+tfbs+"\t"+totalcount+"\t"+seqcount+"\t"+sequenceCollectionSize+"\t"+(int)((double)seqcount*100/(double)sequenceCollectionSize)+"%"+"\t"+decimalformatter.format(matchscore),RAWDATA);
             outputobject.append("\n",RAWDATA);
             if (i%100==0) {
                 task.checkExecutionLock(); // checks to see if this task should suspend execution
@@ -389,27 +407,37 @@ public class BindingSequenceOccurrences extends Analysis {
     @Override
     public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         String sortorder=SORT_BY_BINDING_SEQUENCE;
-        boolean includeLegend=true;  
+        boolean includeLegend=true;
+        int logoheight=19;
+        VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
+        Color [] basecolors=vizSettings.getBaseColors();
+        boolean border=(Boolean)vizSettings.getSettingAsType("motif.border", Boolean.TRUE);        
+        MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);         
+        String showSequenceLogosString="";        
         if (settings!=null) {
-          try {
-             Parameter[] defaults=getOutputParameters();
-             sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);         
-             includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine);
-          }
-          catch (ExecutionError e) {throw e;}
-          catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
+            try {
+                Parameter[] defaults=getOutputParameters(format);
+                sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);         
+                includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine);
+                showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);              
+            }
+            catch (ExecutionError e) {throw e;}
+            catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString); 
+        boolean showLogosAsImages = includeLogosInOutputAsImages(showSequenceLogosString);
+        
         ArrayList<Object[]> resultList=assembleList(sortorder);
         int rownum=0;
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName());  
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Binding Sequence Occurrences"); 
+        CreationHelper helper = (showLogosAsImages)?workbook.getCreationHelper():null;
+        Drawing drawing = (showLogosAsImages)?sheet.createDrawingPatriarch():null;         
         
-        CellStyle title=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, (short)0, HSSFCellStyle.ALIGN_LEFT, false);      
-        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);  
-        CellStyle tableheader=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_CENTER, true);              
+        CellStyle title = getExcelTitleStyle(workbook);
+        CellStyle tableheader = getExcelTableHeaderStyle(workbook);
         
         // Make room for the header which will be added later
-
         Row row = null;
         int headerrows=5;
         if (includeLegend) {
@@ -421,22 +449,69 @@ public class BindingSequenceOccurrences extends Analysis {
         int col=0;
         int logocolumn=0;
         row = sheet.createRow(rownum);
-        outputStringValuesInCells(row, new String[]{"Motif","TFBS","Total","Sequences","Match Score"}, 0, tableheader);      
-        col+=5;
+        outputStringValuesInCells(row, new String[]{"Motif","Name","TFBS","Total","Sequences","Match Score"}, 0, tableheader);      
+        col+=6;
+        if (showSequenceLogos) {
+            logocolumn=col;
+            outputStringValuesInCells(row, new String[]{"Logo"}, logocolumn, tableheader);
+        } 
+        int maxlogowidth=0; // the number of bases in the longest motif 
+        HashMap<String,Integer> imageMap=null; // since the same motif can appear on multiple lines, we will reuse motif logo images
+        if (showLogosAsImages) {
+            sheet.setColumnWidth(logocolumn, 10000);
+            imageMap=new HashMap<>();
+        }        
         for (int i=0;i<resultList.size();i++) {
             rownum++;
             row = sheet.createRow(rownum);
             col=0;
             Object[] entry=resultList.get(i);
-            String motifname=(String)entry[0];
+            String motifID=(String)entry[0];
+            String motifname="???";
             String tfbs=(String)entry[1];
             int seqcount=(Integer)entry[2];
             int totalcount=(Integer)entry[3];
             double matchscore=(Double)entry[4];
-            outputStringValuesInCells(row, new String[]{motifname,tfbs}, col);
-            col+=2;
+            Motif motif=null;
+            if (engine.dataExists(motifID, Motif.class)) {
+                motif=(Motif)engine.getDataItem(motifID);
+                motifname=motif.getShortName();
+            }               
+            outputStringValuesInCells(row, new String[]{motifID,motifname,tfbs}, col);
+            col+=3;
             outputNumericValuesInCells(row, new double[]{totalcount,seqcount,matchscore}, col);
-            col+=3;          
+            col+=3;            
+            if (showSequenceLogos && motif!=null) {
+                if (showLogosAsImages) {
+                    try {
+                        row.setHeightInPoints((short)(sheet.getDefaultRowHeightInPoints()*1.2));
+                        int imageIndex=0;
+                        if (imageMap.containsKey(motifID)) {
+                            imageIndex=imageMap.get(motifID);
+                        } else {
+                        sequencelogo.setMotif(motif);
+                            int width=motif.getLength();
+                            if (width>maxlogowidth) maxlogowidth=width;
+                            byte[] image=getMotifLogoImageAsByteArray(sequencelogo, logoheight, border, "png");
+                            imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
+                            imageMap.put(motifID, imageIndex);
+                        }
+                        ClientAnchor anchor = helper.createClientAnchor();
+                        anchor.setCol1(logocolumn);
+                        anchor.setRow1(rownum);
+                        anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
+                        Picture pict=drawing.createPicture(anchor, imageIndex);	
+                        pict.resize();
+                        int offsetX=25000;
+                        int offsetY=25000;
+                        anchor.setDx1(offsetX);
+                        anchor.setDy1(offsetY);    
+                        anchor.setDx2(anchor.getDx2()+offsetX);
+                        anchor.setDy2(anchor.getDy2()+offsetY);                        
+                    } catch (Exception e) {e.printStackTrace(System.err);}
+                }
+                else outputStringValuesInCells(row, new String[]{motif.getConsensusMotif()}, logocolumn);
+            }            
             if (i%10==0) {
                 task.checkExecutionLock(); // checks to see if this task should suspend execution
                 if (Thread.interrupted() || task.getStatus().equals(ExecutableTask.ABORTED)) throw new InterruptedException();
@@ -446,11 +521,7 @@ public class BindingSequenceOccurrences extends Analysis {
             }
         }
         format.setProgress(95);
-        sheet.autoSizeColumn((short)0);
-        sheet.autoSizeColumn((short)1);
-        sheet.autoSizeColumn((short)2);
-        sheet.autoSizeColumn((short)3);     
-        sheet.autoSizeColumn((short)4);          
+        autoSizeExcelColumns(sheet, 0, 5, 800);
            
         // Add the header on top of the page
         if (includeLegend) {        
@@ -481,7 +552,7 @@ public class BindingSequenceOccurrences extends Analysis {
         }
         
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -780,29 +851,30 @@ private class MotifLogoRenderer extends MotifLogo {
 
 private class TFBSOccurrenceTableModel extends AbstractTableModel {
     private String[] columnNames=null;
-    private ArrayList<String> motifnames=null;
+    private ArrayList<String> motifIDs=null;
     private ArrayList<String> tfbs=null;
     private MotifLabEngine engine;
 
 
     public TFBSOccurrenceTableModel(MotifLabGUI gui) {
         this.engine=gui.getEngine();
-        motifnames=new ArrayList<String>();
+        motifIDs=new ArrayList<String>();
         tfbs=new ArrayList<String>();     
         for (String motifname:counts.keySet()) {
            HashMap<String,int[]> motifcounts=counts.get(motifname);
            for (String tfbsSequence:motifcounts.keySet()) {
-                 motifnames.add(motifname);
+                 motifIDs.add(motifname);
                  tfbs.add(tfbsSequence);
            }
         }
-        columnNames=new String[]{"Motif","TFBS","Total","Sequences","Match score","Logo"};
+        columnNames=new String[]{"Motif","Name","TFBS","Total","Sequences","Match score","Logo"};
     }
 
     @Override
     public Class getColumnClass(int columnIndex) {
         switch (columnIndex) {      
-            case MOTIF:return String.class;            
+            case MOTIF:return String.class;
+            case NAME:return String.class;             
             case TFBS:return String.class;            
             case TOTAL:return Integer.class;
             case SEQUENCE_SUPPORT:return Integer.class;            
@@ -815,12 +887,13 @@ private class TFBSOccurrenceTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         switch (columnIndex) {       
-            case MOTIF:return motifnames.get(rowIndex);             
+            case MOTIF:return motifIDs.get(rowIndex);
+            case NAME:return getMotifName(motifIDs.get(rowIndex));           
             case TFBS:return tfbs.get(rowIndex);          
             case TOTAL:return getIntValueAt(rowIndex,1);
             case SEQUENCE_SUPPORT:return getIntValueAt(rowIndex,0);            
             case MATCH_SCORE:return getMatchValue(rowIndex,2);            
-            case LOGO:return getMotif(motifnames.get(rowIndex));
+            case LOGO:return getMotif(motifIDs.get(rowIndex));
             default:return Object.class;
         }
     }
@@ -829,10 +902,16 @@ private class TFBSOccurrenceTableModel extends AbstractTableModel {
         Data data=engine.getDataItem(id);
         if (data instanceof Motif) return (Motif)data;
         else return null;
-    }    
+    }
+
+    public final String getMotifName(String id) {
+        Data data=engine.getDataItem(id);
+        if (data instanceof Motif) return ((Motif)data).getShortName();
+        else return null;
+    }     
     
     private int getIntValueAt(int row,int col) { // this method is an ad-hoc solution to a casting problem that sometimes occur (perhaps from old sessions)
-        String motifname=motifnames.get(row);
+        String motifname=motifIDs.get(row);
         HashMap<String,int[]> motifcounts=counts.get(motifname);
         Object countsrow=motifcounts.get(tfbs.get(row));
         if (countsrow instanceof double[]) {
@@ -848,7 +927,7 @@ private class TFBSOccurrenceTableModel extends AbstractTableModel {
     }    
     
     private double getMatchValue(int row,int col) { // this method is an ad-hoc solution to a casting problem that sometimes occur (perhaps from old sessions)
-        String motifname=motifnames.get(row);
+        String motifname=motifIDs.get(row);
         HashMap<String,int[]> motifcounts=counts.get(motifname);
         Object countsrow=motifcounts.get(tfbs.get(row));
         if (countsrow instanceof double[]) {
@@ -880,7 +959,7 @@ private class TFBSOccurrenceTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return motifnames.size();
+        return motifIDs.size();
     }
 
 }

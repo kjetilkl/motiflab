@@ -21,7 +21,9 @@ import java.awt.Stroke;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
@@ -49,11 +51,19 @@ import motiflab.engine.task.OperationTask;
 import motiflab.engine.Parameter;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.MotifLabEngine;
+import static motiflab.engine.data.analysis.Analysis.EXCEL;
 import motiflab.engine.dataformat.DataFormat;
+import motiflab.engine.util.Excel_BarChartMaker;
+import motiflab.engine.util.Excel_BoxplotMaker;
 import motiflab.gui.GenericSequenceBrowserPanel;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -102,22 +112,25 @@ public final class GCcontentAnalysis extends Analysis {
     
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Sort by",String.class,"Sequence name",new String[]{"Sequence name","GC ascending","GC descending"},"The property to sort sequences by",false,false),
-             new Parameter("Group by clusters",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Group sequences in partition-clusters together (affects sorting order)",false,false),
-             new Parameter("Show only groups summary",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Show only the summary statistics for each group and not GC-content for individual sequences",false,false),
-             new Parameter("Box plot",String.class, BOTH,new String[]{MEDIAN_QUARTILES,MEAN_STD,BOTH},"Which statistics to show using box plots",false,false),
-             new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false)
-        };
+    public Parameter[] getOutputParameters(String dataformat) {
+        Parameter sortPar = new Parameter("Sort by",String.class,"Sequence name",new String[]{"Sequence name","GC ascending","GC descending"},"The property to sort sequences by",false,false);
+        Parameter groupsPar = new Parameter("Group by clusters",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Group sequences in partition-clusters together (affects sorting order)",false,false);
+        Parameter summaryPar = new Parameter("Show only groups summary",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Show only the summary statistics for each group and not GC-content for individual sequences",false,false);
+        Parameter boxplotPar = new Parameter("Box plot",String.class, BOTH,new String[]{MEDIAN_QUARTILES,MEAN_STD,BOTH},"Which statistics to show using box plots",false,false);
+        Parameter scalePar = new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
+        if (dataformat.equals(HTML)) return new Parameter[]{sortPar,groupsPar,summaryPar,boxplotPar,scalePar};
+        if (dataformat.equals(EXCEL)) return new Parameter[]{sortPar,summaryPar};
+        if (dataformat.equals(RAWDATA)) return new Parameter[]{sortPar,groupsPar,summaryPar};
+        return new Parameter[0];        
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Graph scale") || parameter.equals("Box plot")) return new String[]{"HTML"};
-        if (parameter.equals("Group by clusters") || parameter.equals("Show only groups summary") || parameter.equals("Sort by")) return new String[]{"HTML","RawData"};        
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Graph scale") || parameter.equals("Box plot")) return new String[]{"HTML"};  
+//        if (parameter.equals("Group by clusters")) return new String[]{"HTML","RawData"};            
+//        if (parameter.equals("Show only groups summary") || parameter.equals("Sort by")) return new String[]{"HTML","RawData","Excel"};       
+//        return null;
+//    }     
     
     
     @Override
@@ -222,7 +235,7 @@ public final class GCcontentAnalysis extends Analysis {
         String sortOrderString="Sequence name";
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortOrderString=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              groupByCluster=(Boolean)settings.getResolvedParameter("Group by clusters",defaults,engine);
              showOnlySummary=(Boolean)settings.getResolvedParameter("Show only groups summary",defaults,engine);
@@ -338,7 +351,7 @@ public final class GCcontentAnalysis extends Analysis {
                     outputobject.append(values[STATISTIC_3RD_QUARTILE]+"\n",RAWDATA);
                 }
             }
-            outputobject.append("\n", HTML);
+            outputobject.append("\n", RAWDATA);
     }
 
     private int getBrightness(Color c) {
@@ -355,7 +368,7 @@ public final class GCcontentAnalysis extends Analysis {
         String sortOrderString="Sequence name";
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortOrderString=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              groupByCluster=(Boolean)settings.getResolvedParameter("Group by clusters",defaults,engine);
              showOnlySummary=(Boolean)settings.getResolvedParameter("Show only groups summary",defaults,engine);
@@ -375,10 +388,10 @@ public final class GCcontentAnalysis extends Analysis {
         else sortOrderComparator=new SortOrderComparator(null, sortByGC, ascending);
         ArrayList<String> sequenceNames=new ArrayList<String>(results.keySet());
         Collections.sort(sequenceNames,sortOrderComparator);
-        outputobject.append("# GC-content analysis\n",RAWDATA);   
+        outputobject.append("#GC-content analysis\n",RAWDATA);   
         formatGroupsTableRaw(outputobject, engine);
         if (!showOnlySummary) {
-            outputobject.append("# GC-content in individual sequences\n",RAWDATA);            
+            outputobject.append("#sequence\tGC-content\n",RAWDATA);            
             for (String sequenceName:sequenceNames) {
                 Double value=results.get(sequenceName);
                 outputobject.append(sequenceName+"\t"+value+"\n",RAWDATA);
@@ -387,7 +400,193 @@ public final class GCcontentAnalysis extends Analysis {
         if (format!=null) format.setProgress(100);
         return outputobject;
     }
+    
+    @Override
+    public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        boolean showOnlySummary=false;
+        String sortOrderString="Sequence name";        
+        if (settings!=null) {
+            try {
+                Parameter[] defaults=getOutputParameters(format);
+                sortOrderString=(String)settings.getResolvedParameter("Sort by",defaults,engine);                
+                showOnlySummary=(Boolean)settings.getResolvedParameter("Show only groups summary",defaults,engine);
+            }
+            catch (ExecutionError e) {throw e;}
+            catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
+        }
+        int sortBy=SORT_BY_NAME;
+        if (sortOrderString.equals("GC ascending")) sortBy=SORT_BY_GC_ASCENDING;
+        else if (sortOrderString.equals("GC descending")) sortBy=SORT_BY_GC_DESCENDING;
+        boolean ascending=true;
+        boolean sortByGC=true;
+        if (sortBy==SORT_BY_GC_DESCENDING) ascending=false;
+        if (sortBy==SORT_BY_NAME) sortByGC=false;
 
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet summarySheet = workbook.createSheet("Summary");
+        CellStyle tableheaderStyle=getExcelTableHeaderStyle(workbook);
+        CellStyle percentageStyle=getExcelPercentageStyle(workbook);
+        
+        int groupCount=(sequenceGroups instanceof SequencePartition)?((SequencePartition)sequenceGroups).getNumberOfClusters():1;
+        if (!showOnlySummary) {
+            Color color = Color.RED;
+            SortOrderComparator sortOrderComparator = new SortOrderComparator(null, sortByGC, ascending);                   
+            ArrayList<String> sequenceNames;            
+            XSSFSheet[] gcSheet;
+            if (sequenceGroups instanceof SequenceCollection) {
+                gcSheet=new XSSFSheet[1];
+                gcSheet[0]=workbook.createSheet(((SequenceCollection)sequenceGroups).getName());
+                sequenceNames=((SequenceCollection)sequenceGroups).getAllSequenceNames();
+                Collections.sort(sequenceNames,sortOrderComparator);
+                outputGCcolumns(gcSheet[0],sequenceNames,tableheaderStyle,percentageStyle);
+                drawGCPlot(gcSheet[0],0,1,sequenceNames.size(), color);
+            } else if (sequenceGroups instanceof SequencePartition) {            
+                ArrayList<String> groupNames=((SequencePartition)sequenceGroups).getClusterNames();
+                gcSheet=new XSSFSheet[groupCount];
+                for (int i=0;i<groupCount;i++) {
+                    String groupName=groupNames.get(i);
+                    gcSheet[i]=workbook.createSheet(groupName);
+                    sequenceNames=((SequencePartition)sequenceGroups).getAllSequenceNamesInCluster(groupName);
+                    Collections.sort(sequenceNames,sortOrderComparator);                    
+                    outputGCcolumns(gcSheet[i],sequenceNames,tableheaderStyle,percentageStyle);
+                   drawGCPlot(gcSheet[i],0,1,sequenceNames.size(), color);
+                }
+            } else { // use all sequences as one group
+                gcSheet=new XSSFSheet[1];
+                gcSheet[0]=workbook.createSheet(engine.getDefaultSequenceCollectionName());
+                sequenceNames=new ArrayList<>(results.keySet());
+                Collections.sort(sequenceNames,sortOrderComparator);
+                outputGCcolumns(gcSheet[0],sequenceNames,tableheaderStyle,percentageStyle);
+                drawGCPlot(gcSheet[0],0,1,sequenceNames.size(), color);
+            }
+        }
+        // Output summary statistics on first sheet
+        int rowIndex=0;
+        Row row = summarySheet.createRow(rowIndex++);
+        Cell cell = row.createCell(0);
+        cell.setCellValue(" "); // the title will be added later after columns have been sized
+        cell.setCellStyle(getExcelTitleStyle(workbook));
+        
+        row = summarySheet.createRow(rowIndex++);
+        int cellIndex=0;
+        for (String header:new String[]{"Group","Size","Min","Max","Average","Std.dev.","Median","1st Quartile","3rd Quartile"}) {
+            cell = row.createCell(cellIndex++);
+            cell.setCellValue(header);
+            cell.setCellStyle(tableheaderStyle);
+        }
+             
+        if (sequenceGroups==null || sequenceGroups instanceof SequenceCollection) {
+            SequenceCollection collection=(sequenceGroups instanceof SequenceCollection)?(SequenceCollection)sequenceGroups:null;
+            if (collection==null) { // create new collection with all the sequences used in the analysis if no collection was specified
+                collection=new SequenceCollection(engine.getDefaultSequenceCollectionName());
+                collection.addSequenceNames(new ArrayList<String>(results.keySet()));
+            }
+            double[] values=getStatistics(collection);
+            row = summarySheet.createRow(rowIndex++);
+            cell = row.createCell(0); cell.setCellValue(collection.getName());
+            cell = row.createCell(1); cell.setCellValue(collection.size());
+            cell = row.createCell(2); cell.setCellValue(values[STATISTIC_MIN]); cell.setCellStyle(percentageStyle);
+            cell = row.createCell(3); cell.setCellValue(values[STATISTIC_MAX]); cell.setCellStyle(percentageStyle);           
+            cell = row.createCell(4); cell.setCellValue(values[STATISTIC_AVERAGE]); cell.setCellStyle(percentageStyle);          
+            cell = row.createCell(5); cell.setCellValue(values[STATISTIC_STDDEV]); cell.setCellStyle(percentageStyle);           
+            cell = row.createCell(6); cell.setCellValue(values[STATISTIC_MEDIAN]); cell.setCellStyle(percentageStyle);
+            cell = row.createCell(7); cell.setCellValue(values[STATISTIC_1ST_QUARTILE]); cell.setCellStyle(percentageStyle);
+            cell = row.createCell(8); cell.setCellValue(values[STATISTIC_3RD_QUARTILE]); cell.setCellStyle(percentageStyle);            
+         } else if (sequenceGroups instanceof SequencePartition) {
+            SequencePartition partition=(SequencePartition)sequenceGroups;
+            for (String clusterName:partition.getClusterNames()) {
+                double[] values=getStatistics(partition.getClusterAsSequenceCollection(clusterName, engine));
+                row = summarySheet.createRow(rowIndex++);
+                cell = row.createCell(0); cell.setCellValue(clusterName);
+                cell = row.createCell(1); cell.setCellValue(partition.getClusterSize(clusterName));
+                cell = row.createCell(2); cell.setCellValue(values[STATISTIC_MIN]); cell.setCellStyle(percentageStyle);
+                cell = row.createCell(3); cell.setCellValue(values[STATISTIC_MAX]);  cell.setCellStyle(percentageStyle);          
+                cell = row.createCell(4); cell.setCellValue(values[STATISTIC_AVERAGE]); cell.setCellStyle(percentageStyle);          
+                cell = row.createCell(5); cell.setCellValue(values[STATISTIC_STDDEV]); cell.setCellStyle(percentageStyle);          
+                cell = row.createCell(6); cell.setCellValue(values[STATISTIC_MEDIAN]); cell.setCellStyle(percentageStyle);
+                cell = row.createCell(7); cell.setCellValue(values[STATISTIC_1ST_QUARTILE]); cell.setCellStyle(percentageStyle);
+                cell = row.createCell(8); cell.setCellValue(values[STATISTIC_3RD_QUARTILE]); cell.setCellStyle(percentageStyle);                
+            }
+        } 
+        for (int c=0;c<=8;c++) {
+          summarySheet.autoSizeColumn(c);
+          summarySheet.setColumnWidth(c, summarySheet.getColumnWidth(c)+1000); // one unit of width is rather small
+        }
+        summarySheet.getRow(0).getCell(0).setCellValue("GC-content analysis"); // add title back after cell resizing
+        int firstRow=2; // 2 lines of headers (title + column headers)
+        rowIndex--; // this is now the last row
+        int restartRow=rowIndex+3;
+        row = summarySheet.createRow(restartRow);
+        row.createCell(0).setCellValue("In the boxplots below, the blue boxes show the 1st, 2nd (median) and 3rd quartiles, the whiskers show the minimum and maximum values, the yellow diamond shows the average (mean) value and the red lines the standard deviations from the mean");
+        // Create boxplots
+        XSSFSheet doodleSheet = workbook.createSheet(" ");      
+        int chartRow=restartRow+2;
+        int chartColumn=0;
+        int chartWidth=(groupCount-1)*3; //
+        int chartHeight=(36-chartRow); // there is room for about 36 rows without scrolling, so this will size the chart according to free space
+        if (chartHeight<10) chartHeight=20;
+        if (chartWidth<5) chartWidth=5;
+        Excel_BoxplotMaker boxplot=new Excel_BoxplotMaker(summarySheet, doodleSheet, chartColumn, chartRow, chartWidth, chartHeight, true);
+        int offset=2; // two columns before the statistcal values
+        boxplot.setupDataFromColumns(firstRow,rowIndex, 0,STATISTIC_MIN+offset,STATISTIC_MAX+offset,STATISTIC_MEDIAN+offset,STATISTIC_1ST_QUARTILE+offset,STATISTIC_3RD_QUARTILE+offset);
+        boxplot.addLabels("GC-content", "Groups", "GC %");
+        boxplot.setYrange(0,1.0);      
+        boxplot.addExtraPointsFromColumnSum(STATISTIC_AVERAGE+offset, STATISTIC_STDDEV+offset, false, firstRow, rowIndex, "Std+", Excel_BoxplotMaker.PointStyle.DASH, (short)12, Color.RED);  
+        boxplot.addExtraPointsFromColumnSum(STATISTIC_AVERAGE+offset, STATISTIC_STDDEV+offset, true, firstRow, rowIndex, "Std-", Excel_BoxplotMaker.PointStyle.DASH, (short)12, Color.RED); 
+        boxplot.addExtraPointsFromColumn(STATISTIC_AVERAGE+offset, firstRow, rowIndex, "Mean", Excel_BoxplotMaker.PointStyle.DIAMOND, (short)12, Color.YELLOW);        
+        boxplot.addExtraPointsFromColumn(STATISTIC_MIN+offset, firstRow, rowIndex, "Min", Excel_BoxplotMaker.PointStyle.DASH, (short)20, Color.BLACK);
+        boxplot.addExtraPointsFromColumn(STATISTIC_MAX+offset, firstRow, rowIndex, "Max", Excel_BoxplotMaker.PointStyle.DASH, (short)20, Color.BLACK);
+        boxplot.drawBoxplot();
+        
+        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
+        try {
+            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
+            workbook.write(stream);
+            stream.close();
+        } catch (Exception e) {
+            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+        }
+        outputobject.setBinary(true);        
+        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
+        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
+        if (format!=null) format.setProgress(100);
+        return outputobject; 
+    }
+
+    private void outputGCcolumns(XSSFSheet sheet, ArrayList<String> sortedSequenceNames, CellStyle tableheaderStyle, CellStyle percentageStyle) {
+        Row row = sheet.createRow(0); // header row
+        Cell sCell=row.createCell(0);
+        sCell.setCellValue("Sequence");
+        sCell.setCellStyle(tableheaderStyle);
+        Cell vCell=row.createCell(1);
+        vCell.setCellValue("GC-content");
+        vCell.setCellStyle(tableheaderStyle);
+        for (int i = 0; i < sortedSequenceNames.size(); i++) {
+            row = sheet.createRow(i+1);
+            String sequenceName=sortedSequenceNames.get(i);
+            Double value=results.get(sequenceName);          
+            row.createCell(0).setCellValue(sequenceName);
+            Cell valueCell=row.createCell(1);
+            valueCell.setCellValue(value);
+            valueCell.setCellStyle(percentageStyle);
+        }
+        sheet.autoSizeColumn(0);               
+        sheet.autoSizeColumn(1);
+        sheet.setColumnWidth(0, sheet.getColumnWidth(0)+500);
+        sheet.setColumnWidth(1, sheet.getColumnWidth(1)+500);        
+    }
+    
+    private void drawGCPlot(XSSFSheet sheet, int sequenceNamesColumn, int valuesColumn, int rows, Color color) {
+        Excel_BarChartMaker barchart = new Excel_BarChartMaker(sheet, valuesColumn+2, 3, (int)(rows/4.0), 20);
+        barchart.setupDataFromColumns(sheet, 1, rows+1, sequenceNamesColumn, valuesColumn); // starting at second row ("1") since first row is header
+        barchart.addLabels("GC-content","Groups","GC %");
+        barchart.setYrange(0, 1.0);
+        barchart.setShowInPercentage(true);        
+        barchart.setColors(color, Color.BLACK);
+        barchart.drawBarChart();
+    }
+    
     @Override
     public void runAnalysis(OperationTask task) throws Exception {
         DNASequenceDataset dnasequenceDataset=(DNASequenceDataset)task.getParameter("DNA track");

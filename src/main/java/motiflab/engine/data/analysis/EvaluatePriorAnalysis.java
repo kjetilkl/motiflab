@@ -15,8 +15,11 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -35,8 +38,29 @@ import motiflab.engine.ParameterSettings;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.Parameter;
 import motiflab.engine.TaskRunner;
+import static motiflab.engine.data.analysis.Analysis.EXCEL;
 import motiflab.engine.dataformat.DataFormat;
 import motiflab.gui.VisualizationSettings;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.XDDFLineProperties;
+import org.apache.poi.xddf.usermodel.XDDFSolidFillProperties;
+import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
+import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFLineChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -65,7 +89,7 @@ public class EvaluatePriorAnalysis extends Analysis {
     private HashMap<String,Double> AUCmap=null;
     private HashMap<String,double[]> ROCmap=null;
     private boolean aboveOrEqual=true;
-    private static final int resolution=100; // number if threshold samples to use when drawing statistics graphs
+    private static final int resolution=100; // DON'T CHANGE THIS! Number if threshold samples to use when drawing statistics graphs. Ranges from 0 to this number inclusive, so the actual count is 1 bigger
 
     private ArrayList<double[]> optimalThresholdBestSnSpsum=null; // each double[] contains min and max in threshold range
     private ArrayList<double[]> optimalThresholdBestAccuracy=null; // (or lower and upper threshold bound)
@@ -86,18 +110,19 @@ public class EvaluatePriorAnalysis extends Analysis {
     
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
+    public Parameter[] getOutputParameters(String dataformat) {
+        if (dataformat.equals(HTML)) return new Parameter[] {
               new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false),
               new Parameter("Include legend",String.class,"",null,"<html>This argument can be used to include a legend box as part of the figure itself.<br>If used, this argument should be either a single positive value or three values separated by comma.<br>The first value will be the %-scale the legend box should be displayed at.<br>The optional second and third values are interpreted as a coordinate at which to display the legend box.<br>Positive coordinates are offset down and to the right relative to an origin in the upper left corner.<br>Negative values are offset left and upwards relative to an origin in the lower right corner.</html>",false,false)
         };
+        else return new Parameter[0];
     }
 
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Graph scale") || parameter.equals("Include legend")) return new String[]{"HTML"};
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Graph scale") || parameter.equals("Include legend")) return new String[]{"HTML"};
+//        return null;
+//    }     
     
     @Override
     public String getAnalysisName() {
@@ -226,7 +251,7 @@ public class EvaluatePriorAnalysis extends Analysis {
         double[] includeLegend=null;             
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
              legendScaleString=(String)settings.getResolvedParameter("Include legend",defaults,engine);             
           }
@@ -421,7 +446,275 @@ public class EvaluatePriorAnalysis extends Analysis {
 
     }
 
+    @Override
+    public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        if (ROCmap==null) return formatExcelsingleFeature(outputobject, engine, settings, task, format);
+        else return formatExcelmultipleFeatures(outputobject, engine, settings, task, format);
+    }
+    
+    private OutputData formatExcelsingleFeature(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        XSSFWorkbook workbook=null;
+        try {
+            InputStream stream = CompareRegionDatasetsAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_EvaluatePrior.xlsx");
+            workbook = new XSSFWorkbook(stream);
+            stream.close();
+            XSSFSheet sheet = workbook.getSheetAt(0);   // just use the first sheet 
+          
+            int toprow=100; // the data starts at row 101 (1-indexed) in the Excel template
+            
+            if (format!=null) format.setProgress(10);     
+            for (int i=0;i<=resolution;i++) {
+                // double xValue = ((double)i)/100.0;
+                double rocValue = ROCvalues[i];
+                Row row = sheet.getRow(toprow+i);
+                int column = 1; // this is determined by the Excel template file    
+                row.getCell(column).setCellValue(rocValue);
+            }        
+            if (format!=null) format.setProgress(30);   
+            for (int i=0;i<=resolution;i++) {
+                double recall = ((double)i)/100.0;
+                double precision = PrecisionRecallvalues[i];
+                Row row = sheet.getRow(toprow+i);
+                int column = 3; // this is determined by the Excel template file    
+                row.getCell(column++).setCellValue(recall);
+                row.getCell(column++).setCellValue(precision);                
+            }             
+            if (format!=null) format.setProgress(50);   
+              
+            double[] sensitivity=getStatistic("sensitivity");
+            double[] specificity=getStatistic("specificity");
+            double[] ppv=getStatistic("PPV");
+            double[] npv=getStatistic("NPV");
+            double[] fpr=getStatistic("false positive rate");
+            double[] fnr=getStatistic("false negative rate");
+            double[] fdr=getStatistic("false discovery rate");
+            double[] fomr=getStatistic("false omission rate");
+            double[] acc=getStatistic("accuracy");
+            double[] perf=getStatistic("performance");
+            double[] discr=getStatistic("discrimination");
+            double[] avgsnsp=getStatistic("averageSnSp");        
+            double[] fmeasure=getStatistic("F-measure");           
+            double step=(maxPriorValue-minPriorValue)/(double)resolution;
 
+            for (int i=0;i<=resolution;i++) {
+                Row row = sheet.getRow(i+toprow); // 
+                double threshold=minPriorValue+(i*step);
+                int column=6; // this is determined by the Excel template file
+                row.getCell(column++).setCellValue(threshold);
+                row.getCell(column++).setCellValue(sensitivity[i]);
+                row.getCell(column++).setCellValue(specificity[i]);
+                row.getCell(column++).setCellValue(fpr[i]);
+                row.getCell(column++).setCellValue(avgsnsp[i]);
+                row.getCell(column++).setCellValue(discr[i]); 
+                row.getCell(column++).setCellValue(fmeasure[i]); 
+                row.getCell(column++).setCellValue(ppv[i]);
+                row.getCell(column++).setCellValue(npv[i]); 
+                row.getCell(column++).setCellValue(fdr[i]); 
+                row.getCell(column++).setCellValue(fnr[i]);
+                row.getCell(column++).setCellValue(fomr[i]); 
+                row.getCell(column++).setCellValue(perf[i]);
+                row.getCell(column++).setCellValue(acc[i]);
+            } 
+            if (format!=null) format.setProgress(70);            
+            // histograms
+            int numberOfBins=100; // this is hardcoded in the analysis below
+            double binSize = (maxPriorValue-minPriorValue)/((double)numberOfBins);           
+            for (int i=0;i<numberOfBins;i++) {
+                Row row = sheet.getRow(i+toprow); //
+                double binstart=minPriorValue+(binSize*i);
+                int column=21; // this is determined by the Excel template file 
+                row.getCell(column++).setCellValue(binstart);            
+                row.getCell(column++).setCellValue(insideBins[i]);    
+                row.getCell(column++).setCellValue(outsideBins[i]);  
+                row.getCell(column++).setCellValue((double)insideBins[i]/(double)inside);  
+                row.getCell(column++).setCellValue((double)outsideBins[i]/(double)outside);              
+            }        
+            if (format!=null) format.setProgress(90);              
+            // Add all the text
+            String title = "Evaluation of positional prior \""+numericDatasetName+"\" for prediction of \""+regionDatasetName+"\"";
+            String subtitle = "Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":"");
+            if (sequenceCollectionName!=null) subtitle+=" from collection \""+sequenceCollectionName+"\"";            
+            sheet.getRow(0).getCell(0).setCellValue(title);
+            sheet.getRow(2).getCell(1).setCellValue(subtitle);
+            
+            int rowIndex=22;
+            DecimalFormat decimalformatter=new DecimalFormat("0.#####");            
+            String line1 = "These graphs summarize the ability of \""+numericDatasetName+"\" to discriminate bases inside \""+regionDatasetName+"\" regions";
+            String line2 = "from the surrounding background. The evaluation assumes that all bases with a value of \""+numericDatasetName+"\" ";
+            String line3 = (aboveOrEqual)?"greater than or equal to":"strictly greater than";
+            line3+=" some threshold are predicted as lying within \""+regionDatasetName+"\" regions ";
+            String line4 = "while bases scoring "+((aboveOrEqual)?"below":"equal to or below");
+            line4+=" the threshold are predicted as background.";
+            String line5 = "The performance of this prior, as evaluated by the Area Under The Curve of the ROC-graph, is "+decimalformatter.format(AUC)+", which is "+getEvaluationOfAUC(AUC)+".";            
+            String line6 = "The graphs on the right show how different performance statistics vary according to different threshold levels on the X-axis.";
+            
+            setCellValue(sheet, rowIndex++, 0, line1);
+            setCellValue(sheet, rowIndex++, 0, line2);
+            setCellValue(sheet, rowIndex++, 0, line3);
+            setCellValue(sheet, rowIndex++, 0, line4);
+            setCellValue(sheet, rowIndex++, 0, line5);  
+            setCellValue(sheet, rowIndex++, 0, "");  
+            setCellValue(sheet, rowIndex++, 0, line6);             
+            
+            if (optimalThresholdBestSnSpsum.size()==1) {
+                double[] range=optimalThresholdBestSnSpsum.get(0);
+                String lineOptimal="The best trade-off between sensitivity and specificity is obtained with the ";
+                if (range[0]==range[1]) lineOptimal+="threshold "+decimalformatter.format(range[0])+".";
+                else lineOptimal+="threshold in the range ["+decimalformatter.format(range[0])+","+decimalformatter.format(range[1])+"].";
+                setCellValue(sheet, rowIndex++, 0, lineOptimal);
+            } else {
+                String lineOptimal="The distribution of \""+numericDatasetName+"\" values allows for multiple different thresholds which can achieve optimal trade-off between sensitivity and specificity:";
+                setCellValue(sheet, rowIndex++, 0, lineOptimal);
+                for (double[] range:optimalThresholdBestSnSpsum) {
+                   if (range[0]==range[1]) setCellValue(sheet, rowIndex++, 1, decimalformatter.format(range[0]));
+                   else setCellValue(sheet, rowIndex++, 1, decimalformatter.format(range[0])+" - "+decimalformatter.format(range[1]));;
+                }
+            }           
+            if (optimalThresholdBestAccuracy.size()==1) {
+                double[] range=optimalThresholdBestAccuracy.get(0);
+                String lineOptimal="The highest obtainable accuracy (% of all correctly predicted bases) is "+decimalformatter.format(bestAccuracy);
+                if (range[0]==range[1]) lineOptimal+=" with the threshold "+decimalformatter.format(range[0])+".";
+                else lineOptimal+=" with a threshold in the range ["+decimalformatter.format(range[0])+","+decimalformatter.format(range[1])+"].";
+                setCellValue(sheet, rowIndex++, 0, lineOptimal);
+            } else {
+                String lineOptimal="The highest obtainable accuracy (% of all correctly predicted bases) is "+decimalformatter.format(bestAccuracy)+".";
+                lineOptimal+="The distribution of  \""+numericDatasetName+"\" values allows for multiple different thresholds which can achieve optimal accuracy:";
+                setCellValue(sheet, rowIndex++, 0, lineOptimal);
+                for (double[] range:optimalThresholdBestAccuracy) {
+                   if (range[0]==range[1]) setCellValue(sheet, rowIndex++, 1, decimalformatter.format(range[0]));
+                   else setCellValue(sheet, rowIndex++, 1, decimalformatter.format(range[0])+" - "+decimalformatter.format(range[1]));;
+                }
+            }   
+            String line7 = "Note that the optimal accuracy-threshold can differ from the threshold for best sensitivity/specificity if the ratio";
+            String line8 = "between the number of bases inside regions versus outside is skewed. ";
+            line8+= "In this dataset the inside-to-outside ratio is ";
+            if (inside<outside) line8+="1:"+decimalformatter.format((double)outside/(double)inside)+".";
+            else line8+=decimalformatter.format((double)inside/(double)outside)+":1.";  
+            setCellValue(sheet, rowIndex++, 0, line7);
+            setCellValue(sheet, rowIndex++, 0, line8);             
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw new ExecutionError(e.getMessage());
+        }
+       
+        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
+        try {
+            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
+            workbook.write(stream);
+            stream.close();
+        } catch (Exception e) {
+            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+        }
+        outputobject.setBinary(true);        
+        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
+        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
+        return outputobject;   
+    }
+    
+    private Cell setCellValue(XSSFSheet sheet, int row, int column, String value) {
+        Row r = sheet.getRow(row);
+        if (r==null) r=sheet.createRow(row);
+        Cell cell = r.getCell(column);
+        if (cell==null) cell=r.createCell(column);
+        cell.setCellValue(value);
+        return cell;
+    }
+    
+    private Cell setCellValue(XSSFSheet sheet, int row, int column, double value) {
+        Row r = sheet.getRow(row);
+        if (r==null) r=sheet.createRow(row);
+        Cell cell = r.getCell(column);
+        if (cell==null) cell=r.createCell(column);
+        cell.setCellValue(value);
+        return cell;
+    }    
+
+    private OutputData formatExcelmultipleFeatures(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        XSSFWorkbook workbook=null;
+        try {
+            InputStream stream = CompareRegionDatasetsAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_EvaluatePrior_multiple.xlsx");
+            workbook = new XSSFWorkbook(stream);
+            stream.close();
+            XSSFSheet sheet = workbook.getSheetAt(0);
+            XSSFSheet datasheet = workbook.getSheetAt(1); 
+            CellStyle tableheaderstyle = getExcelTableHeaderStyle(workbook);            
+            // update the data range of the histogram
+            XSSFDrawing drawing = ((XSSFSheet)sheet).createDrawingPatriarch();           
+            XSSFChart rocChart = drawing.getCharts().get(0);
+            // Access the chart data
+            XDDFChartData data = rocChart.getChartSeries().get(0);
+            
+            int toprow=1; // the data starts at row 101 (1-indexed) in the Excel template. There are 101 values for each series 
+            int numdatarows=101;
+            XDDFDataSource<Double> xValues = XDDFDataSourcesFactory.fromNumericCellRange(datasheet, new CellRangeAddress(toprow, toprow+numdatarows-1, 0, 0)); // X values
+         
+            if (format!=null) format.setProgress(10);   
+            ArrayList<String> names=new ArrayList<String>(ROCmap.size());
+            for (String s:ROCmap.keySet()) names.add(s);
+            Collections.sort(names, new AUCSortComparator());
+            VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
+            int row = 5; // determined by the Excel template file
+            int column = 8; // determined by the Excel template file
+            int datacolumn = 2;
+            Color bgcolor = new Color(255,255,220);
+            CellStyle valueCellStyle=createExcelStyle(workbook, BorderStyle.THIN, null, bgcolor, HorizontalAlignment.RIGHT, VerticalAlignment.CENTER);
+            for (int i=0;i<names.size();i++) {
+                String featurename=names.get(i);
+                if (vizSettings!=null && !vizSettings.isTrackVisible(featurename)) continue;
+                Color trackColor = vizSettings.getForeGroundColor(featurename);
+                double AUCvalue=AUCmap.get(featurename);
+                CellStyle style=createExcelStyle(workbook, BorderStyle.THIN, trackColor, bgcolor, HorizontalAlignment.LEFT, VerticalAlignment.CENTER);                
+                setCellValue(sheet, row, column, featurename).setCellStyle(style);
+                setCellValue(sheet, row, column+1, AUCvalue).setCellStyle(valueCellStyle);
+                double[] values=ROCmap.get(featurename);
+                for (int j=0;j<=resolution;j++) {
+                    setCellValue(datasheet,toprow+j,datacolumn,values[j]);
+                } 
+                XDDFNumericalDataSource<Double> newSeriesData = XDDFDataSourcesFactory.fromNumericCellRange(datasheet, new CellRangeAddress(toprow, toprow+numdatarows-1, datacolumn, datacolumn));                
+                XDDFLineChartData.Series newSeries = (XDDFLineChartData.Series) data.addSeries(xValues, newSeriesData);
+                newSeries.setTitle(featurename, null);   
+                XDDFSolidFillProperties fillProperties = getExcelFillColor(trackColor);
+                XDDFLineProperties lineProperties = new XDDFLineProperties();
+                lineProperties.setFillProperties(fillProperties);
+                lineProperties.setWidth(2.0);
+                newSeries.setLineProperties(lineProperties);
+                newSeries.setMarkerStyle(MarkerStyle.NONE);
+                newSeries.setSmooth(true);           
+
+                setCellValue(datasheet,toprow-1,datacolumn,featurename).setCellStyle(tableheaderstyle); // header (not really used)
+                datacolumn++;
+                row++;
+            }       
+            rocChart.plot(data);            
+            if (format!=null) format.setProgress(90);              
+            // Add all the text
+            String title = "Evaluation of different positional priors for predicting \""+regionDatasetName+"\"";
+            String subtitle = "Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":"");
+            if (sequenceCollectionName!=null) subtitle+=" from collection \""+sequenceCollectionName+"\"";            
+            sheet.getRow(0).getCell(0).setCellValue(title);
+            sheet.getRow(2).getCell(1).setCellValue(subtitle);            
+            
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            throw new ExecutionError(e.getMessage());
+        }
+       
+        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
+        try {
+            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
+            workbook.write(stream);
+            stream.close();
+        } catch (Exception e) {
+            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+        }
+        outputobject.setBinary(true);        
+        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
+        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
+        return outputobject;             
+    }   
 
 
     @Override
@@ -435,7 +728,7 @@ public class EvaluatePriorAnalysis extends Analysis {
         outputobject.append("#Evaluation of \""+numericDatasetName+"\" as a positional prior to discriminate bases inside \""+regionDatasetName+"\" regions from the surrounding background\n",RAWDATA);
         outputobject.append("#Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":""),RAWDATA);
         if (sequenceCollectionName!=null) outputobject.append(" from collection '"+sequenceCollectionName+"'",RAWDATA);
-        outputobject.append("#Bases that score "+((aboveOrEqual)?"above or equal to":"stricly above")+" a threshold are considered positive instances\n",RAWDATA);
+        outputobject.append("\n#Bases that score "+((aboveOrEqual)?"above or equal to":"stricly above")+" a threshold are considered positive instances\n",RAWDATA);
         outputobject.append("\n",RAWDATA);
         outputobject.append("AUC="+AUC+"\n",RAWDATA);
         if (optimalThresholdBestSnSpsum.size()==1) {
@@ -455,10 +748,81 @@ public class EvaluatePriorAnalysis extends Analysis {
             else outputobject.append("Best accuracy threshold=["+decimalformatter.format(range[0])+","+decimalformatter.format(range[1])+"]\n",RAWDATA);
         } else {
             for (double[] range:optimalThresholdBestAccuracy) {
-               if (range[0]==range[1]) outputobject.append("Best accuracy threshold="+decimalformatter.format(range[0])+"\n",HTML);
-               else outputobject.append("Best accuracy threshold=["+decimalformatter.format(range[0])+" - "+decimalformatter.format(range[1])+"\n",HTML);
+               if (range[0]==range[1]) outputobject.append("Best accuracy threshold="+decimalformatter.format(range[0])+"\n",RAWDATA);
+               else outputobject.append("Best accuracy threshold=["+decimalformatter.format(range[0])+" - "+decimalformatter.format(range[1])+"\n",RAWDATA);
            }
         }
+        outputobject.append("\n\n",RAWDATA);
+        if (format!=null) format.setProgress(20);   
+        outputobject.append("#X-value\tROC\n",RAWDATA);   
+        for (int i=0;i<=resolution;i++) {
+            double xValue = ((double)i)/100.0;
+            double rocValue = ROCvalues[i];
+            outputobject.append(xValue+"\t"+rocValue+"\n", RAWDATA);
+        }        
+        
+        outputobject.append("\n\n",RAWDATA);
+        
+        if (format!=null) format.setProgress(40);   
+        outputobject.append("#Recall\tPrecision\n",RAWDATA);
+        for (int i=0;i<=resolution;i++) {
+            double recall = ((double)i)/100.0;
+            double precision = PrecisionRecallvalues[i];
+            outputobject.append(recall+"\t"+precision+"\n", RAWDATA);
+        }     
+        
+        outputobject.append("\n\n",RAWDATA);
+        
+        if (format!=null) format.setProgress(60);
+        outputobject.append("\n\n",RAWDATA);
+        outputobject.append("#Threshold\tSn\tSp\tFPR\tAvg Sn&Sp\tDist Sn-FDR\tF-measure\tPPV\tNPV\tFDR\tFNR\tFOR\tPerformace\tAccuracy\n",RAWDATA);
+        double[] sensitivity=getStatistic("sensitivity");
+        double[] specificity=getStatistic("specificity");
+        double[] ppv=getStatistic("PPV");
+        double[] npv=getStatistic("NPV");
+        double[] fpr=getStatistic("false positive rate");
+        double[] fnr=getStatistic("false negative rate");
+        double[] fdr=getStatistic("false discovery rate");
+        double[] fomr=getStatistic("false omission rate");
+        double[] acc=getStatistic("accuracy");
+        double[] perf=getStatistic("performance");
+        double[] discr=getStatistic("discrimination");
+        double[] avgsnsp=getStatistic("averageSnSp");        
+        double[] fmeasure=getStatistic("F-measure");           
+        double step=(maxPriorValue-minPriorValue)/(double)resolution;
+        for (int i=0;i<=resolution;i++) {
+            double threshold=minPriorValue+(i*step);
+            outputobject.append(""+threshold,RAWDATA);
+            outputobject.append("\t"+sensitivity[i],RAWDATA);
+            outputobject.append("\t"+specificity[i],RAWDATA); 
+            outputobject.append("\t"+fpr[i],RAWDATA);
+            outputobject.append("\t"+avgsnsp[i],RAWDATA);
+            outputobject.append("\t"+discr[i],RAWDATA); 
+            outputobject.append("\t"+fmeasure[i],RAWDATA); 
+            outputobject.append("\t"+ppv[i],RAWDATA);
+            outputobject.append("\t"+npv[i],RAWDATA); 
+            outputobject.append("\t"+fdr[i],RAWDATA); 
+            outputobject.append("\t"+fnr[i],RAWDATA);
+            outputobject.append("\t"+fomr[i],RAWDATA); 
+            outputobject.append("\t"+perf[i],RAWDATA); 
+            outputobject.append("\t"+acc[i],RAWDATA);    
+            outputobject.append("\n",RAWDATA);   
+        }        
+         if (format!=null) format.setProgress(80);       
+        // histograms
+        int numberOfBins=100; // this is hardcoded in the analysis below
+        double binSize = (maxPriorValue-minPriorValue)/((double)numberOfBins); 
+        outputobject.append("\n\n#Histogram\n",RAWDATA);
+        outputobject.append("#Threshold\tInside\tOutside\tInside normalized\tOutside normalized\n",RAWDATA);              
+        for (int i=0;i<numberOfBins;i++) {
+            double binstart=minPriorValue+(binSize*i);
+            outputobject.append(""+binstart,RAWDATA);            
+            outputobject.append("\t"+insideBins[i],RAWDATA);    
+            outputobject.append("\t"+outsideBins[i],RAWDATA);  
+            outputobject.append("\t"+((double)insideBins[i]/(double)inside),RAWDATA);  
+            outputobject.append("\t"+((double)outsideBins[i]/(double)outside),RAWDATA);   
+            outputobject.append("\n",RAWDATA);             
+        }             
         if (format!=null) format.setProgress(100);
         return outputobject;
     }
@@ -583,26 +947,19 @@ public class EvaluatePriorAnalysis extends Analysis {
         // calculate Precision-Recall values. with recall (sensitivity) on the X-axis (index) and Precision (PPV) on the Y-axis (value)
         PrecisionRecallvalues=new double[resolution+1];
         double[] precision=getStatistic("PPV");
-        double[] recall=getStatistic("sensitivity");
-        double minRecall=1;
-        double maxRecall=0;
-        int minRecallIndex=resolution;
-        int maxRecallIndex=0;
-        for (int i=0;i<=resolution;i++) {  
-            if (recall[i]>=maxRecall) {maxRecall=recall[i];if (i>maxRecallIndex);maxRecallIndex=i;}
-            if (recall[i]<=minRecall) {minRecall=recall[i];if (i<minRecallIndex);minRecallIndex=i;}
+        double[] recall=getStatistic("sensitivity");  
+        double lastvalid=0; 
+        for (int i=resolution;i>=0;i--) {  
             ArrayList<Integer> thresholds=getThresholdsForRecallRange((double)i/(double)resolution,(double)(i+1)/(double)resolution,recall);
-            double bestPrecision=getHighestPrecisionForThreshold(thresholds,precision);
-            PrecisionRecallvalues[i]=bestPrecision;
-            // System.err.println("["+i+"]{"+threshold+"} TP="+TPFPTNFN[i][0]+", FP="+TPFPTNFN[i][1]+", TN="+TPFPTNFN[i][2]+", FN="+TPFPTNFN[i][3]+"    besttotal="+besttotal+"    bestAccuracy="+bestaccuracy);
+            if (thresholds.isEmpty()) {
+                PrecisionRecallvalues[i]=lastvalid; // for missing values, interpolate with last valid value
+            } else  {
+                double bestPrecision=getHighestPrecisionForThreshold(thresholds,precision);
+                PrecisionRecallvalues[i]=bestPrecision;
+                lastvalid=bestPrecision;
+            }
         }
-        double lastvalid=0;
-        // interpolate missing values
-        for (int i=maxRecallIndex;i>=minRecallIndex;i--) {
-             double current=PrecisionRecallvalues[i];
-             if (current!=-Double.MAX_VALUE) lastvalid=current;
-             else PrecisionRecallvalues[i]=lastvalid;
-        }        
+               
         task.setProgress(95); //
         task.setStatusMessage("Executing analysis: "+getAnalysisName()+"  (Finding optimal thresholds)");
         if (Thread.interrupted() || task.getStatus().equals(ExecutableTask.ABORTED)) throw new InterruptedException();
@@ -663,7 +1020,7 @@ public class EvaluatePriorAnalysis extends Analysis {
      * @return 
      */
     private ArrayList<Integer> getThresholdsForRecallRange(double fromRecall, double toRecall, double[] recall) {
-        ArrayList<Integer> result=new ArrayList<Integer>();
+        ArrayList<Integer> result=new ArrayList<Integer>(); // since recall can never increase, there should only be one continous threshold interval corresponding the the recall-range
         for (int i=0;i<recall.length;i++) {
             if (recall[i]>=fromRecall && recall[i]<toRecall) result.add(i);
         }
@@ -1401,7 +1758,7 @@ public class EvaluatePriorAnalysis extends Analysis {
         g.setColor(Color.ORANGE);
         graph.drawCurve(Xpoints, getStatistic("false discovery rate"));
         g.setColor(Color.PINK);
-        graph.drawCurve(Xpoints, getStatistic("false ommision rate"));
+        graph.drawCurve(Xpoints, getStatistic("false omission rate"));
         g.setColor(Color.CYAN);
         graph.drawCurve(Xpoints, getStatistic("performance"));
         g.setColor(Color.BLACK);
@@ -1438,7 +1795,9 @@ public class EvaluatePriorAnalysis extends Analysis {
             double TP=TPFPTNFN[i][0];
             double FP=TPFPTNFN[i][1];
             double TN=TPFPTNFN[i][2];
-            double FN=TPFPTNFN[i][3];
+            double FN=TPFPTNFN[i][3];  
+            // If no positive predictions or no negative predictions are made, division by zero will occurr for some statistics, resulting in NaN values.
+            // This happens at edge-cases, where all bases are predicted as being either positive or negative. (threshold is at minimum or maximum value)
                  if (statistic.equalsIgnoreCase("sensitivity")) result[i]=TP/(TP+FN);
             else if (statistic.equalsIgnoreCase("specificity")) result[i]=TN/(FP+TN);
             else if (statistic.equalsIgnoreCase("PPV")) result[i]=TP/(TP+FP);
@@ -1446,13 +1805,14 @@ public class EvaluatePriorAnalysis extends Analysis {
             else if (statistic.equalsIgnoreCase("false positive rate")) result[i]=1-TN/(FP+TN); // 1-specificity
             else if (statistic.equalsIgnoreCase("false negative rate")) result[i]=1-TP/(TP+FN); // 1-sensitivity
             else if (statistic.equalsIgnoreCase("false discovery rate")) result[i]=1-TP/(TP+FP);
-            else if (statistic.equalsIgnoreCase("false ommision rate")) result[i]=1-TN/(TN+FN);
+            else if (statistic.equalsIgnoreCase("false omission rate")) result[i]=1-TN/(TN+FN);
             else if (statistic.equalsIgnoreCase("accuracy")) result[i]=(TP+TN)/(TP+FP+TN+FN);
             else if (statistic.equalsIgnoreCase("performance")) result[i]=TP/(TP+FP+FN);
-            else if (statistic.equalsIgnoreCase("correlation")) result[i]=0;
+//          else if (statistic.equalsIgnoreCase("correlation")) result[i]=0; // not used yet
             else if (statistic.equalsIgnoreCase("discrimination")) result[i]=Math.abs(TP/(TP+FN)-(1-TN/(FP+TN))); // distance between sensitivity and FPR
             else if (statistic.equalsIgnoreCase("averageSnSp")) result[i]=((TP/(TP+FN))+(TN/(FP+TN)))/2; // average of Sn and Sp
-            else if (statistic.equalsIgnoreCase("F-measure")) result[i]=(2*TP)/(2*TP+FN+FP); // harmonic mean of precision (PPV) and recall (sensitivity)
+            else if (statistic.equalsIgnoreCase("F-measure")) result[i]=(2*TP)/(2*TP+FN+FP); // harmonic mean of precision (PPV) and recall (sensitivity)   
+            if (Double.isNaN(result[i])) result[i]=0; // to avoid NaN values
         }
         return result;
     }

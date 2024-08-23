@@ -44,16 +44,13 @@ import motiflab.gui.GenericRegionBrowserPanel;
 import motiflab.gui.OutputPanel;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
-import org.apache.poi.hslf.model.Picture;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.CellRangeAddress;
-import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.util.RegionUtil;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -225,7 +222,7 @@ public class CompareRegionOccurrencesAnalysis extends Analysis {
         String sortorder="By type";
         if (outputSettings!=null) {
           try {
-                 Parameter[] defaults=getOutputParameters();
+                 Parameter[] defaults=getOutputParameters(format);
                  sortorder=(String)outputSettings.getResolvedParameter("Sort by",defaults,engine);
           } 
           catch (ExecutionError e) {throw e;} 
@@ -300,7 +297,7 @@ public class CompareRegionOccurrencesAnalysis extends Analysis {
         String sortorder="By type";
         if (outputSettings!=null) {
           try {
-                 Parameter[] defaults=getOutputParameters();
+                 Parameter[] defaults=getOutputParameters(format);
                  sortorder=(String)outputSettings.getResolvedParameter("Sort by",defaults,engine);
           } 
           catch (ExecutionError e) {throw e;} 
@@ -345,7 +342,7 @@ public class CompareRegionOccurrencesAnalysis extends Analysis {
         boolean includeLegend=true;
         if (outputSettings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)outputSettings.getResolvedParameter("Sort by",defaults,engine);
           }
           catch (ExecutionError e) {throw e;}
@@ -353,39 +350,46 @@ public class CompareRegionOccurrencesAnalysis extends Analysis {
         }
    
         int rownum=0;
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName());  
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet(outputobject.getName());  
         
-        CellStyle title=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, (short)0, HSSFCellStyle.ALIGN_LEFT, false);      
-        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);
-        CellStyle tableheader=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_CENTER, true);      
+        CellStyle title = getExcelTitleStyle(workbook);
+        CellStyle tableheader = getExcelTableHeaderStyle(workbook);
         
-        CellStyle groupA_UP=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.RED.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle groupB_sigUP=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.CORAL.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle groupC_same=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.YELLOW.index, HSSFCellStyle.ALIGN_RIGHT, false);      
-        CellStyle groupD_sigDOWN=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_GREEN.index, HSSFCellStyle.ALIGN_RIGHT, false);          
-        CellStyle groupE_DOWN=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.BRIGHT_GREEN.index, HSSFCellStyle.ALIGN_RIGHT, false);          
-        CellStyle groupF_notpresent=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.WHITE.index, HSSFCellStyle.ALIGN_RIGHT, false);          
+        VisualizationSettings vizSettings = engine.getClient().getVisualizationSettings();
+        Color OVERREP_TARGET_DEFAULT_COLOR = vizSettings.getSystemColor("onlyintarget");
+        Color OVERREP_TARGET_COLOR = vizSettings.getSystemColor("overrepintarget");
+        Color OVERREP_CONTROL_DEFAULT_COLOR = vizSettings.getSystemColor("onlyincontrol");
+        Color OVERREP_CONTROL_COLOR = vizSettings.getSystemColor("overrepincontrol");
+        Color SAME_RATE_COLOR = vizSettings.getSystemColor("samerate");
+        Color NOT_PRESENT_COLOR = vizSettings.getSystemColor("notpresent");        
         
-        CellStyle groupA_UP_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.RED.index, HSSFCellStyle.ALIGN_CENTER, false);      
-        CellStyle groupB_sigUP_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.CORAL.index, HSSFCellStyle.ALIGN_CENTER, false);      
-        CellStyle groupC_same_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.YELLOW.index, HSSFCellStyle.ALIGN_CENTER, false);      
-        CellStyle groupD_sigDOWN_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_GREEN.index, HSSFCellStyle.ALIGN_CENTER, false);          
-        CellStyle groupE_DOWN_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.BRIGHT_GREEN.index, HSSFCellStyle.ALIGN_CENTER, false);          
-        CellStyle groupF_notpresent_LEGEND=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.WHITE.index, HSSFCellStyle.ALIGN_CENTER, false);          
+        CellStyle groupA_UP=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_TARGET_DEFAULT_COLOR, HorizontalAlignment.RIGHT, false);      
+        CellStyle groupB_sigUP=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_TARGET_COLOR, HorizontalAlignment.RIGHT, false);      
+        CellStyle groupC_same=createExcelStyle(workbook, BorderStyle.THIN, SAME_RATE_COLOR, HorizontalAlignment.RIGHT, false);      
+        CellStyle groupD_sigDOWN=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_CONTROL_COLOR, HorizontalAlignment.RIGHT, false);          
+        CellStyle groupE_DOWN=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_CONTROL_DEFAULT_COLOR, HorizontalAlignment.RIGHT, false);          
+        CellStyle groupF_notpresent=createExcelStyle(workbook, BorderStyle.THIN, NOT_PRESENT_COLOR, HorizontalAlignment.RIGHT, false);          
         
+        CellStyle groupA_UP_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_TARGET_DEFAULT_COLOR, HorizontalAlignment.CENTER, false);      
+        CellStyle groupB_sigUP_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_TARGET_COLOR, HorizontalAlignment.CENTER, false);      
+        CellStyle groupC_same_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, SAME_RATE_COLOR, HorizontalAlignment.CENTER, false);      
+        CellStyle groupD_sigDOWN_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_CONTROL_COLOR, HorizontalAlignment.CENTER, false);          
+        CellStyle groupE_DOWN_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, OVERREP_CONTROL_DEFAULT_COLOR, HorizontalAlignment.CENTER, false);          
+        CellStyle groupF_notpresent_LEGEND=createExcelStyle(workbook, BorderStyle.THIN, NOT_PRESENT_COLOR, HorizontalAlignment.CENTER, false);     
+              
         groupA_UP_LEGEND.setWrapText(true);
         groupB_sigUP_LEGEND.setWrapText(true);
         groupC_same_LEGEND.setWrapText(true);
         groupD_sigDOWN_LEGEND.setWrapText(true);
         groupE_DOWN_LEGEND.setWrapText(true);
         groupF_notpresent_LEGEND.setWrapText(true);
-        groupA_UP_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupB_sigUP_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupC_same_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupD_sigDOWN_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupE_DOWN_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
-        groupF_notpresent_LEGEND.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);        
+        groupA_UP_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupB_sigUP_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupC_same_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupD_sigDOWN_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupE_DOWN_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);
+        groupF_notpresent_LEGEND.setVerticalAlignment(VerticalAlignment.CENTER);        
         
         // Make room for the header which will be added later
         
@@ -486,10 +490,10 @@ public class CompareRegionOccurrencesAnalysis extends Analysis {
 //                };
 //                for (CellRangeAddress range:merged) {
 //                    sheet.addMergedRegion(range);
-//                    RegionUtil.setBorderBottom(HSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells
-//                    RegionUtil.setBorderTop(HSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells
-//                    RegionUtil.setBorderLeft(HSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells
-//                    RegionUtil.setBorderRight(HSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells                                   
+//                    RegionUtil.setBorderBottom(XSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells
+//                    RegionUtil.setBorderTop(XSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells
+//                    RegionUtil.setBorderLeft(XSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells
+//                    RegionUtil.setBorderRight(XSSFCellStyle.BORDER_THIN, range, sheet, workbook); // borders must be updated on merged cells                                   
 //                }               
 //                int[] widths=new int[]{3500,5000,3500,5000,3500,3500};
 //                for (int i=0;i<widths.length;i++) {
@@ -501,23 +505,23 @@ public class CompareRegionOccurrencesAnalysis extends Analysis {
                 row=sheet.getRow(5);
                 outputStringValueInCell(row, 0, "Types overrepresented\nin target",groupB_sigUP_LEGEND);
                 outputStringValueInCell(row, 1, "Same rate",groupC_same_LEGEND);
-                outputStringValueInCell(row, 2, "Types overrepresented\nin control",groupD_sigDOWN_LEGEND);                
-                outputStringValueInCell(row, 3, "Not present",groupF_notpresent_LEGEND);                
+                outputStringValueInCell(row, 2, "Types overrepresented\nin control",groupD_sigDOWN_LEGEND);                              
                 row=sheet.getRow(6);
                 outputNumericValueInCell(row, 0, counts[(int)OVERREPRESENTED_IN_TARGET], groupB_sigUP_LEGEND);
                 outputNumericValueInCell(row, 1, counts[(int)SAME_IN_BOTH_SETS], groupC_same_LEGEND);
                 outputNumericValueInCell(row, 2, counts[(int)OVERREPRESENTED_IN_CONTROL], groupD_sigDOWN_LEGEND);
-                outputNumericValueInCell(row, 3, counts[(int)NOT_PRESENT], groupF_notpresent_LEGEND);
-                int[] widths=new int[]{5000,3500,5000,3500};
+                int[] widths=new int[]{5000,3500,5000};
                 for (int i=0;i<widths.length;i++) {
                     int currentwidth=sheet.getColumnWidth(i);
                     sheet.setColumnWidth(i,Math.max(currentwidth,widths[i]));                    
-                }  
+                }
+                autoSizeExcelColumns(sheet, 3, 5, 800);
+                
              }              
         }       
         
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -754,17 +758,19 @@ public class CompareRegionOccurrencesAnalysis extends Analysis {
     
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Sort by",String.class,"By type",new String[]{"By type","By expression"},null,false,false),
-         };
+    public Parameter[] getOutputParameters(String dataformat) {
+        if (dataformat.equals(HTML) || dataformat.equals(EXCEL) || dataformat.equals(RAWDATA)) {
+            return new Parameter[] {
+                new Parameter("Sort by",String.class,"By type",new String[]{"By type","By expression"},null,false,false),
+            };
+        } else return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("By type") || parameter.equals("Sort by")) return new String[]{"HTML","RawData","Excel"};        
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("By type") || parameter.equals("Sort by")) return new String[]{"HTML","RawData","Excel"};        
+//        return null;
+//    }     
     
     private class SortOrderComparator implements Comparator<String> {
             @Override

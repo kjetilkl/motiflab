@@ -23,7 +23,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import motiflab.engine.data.*;
 import java.util.ArrayList;
@@ -45,16 +44,17 @@ import motiflab.engine.Parameter;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.dataformat.DataFormat;
+import motiflab.engine.util.Excel_DualLineChartMaker;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -89,21 +89,22 @@ public class MapCorrelationAnalysis extends Analysis {
         return (data instanceof NumericMap);
     }      
     
-    /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {        
+    public Parameter[] getOutputParameters(String dataformat) {        
          Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","svg","pdf","eps"},"The image format to use for the graph",false,false);                       
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
          Parameter sortBy=new Parameter("Sort by",String.class,"First",new String[]{"First","Second"},"Which of the two maps should be sorted in ascending order in the graph",false,false);
-         return new Parameter[]{imageformat, sortBy,scalepar};
+         if (dataformat.equals(HTML))  return new Parameter[]{sortBy, imageformat, scalepar};
+         if (dataformat.equals(EXCEL)) return new Parameter[]{sortBy, scalepar};
+         return new Parameter[0];
     }  
 
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Sort by")) return new String[]{HTML,EXCEL};
-        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{HTML};
-        return null;
-    }    
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Sort by")) return new String[]{HTML,EXCEL};
+//        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{HTML};
+//        return null;
+//    }    
     
     @Override
     public String[] getResultVariables() {
@@ -183,7 +184,7 @@ public class MapCorrelationAnalysis extends Analysis {
         String imageFormat="png";
         if (settings!=null) {
           try {
-                 Parameter[] defaults=getOutputParameters();
+                 Parameter[] defaults=getOutputParameters(format);
                  scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine); 
                  imageFormat=(String)settings.getResolvedParameter("Image format",defaults,engine);                 
                  showAscendingString=(String)settings.getResolvedParameter("Sort by",defaults,engine);
@@ -395,75 +396,83 @@ public class MapCorrelationAnalysis extends Analysis {
         String showAscendingString="First";
         if (settings!=null) {
           try {
-                 Parameter[] defaults=getOutputParameters();              
+                 Parameter[] defaults=getOutputParameters(format);              
                  showAscendingString=(String)settings.getResolvedParameter("Sort by",defaults,engine);
           } 
           catch (ExecutionError e) {throw e;} 
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         } 
-        int ascendingMap=(showAscendingString.equals("Second"))?1:0;        
-       
-        Workbook workbook=null;
-        try {
-            InputStream stream = MapCorrelationAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_MapCorrelation.xlt");
-            workbook = WorkbookFactory.create(stream);
-            stream.close();
-                        
-            // setup the data for the maps which will be used to create the graph                                      
-            ArrayList<double[]> map=getMapValues(ascendingMap);
-            Sheet mapValuesSheet = workbook.getSheetAt(1);
-            
-            int entries=map.size();        
-            for (int i=0;i<entries;i++) { // insert histogram values into Sheet2
-                double[] mapsrow=map.get(i);
-                Row row=mapValuesSheet.getRow(i+1);
-                if (row==null) row=mapValuesSheet.createRow(i+1);
-                Cell cell=row.getCell(0);
-                if (cell==null) cell=row.createCell(0);
-                cell.setCellValue(mapsrow[0]);
-                cell=row.getCell(1);
-                if (cell==null) cell=row.createCell(1);                
-                cell.setCellValue(mapsrow[1]);                   
-            }
-            Name firstRange = workbook.getName("First"); //              
-            String firstRange_reference = "Sheet2!$A$2:$A$"+(entries+1);   //Set new range for named range                       
-            firstRange.setRefersToFormula(firstRange_reference); //Assign to named range
+        int sortBy=(showAscendingString.equals("First"))?0:1;  
 
-            Name secondRange = workbook.getName("Second"); //              
-            String secondRange_reference = "Sheet2!$B$2:$B$"+(entries+1);   //Set new range for named range                       
-            secondRange.setRefersToFormula(secondRange_reference); //Assign to named range
-            
-            // set the series names
-            mapValuesSheet.getRow(0).getCell(0).setCellValue((ascendingMap==0)?firstMapName:secondMapName);
-            mapValuesSheet.getRow(0).getCell(1).setCellValue((ascendingMap==1)?firstMapName:secondMapName);
-                                 
-            // Now update the "front page"
-            Sheet sheet = workbook.getSheetAt(0);              
-            sheet.setForceFormulaRecalculation(true);                     
-            String description1="Analysis of the correlation between the numeric maps \""+firstMapName+"\" and \""+secondMapName+"\"";
-            String description2="The analysis was based on "+dataCollectionSize+" pair"+((dataCollectionSize!=1)?"s":"")+" of values";
-            if (dataCollectionName!=null) description2+=" from collection \""+dataCollectionName+"\"";
-            sheet.getRow(2).getCell(0).setCellValue(description1);
-            sheet.getRow(3).getCell(0).setCellValue(description2);
-                                 
-            // fill inn the correlation values
-            sheet.getRow(30).getCell(1).setCellValue(pearsonsCorrelation);
-            sheet.getRow(30).getCell(2).setCellValue(spearmanCorrelation);
-
-                                 
-            
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            throw new ExecutionError(e.getMessage());
+        double[] map1_values = new double[datapointsFirst.length];
+        double[] map2_values = new double[datapointsSecond.length];
+        int size = map1_values.length;
+        ArrayList<double[]> inSortedOrder=new ArrayList<double[]>(size);
+        for (int i=0;i<size;i++) inSortedOrder.add(new double[]{datapointsFirst[i],datapointsSecond[i]});
+        Collections.sort(inSortedOrder,new SortOrderComparator(sortBy));
+        for (int i=0;i<size;i++) {
+            double[] pair = inSortedOrder.get(i);
+            map1_values[i] = pair[0];
+            map2_values[i] = pair[1];
+        }      
+        
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Map correlation");
+        XSSFSheet valuesSheet = workbook.createSheet("Values");        
+        
+        for (int i=0;i<map1_values.length;i++) {
+            Row row = valuesSheet.createRow(i);
+            row.createCell(0).setCellValue(map1_values[i]);
+            row.createCell(1).setCellValue(map2_values[i]);            
         }
+        
+        Cell titleCell = sheet.createRow(0).createCell(0);
+        titleCell.setCellValue("Map Correlation Analysis");
+        titleCell.setCellStyle(getExcelTitleStyle(workbook));
+        
+        Excel_DualLineChartMaker linechart = new Excel_DualLineChartMaker(sheet, 0, 2, 12, 20);
+        linechart.addDataFromColumns(valuesSheet, 0,1, 0,map1_values.length-1);
+        linechart.setColors(Color.RED, Color.BLUE);
+        linechart.setLabels(null, null, firstMapName, secondMapName);
+        linechart.setSeriesNames(firstMapName, secondMapName);        
+        linechart.drawLineChart();
+
+        CellStyle tableHeaderStyle = getExcelTableHeaderStyle(workbook);
+        CellStyle tableCellStyle = getExcelBorderedStyle(workbook);
+        tableCellStyle.setAlignment(HorizontalAlignment.CENTER);
+        tableCellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00000"));
+        int rowIndex=24;
+        int cellIndex=3;
+        Row row = sheet.createRow(rowIndex++);
+        Cell cell = row.createCell(cellIndex++);
+        cell.setCellValue("Pearson's Correlation");
+        cell.setCellStyle(tableHeaderStyle);
+        cell = row.createCell(cellIndex--);
+        cell.setCellValue("Spearman's Correlation");
+        cell.setCellStyle(tableHeaderStyle); 
+        row = sheet.createRow(rowIndex++);
+        cell = row.createCell(cellIndex++);
+        cell.setCellValue(pearsonsCorrelation);
+        cell.setCellStyle(tableCellStyle);
+        cell = row.createCell(cellIndex--);
+        cell.setCellValue(spearmanCorrelation);
+        cell.setCellStyle(tableCellStyle);
+        autoSizeExcelColumns(sheet, cellIndex, cellIndex+1, 800);
+        rowIndex+=2;
+        
+        sheet.createRow(rowIndex++).createCell(cellIndex).setCellValue("Analysis of the correlation between \""+firstMapName+"\" and \""+secondMapName+"\"");
+        sheet.createRow(rowIndex++).createCell(cellIndex).setCellValue("The analysis was based on "+map1_values.length+" pairs of values");
+        
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
             stream.close();
         } catch (Exception e) {
             throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
+        } finally {
+            try {workbook.close();} catch (Exception ee) {}
         }
         outputobject.setBinary(true);        
         outputobject.setDirty(true); // this is not set automatically since I don't append to the document

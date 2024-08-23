@@ -54,22 +54,37 @@ import motiflab.engine.dataformat.DataFormat;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.ToolTipHeader;
 import motiflab.gui.VisualizationSettings;
-import org.apache.poi.POIXMLDocumentPart;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+//import org.apache.poi.POIXMLDocumentPart;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xddf.usermodel.XDDFShapeProperties;
+import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFCategoryDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFTable;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.xmlbeans.XmlCursor;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTBarChart;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTBarSer;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTErrBars;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumData;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumDataSource;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumRef;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumVal;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTPlotArea;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTUnsignedInt;
+import org.openxmlformats.schemas.drawingml.x2006.chart.STErrBarType;
+import org.openxmlformats.schemas.drawingml.x2006.chart.STErrValType;
 
 /**
  *
@@ -106,31 +121,35 @@ public class BenchmarkAnalysis extends Analysis {
     
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {
+    public Parameter[] getOutputParameters(String dataformat) {
          Statistics temp=new Statistics();
          String[] stats=temp.getStatisticNames();
          StringBuilder string=new StringBuilder("<html>This format-string specifies which metrics to include in the output.<br>Recognized performance metrics are:<br><br>");
          for (String stat:stats) string.append(stat+"<br>");
          string.append("</html>");
-         Parameter par1=new Parameter("Metrics",String.class,"Sn,Sp,PPV,ASP,PC,Acc,CC,sSN,sPPV,sASP",null,string.toString(),false,false);
+         Parameter parMetrics=new Parameter("Metrics",String.class,"Sn,Sp,PPV,ASP,PC,Acc,CC,sSN,sPPV,sASP",null,string.toString(),false,false);
+         Parameter parAbbr=new Parameter("Use abbreviations",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},null,false,false);         
          Parameter parX=new Parameter("X-axis",String.class,"Method",new String[]{"Method","Statistic/Groups"},null,false,false);
-         Parameter parY=new Parameter("Use abbreviations",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},null,false,false);
          Parameter parZ=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
          Parameter parL=new Parameter("Legend",String.class,"",null,"<html>This argument can be used to position the legend box.<br>If used, its value should be either should be either \"normal\", \"none\", a single positive value or three values separated by comma.<br>The first numeric value will be the %-scale the legend box should be displayed at.<br>The optional second and third values are interpreted as a coordinate at which to display the legend box.<br>Positive coordinates are offset down and to the right relative to an origin in the upper left corner.<br>Negative values are offset left and upwards relative to an origin in the lower right corner.</html>",false,false);
          Parameter parC=new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the track will be output as the first column in the table",false,false);               
-         return new Parameter[]{par1,parY,parX,parZ,parC,parL};
+         
+         if (dataformat.equals(HTML)) return new Parameter[]{parMetrics,parAbbr,parX,parZ,parC,parL};
+         else if (dataformat.equals(EXCEL)) return new Parameter[]{}; // {parMetrics,parAbbr};
+         else if (dataformat.equals(RAWDATA)) return new Parameter[]{parMetrics,parAbbr};
+         else return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("X-axis")
-         || parameter.equals("Graph scale")
-         || parameter.equals("Legend")
-         || parameter.equals("Color boxes")
-        ) return new String[]{"HTML"};
-        if (parameter.equals("Metrics") || parameter.equals("Use abbreviations")) return new String[]{"HTML","RawData"};        
-        else return null;
-    }
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("X-axis")
+//         || parameter.equals("Graph scale")
+//         || parameter.equals("Legend")
+//         || parameter.equals("Color boxes")
+//        ) return new String[]{HTML};
+//        if (parameter.equals("Metrics") || parameter.equals("Use abbreviations")) return new String[]{HTML,EXCEL,RAWDATA};        
+//        return null;
+//    }
 
     @Override
     public String getAnalysisName() {
@@ -208,7 +227,7 @@ public class BenchmarkAnalysis extends Analysis {
         boolean showColorBoxes=false;
         if (outputSettings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format.getName());
              String formatString=(String)outputSettings.getResolvedParameter("Metrics",defaults,engine);
              abbreviate=(Boolean)outputSettings.getResolvedParameter("Use abbreviations",defaults,engine);
              xaxis=(String)outputSettings.getResolvedParameter("X-axis",defaults,engine);
@@ -778,21 +797,21 @@ public class BenchmarkAnalysis extends Analysis {
         ArrayList<String> graphStatistics=new ArrayList<String>();
         boolean abbreviate=true;
         if (outputSettings!=null) {
-          try {
-             Parameter[] defaults=getOutputParameters();
-             String formatString=(String)outputSettings.getResolvedParameter("Metrics",defaults,engine);
-             abbreviate=(Boolean)outputSettings.getResolvedParameter("Use abbreviations",defaults,engine);
-             String[] metrics=formatString.trim().split("\\s*,\\s*");
-             for (String metric:metrics) {                
-                 if (isLongNameForStatistic(metric)) {
-                    graphStatistics.add(metric);
-                 } if (isShortNameForStatistic(metric)) {
-                    graphStatistics.add(getLongNameForStatistic(metric)); 
-                 }
-             }          
-          } 
-          catch (ExecutionError e) {throw e;} 
-          catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
+            try {
+                Parameter[] defaults=getOutputParameters(format.getName());
+                String formatString=(String)outputSettings.getResolvedParameter("Metrics",defaults,engine);
+                abbreviate=(Boolean)outputSettings.getResolvedParameter("Use abbreviations",defaults,engine);
+                String[] metrics=formatString.trim().split("\\s*,\\s*");
+                for (String metric:metrics) {                
+                   if (isLongNameForStatistic(metric)) {
+                       graphStatistics.add(metric);
+                   } if (isShortNameForStatistic(metric)) {
+                       graphStatistics.add(getLongNameForStatistic(metric)); 
+                   }
+               }          
+            } 
+            catch (ExecutionError e) {throw e;} 
+            catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }       
               
         outputobject.append("#Benchmark evaluation against '"+answerTrackName+"'\n",RAWDATA);
@@ -846,57 +865,51 @@ public class BenchmarkAnalysis extends Analysis {
     }
    
     @Override
-    public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
-        //
-        //  ***   It seems that it is not possible to clone sheets containing charts (at least for now), so if multiple groups are to be included   ***
-        //  ***   we output one "template" graph on the first sheet and then only the data for the groups are output on subsequent sheets.          ***
-        //  ***   To create a graph for a sheet, the user has to manually copy the group data table and paste it into Sheet1.                       ***
-        // 
-        Workbook workbook=null;
+    public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings outputSettings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
+        XSSFWorkbook workbook=null;
         try {
-            InputStream stream = BenchmarkAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_Benchmark.xlsx");           
-            workbook = WorkbookFactory.create(stream);
+            InputStream stream = DistributionAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_Benchmark.xlsx");
+            workbook = (XSSFWorkbook)WorkbookFactory.create(stream);
             stream.close();
             if (format!=null) format.setProgress(20);    
-            
+                               
             // setup the statistics
-            ArrayList<String> methodnames=engine.getClient().getVisualizationSettings().sortFeaturesAccordingToOrderInMasterList(predictionTrackNames, false, aggregate);           
-            int rowIndex=20; // this is the row that the table starts at in the template 
+            ArrayList<String> methodnames=engine.getClient().getVisualizationSettings().sortFeaturesAccordingToOrderInMasterList(predictionTrackNames, true, aggregate);           
             String[] metrics=new String[]{"Sn","Sp","PPV","NPV","PC","ASP","F","Acc","CC","sSn","sPPV","sASP","sPC","sF"}; // this is the order used in the template
-            CellStyle cellStyle = workbook.createCellStyle();
-            cellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("0.000"));         
-            
-            if (groupnames.isEmpty() || groupnames.size()>1) { // output 'all' first then each group in turn (if any)
-               Sheet sheet;   
-               sheet = workbook.getSheetAt(0);
-               outputSingleExcelSheet(sheet, null, methodnames, rowIndex, metrics, cellStyle, !groupnames.isEmpty()); // first sheet. Includes template for chart. Do not rename this sheet since the chart contains references to it!
-               
-               if (!groupnames.isEmpty())  {
-                   sheet = workbook.createSheet();
-                   workbook.setSheetName(workbook.getSheetIndex(sheet), "All");
-                   outputSingleExcelSheet(sheet, null, methodnames, rowIndex, metrics, cellStyle, true);
-               } // add copy of "all" group for backup
-               int i=0;
-               for (String groupname:groupnames) { // output each group in turn
-                  if (format!=null) format.setProgress((int)(20+60*(i/groupnames.size()))); // not right...
-                  sheet = workbook.createSheet();
-                  workbook.setSheetName(workbook.getSheetIndex(sheet), groupname);
-                  outputSingleExcelSheet(sheet, groupname, methodnames, rowIndex, metrics, cellStyle, true);
-                  i++;
-               }
-            } else { // single named group
+            CellStyle cellStyle = createExcelStyle(workbook, BorderStyle.THIN, new Color(255,255,210), HorizontalAlignment.RIGHT, false);
+            cellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("0.000"));
+            CellStyle methodStyle = createExcelStyle(workbook, BorderStyle.THIN, new Color(220,220,255), HorizontalAlignment.LEFT, false);
+                                          
+            if (groupnames.isEmpty() || groupnames.size()>1) { // output 'all' first then each group in turn (if any)             
+                int i=0;
+                XSSFSheet sheet;
+                
+                for (String groupname:groupnames) { // Add an extra sheet for each cluster
+                    if (format!=null) format.setProgress((int)(20+60*(i/groupnames.size()))); // not right...
+                    sheet = workbook.cloneSheet(0);
+                    workbook.setSheetName(workbook.getSheetIndex(sheet), groupname); // name the sheed after the cluster
+                    outputSingleExcelSheet(sheet, groupname, methodnames, metrics, cellStyle, methodStyle);
+                    i++;
+                }
+                // I output the first sheet last so that it is fresh when it is being cloned above and does not have anything on it that could cause problems (like error bars)              
+                sheet = workbook.getSheetAt(0);
+                workbook.setSheetName(0, "All"); // rename first sheet to All                 
+                outputSingleExcelSheet(sheet, null, methodnames, metrics, cellStyle, methodStyle);                 
+                 
+            } else { // single named group (i.e. analysis limited to a selected Sequence Collection)
                 if (format!=null) format.setProgress(40);                
-                Sheet sheet = workbook.getSheetAt(0); 
-                // workbook.setSheetName(0, groupnames.get(0)); // Never rename Sheet1 since the chart contains references to it
-                outputSingleExcelSheet(sheet, groupnames.get(0), methodnames, rowIndex, metrics, cellStyle, false);
+                XSSFSheet sheet = workbook.getSheetAt(0);
+                workbook.setSheetName(0, groupnames.get(0)); // name the sheed after the Sequence Collection 
+                outputSingleExcelSheet(sheet, groupnames.get(0), methodnames, metrics, cellStyle, methodStyle);
             }            
                         
         } catch (Exception e) {
+            // e.printStackTrace();
             throw new ExecutionError(e.getMessage(),e);
         }
         if (format!=null) format.setProgress(80);  
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx"); // we use this suffix since we are forced to use the "new Excel" version.       
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");      
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -907,44 +920,232 @@ public class BenchmarkAnalysis extends Analysis {
         outputobject.setBinary(true);        
         outputobject.setDirty(true); // this is not set automatically since I don't append to the document
         outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
-        outputobject.setPreferredFileSuffix("xlsx"); // The EXCEL format is usually based on old Excel versions and uses the "xls" suffix.
-                                                     // However, since we are forced to use the new format here, we explicitly set the suffix to "xlsx" instead to avoid confusion when opening the file in Excel.
         if (format!=null) format.setProgress(100);  
         return outputobject;        
     }       
     
-    private void outputSingleExcelSheet(Sheet sheet, String groupname, ArrayList<String> methodnames, int rowIndex, String[] metrics, CellStyle cellStyle, boolean isCopy) {
+    private void outputSingleExcelSheet(XSSFSheet sheet, String groupname, ArrayList<String> methodnames, String[] metrics, CellStyle cellStyle, CellStyle headerstyle) { 
+        VisualizationSettings vizSettings = MotifLabEngine.getEngine().getClient().getVisualizationSettings();   
+        String sheetname = sheet.getSheetName();
         sheet.setForceFormulaRecalculation(true);           
-        String firstLine="Benchmark analysis against \""+answerTrackName+"\"";
+        String firstLine="Benchmark analysis against \""+answerTrackName+"\"";       
         Row row=sheet.getRow(0);
         if (row==null) row=sheet.createRow(0);          
         outputStringValueInCell(row, 0, firstLine, null); 
-        row=sheet.getRow(2);
-        if (row==null) row=sheet.createRow(2);               
-        if (groupname!=null) outputStringValueInCell(row, 0, "Group: "+groupname, null);
-        if (isCopy) { // at the moment it seems that it is impossible to clone charts, so we include a message instead to copy the data into Sheet1
-            row=sheet.getRow(8);
-            if (row==null) row=sheet.createRow(8);               
-            if (groupname!=null) outputStringValueInCell(row, 2, "Copy the table below data and paste it over the table on Sheet1 to update the graph", null);            
-        }
 
-        int i=0;
+        int headerRow = 2; // Row for header (above first data line). This is dictated by the Excel template file
+        XSSFDrawing drawing = ((XSSFSheet)sheet).createDrawingPatriarch();
+        XSSFChart barChart = drawing.getCharts().get(0);
+        XDDFChartData chartData = barChart.getChartSeries().get(0);
+        
+        // Add tracks to statistics table. (Note that the names can be aggregated)
+        int rowIndex = headerRow;   
+        int errorBarColumnsStart = metrics.length+10;
+        if (aggregate) {           
+            String[] metricsSTDlabels = new String[metrics.length];
+            for (int i=0;i<metrics.length;i++) {
+                metricsSTDlabels[i]=metrics[i]+"-StDev";
+            }            
+            Row stdHeaderRow = sheet.getRow(headerRow);
+            outputStringValuesInCells(stdHeaderRow, metricsSTDlabels, errorBarColumnsStart, headerstyle);
+        }
+        
         for (String trackname:methodnames) { 
-            row=sheet.getRow(rowIndex+i);
-            if (row==null) row=sheet.createRow(rowIndex+i);    
+            rowIndex++;
+            row=sheet.getRow(rowIndex);
+            if (row==null) row=sheet.createRow(rowIndex);    
             String key=(groupname==null)?trackname:(trackname+"\t"+groupname);
-            Statistics stat=benchmark.get(key);            
-            outputStringValueInCell(row, 0, trackname, null);
-            int col=0;
-            for (String metric:metrics) {     
-                col++;
-                Double value=stat.getStatisticValue(metric);                    
-                outputNumericValueInCell(row, col, value, cellStyle);        
+            Statistics stat = benchmark.get(key);  
+            double[] values = stat.getStatisticsAsArray(metrics);
+            outputStringValueInCell(row, 0, trackname, headerstyle);
+            outputNumericValuesInCells(row, values, 1, cellStyle);
+            if (aggregate) {
+                if (stat.hasStandardDeviations()) {
+                    double[] std = stat.getStatisticsStandardDeviationsAsArray(metrics);                      
+                    outputNumericValuesInCells(row, std, errorBarColumnsStart, cellStyle);
+                } else {
+                    // if a track is not aggregated, output 0.0 as stdev value for all metrics, or else Excel will complain later about missing values
+                    outputNumericValuesInCells(row, new double[metrics.length], errorBarColumnsStart, null); // don't use the same cell style, as a signal that this row is just defaults
+                }
             }
-            i++;                
-        }       
+        }
+               
+        int numTracks = methodnames.size();
+        XDDFCategoryDataSource categories = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(headerRow+1, headerRow+numTracks, 0, 0)); //   
+             
+        int seriesNumber = 0; // 
+        int existingSeries = chartData.getSeriesCount();      
+        for (String metric:metrics) { // Set up new series from the columns. Each metric is a series and each method is a category [!]
+            XDDFNumericalDataSource values = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(headerRow+1, headerRow+numTracks, seriesNumber+1, seriesNumber+1));
+            XDDFBarChartData.Series series;
+            
+            if (seriesNumber<existingSeries) { // first series exists already so we just replace it
+                series = (XDDFBarChartData.Series)chartData.getSeries(seriesNumber);
+                series.replaceData(categories, values);          
+            } else {            
+                series = (XDDFBarChartData.Series)chartData.addSeries(categories, values);                                
+            }
+            String longname = (isLongNameForStatistic(metric))?metric:getLongNameForStatistic(metric);
+            if (longname==null) longname=metric;
+            Color color = vizSettings.getSystemColor(longname);
+            setExcelBarChartColor(series, color);
+            series.setTitle(null, new CellReference(sheet.getSheetName(), headerRow,  seriesNumber+1, true, true) );
+            if (aggregate) {
+                addErrorBars(series, sheet, headerRow+1, headerRow+numTracks, errorBarColumnsStart+seriesNumber, errorBarColumnsStart+seriesNumber, true);
+                addErrorBars(series, sheet, headerRow+1, headerRow+numTracks, errorBarColumnsStart+seriesNumber, errorBarColumnsStart+seriesNumber, false);               
+            }
+            seriesNumber++;
+        }              
+        barChart.plot(chartData);    
+        
+        // ==============   CHART 2  ==================
+        
+        // In the second plot the series are tracks/methods and the categories are metrics         
+        barChart = drawing.getCharts().get(1);
+        chartData = barChart.getChartSeries().get(0);        
+        seriesNumber = 0; // 
+        existingSeries = chartData.getSeriesCount();        
+        categories = XDDFDataSourcesFactory.fromStringCellRange(sheet, new CellRangeAddress(headerRow, headerRow, 1, metrics.length)); //        
+        for (String trackname:methodnames) { // Set up new series from the rows
+            int seriesRow = headerRow+1+seriesNumber;
+            XDDFNumericalDataSource values = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(seriesRow, seriesRow, 1, metrics.length));
+            XDDFBarChartData.Series series;
+            if (seriesNumber<existingSeries) { // first series exists already so we just replace it
+                series = (XDDFBarChartData.Series)chartData.getSeries(seriesNumber);
+                series.replaceData(categories, values);             
+            } else {
+                series = (XDDFBarChartData.Series)chartData.addSeries(categories, values);
+                // Now we must set the name of series as well, or Excel will complain when opening the file!  get "getF()" property should return a cell reference pointing to the name
+                if (series.getCTBarSer().getTx()==null) series.getCTBarSer().addNewTx();
+                if (series.getCTBarSer().getTx().getStrRef()==null) series.getCTBarSer().getTx().addNewStrRef();               
+                series.getCTBarSer().getTx().getStrRef().setF("$A$"+(seriesRow+1)); // setF("'"+sheetname+"'!$A$"+(seriesRow+1));               
+            }
+            series.setTitle(null, new CellReference(sheet.getSheetName(), seriesRow,  0, true, true) );
+            if (aggregate) {
+                // addErrorBars(series, sheet, seriesRow, seriesRow, errorBarColumnsStart, errorBarColumnsStart+metrics.length-1);
+                addErrorBars(series, sheet, seriesRow, seriesRow, errorBarColumnsStart, errorBarColumnsStart+metrics.length-1, true);
+                addErrorBars(series, sheet, seriesRow, seriesRow, errorBarColumnsStart, errorBarColumnsStart+metrics.length-1, false);               
+            }            
+            Color color = vizSettings.getForeGroundColor(trackname);
+            setExcelBarChartColor(series, color);
+            seriesNumber++;
+        }              
+        barChart.plot(chartData);    
+
+        // reposition the two charts so that they are below the statistics table
+        int chartRow1 = headerRow + methodnames.size() + 2;
+        int chartHeight = 14;
+        int chartRow2 = chartRow1+chartHeight+1;
+        setExcelAnchorRows(drawing, new int[][]{ {chartRow1,chartRow1+chartHeight},{chartRow2,chartRow2+chartHeight} }); // chartRow1, chartRow1+chartHeight);       
+    }
+
+    private void addErrorBars(XDDFBarChartData.Series barChartSeries, XSSFSheet sheet, int row1, int row2, int col1, int col2, boolean plus) {
+        // Get the series at the specified index
+        CTBarSer series = barChartSeries.getCTBarSer();   
+        CTErrBars errBars = series.addNewErrBars();       
+        
+        errBars.addNewNoEndCap().setVal(false);
+        errBars.addNewErrBarType().setVal((plus)?STErrBarType.PLUS:STErrBarType.MINUS);
+        errBars.addNewErrValType().setVal(STErrValType.CUST);
+        
+        // Set error bar values from the sheet 
+        String cellAddress = "$"+getExcelColumnNameForIndex(col1+1)+"$"+(row1+1)+":$"+getExcelColumnNameForIndex(col2+1)+"$"+(row2+1); // cellAddress = ""+sheet.getSheetName()+"!$"+getExcelColumnNameForIndex(col1+1)+"$"+(row1+1)+":$"+getExcelColumnNameForIndex(col2+1)+"$"+(row2+1);
+        CTNumDataSource source = (plus)?errBars.addNewPlus():errBars.addNewMinus(); 
+        CTNumRef numRef = source.addNewNumRef();                
+        numRef.setF(cellAddress);        
+
+        // Add numCache with actual values (or else it does not work)
+        if (col1==col2) { // error values from a single column
+            int numpoints = row2 - row1 + 1;
+            CTNumData numCache  = numRef.addNewNumCache();    
+            numCache.setFormatCode("General");            
+            CTUnsignedInt ptCount = numCache.addNewPtCount();        
+            ptCount.setVal(numpoints);
+            for (int i=0; i<numpoints; i++) {
+                int rowIndex = row1+i;
+                Row row = sheet.getRow(rowIndex);
+                Cell cell = row.getCell(col1);
+                double value = cell.getNumericCellValue();
+                CTNumVal numVal = numCache.addNewPt();
+                numVal.setIdx(i); 
+                numVal.setV(String.valueOf(value));          
+            }            
+        } else if (row1==row2){ // error values from a single row
+            int numpoints = col2 - col1 + 1;
+            CTNumData numCache  = numRef.addNewNumCache();       
+            numCache.setFormatCode("General");            
+            CTUnsignedInt ptCount = numCache.addNewPtCount();        
+            ptCount.setVal(numpoints);      
+            for (int i=0; i<numpoints; i++) {
+                int col = col1+i;
+                Row row = sheet.getRow(row1);
+                Cell cell = row.getCell(col);
+                double value = cell.getNumericCellValue();
+                CTNumVal numVal = numCache.addNewPt();
+                numVal.setIdx(i);
+                numVal.setV(String.valueOf(value));           
+            }                               
+        }            
+    }     
+    
+    
+    private void setExcelBarChartColor(XDDFBarChartData.Series series, Color color) {
+        XDDFShapeProperties shapeProperties = new XDDFShapeProperties();
+        shapeProperties.setFillProperties(getExcelFillColor(color));
+        series.setShapeProperties(shapeProperties);       
     }
     
+    /**
+     * Repositions charts in a sheet by adjusting their start and end row coordinates
+     * @param drawing
+     * @param newCoordinates list of pairs. Each pair should contain a startRow and an endRow for one Chart
+     */
+    private void setExcelAnchorRows(XSSFDrawing drawing, int[][] newCoordinates) {
+       // This is a really hacky way to reposition a Chart by directly editing the "drawing1.xml" file which is part of the Excel file (which is really just a ZIP-archive)
+        String xqNamespace = "declare namespace xdr='http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing';"; 
+        XmlCursor cursor = drawing.getCTDrawing().newCursor();  
+        cursor.selectPath(xqNamespace + "./xdr:twoCellAnchor");
+        int chart = 0;
+        while (cursor.toNextSelection()) {
+            if (newCoordinates==null || chart>=newCoordinates.length) break;
+            int[] chartCoordinates = newCoordinates[chart];
+            setValueofExcelXMLelement(cursor.newCursor(),new String[]{"from","row"}, ""+chartCoordinates[0]);
+            setValueofExcelXMLelement(cursor.newCursor(),new String[]{"to","row"}, ""+chartCoordinates[1]);                      
+            chart++;
+        }                
+    }   
+    
+    /**
+     * Given a cursor to a parent element, this method will traverse down the nested
+     * structure searching for nested elements in the order listed in 'path'
+     * and then replace the value of the final element with newValue
+     * @param parent
+     * @param path
+     * @param newValue 
+     */
+    private void setValueofExcelXMLelement(XmlCursor cursor, String[] path, String newValue) {
+        int level = 0;
+        int safety = 0;
+        while (level<path.length) {
+            safety++; if (safety>1000) return;
+            String targetChild = path[level];
+            if (cursor.toFirstChild()) {
+                do {
+                    safety++; if (safety>1000) return;
+                    String nodename = cursor.getName().getLocalPart();
+                    if (nodename.equals(targetChild)) {
+                        if (level==path.length-1) { // we have found the final target
+                            cursor.setTextValue(""+newValue);
+                            return;
+                        } else { // We found the element, but we are not finished with the path. Keep traversing down
+                            level++;
+                            break; 
+                        }
+                    }
+                } while (cursor.toNextSibling());
+            }   
+        }
+    }
     
     
     @Override
@@ -959,7 +1160,7 @@ public class BenchmarkAnalysis extends Analysis {
             else if (siteOverlapFraction>=1.0) siteOverlapFraction=1.0;
         }
         ArrayList<Data> predictions=task.getEngine().getAllDataItemsOfType(RegionDataset.class);
-        int numberofpredictions=predictions.size()-1; // -1 because the answer set is also in the predictions list
+        int numberofpredictions=predictions.size()-1; // subtract one because the answer set is also in the predictions list
         if (numberofpredictions==0) throw new Exception("No prediction tracks to evaluate");
         boolean groupedByPartition=groups instanceof SequencePartition;
         
@@ -1069,7 +1270,7 @@ public class BenchmarkAnalysis extends Analysis {
         if (aggregate) { // replace tracks with same prefix ending in _x where x is some number with the average statistics for these tracks
             ArrayList<String> newTrackNames=new ArrayList<String>();
             HashMap<String, Statistics> newbenchmark=new HashMap<String, Statistics>();
-            HashMap<String,ArrayList<String>> aggregates=new HashMap<String,ArrayList<String>>();
+            HashMap<String,ArrayList<String>> aggregates=new HashMap<String,ArrayList<String>>(); // stores the names of actual tracks that belong under which aggregated track name
             for (String trackname:predictionTrackNames) { // cluster names that should be together
                 int i=trackname.lastIndexOf('_');
                 if (i>0 && i<trackname.length()-1) {
@@ -1093,7 +1294,7 @@ public class BenchmarkAnalysis extends Analysis {
                 }                    
             }
             if (newTrackNames.size()<predictionTrackNames.size()) { // we have aggregate-clustering
-                 if (groupnames.isEmpty()) {
+                 if (groupnames.isEmpty()) { // no collection is specified. Use all sequences.
                      for (String trackname:newTrackNames) {
                          if (aggregates.containsKey(trackname)) {
                             ArrayList<Statistics> cluster=getClusters(aggregates.get(trackname), null);
@@ -1101,7 +1302,7 @@ public class BenchmarkAnalysis extends Analysis {
                             newbenchmark.put(trackname, aggregatedStats);  
                          } else newbenchmark.put(trackname, benchmark.get(trackname));
                      }
-                 } else {
+                 } else { // this case might be a single group or a cluster. In the latter case we should also process the "All" (null) group with sequences from all clusters
                      for (String trackname:newTrackNames) {
                          for (String groupname:groupnames) {  
                              if (aggregates.containsKey(trackname)) {
@@ -1110,12 +1311,13 @@ public class BenchmarkAnalysis extends Analysis {
                                 newbenchmark.put(trackname+"\t"+groupname, aggregatedStats);  
                              } else newbenchmark.put(trackname+"\t"+groupname, benchmark.get(trackname+"\t"+groupname));
                          }
-                         if (aggregates.containsKey(trackname)) { 
-                            ArrayList<Statistics> cluster=getClusters(aggregates.get(trackname), null);
-                            Statistics aggregatedStats=new Statistics(cluster);
-                            newbenchmark.put(trackname, aggregatedStats);  
-                         } else newbenchmark.put(trackname, benchmark.get(trackname));                        
-                         
+                         if (groupedByPartition) { // process the "All" group if we are dealing with clusters
+                            if (aggregates.containsKey(trackname)) { 
+                               ArrayList<Statistics> cluster=getClusters(aggregates.get(trackname), null);
+                               Statistics aggregatedStats=new Statistics(cluster);
+                               newbenchmark.put(trackname, aggregatedStats);  
+                            } else newbenchmark.put(trackname, benchmark.get(trackname));   
+                         }                        
                      }
                  }
                  predictionTrackNames=newTrackNames; // replace the old un-aggregated variables
@@ -1580,10 +1782,10 @@ public class BenchmarkAnalysis extends Analysis {
                     Double value=stat.getStatisticValue(metric);                
                     data[i][j+1]=value;
                     if (stat.hasStandardDeviations()) {
-                       stddata[i][j+1][0]=(Double)stat.getStatisticStandardDeviation(metric); 
-                       stddata[i][j+1][1]=(Double)stat.getStatisticMinValue(metric); 
-                       stddata[i][j+1][2]=(Double)stat.getStatisticMaxValue(metric); 
-                       stddata[i][j+1][3]=(Double)stat.getStatisticNumberOfValues(metric); 
+                        stddata[i][j+1][0]=(Double)stat.getStatisticStandardDeviation(metric); 
+                        stddata[i][j+1][1]=(Double)stat.getStatisticMinValue(metric); 
+                        stddata[i][j+1][2]=(Double)stat.getStatisticMaxValue(metric); 
+                        stddata[i][j+1][3]=(Double)stat.getStatisticNumberOfValues(metric); 
                     } 
                 }
                 i++;
@@ -1742,8 +1944,8 @@ public class BenchmarkAnalysis extends Analysis {
             int size=list.size();
             double[] values=new double[size];
             double[] stat=null;
-            for (int i=0;i<size;i++) {
-                Statistics other=list.get(i);
+            for (int i=0;i<size;i++) {                
+                Statistics other=list.get(i);              
                 nTP+=other.nTP;
                 nFP+=other.nFP;
                 nTN+=other.nTN;
@@ -1751,37 +1953,50 @@ public class BenchmarkAnalysis extends Analysis {
                 sTP+=other.sTP;
                 sFP+=other.sFP;
                 sFN+=other.sFN;                
-            }    
-            
+            }               
             for (String statistic:statisticnames) {
-              for (int i=0;i<size;i++) values[i]=list.get(i).getStatisticValue(statistic);
-              stat=getAverageAndStdDev(values);             
-              storage.put(statistic,stat[0]);
-              storage.put(statistic+"_std",stat[1]);               
-              storage.put(statistic+"_min",stat[2]);               
-              storage.put(statistic+"_max",stat[3]);  
-              storage.put(statistic+"_count",stat[4]);              
+                for (int i=0;i<size;i++) {
+                   values[i]=list.get(i).getStatisticValue(statistic);
+                }
+                stat=getAverageAndStdDev(values);             
+                storage.put(statistic,stat[0]);
+                storage.put(statistic+"_std",stat[1]);               
+                storage.put(statistic+"_min",stat[2]);               
+                storage.put(statistic+"_max",stat[3]);  
+                storage.put(statistic+"_count",stat[4]);              
             }          
         }        
 
         public Statistics() {} // void constructor
+               
+        /** Returns an array with statistics corresponding to the names in the list */        
+        public double[] getStatisticsAsArray(ArrayList<String> list) {
+            String[] listAsArray = new String[list.size()];
+            return getStatisticsAsArray(list.toArray(listAsArray));
+        }
         
         /** Returns an array with statistics corresponding to the names in the list */
-        public double[] getStatisticsAsArray(ArrayList<String> list) {
-            double[] result=new double[list.size()];
-            for (int i=0;i<list.size();i++) {
-                String stat=list.get(i);
+        public double[] getStatisticsAsArray(String[] list) {
+            double[] result=new double[list.length];
+            for (int i=0;i<list.length;i++) {
+                String stat=list[i];
                 if (isLongNameForStatistic(stat)) stat=getShortNameForStatistic(stat);
                 result[i]=getStatisticValue(stat);
             }
             return result;
         }
+        
+        /** Returns an array with standard deviations for the statistics corresponding to the names in the list */        
+        public double[] getStatisticsStandardDeviationsAsArray(ArrayList<String> list) {
+            String[] listAsArray = new String[list.size()];
+            return getStatisticsStandardDeviationsAsArray(list.toArray(listAsArray));
+        }        
 
         /** Returns an array with standard deviations for the statistics corresponding to the names in the list */
-        public double[] getStatisticsStandardDeviationsAsArray(ArrayList<String> list) {
-            double[] result=new double[list.size()];
-            for (int i=0;i<list.size();i++) {
-                String stat=list.get(i);
+        public double[] getStatisticsStandardDeviationsAsArray(String[] list) {
+            double[] result=new double[list.length];
+            for (int i=0;i<list.length;i++) {
+                String stat=list[i];
                 if (isLongNameForStatistic(stat)) stat=getShortNameForStatistic(stat);
                 result[i]=getStatisticStandardDeviation(stat);
             }

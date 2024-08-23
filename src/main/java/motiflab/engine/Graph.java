@@ -523,7 +523,7 @@ public class Graph {
      * the values are graph-values (not pixel coordinates)
      */
     public void drawCurve(double[] Xpoints, double[] Ypoints) {
-        if (Xpoints==null || Xpoints==null ||  Xpoints.length!=Ypoints.length || Xpoints.length<2) return;
+        if (Xpoints==null || Ypoints==null ||  Xpoints.length!=Ypoints.length || Xpoints.length<2) return;
         GeneralPath graph=new GeneralPath();
         graph.moveTo(getXforValue(Xpoints[0]),getYforValue(Ypoints[0]));
         for (int i=1;i<Xpoints.length;i++) {

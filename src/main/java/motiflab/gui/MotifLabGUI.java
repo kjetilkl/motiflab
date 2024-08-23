@@ -148,6 +148,7 @@ import motiflab.engine.protocol.StandardProtocol;
 import motiflab.gui.operationdialog.*;
 import motiflab.gui.prompt.*;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.logging.log4j.core.util.TypeUtil;
 
 
 
@@ -4979,6 +4980,9 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                 for (Protocol protocol:protocolEditor.getProtocolManager().getAllProtocols()) {
                     if (protocol instanceof StandardProtocol) ((StandardProtocol)protocol).setDirtyFlag(true); // mark all recently opened protocols as dirty to force user to acknowledge overwrite when saving
                 }
+                for (Data output:engine.getAllDataItemsOfType(OutputData.class)) {
+                    ((OutputData)output).setDirty(true); // mark all output data objects as dirty so that it is possible to save them again
+                }                
                 undoManager.discardAllEdits(); // reset the undo queue
                 if (selectedTabName!=null) mainWindow.setSelectedTab(selectedTabName);
                 recplaystopButtonGroup.clearSelection();
@@ -5232,6 +5236,9 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                     for (Protocol protocol:protocolEditor.getProtocolManager().getAllProtocols()) {
                         if (protocol instanceof StandardProtocol) ((StandardProtocol)protocol).setDirtyFlag(true); // mark all recently opened protocols as dirty to force user to acknowledge overwrite when saving
                     }
+                    for (Data output:engine.getAllDataItemsOfType(OutputData.class)) {
+                        ((OutputData)output).setDirty(true); // mark all output data as dirty so that it is possible to save them again
+                    }                      
                     undoManager.discardAllEdits(); // reset the undo queue
                     if (selectedTabName!=null) mainWindow.setSelectedTab(selectedTabName);
                     registerRecentSession(fullpath);

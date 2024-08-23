@@ -19,7 +19,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import motiflab.engine.data.*;
@@ -38,10 +37,16 @@ import motiflab.engine.MotifLabEngine;
 import motiflab.engine.Parameter;
 import motiflab.engine.TaskRunner;
 import motiflab.engine.dataformat.DataFormat;
+import motiflab.engine.util.Excel_PieChartMaker;
 import motiflab.gui.VisualizationSettings;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -70,17 +75,18 @@ public class CompareRegionDatasetsAnalysis extends Analysis {
     
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {
+    public Parameter[] getOutputParameters(String dataformat) {
          Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","svg","pdf","eps"},"The image format to use for the graph",false,false);                              
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-         return new Parameter[]{imageformat,scalepar};
+         if (dataformat.equals(HTML)) return new Parameter[]{imageformat,scalepar};
+         else return new Parameter[0];
     }    
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{"HTML"};
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{"HTML"};
+//        return null;
+//    }     
     
     @Override
     public String[] getSourceProxyParameters() {return new String[]{"First","Second"};} 
@@ -189,7 +195,7 @@ public class CompareRegionDatasetsAnalysis extends Analysis {
         if (format!=null) format.setProgress(5);
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              imageFormat=(String)settings.getResolvedParameter("Image format",defaults,engine);              
              scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
           } 
@@ -294,7 +300,7 @@ public class CompareRegionDatasetsAnalysis extends Analysis {
     private void paintGraphImage(Graphics2D g, double scale, int width, int height, int pieChartSize, int margin, int pieMargin, String[] legends, Dimension legendsdim, VisualizationSettings settings) throws IOException {
         Color firstTrackColor=settings.getForeGroundColor(predictionTrackName);
         Color secondTrackColor=settings.getForeGroundColor(answerTrackName);
-        Color blendColor=blendColors(firstTrackColor, secondTrackColor);
+        Color blendColor=VisualizationSettings.blendColors(firstTrackColor, secondTrackColor);
         Color[] colors=new Color[]{secondTrackColor,blendColor,firstTrackColor,Color.WHITE};
         
         g.scale(scale, scale);
@@ -319,23 +325,7 @@ public class CompareRegionDatasetsAnalysis extends Analysis {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }    
     
-    private Color blendColors (Color color1, Color color2) {
-        float[] HSB1=Color.RGBtoHSB(color1.getRed(), color1.getGreen(), color1.getBlue(), null);
-        float[] HSB2=Color.RGBtoHSB(color2.getRed(), color2.getGreen(), color2.getBlue(), null);       
-        float minH=(HSB1[0]<HSB2[0])?HSB1[0]:HSB2[0];
-        float maxH=(HSB1[0]>HSB2[0])?HSB1[0]:HSB2[0];
-        float distUP=maxH-minH;
-        float distDOWN=(1-maxH+minH);
-        float newH=0;
-        if (distUP<=distDOWN) {
-           newH=minH+distUP/2.0f;
-        } else {
-           newH=minH-distDOWN/2.0f; 
-        }   
-        if (newH<0) newH=1+newH; //
-        if (newH>=1) newH=newH-1; //          
-        return Color.getHSBColor(newH, (HSB1[1]+HSB2[1])/2.0f, (HSB1[2]+HSB2[2])/2.0f);
-    }    
+  
     
     @Override
     public OutputData formatRaw(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
@@ -371,35 +361,118 @@ public class CompareRegionDatasetsAnalysis extends Analysis {
     
     @Override
     public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
-        Workbook workbook=null;
-        try {
-            InputStream stream = CompareRegionDatasetsAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_CompareRegionDatasets.xlt");
-            workbook = WorkbookFactory.create(stream);
-            stream.close();
-            Sheet sheet = workbook.getSheetAt(0);   // just use the first sheet  
-            
-            sheet.setForceFormulaRecalculation(true);
-            
-            sheet.getRow(17).getCell(1).setCellValue(predictionTrackName);
-            sheet.getRow(18).getCell(1).setCellValue(answerTrackName);            
-            
-            sheet.getRow(7).getCell(1).setCellValue(nTP);
-            sheet.getRow(7).getCell(2).setCellValue(nFP);
-            sheet.getRow(7).getCell(3).setCellValue(nTN);
-            sheet.getRow(7).getCell(4).setCellValue(nFN);
-            
-            String numberOfSequencesString="Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize==1)?"":"s");
-            if (sequenceCollectionName!=null) numberOfSequencesString+=" from collection \""+sequenceCollectionName+"\"";
-            sheet.getRow(2).getCell(1).setCellValue(numberOfSequencesString);
-                  
-            // HSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
-            
-        } catch (Exception e) {
-            throw new ExecutionError(e.getMessage());
+        VisualizationSettings vizSettings = engine.getClient().getVisualizationSettings();       
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Compare Region Datasets");
+        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+        
+        CellStyle titleStyle = getExcelTitleStyle(workbook);
+        CellStyle tableheaderStyle = getExcelTableHeaderStyle(workbook);
+        CellStyle tableCellStyle = createExcelStyle(workbook, BorderStyle.THIN, null, HorizontalAlignment.CENTER, false);
+        CellStyle tableCellPercentageStyle = createExcelStyle(workbook, BorderStyle.THIN, null, HorizontalAlignment.CENTER, false); 
+                  tableCellPercentageStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));        
+        CellStyle headerStyle = getExcelHeaderStyle(workbook, 1.5, false, false);
+        CellStyle percentageStyle = getExcelPercentageStyle(workbook);
+        CellStyle statisticsStyle = createExcelStyle(workbook, BorderStyle.THIN, null, HorizontalAlignment.CENTER, false); 
+                  statisticsStyle.setDataFormat(workbook.createDataFormat().getFormat("0.000"));             
+        
+
+        
+        // Output summary statistics on first sheet
+        Row row = sheet.createRow(0);
+        Cell cell = row.createCell(0);
+        cell.setCellValue("Comparing \""+predictionTrackName+"\" against \""+answerTrackName+"\"");
+        cell.setCellStyle(titleStyle);
+        
+        row = sheet.createRow(2);
+        cell = row.createCell(1);
+        String header2 = "Analysis based on "+sequenceCollectionSize+" sequence"+((sequenceCollectionSize!=1)?"s":"");
+        cell.setCellValue(header2);
+        
+        row = sheet.createRow(5);
+        cell = row.createCell(1);
+        cell.setCellValue("Base Counts");
+        cell.setCellStyle(headerStyle);
+        
+        row = sheet.createRow(6);
+        int cellIndex=1;
+        String[] headers = new String[]{"TP","FP","TN","FN"};
+        for (String header:headers) {
+            cell = row.createCell(cellIndex++);
+            cell.setCellValue(header);
+            cell.setCellStyle(tableheaderStyle);
         }
-       
+        int datarow = 7;
+        row = sheet.createRow(datarow);
+        cellIndex=1;
+        cell = row.createCell(cellIndex++); cell.setCellValue(nTP); cell.setCellStyle(tableCellStyle);        
+        cell = row.createCell(cellIndex++); cell.setCellValue(nFP); cell.setCellStyle(tableCellStyle);
+        cell = row.createCell(cellIndex++); cell.setCellValue(nTN); cell.setCellStyle(tableCellStyle);
+        cell = row.createCell(cellIndex++); cell.setCellValue(nFN); cell.setCellStyle(tableCellStyle);
+                
+        row = sheet.createRow(8); // percentages
+        cellIndex=1;
+        cell = row.createCell(cellIndex++); cell.setCellFormula("B8/(B8+C8+D8+E8)"); cell.setCellStyle(tableCellPercentageStyle); evaluator.evaluateFormulaCell(cell);        
+        cell = row.createCell(cellIndex++); cell.setCellFormula("C8/(B8+C8+D8+E8)"); cell.setCellStyle(tableCellPercentageStyle); evaluator.evaluateFormulaCell(cell);
+        cell = row.createCell(cellIndex++); cell.setCellFormula("D8/(B8+C8+D8+E8)"); cell.setCellStyle(tableCellPercentageStyle); evaluator.evaluateFormulaCell(cell);
+        cell = row.createCell(cellIndex++); cell.setCellFormula("E8/(B8+C8+D8+E8)"); cell.setCellStyle(tableCellPercentageStyle); evaluator.evaluateFormulaCell(cell);
+               
+        row = sheet.createRow(11);
+        cell = row.createCell(1);
+        cell.setCellValue("Statistics");
+        cell.setCellStyle(headerStyle);        
+              
+        row = sheet.createRow(12);
+        cellIndex=1;
+        headers = new String[]{"Sn","Sp","PPV","NPV","PC","ASP","F","Acc","CC"};
+        for (String header:headers) {
+            cell = row.createCell(cellIndex++);
+            cell.setCellValue(header);
+            cell.setCellStyle(tableheaderStyle);
+        }
+        row = sheet.createRow(13);
+        cellIndex=1;
+        cell = row.createCell(cellIndex++); cell.setCellFormula("B8/(B8+E8)"); cell.setCellStyle(statisticsStyle); evaluator.evaluateFormulaCell(cell);  // Sensitivity      
+        cell = row.createCell(cellIndex++); cell.setCellFormula("D8/(C8+D8)"); cell.setCellStyle(statisticsStyle); evaluator.evaluateFormulaCell(cell);  // Specificity 
+        cell = row.createCell(cellIndex++); cell.setCellFormula("B8/(B8+C8)"); cell.setCellStyle(statisticsStyle); evaluator.evaluateFormulaCell(cell);  // Positive predictive value 
+        cell = row.createCell(cellIndex++); cell.setCellFormula("D8/(D8+E8)"); cell.setCellStyle(statisticsStyle); evaluator.evaluateFormulaCell(cell);  // Negative predictive value 
+        cell = row.createCell(cellIndex++); cell.setCellFormula("B8/(B8+C8+E8)"); cell.setCellStyle(statisticsStyle); evaluator.evaluateFormulaCell(cell);  // Performance coefficient      
+        cell = row.createCell(cellIndex++); cell.setCellFormula("((B8/(B8+E8))+(B8/(B8+C8)))/2"); cell.setCellStyle(statisticsStyle); evaluator.evaluateFormulaCell(cell);  // Average Site Performance (Sn+PPv)/2
+        cell = row.createCell(cellIndex++); cell.setCellFormula("(2*B8)/((2*B8)+C8+E8)"); cell.setCellStyle(statisticsStyle); evaluator.evaluateFormulaCell(cell);  // F-measure
+        cell = row.createCell(cellIndex++); cell.setCellFormula("(B8+D8)/(B8+C8+D8+E8)"); cell.setCellStyle(statisticsStyle); evaluator.evaluateFormulaCell(cell);  // Accurracy
+        cell = row.createCell(cellIndex++); cell.setCellFormula("((B8*D8)-(C8*E8))/SQRT((B8+C8)*(B8+E8)*(D8+C8)*(D8+E8))"); cell.setCellStyle(statisticsStyle); evaluator.evaluateFormulaCell(cell);  // Matthews Correlation Coefficient       
+        
+        for (int i=0;i<=9;i++) {
+           sheet.setColumnWidth(i,3200); 
+        }  
+        
+        double nSn=getStatistic("nSn");
+        double nPPV=getStatistic("nPPV");
+        double nPC=getStatistic("nPC");        
+        cell = sheet.createRow(24).createCell(9); cell.setCellValue(nPPV); cell.setCellStyle(percentageStyle);
+        cell = sheet.getRow(24).createCell(10);   cell.setCellValue(" of \""+predictionTrackName+"\" overlaps with \""+answerTrackName+"\" (PPV)");
+  
+        cell = sheet.createRow(25).createCell(9); cell.setCellValue(nSn); cell.setCellStyle(percentageStyle);
+        cell = sheet.getRow(25).createCell(10);   cell.setCellValue(" of \""+answerTrackName+"\" overlaps with \""+predictionTrackName+"\" (Sn)");        
+
+        cell = sheet.createRow(26).createCell(9); cell.setCellValue(nPC); cell.setCellStyle(percentageStyle);
+        cell = sheet.getRow(26).createCell(10);   cell.setCellValue(" relative overlap with respect to both tracks (Performance Coefficient)");
+
+        // pie chart
+        
+        Excel_PieChartMaker pieChart = new Excel_PieChartMaker(sheet, 1, 16, 7, 18);
+
+        // boxplot.setupDataFromColumns(firstRow,rowIndex, 0,STATISTIC_MIN+offset,STATISTIC_MAX+offset,STATISTIC_MEDIAN+offset,STATISTIC_1ST_QUARTILE+offset,STATISTIC_3RD_QUARTILE+offset);    
+        String[] labels = new String[]{"Unique to "+predictionTrackName+" (FP)", "Overlap (TP)", "Unique to "+answerTrackName+" (FN)","Background (TN)"};
+        Color firstTrackColor=vizSettings.getForeGroundColor(predictionTrackName);
+        Color secondTrackColor=vizSettings.getForeGroundColor(answerTrackName);
+        Color blendColor=VisualizationSettings.blendColors(firstTrackColor, secondTrackColor);
+        Color[] colors=new Color[]{firstTrackColor,blendColor,secondTrackColor,Color.WHITE};        
+        pieChart.setupDataFromCells(new int[][]{ {datarow,2}, {datarow,1}, {datarow,4}, {datarow,3} }, labels, colors); // FP, TP, FN, TN
+        pieChart.drawPieChart();   
+        
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);

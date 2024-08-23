@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import motiflab.engine.task.ExecutableTask;
 import motiflab.engine.ExecutionError;
-import motiflab.engine.MotifLabEngine;
 import motiflab.engine.Parameter;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.data.Data;
@@ -25,14 +24,14 @@ import motiflab.engine.data.OutputData;
 import motiflab.engine.data.SequenceNumericMap;
 import motiflab.engine.data.TextMap;
 import motiflab.engine.protocol.ParseError;
-
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -90,7 +89,7 @@ public class DataFormat_ExcelMap extends DataFormat {
 
     @Override
     public String getSuffix() {
-        return "xls";
+        return "xlsx";
     }
 
     @Override
@@ -128,8 +127,8 @@ public class DataFormat_ExcelMap extends DataFormat {
         }
         keycolumn=keycolumn-1;
         valuecolumn=valuecolumn-1;
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName()); 
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet(outputobject.getName()); 
         DataMap map=(DataMap)dataobject;        
         if (includeEntries!=null && !includeEntries.getMembersClass().equals(map.getMembersClass())) includeEntries=null;
         ArrayList<String> keys=(includeEntries==null)?map.getAllKeys(engine):includeEntries.getValues();
@@ -158,8 +157,12 @@ public class DataFormat_ExcelMap extends DataFormat {
               if (map instanceof NumericMap) valuecell.setCellValue((Double)map.getValue());
               else valuecell.setCellValue((String)map.getValue());    
         }
+        int maxcolumn=Math.max(keycolumn,valuecolumn);
+        for (short j=0;j<maxcolumn;j++) { 
+            sheet.autoSizeColumn(j);               
+        }        
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,getSuffix());        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -226,7 +229,7 @@ public class DataFormat_ExcelMap extends DataFormat {
                             ((NumericMap)target).setDefaultValue(value);  
                         } catch (Exception e) {throw new ExecutionError("Unable to parse expected numeric value for \""+key+"\". Found \""+valuecell.getStringCellValue()+"\"");}                  
                     } else {
-                        valuecell.setCellType(Cell.CELL_TYPE_STRING); // this is a hack to convert the cell contents to string and avoid exceptions                       
+                        valuecell.setCellType(CellType.STRING); // .CELL_TYPE_STRING); // this is a hack to convert the cell contents to string and avoid exceptions                       
                         ((TextMap)target).setDefaultValue(valuecell.getStringCellValue());
                     }
                     found++;                    
@@ -243,7 +246,7 @@ public class DataFormat_ExcelMap extends DataFormat {
                                 ((NumericMap)target).setValue(key,value);      
                             } catch (Exception e) {throw new ExecutionError("Unable to parse expected numeric value for \""+key+"\". Found \""+valuecell.getStringCellValue()+"\"");}                                  
                         } else {
-                            valuecell.setCellType(Cell.CELL_TYPE_STRING); // this is a hack to convert the cell contents to string and avoid exceptions
+                            valuecell.setCellType(CellType.STRING); // valuecell.setCellType(Cell.CELL_TYPE_STRING); // this is a hack to convert the cell contents to string and avoid exceptions
                             ((TextMap)target).setValue(key,valuecell.getStringCellValue());
                         }
                         found++;

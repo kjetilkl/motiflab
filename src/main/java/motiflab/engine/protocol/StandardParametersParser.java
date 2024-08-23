@@ -57,6 +57,7 @@ public class StandardParametersParser extends ParametersParser {
     public ParameterSettings parse(String text, Parameter[] parameterFormats) throws ParseError {
         ParameterSettings settings=new ParameterSettings();
         if (text==null || text.trim().isEmpty()) return settings;
+        if (parameterFormats==null) return settings;
         String[] parts=splitOnComma(text);
         for (String part:parts) {
             if (part.isEmpty()) throw new ParseError("Empty parameter (maybe misplaced comma)");

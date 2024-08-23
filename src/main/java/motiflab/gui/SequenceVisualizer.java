@@ -1591,7 +1591,7 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
      * Finds the first DNA sequence track and copies the DNA sequence(s) from the selected segments to the clipboard (in the orientation shown).
      * If multiple selections are made, the sequences will be added separated by newlines
      */
-    private void copySequenceToClipboard() { //        
+    private void copySequenceToClipboard() { //    
         ArrayList<SelectionWindow>selections=settings.getSelectionWindows(sequenceName);
         if (selections==null || selections.isEmpty()) return; 
         DNASequenceDataset dnadataset=gui.getFeaturesPanel().getReferenceDNAtrack(null);

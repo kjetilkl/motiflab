@@ -44,15 +44,23 @@ import motiflab.gui.MotifLabGUI;
 import motiflab.gui.MotifLogo;
 import motiflab.gui.VisualizationSettings;
 import motiflab.gui.prompt.Prompt;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.xddf.usermodel.XDDFColor;
+import org.apache.poi.xddf.usermodel.XDDFSolidFillProperties;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * The parent class of all Analysis data objects
@@ -62,10 +70,12 @@ public abstract class Analysis extends Data implements ParameterExporter {
 
     private static final long serialVersionUID  = -7466671501926581281L; // for backwards compatibility
         
-    public static final String MOTIF_LOGO_NO="No";
-    public static final String MOTIF_LOGO_NEW="New images";
-    public static final String MOTIF_LOGO_SHARED="Shared images";
-    public static final String MOTIF_LOGO_TEXT="Text";
+    private static final String MOTIF_LOGO_NO="No";
+    private static final String MOTIF_LOGO_NEW="New images";
+    private static final String MOTIF_LOGO_SHARED="Shared images";
+    private static final String MOTIF_LOGO_EMBEDDED="Embedded images";
+    private static final String MOTIF_LOGO_INCLUDE="Yes";    
+    private static final String MOTIF_LOGO_TEXT="Text";
 
     public static final String HTML=DataFormat_HTML.HTML;
     public static final String RAWDATA=DataFormat_RawData.RAWDATA;
@@ -118,6 +128,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
      * @param parameter
      * @return 
      */
+    @Deprecated
     public String[] getOutputParameterFilter(String parameter) {
         return null;
     }    
@@ -255,7 +266,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
         ArrayList<String> strings=rawdata.getContentsAsStrings();
         if (strings.isEmpty()) return outputobject;
         int index=0;
-        // Check if the first line could be a header
+        // Check if the first line could be a title header and output this in an <H1> element. Tab-separated headers are turned into <th> table-headers below.
         if (strings.get(0).startsWith("#") && !strings.get(0).contains("\t")) { 
             outputobject.append("<H1>"+strings.get(0).substring(1) +"</H1>", HTML); // first line is a header!            
             index=1;
@@ -297,10 +308,10 @@ public abstract class Analysis extends Data implements ParameterExporter {
      * Subclasses of Analysis should override this method to output analysis-specific output. 
      * If the method is not overridden by the subclass, the default superclass implementation will base the Excel-output on the raw data created by calling formatRaw()
      * The following formatting rules will then apply:
-     *     - If the first line of text starts with # it will be output as a header in large font (without the # prefix) unless it also contains TABs
+     *     - If the first line of text starts with # it will be output as a header in a large font (without the # prefix) unless it also contains TABs
      *     - Lines containing TAB separated columns will also be divided across columns in the Excel sheet. 
-     *       Cells containing numbers or text respectively will be formatted as such. As will numbers followed by a percentage sign.
-     *     - Table lines starting with # (i.e. lines starting with # and containing tabs) are considered as "table headers" and will be formatted accordingly
+     *       Cells containing numbers or text, respectively, will be formatted as such. As will numbers followed by a percentage sign.
+     *     - Table lines starting with # (i.e. lines starting with # and containing tabs) are considered as "table headers" and will be formatted with light yellow background and black borders
      *     - All other lines will just be output as plain text in one column (if they start with # this prefix will be removed)
      * @param outputobject
      * @param engine
@@ -316,26 +327,31 @@ public abstract class Analysis extends Data implements ParameterExporter {
         rawdata = formatRaw(rawdata, engine, settings, task, format);
         ArrayList<String> strings=rawdata.getContentsAsStrings();
 
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet();
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet();
 
-        CellStyle title=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, (short)0, HSSFCellStyle.ALIGN_LEFT, false);      
-        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);
-        CellStyle tableheader=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_CENTER, true); 
+        Color lightYellow=new Color(255,255,200);
+        CellStyle title=getExcelTitleStyle(workbook);             
+        CellStyle tableheader=getExcelTableHeaderStyle(workbook);
         CellStyle stylePercentage = workbook.createCellStyle(); // default stype
         stylePercentage.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
-        CellStyle tableheaderPercentage=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_CENTER, true); 
+        CellStyle tableheaderPercentage=createExcelStyle(workbook, BorderStyle.THIN, lightYellow, HorizontalAlignment.CENTER, true); 
         tableheaderPercentage.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
         
+        boolean hasTitle=false;
         int index=0;
-        int rownum=0;
-        Row row = null;       
-        // Check if the first line could be a header
+        int rownum=0;        
+        Row row = null;
+        ArrayList<Object[]> extraLines=new ArrayList<>(); // this will hold lines that will be output in a second pass, after the columns have been scaled
+        String outputTitle=null;
+        // Check if the first line could be a title header
         if (strings.size()>0 && strings.get(0).startsWith("#") && !strings.get(0).contains("\t")) { 
             row = sheet.createRow(rownum); 
-            outputStringValueInCell(row, 0, strings.get(0).substring(1), title);          
+            outputTitle=strings.get(0).substring(1); 
+            outputStringValueInCell(row, 0, " ", title); // this is just a placeholder for now        
             index=1;
             rownum++;
+            hasTitle=true;
         }
         int maxcol=0;
         for (int i=index;i<strings.size();i++) {
@@ -375,18 +391,28 @@ public abstract class Analysis extends Data implements ParameterExporter {
                   } 
             } else { // not a table row. Just output as one column 
                 if (line.startsWith("#")) line=line.substring(1);
-                outputStringValueInCell(row, 0, line, null);
+                outputStringValueInCell(row, 0, " ", null); // if this line is long, it can mess up the auto-size of the data columns, so I will add a placeholder here and add the real text later
+                extraLines.add(new Object[]{line,rownum}); // store the text and linenumber so I can add the text back in a second pass later
             }
             rownum++;
         }          
         
-        for (short i=1;i<maxcol;i++) { // Note: do not autosize the first column since this can potentially contain very long texts (e.g. headers)
-            sheet.autoSizeColumn(i);               
+        autoSizeExcelColumns(sheet, 0, maxcol-1, 800);
+        if (outputTitle!=null) { // add title back after resizing columns to fit
+           sheet.getRow(0).getCell(0).setCellValue(outputTitle);
+        }
+        
+        if (extraLines!=null) { // add back comment lines that could have messed up resizing
+            for (Object[] line:extraLines) {
+                String text=(String)line[0];
+                int rowIndex=(int)line[1];
+                sheet.getRow(rowIndex).getCell(0).setCellValue(text);
+            }
         }
         format.setProgress(95);  
         
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -399,8 +425,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
         outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document
         return outputobject;   
     }
-
-    
+  
     
     @Override
     public Object getDefaultValueForParameter(String parameterName) {
@@ -432,20 +457,27 @@ public abstract class Analysis extends Data implements ParameterExporter {
     /**
      * Adds a regular parameter to the Analysis. This is used for initialization of Analysis objects and should only be called in a constructor or similar setup method
      */
-    protected void addParameter(String parameterName, Class type ,Object defaultValue, Object[] allowedValues, String description, boolean required, boolean hidden) {
+    protected final void addParameter(String parameterName, Class type ,Object defaultValue, Object[] allowedValues, String description, boolean required, boolean hidden) {
         parameterFormats.add(new Parameter(parameterName,type,defaultValue,allowedValues,description,required,hidden));
     }    
     /**
      * Adds a regular parameter to the Analysis. This is used for initialization of Analysis objects and should only be called in a constructor or similar setup method
      */
-    protected void addParameter(String parameterName, Class type ,Object defaultValue, Object[] allowedValues, String description, boolean required, boolean hidden, boolean advanced) {
+    protected final void addParameter(String parameterName, Class type ,Object defaultValue, Object[] allowedValues, String description, boolean required, boolean hidden, boolean advanced) {
         parameterFormats.add(new Parameter(parameterName,type,defaultValue,allowedValues,description,required,hidden,advanced));
     }      
     
-    /** Returns a list of output parameters that can be set when an Analysis is output */
-    public Parameter[] getOutputParameters() {
+    /** Returns a list of output parameters that can be set when an Analysis is output
+     * @param dataformat The name of the dataformat in which the analysis will be output, e.g. HTML, Excel or RawData. This can be used to filter which parameters are shown
+     */
+    public Parameter[] getOutputParameters(String dataformat) {
         return new Parameter[0];
     }
+    
+    public Parameter[] getOutputParameters(DataFormat dataformat) {
+        if (dataformat!=null) return getOutputParameters(dataformat.getName());
+        else return new Parameter[0];
+    }    
 
     // This will probably not be needed here anyway since analyses are immutable
     @Override
@@ -519,6 +551,67 @@ public abstract class Analysis extends Data implements ParameterExporter {
         }
 
     }
+    
+    /**
+     * Returns a list of options for how to handle motif logos
+     * @param dataformat The name of the format that the analysis will be output in, e.g. Excel or HTML
+     * @return 
+     */
+    public static String[] getMotifLogoOptions(String dataformat) {
+        if (dataformat.equalsIgnoreCase(HTML)) return new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_SHARED,MOTIF_LOGO_TEXT};        
+        else if (dataformat.equalsIgnoreCase(EXCEL))   return new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_INCLUDE,MOTIF_LOGO_TEXT};
+        else if (dataformat.equalsIgnoreCase(RAWDATA)) return new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_TEXT};        
+        else return new String[]{""};
+    }
+    
+    /**
+     * Returns the default option for how to output motif/module logos for the given data format
+     * @param dataformat
+     * @return 
+     */
+    public static String getMotifLogoDefaultOption(String dataformat) {
+        if (dataformat.equalsIgnoreCase(RAWDATA)) return MOTIF_LOGO_TEXT;        
+        else return MOTIF_LOGO_NO;
+    }    
+    
+    /**
+     * Returns true if the selection option means that a motif/module logo should be included in the output
+     * either as an image or a textual representation
+     * @param option
+     * @return 
+     */
+    public static boolean includeLogosInOutput(String option) {
+        return (option.equalsIgnoreCase(MOTIF_LOGO_NEW) || option.equalsIgnoreCase(MOTIF_LOGO_SHARED) || option.equalsIgnoreCase(MOTIF_LOGO_INCLUDE) || option.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+    }
+    
+    /**
+     * Returns true if the selection option means that a motif/module logo should be included in the output
+     * as regular text rather than an image
+     * @param option
+     * @return 
+     */
+    public static boolean includeLogosInOutputAsText(String option) {
+        return (option.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+    }    
+    
+    /**
+     * Returns true if the selection option means that a motif/module logo should be included in the output as an image
+     * @param option
+     * @return 
+     */
+    public static boolean includeLogosInOutputAsImages(String option) {
+        return (option.equalsIgnoreCase(MOTIF_LOGO_NEW) || option.equalsIgnoreCase(MOTIF_LOGO_SHARED) || option.equalsIgnoreCase(MOTIF_LOGO_INCLUDE));
+    }
+    
+    /**
+     * Returns true if the selection option means that a motif/module logo should be included in the output as a shared image
+     * (i.e. the name of the image file is based on the data object, and it is not recreated if it already exists)
+     * @param option
+     * @return 
+     */
+    public static boolean includeLogosInOutputAsSharedImages(String option) {
+        return (option.equalsIgnoreCase(MOTIF_LOGO_SHARED));
+    }     
 
     /** Creates a motif logo image for the given motif, saves it to a temp-file and return an IMG-tag that can
      *  be inserted in HTML-documents to display the image
@@ -773,55 +866,176 @@ public abstract class Analysis extends Data implements ParameterExporter {
         if (style!=null) cell.setCellStyle(style);
     }       
     
-    protected CellStyle createExcelStyle(HSSFWorkbook workbook, short border, short color, short alignment, boolean bold) {
+    protected CellStyle createExcelStyle(XSSFWorkbook workbook, BorderStyle border, Color backgroundColor, HorizontalAlignment alignment, boolean bold) {
         CellStyle style = workbook.createCellStyle();
-        style.setBorderBottom(border); // HSSFCellStyle.BORDER_THIN 
-        style.setBorderTop(border);
-        style.setBorderLeft(border);  
-        style.setBorderRight(border);  
-        if (color>0) {
-            style.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-            style.setFillForegroundColor(color); // HSSFColor.LIGHT_YELLOW 
+        if (border!=null) {
+            style.setBorderBottom(border);  
+            style.setBorderTop(border);
+            style.setBorderLeft(border);  
+            style.setBorderRight(border);  
         }
-        style.setAlignment(alignment);
+        if (backgroundColor!=null) {            
+            style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            style.setFillForegroundColor(new XSSFColor(backgroundColor,null)); 
+        }
+        if (alignment!=null) style.setAlignment(alignment);
         if (bold) {
             addFontToExcelCellStyle(workbook, style, null, (short)0, true, false);
         }
         return style;
-    } 
-     
+    }
     
-    protected void addFontToExcelCellStyle(HSSFWorkbook workbook, CellStyle style, String fontName, short fontHeight, boolean bold, boolean italics) {
-        HSSFFont font = workbook.createFont();
+    protected CellStyle createExcelStyle(XSSFWorkbook workbook, BorderStyle border, Color foregroundColor, Color backgroundColor, HorizontalAlignment alignment, VerticalAlignment valignment) {
+        CellStyle style = workbook.createCellStyle();
+        if (border!=null) {
+            style.setBorderBottom(border);  
+            style.setBorderTop(border);
+            style.setBorderLeft(border);  
+            style.setBorderRight(border);  
+        }
+        if (foregroundColor!=null) {
+            XSSFFont font = workbook.createFont();
+            font.setColor(new XSSFColor(foregroundColor,null));
+            style.setFont(font);
+        }
+        if (backgroundColor!=null) {            
+            style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            style.setFillForegroundColor(new XSSFColor(backgroundColor,null)); 
+        }
+        if (alignment!=null) style.setAlignment(alignment);
+        if (valignment!=null) style.setVerticalAlignment(valignment);
+        return style;
+    }     
+    
+    
+    protected void addFontToExcelCellStyle(XSSFWorkbook workbook, CellStyle style, String fontName, short fontHeight, boolean bold, boolean italics) {
+        XSSFFont font = workbook.createFont();
         if (fontName!=null) font.setFontName(fontName);
         if (fontHeight>0) font.setFontHeightInPoints(fontHeight);
-        if (bold) font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);  
+        font.setBold(bold);
         font.setItalic(italics);
         style.setFont(font); 
     }
     
-    private static char[] alphabet=new char[]{'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-    public static String getExcelColumnNameForIndex(int col) {
-        if (col<0) return "";
-        if (col<alphabet.length) return ""+alphabet[col]; // single letter
-        int top2=alphabet.length*alphabet.length+alphabet.length;
-        if (col<top2) { // two letters
-            col-=alphabet.length;
-            int first=(col/alphabet.length); // integer division
-            int second=col%alphabet.length;       
-            return ""+alphabet[first]+alphabet[second];            
+    public CellStyle getExcelTitleStyle(XSSFWorkbook workbook) {        
+        CellStyle title=createExcelStyle(workbook, BorderStyle.NONE, null, HorizontalAlignment.LEFT, false); 
+        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);
+        return title;
+    }
+    
+    public CellStyle getExcelHeaderStyle(XSSFWorkbook workbook, double fontScaleFactor, boolean bold, boolean italics) {        
+        CellStyle title=createExcelStyle(workbook, BorderStyle.NONE, null, HorizontalAlignment.LEFT, false); 
+        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*fontScaleFactor), bold, italics);
+        return title;
+    }    
+    
+    public CellStyle getExcelTableHeaderStyle(XSSFWorkbook workbook) {
+        return createExcelStyle(workbook, BorderStyle.THIN, new Color(255,255,200), HorizontalAlignment.CENTER, true); // using light yellow background color
+    }
+
+    public CellStyle getExcelPercentageStyle(XSSFWorkbook workbook) {
+        CellStyle stylePercentage = workbook.createCellStyle(); // default stype       
+        stylePercentage.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
+        return stylePercentage;
+    }
+    
+    public CellStyle getExcelBorderedStyle(XSSFWorkbook workbook) {
+        return createExcelStyle(workbook, BorderStyle.THIN, null, null, false); // using light yellow background color
+    }    
+    
+    public static XDDFSolidFillProperties getExcelFillColor(Color color) {       
+        if (color.getAlpha()==255) { // regular opaque color
+            XDDFColor scolor=XDDFColor.from(new byte[]{(byte)color.getRed(),(byte)color.getGreen(),(byte)color.getBlue()});
+            return new XDDFSolidFillProperties(scolor);        
+        } 
+//        else { // some transparency is needed, but I don't know how to apply alpha on a regular color :-(
+//            int blue  = color.getBlue();
+//            int red   = color.getRed();
+//            int green = color.getGreen();
+//            int alpha = color.getAlpha();              
+//            XDDFColor scolor=XDDFColor.from(PresetColor.WHITE);
+//            XDDFSolidFillProperties fillProperties = new XDDFSolidFillProperties(scolor);
+//            CTSolidColorFillProperties ctSolidColorFillProperties = (CTSolidColorFillProperties)fillProperties.getXmlObject();    
+//            CTPresetColor ctPresetColor = ctSolidColorFillProperties.addNewPrstClr();
+//            CTPositiveFixedPercentage alphaValue = ctPresetColor.addNewAlpha();
+//            CTPercentage blueValue = ctPresetColor.addNewBlue();
+//            CTPercentage greenValue = ctPresetColor.addNewGreen();
+//            CTPercentage redValue = ctPresetColor.addNewRed();
+//            // convert value from 0 (transparent) to 255 (opaque) to 0-1000000
+//            blue = (int)(blue*(100000.0/255.0));
+//            green = (int)(green*(100000.0/255.0));
+//            red = (int)(red*(100000.0/255.0));
+//            alpha = (int)(alpha*(100000.0/255.0));             
+//            alphaValue.setVal(alpha); // the value range is from 0 (transparent) to 100000 (opaque)
+//            blueValue.setVal(blue); //
+//            redValue.setVal(red); //  
+//            greenValue.setVal(green); //  
+//            return fillProperties;
+//        }  
+        else return new XDDFSolidFillProperties(XDDFColor.from(new byte[]{(byte)color.getRed(),(byte)color.getGreen(),(byte)color.getBlue()})); // fallback without alpha
+    }    
+    
+    protected void autoSizeExcelColumns(XSSFSheet sheet, int startCol, int endCol, int padding) {
+        for (int i=startCol; i<=endCol; i++) {
+            sheet.autoSizeColumn(i);
+            if (padding>0) {
+                try {sheet.setColumnWidth(i, sheet.getColumnWidth(i)+padding); }
+                catch (java.lang.IllegalArgumentException argX) {}
+            }
         }
-        int top3=alphabet.length*alphabet.length*alphabet.length+top2;
-        if (col<top3) { // three letters
-            col-=top2; // offset to zero
-            int first=(col/(alphabet.length*alphabet.length)); // integer division
-            col-=first*(alphabet.length*alphabet.length);
-            int second=(col/alphabet.length); // integer division
-            col-=second*alphabet.length;
-            int third=col%alphabet.length;  
-            return ""+alphabet[first]+alphabet[second]+alphabet[third];   
-        }         
-        return "";
+    }
+    
+    protected void autoSizeExcelColumns(XSSFSheet sheet, int startCol, int endCol, int padding, int minimum) {
+        for (int i=startCol; i<=endCol; i++) {
+            sheet.autoSizeColumn(i);
+            int width = sheet.getColumnWidth(i);
+            if (padding>0) {
+                int newWidth = width+padding;
+                if (newWidth<minimum) newWidth = minimum;
+                try {sheet.setColumnWidth(i, newWidth); }
+                catch (java.lang.IllegalArgumentException argX) {}
+            } else {
+                if (width<minimum) try {sheet.setColumnWidth(i,minimum); }
+                catch (java.lang.IllegalArgumentException argX) {}
+            }
+        }
+    }    
+    
+    protected void forceExcelFormulaRecalculation(XSSFWorkbook workbook, XSSFSheet onlyThisSheet) {
+        XSSFFormulaEvaluator evaluator = (XSSFFormulaEvaluator) workbook.getCreationHelper().createFormulaEvaluator();
+        if (onlyThisSheet!=null) {
+            for (Row row : onlyThisSheet) {
+               for (Cell cell : row) {
+                   if (cell.getCellType() == CellType.FORMULA) evaluator.evaluateFormulaCell(cell);                   
+               }
+            }           
+        } else {
+            for (Sheet sheet: workbook) {
+                for (Row row : sheet) {
+                    for (Cell cell : row) {
+                        if (cell.getCellType() == CellType.FORMULA) evaluator.evaluateFormulaCell(cell);                   
+                    }
+                }
+            }
+        }      
+    }
+    
+    private static char[] alphabet=new char[]{'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+    /**
+     * Returns the "name" of a column in an Excel sheet corresponding to the column number (1-indexed!)
+     * E.g. Column 1 is A, Column 2 is B, Column 28 is AB, Column 52 is AZ and Column 87 is CI
+     * @param columnNumber Starting at 1
+     * @return 
+     */
+    public static String getExcelColumnNameForIndex(int columnNumber) { // 
+        StringBuilder columnLetter = new StringBuilder();
+        while (columnNumber > 0) {
+            int remainder = (columnNumber - 1) % 26;
+            columnLetter.insert(0, (char)(remainder + 'A'));
+            columnNumber = (columnNumber - 1) / 26;
+        }
+        return columnLetter.toString();
+
     }
     
     

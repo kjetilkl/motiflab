@@ -36,12 +36,10 @@ import motiflab.engine.dataformat.DataFormat;
 import motiflab.gui.GenericRegionBrowserPanel;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -78,19 +76,20 @@ public class RegionOccurrenceAnalysis extends Analysis {
     
     
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Sort by",String.class,SORT_BY_SEQUENCE_OCCURRENCES, new String[]{SORT_BY_TYPE,SORT_BY_SEQUENCE_OCCURRENCES,SORT_BY_TOTAL_OCCURRENCES},"Sorting order for the results table",false,false),
-             new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false)       
-        };
+    public Parameter[] getOutputParameters(String dataformat) {
+        Parameter sortPar = new Parameter("Sort by",String.class,SORT_BY_SEQUENCE_OCCURRENCES, new String[]{SORT_BY_TYPE,SORT_BY_SEQUENCE_OCCURRENCES,SORT_BY_TOTAL_OCCURRENCES},"Sorting order for the results table",false,false);
+        Parameter legend = new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false);
+        if (dataformat.equals(EXCEL)) return new Parameter[]{sortPar,legend};
+        else if (dataformat.equals(HTML) || dataformat.equals(RAWDATA)) return new Parameter[]{sortPar};
+        else return new Parameter[0];
     }
-    
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Legend")) return new String[]{EXCEL};        
-        if (parameter.equals("Sort by")) return new String[]{HTML,RAWDATA,EXCEL};        
-        return null;
-    }      
+//    
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Legend")) return new String[]{EXCEL};        
+//        if (parameter.equals("Sort by")) return new String[]{HTML,RAWDATA,EXCEL};        
+//        return null;
+//    }      
 
     @Override
     public String[] getResultVariables() {
@@ -174,7 +173,7 @@ public class RegionOccurrenceAnalysis extends Analysis {
         String sortorder=SORT_BY_TYPE;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
           }
           catch (ExecutionError e) {throw e;}
@@ -222,7 +221,7 @@ public class RegionOccurrenceAnalysis extends Analysis {
         boolean includeLegend=false;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine);             
           }
@@ -232,15 +231,14 @@ public class RegionOccurrenceAnalysis extends Analysis {
         ArrayList<Object[]> resultList=assembleList(sortorder,engine);
 
         int rownum=0;
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName());  
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Region Occurrences");  
         
-        CellStyle title=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, (short)0, HSSFCellStyle.ALIGN_LEFT, false);      
-        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);
-        CellStyle tableheader=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_CENTER, true);      
- 
-        // Make room for the header which will be added later
+        CellStyle title = getExcelTitleStyle(workbook);
+        CellStyle tableheader = getExcelTableHeaderStyle(workbook);
+        CellStyle percentageStyle = getExcelPercentageStyle(workbook);
 
+        // Make room for the header which will be added later
         Row row = null;
         int headerrows=5;
         if (includeLegend) {
@@ -250,9 +248,8 @@ public class RegionOccurrenceAnalysis extends Analysis {
             rownum=headerrows-1; // -1 because it will be incremented later on...
         }        
         int col=0;
-        int logocolumn=0;
         row = sheet.createRow(rownum);
-        outputStringValuesInCells(row, new String[]{"Type","Total","Sequences"}, 0, tableheader);      
+        outputStringValuesInCells(row, new String[]{"Type","Total","Sequence hits","Total sequences","Support"}, 0, tableheader);      
         col+=3;
         for (int i=0;i<resultList.size();i++) {
             rownum++;
@@ -264,10 +261,10 @@ public class RegionOccurrenceAnalysis extends Analysis {
             int totalcount=(Integer)entry[2];           
             outputStringValueInCell(row, col, regionname, null);
             col+=1;
-            outputNumericValuesInCells(row, new double[]{totalcount,seqcount}, col, null);
-            col+=2;
- 
-            //outputobject.append("\n",RAWDATA);
+            outputNumericValuesInCells(row, new double[]{totalcount,seqcount,sequenceCollectionSize}, col, null);
+            col+=3;
+            outputNumericValuesInCells(row, new double[]{(double)seqcount/(double)sequenceCollectionSize}, col, percentageStyle);            
+            col+=1;
             if (i%10==0) {
                 task.checkExecutionLock(); // checks to see if this task should suspend execution
                 if (Thread.interrupted() || task.getStatus().equals(ExecutableTask.ABORTED)) throw new InterruptedException();
@@ -277,9 +274,7 @@ public class RegionOccurrenceAnalysis extends Analysis {
             }
         }
         format.setProgress(95);
-        sheet.autoSizeColumn((short)0);
-        sheet.autoSizeColumn((short)1);
-        sheet.autoSizeColumn((short)2);       
+        autoSizeExcelColumns(sheet, 0, 4, 800);
         
         // Add the header on top of the page
         if (includeLegend) {        
@@ -304,7 +299,7 @@ public class RegionOccurrenceAnalysis extends Analysis {
         }
         
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -324,7 +319,7 @@ public class RegionOccurrenceAnalysis extends Analysis {
         String sortorder=SORT_BY_TYPE;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
           }
           catch (ExecutionError e) {throw e;}
@@ -422,7 +417,7 @@ public class RegionOccurrenceAnalysis extends Analysis {
                      if (value2==null) return -1;                         
                      int res=value2.compareTo(value1); // sorts descending!
                      if (res!=0) return res;
-                     else return ((Integer)region2[1]).compareTo(((Integer)region1[1])); // if equal, sorts by total count descending!
+                     else return ((Integer)region2[1]).compareTo(((Integer)region1[1])); // if equal, sorts by sequence count descending!
                 } else { // sort by region type
                     String regionname1=(String)region1[0];
                     String regionname2=(String)region2[0];

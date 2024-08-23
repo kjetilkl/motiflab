@@ -57,16 +57,14 @@ import motiflab.gui.MotifLogo;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -138,25 +136,27 @@ public class MotifPositionDistributionAnalysis extends Analysis {
     }  
     
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Include",MotifCollection.class,null,new Class[]{MotifCollection.class},"Only include data from this collection",false,false),                        
-             new Parameter("Sort by",String.class,SORT_BY_KURTOSIS, new String[]{SORT_BY_MOTIF,SORT_BY_STDDEV,SORT_BY_KURTOSIS},"Sorting order for the results table",false,false),
-             new Parameter("Logos",String.class,MOTIF_LOGO_NO, new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_SHARED,MOTIF_LOGO_TEXT},"Include sequence logos in the output",false,false),
-             new Parameter("Histograms",Boolean.class,Boolean.TRUE, new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Include histograms in the output. Note that the histograms must have been computed when the analysis was executed in order for them to be output.",false,false),
-             new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif will be output as the first column",false,false),
-             new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false)       
-        };
+    public Parameter[] getOutputParameters(String dataformat) {       
+        Parameter incPar  = new Parameter("Include",MotifCollection.class,null,new Class[]{MotifCollection.class},"Only include data from this collection",false,false);                        
+        Parameter sortPar = new Parameter("Sort by",String.class,SORT_BY_KURTOSIS, new String[]{SORT_BY_MOTIF,SORT_BY_STDDEV,SORT_BY_KURTOSIS},"Sorting order for the results table",false,false);
+        Parameter logos   = new Parameter("Logos",String.class,getMotifLogoDefaultOption(dataformat), getMotifLogoOptions(dataformat),"Include motif sequence logos in the output",false,false);
+        Parameter histPar = new Parameter("Histograms",Boolean.class,Boolean.TRUE, new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Include histograms in the output. Note that the histograms must have been computed when the analysis was executed in order for them to be output.",false,false);
+        Parameter colPar  = new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif will be output as the first column",false,false);
+        Parameter legend  = new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false);       
+        if (dataformat.equals(HTML)) return new Parameter[]{incPar,sortPar,logos,histPar,colPar};
+        if (dataformat.equals(EXCEL)) return new Parameter[]{incPar,sortPar,logos,histPar,legend};
+        if (dataformat.equals(RAWDATA)) return new Parameter[]{incPar,sortPar,logos};       
+        return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Color boxes")) return new String[]{HTML};
-        if (parameter.equals("Histograms")) return new String[]{HTML,EXCEL};
-        if (parameter.equals("Legend")) return new String[]{EXCEL};
-        if (parameter.equals("Include") || parameter.equals("Sort by") || parameter.equals("Logos")) return new String[]{HTML,RAWDATA,EXCEL};        
-        return null;
-    }      
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Color boxes")) return new String[]{HTML};
+//        if (parameter.equals("Histograms")) return new String[]{HTML,EXCEL};
+//        if (parameter.equals("Legend")) return new String[]{EXCEL};
+//        if (parameter.equals("Include") || parameter.equals("Sort by") || parameter.equals("Logos")) return new String[]{HTML,RAWDATA,EXCEL};        
+//        return null;
+//    }      
 
     @Override
     public String[] getResultVariables() {
@@ -304,13 +304,13 @@ public class MotifPositionDistributionAnalysis extends Analysis {
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
         Color [] basecolors=vizSettings.getBaseColors();
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean showHistograms=true;
         boolean showColorBoxes=false;
         MotifCollection include=null;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
              showHistograms=(Boolean)settings.getResolvedParameter("Histograms",defaults,engine);
@@ -321,7 +321,7 @@ public class MotifPositionDistributionAnalysis extends Analysis {
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
         if (histograms==null) showHistograms=false; // we can't output histograms if they are not computed
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
 
         ArrayList<Object[]> resultList=assembleList(sortorder, include);
         engine.createHTMLheader("Motif Position Distribution Analysis", null, null, true, true, true, outputobject);
@@ -413,14 +413,14 @@ public class MotifPositionDistributionAnalysis extends Analysis {
         Color [] basecolors=vizSettings.getBaseColors();
         boolean border=(Boolean)vizSettings.getSettingAsType("motif.border", Boolean.TRUE);        
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean includeLegend=false;
         boolean showHistograms=false;
         int logoheight=19;
         MotifCollection include=null;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
              includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine); 
@@ -430,22 +430,21 @@ public class MotifPositionDistributionAnalysis extends Analysis {
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showLogosAsImages=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED));           
-        boolean showSequenceLogos=(showLogosAsImages || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));      
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
+        boolean showLogosAsImages = includeLogosInOutputAsImages(showSequenceLogosString);          
+    
         if (histograms==null) showHistograms=false;
         ArrayList<Object[]> resultList=assembleList(sortorder,include);
         int rownum=0;
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName());
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Motif Position Distribution");
         CreationHelper helper = (showLogosAsImages||showHistograms)?workbook.getCreationHelper():null;
         Drawing drawing = (showLogosAsImages||showHistograms)?sheet.createDrawingPatriarch():null; 
              
-        CellStyle title=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, (short)0, HSSFCellStyle.ALIGN_LEFT, false);      
-        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);
-        CellStyle tableheader=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_CENTER, true);      
+        CellStyle title = getExcelTitleStyle(workbook);
+        CellStyle tableheader = getExcelTableHeaderStyle(workbook);
         
         // Make room for the header which will be added later
-
         Row row = null;
         int headerrows=5;
         if (includeLegend) {
@@ -497,17 +496,19 @@ public class MotifPositionDistributionAnalysis extends Analysis {
                 double[] histogram=histograms.get(motifname);      
                 try {
                     byte[] image=histogramrenderer.outputHistogramToByteArray(histogram);
-                    int imageIndex=workbook.addPicture(image, HSSFWorkbook.PICTURE_TYPE_PNG);
+                    int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
                     ClientAnchor picanchor = helper.createClientAnchor();
                     picanchor.setCol1(histogramcolumn);
                     picanchor.setRow1(rownum);
-                    picanchor.setAnchorType(ClientAnchor.MOVE_DONT_RESIZE);
+                    picanchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
                     Picture pict=drawing.createPicture(picanchor, imageIndex);	
                     pict.resize();
-                    picanchor.setDx1(10);
-                    picanchor.setDy1(10);    
-                    picanchor.setDx2(picanchor.getDx2()+10);
-                    picanchor.setDy2(picanchor.getDy2()+10);                
+                    int offsetX=25000;
+                    int offsetY=25000;                    
+                    picanchor.setDx1(offsetX);
+                    picanchor.setDy1(offsetY);    
+                    picanchor.setDx2(picanchor.getDx2()+offsetX);
+                    picanchor.setDy2(picanchor.getDy2()+offsetY);                
                 } catch (IOException e) {throw new ExecutionError(e.getMessage());}
             }    
             if (showSequenceLogos && motif!=null) {
@@ -517,18 +518,20 @@ public class MotifPositionDistributionAnalysis extends Analysis {
                         int width=motif.getLength();
                         if (width>maxlogowidth) maxlogowidth=width;
                         byte[] image=getMotifLogoImageAsByteArray(sequencelogo, logoheight, border, "png");
-                        int imageIndex=workbook.addPicture(image, HSSFWorkbook.PICTURE_TYPE_PNG);
+                        int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
                         ClientAnchor picanchor = helper.createClientAnchor();
                         picanchor.setCol1(logocolumn);
                         picanchor.setRow1(rownum);
-                        picanchor.setAnchorType(ClientAnchor.MOVE_DONT_RESIZE);
+                        picanchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
                         Picture pict=drawing.createPicture(picanchor, imageIndex);	
                         pict.resize();
-                        picanchor.setDx1(10);
-                        picanchor.setDy1(10);    
-                        picanchor.setDx2(picanchor.getDx2()+10);
-                        picanchor.setDy2(picanchor.getDy2()+10);                         
-                    } catch (Exception e) {e.printStackTrace(System.err);}
+                        int offsetX=25000;
+                        int offsetY=25000;
+                        picanchor.setDx1(offsetX);
+                        picanchor.setDy1(offsetY);    
+                        picanchor.setDx2(picanchor.getDx2()+offsetX);
+                        picanchor.setDy2(picanchor.getDy2()+offsetY);                         
+                    } catch (Exception e) {throw new ExecutionError(e.getMessage());}
                 }
                 else outputStringValuesInCells(row, new String[]{motif.getConsensusMotif()}, logocolumn);
             }
@@ -541,9 +544,8 @@ public class MotifPositionDistributionAnalysis extends Analysis {
             }
         }
         format.setProgress(95);
-        for (short i=0;i<col;i++) {
-            sheet.autoSizeColumn(i);               
-        }
+        
+        autoSizeExcelColumns(sheet, 0, col-1, 800);
         if (!showLogosAsImages) sheet.autoSizeColumn((short)logocolumn);  
 
         if (includeLegend) {        
@@ -569,7 +571,7 @@ public class MotifPositionDistributionAnalysis extends Analysis {
         }
         
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);
@@ -586,14 +588,14 @@ public class MotifPositionDistributionAnalysis extends Analysis {
     
     @Override
     public OutputData formatRaw(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
-        AnnotatedValueRenderer histogramrenderer=new AnnotatedValueRenderer(null);
+        AnnotatedValueRenderer histogramrenderer=new AnnotatedValueRenderer(engine.getClient().getVisualizationSettings());
         String sortorder=SORT_BY_MOTIF;
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean showHistograms=true;
         MotifCollection include=null;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
              showHistograms=(Boolean)settings.getResolvedParameter("Histograms",defaults,engine);
@@ -603,7 +605,7 @@ public class MotifPositionDistributionAnalysis extends Analysis {
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
         if (histograms==null) showHistograms=false; // we can't output histograms if they are not computed
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+        boolean showSequenceLogos=includeLogosInOutput(showSequenceLogosString);
 
         ArrayList<Object[]> resultList=assembleList(sortorder, include);
         outputobject.append("#Positional distribution analysis with motifs from '"+motifCollectionName+"' and sites from '"+motifTrackName+"'",RAWDATA);

@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import motiflab.engine.data.*;
 import java.util.ArrayList;
+import java.util.List;
 import javax.imageio.ImageIO;
 import motiflab.engine.task.ExecutableTask;
 import motiflab.engine.ExecutionError;
@@ -37,11 +38,19 @@ import motiflab.engine.task.OperationTask;
 import motiflab.gui.VisualizationSettings;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xddf.usermodel.chart.AxisPosition;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartAxis;
+import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
+import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
+import org.apache.poi.xddf.usermodel.chart.XDDFScatterChartData;
+import org.apache.poi.xddf.usermodel.chart.XDDFValueAxis;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -96,17 +105,18 @@ public class SingleMotifRegressionAnalysis extends Analysis {
     
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
-    public Parameter[] getOutputParameters() {   
+    public Parameter[] getOutputParameters(String dataformat) {   
          Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","gif","svg","pdf","eps"},"The image format to use for the graph",false,false);            
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-         return new Parameter[]{imageformat,scalepar};
+         if (dataformat.equals(HTML)) return new Parameter[]{imageformat,scalepar};
+         return new Parameter[0];
     } 
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{HTML};
-        return null;
-    }      
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{HTML};
+//        return null;
+//    }      
 
     @Override
     public String[] getResultVariables() {
@@ -199,7 +209,7 @@ public class SingleMotifRegressionAnalysis extends Analysis {
         if (format!=null) format.setProgress(5);
         if (settings!=null) {
           try {
-                 Parameter[] defaults=getOutputParameters();
+                 Parameter[] defaults=getOutputParameters(format);
                  scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
                  imageformat=(String)settings.getResolvedParameter("Image format",defaults,engine);                 
           } 
@@ -309,26 +319,11 @@ public class SingleMotifRegressionAnalysis extends Analysis {
     }    
     
     private Dimension saveGraphAsImage(File file, double scale, String imageformat, VisualizationSettings settings) throws IOException {
-        double maxX=-Double.MAX_VALUE;
-        double maxY=-Double.MAX_VALUE;
-        double minX=Double.MAX_VALUE;
-        double minY=Double.MAX_VALUE;
-        for (int i=0;i<datapoints.length;i++) {
-            if (!Double.isNaN(datapoints[i][0]) && datapoints[i][0]>maxX) maxX=datapoints[i][0];
-            if (!Double.isNaN(datapoints[i][0]) && datapoints[i][0]<minX) minX=datapoints[i][0];
-            if (!Double.isNaN(datapoints[i][0]) && datapoints[i][1]>maxY) maxY=datapoints[i][1];
-            if (!Double.isNaN(datapoints[i][0]) && datapoints[i][1]<minY) minY=datapoints[i][1];
-        }
-        if (minX==Double.MAX_VALUE) minX=(maxX==-Double.MAX_VALUE)?0:maxX;
-        if (maxX==-Double.MAX_VALUE) maxX=0;
-        if (minY==Double.MAX_VALUE) minY=(maxY==-Double.MAX_VALUE)?0:maxY;
-        if (maxY==-Double.MAX_VALUE) maxY=0;
-        double xRange=maxX-minX; if (xRange==0) {maxX=minX+1;xRange=1;}
-        double yRange=maxY-minY; if (yRange==0) {maxY=minY+1;yRange=1;}
-        minX=minX-(xRange*0.05);
-        maxX=maxX+(xRange*0.05);
-        minY=minY-(yRange*0.05);
-        maxY=maxY+(yRange*0.05);
+        double[] ranges = getAxisRanges();
+        double minX = ranges[0];
+        double maxX = ranges[1];
+        double minY = ranges[2];
+        double maxY = ranges[3];
 
         int graphheight=250; // height of graph in pixels (just the histogram);
         int graphwidth=350;
@@ -383,7 +378,31 @@ public class SingleMotifRegressionAnalysis extends Analysis {
             return new Dimension(width,height); 
         }            
         
-    }    
+    } 
+    
+    private double[] getAxisRanges() {
+        double maxX=-Double.MAX_VALUE;
+        double maxY=-Double.MAX_VALUE;
+        double minX=Double.MAX_VALUE;
+        double minY=Double.MAX_VALUE;
+        for (int i=0;i<datapoints.length;i++) {
+            if (!Double.isNaN(datapoints[i][0]) && datapoints[i][0]>maxX) maxX=datapoints[i][0];
+            if (!Double.isNaN(datapoints[i][0]) && datapoints[i][0]<minX) minX=datapoints[i][0];
+            if (!Double.isNaN(datapoints[i][0]) && datapoints[i][1]>maxY) maxY=datapoints[i][1];
+            if (!Double.isNaN(datapoints[i][0]) && datapoints[i][1]<minY) minY=datapoints[i][1];
+        }
+        if (minX==Double.MAX_VALUE) minX=(maxX==-Double.MAX_VALUE)?0:maxX;
+        if (maxX==-Double.MAX_VALUE) maxX=0;
+        if (minY==Double.MAX_VALUE) minY=(maxY==-Double.MAX_VALUE)?0:maxY;
+        if (maxY==-Double.MAX_VALUE) maxY=0;
+        double xRange=maxX-minX; if (xRange==0) {maxX=minX+1;xRange=1;}
+        double yRange=maxY-minY; if (yRange==0) {maxY=minY+1;yRange=1;}
+        if (minX!=0) minX=minX-(xRange*0.05); // add some padding
+        maxX=maxX+(xRange*0.05);
+        if (minY!=0) minY=minY-(yRange*0.05);
+        maxY=maxY+(yRange*0.05);
+        return new double[]{minX,maxX,minY,maxY};
+    }
     
     private void paintGraphImage(Graphics2D g, double scale, int width, int height, double minX, double maxX, double minY, double maxY, int graphwidth, int graphheight, int translateX, int translateY, VisualizationSettings settings) {
         Color color1=settings.getSystemColor("color1");
@@ -430,21 +449,23 @@ public class SingleMotifRegressionAnalysis extends Analysis {
     
    @Override
     public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
-        Workbook workbook=null;
+        XSSFWorkbook workbook=null;
         try {
-            InputStream stream = DistributionAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_SingleMotifRegression.xlt");
-            workbook = WorkbookFactory.create(stream);
+            InputStream stream = DistributionAnalysis.class.getResourceAsStream("resources/AnalysisTemplate_SingleMotifRegression.xlsx");
+            workbook = new XSSFWorkbook(stream);
             stream.close();
+            XSSFSheet sheet = workbook.getSheetAt(0);   // just use the first sheet 
                             
-            // setup the data for the histogram                                      
-            Sheet histogramsheet = workbook.getSheetAt(1);
-            int rowIndex=0;
+            // setup the data for the scatterplot           
+            int topRow = 99;// data starts at row 100 in Excel template (1-indexed)
+            int rowIndex = topRow; 
+            int validRows = 0;
             for (int i=0;i<datapoints.length;i++) {
                 double x=datapoints[i][0];
                 double y=datapoints[i][1];  
                 if (!(Double.isNaN(x) || Double.isNaN(y))) {
-                    Row row=histogramsheet.getRow(rowIndex);
-                    if (row==null) row=histogramsheet.createRow(rowIndex);
+                    Row row=sheet.getRow(rowIndex);
+                    if (row==null) row=sheet.createRow(rowIndex);
                     Cell cell=row.getCell(0);
                     if (cell==null) cell=row.createCell(0);
                     cell.setCellValue(x);
@@ -452,22 +473,63 @@ public class SingleMotifRegressionAnalysis extends Analysis {
                     if (cell==null) cell=row.createCell(1);
                     cell.setCellValue(y);                    
                     rowIndex++;
+                    validRows++;
                 }
             }   
+            // clear remaining example data from analysis template sheet
+            while (rowIndex<310) {
+               Row row = sheet.getRow(rowIndex++);
+               if (row==null) break;
+               Cell cell = row.getCell(0);
+               if (cell!=null) cell.setBlank();  
+               cell = row.getCell(1);
+               if (cell!=null) cell.setBlank();                  
+            }       
+            XSSFDrawing drawing = ((XSSFSheet)sheet).createDrawingPatriarch();
+            XSSFChart scatterplot = drawing.getCharts().get(0);
+            List<XDDFChartData> data = scatterplot.getChartSeries();        
 
-            if (rowIndex>0) {
-                Name xValues = workbook.getName("valuesX"); //              
-                String xValues_reference = "Sheet2!$A$1:$A$"+rowIndex;   //Set new range for named range                       
-                xValues.setRefersToFormula(xValues_reference); //Assign to named range
+            XDDFNumericalDataSource xValues = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(topRow, topRow+validRows-1, 0, 0) );
+            XDDFNumericalDataSource yValues = XDDFDataSourcesFactory.fromNumericCellRange(sheet, new CellRangeAddress(topRow, topRow+validRows-1, 1, 1) );       
+            XDDFScatterChartData.Series series1 = (XDDFScatterChartData.Series)data.get(0).getSeries(0); 
+            series1.replaceData(xValues, yValues);
+            scatterplot.plot(scatterplot.getChartSeries().get(0));
 
-                Name yValues = workbook.getName("valuesY"); //              
-                String yValues_reference = "Sheet2!$B$1:$B$"+rowIndex;   //Set new range for named range                       
-                yValues.setRefersToFormula(yValues_reference); //Assign to named range
+            // Define new data ranges
+            int datarowPlusOne=topRow+1;
+            String sheetname = sheet.getSheetName();
+            String newXrange = "'"+sheetname+"'!$A$"+datarowPlusOne+":$A$"+(datarowPlusOne+validRows-1);
+            String newYrange = "'"+sheetname+"'!$B$"+datarowPlusOne+":$B$"+(datarowPlusOne+validRows-1);        
+            // Check if the x-axis is null
+            if (series1.getCTScatterSer().getXVal() == null) {series1.getCTScatterSer().addNewXVal();}
+            if (series1.getCTScatterSer().getXVal().getNumRef() != null) {
+                series1.getCTScatterSer().getXVal().getNumRef().setF(newXrange);
             }
+            else if (series1.getCTScatterSer().getXVal().getStrRef()!= null) {
+                series1.getCTScatterSer().getXVal().getStrRef().setF(newXrange);
+            }
+            else {
+                series1.getCTScatterSer().getXVal().addNewNumRef();
+                series1.getCTScatterSer().getXVal().getNumRef().setF(newXrange);
+            }
+            series1.getCTScatterSer().getYVal().getNumRef().setF(newYrange); 
+            // set axis range
+            double[] ranges = getAxisRanges();   
+            double xMin = ranges[0]; // Math.floor(ranges[0]); // Excel is bad at selecting tick marks, so we will do some rounding
+            double xMax = ranges[1]; // Math.ceil(ranges[1]);  // 
+            double yMin = ranges[2]; // Math.floor(ranges[2]); // 
+            double yMax = ranges[3]; // Math.ceil(ranges[3]);  //   
+            for (XDDFChartAxis axis : scatterplot.getAxes()) {
+                if (axis.getPosition() == AxisPosition.BOTTOM) {
+                   ((XDDFValueAxis)axis).setMinimum(xMin);
+                   ((XDDFValueAxis)axis).setMaximum(xMax);                   
+                } else if (axis.getPosition() == AxisPosition.LEFT) {
+                   ((XDDFValueAxis)axis).setMinimum(yMin);
+                   ((XDDFValueAxis)axis).setMaximum(yMax);                   
+                }
+            }                     
             
-            // Now update the "front page"
-            Sheet sheet = workbook.getSheetAt(0);              
-            sheet.setForceFormulaRecalculation(true);
+            // Update the "front page"          
             String firstLine="The analysis was performed with motif \""+motifName+"\"  from track \""+motifTrackName+"\"";
             sheet.getRow(2).getCell(1).setCellValue(firstLine);
             String secondLine="Sequence values were taken from \""+sequenceMapName+"\"";
@@ -480,7 +542,7 @@ public class SingleMotifRegressionAnalysis extends Analysis {
                 sheet.getRow(4).getCell(1).setCellValue(thirdLine);
             }                       
             
-            // the matrix
+            // the statistics table
             int offset=1;
             Row row=sheet.getRow(7);
             row.getCell(offset+0).setCellValue(statistics[INTERCEPT]);
@@ -500,7 +562,7 @@ public class SingleMotifRegressionAnalysis extends Analysis {
             throw new ExecutionError(e.getMessage());
         }
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);

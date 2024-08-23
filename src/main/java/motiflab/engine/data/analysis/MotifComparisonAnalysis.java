@@ -40,16 +40,14 @@ import motiflab.gui.GenericMotifBrowserPanel;
 import motiflab.gui.MotifLogo;
 import motiflab.gui.MotifLabGUI;
 import motiflab.gui.VisualizationSettings;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -85,23 +83,25 @@ public class MotifComparisonAnalysis extends Analysis {
     }  
     
     @Override
-    public Parameter[] getOutputParameters() {
-        return new Parameter[] {
-             new Parameter("Metrics",String.class,"", null,"<html>Explicitly list the metrics to include in the output (separated with commas).<br>If this is empty, all metrics will be output.<br></html>",false,false),
-             new Parameter("Sort by",String.class,"ID", null,"This could be 'ID' or one of the metric names",false,false),
-             new Parameter("Logos",String.class,MOTIF_LOGO_NO, new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_SHARED,MOTIF_LOGO_TEXT},"Include sequence logos in the table",false,false),
-             new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif will be output as the first column",false,false), 
-             new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false)       
-        };
+    public Parameter[] getOutputParameters(String dataformat) {      
+        Parameter metricsPar = new Parameter("Metrics",String.class,"", null,"<html>Explicitly list the metrics to include in the output (separated with commas).<br>If this is empty, all metrics will be output.<br></html>",false,false);
+        Parameter sortPar = new Parameter("Sort by",String.class,"ID", null,"This could be 'ID' or one of the metric names",false,false);
+        Parameter logos = new Parameter("Logos",String.class,getMotifLogoDefaultOption(dataformat), getMotifLogoOptions(dataformat),"Include motif sequence logos in the table",false,false);
+        Parameter colorPar = new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif will be output as the first column",false,false);
+        Parameter legendPar = new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false);       
+        if (dataformat.equals(HTML)) return new Parameter[]{metricsPar,sortPar,logos,colorPar};
+        if (dataformat.equals(EXCEL)) return new Parameter[]{metricsPar,sortPar,logos,legendPar};
+        if (dataformat.equals(RAWDATA)) return new Parameter[]{metricsPar,sortPar,logos};
+        return new Parameter[0];
     }
     
-    @Override
-    public String[] getOutputParameterFilter(String parameter) {
-        if (parameter.equals("Color boxes")) return new String[]{HTML};
-        if (parameter.equals("Legend")) return new String[]{EXCEL};
-        if (parameter.equals("Metrics") || parameter.equals("Sort by") || parameter.equals("Logos")) return new String[]{HTML,RAWDATA,EXCEL};        
-        return null;
-    }     
+//    @Override
+//    public String[] getOutputParameterFilter(String parameter) {
+//        if (parameter.equals("Color boxes")) return new String[]{HTML};
+//        if (parameter.equals("Legend")) return new String[]{EXCEL};
+//        if (parameter.equals("Metrics") || parameter.equals("Sort by") || parameter.equals("Logos")) return new String[]{HTML,RAWDATA,EXCEL};        
+//        return null;
+//    }     
 
     @Override
     public String[] getResultVariables() {
@@ -243,11 +243,11 @@ public class MotifComparisonAnalysis extends Analysis {
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
         String metricsString="";
         ArrayList<String> includeMetrics=new ArrayList<String>();
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean showColorBoxes=false;
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              metricsString=(String)settings.getResolvedParameter("Metrics",defaults,engine);
              sortkey=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
@@ -256,7 +256,7 @@ public class MotifComparisonAnalysis extends Analysis {
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));        
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
         HashMap<String,String> abbrmap=new HashMap<String, String>();
         String[] metricnames=engine.getAllMotifComparatorNames(false);
         String[] metricabbr=engine.getAllMotifComparatorNames(true);
@@ -361,12 +361,12 @@ public class MotifComparisonAnalysis extends Analysis {
     @Override
     public OutputData formatRaw(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         String sortkey="ID";
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         String metricsString="";
         ArrayList<String> includeMetrics=new ArrayList<String>();
         if (settings!=null) {
           try {
-             Parameter[] defaults=getOutputParameters();
+             Parameter[] defaults=getOutputParameters(format);
              metricsString=(String)settings.getResolvedParameter("Metrics",defaults,engine);
              sortkey=(String)settings.getResolvedParameter("Sort by",defaults,engine);
              showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);             
@@ -374,7 +374,7 @@ public class MotifComparisonAnalysis extends Analysis {
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showSequenceLogos=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));        
+        boolean showSequenceLogos=includeLogosInOutput(showSequenceLogosString);
         HashMap<String,String> abbrmap=new HashMap<String, String>();
         String[] metricnames=engine.getAllMotifComparatorNames(false);
         String[] metricabbr=engine.getAllMotifComparatorNames(true);
@@ -404,10 +404,10 @@ public class MotifComparisonAnalysis extends Analysis {
         outputobject.append("#Comparing target motif '"+targetMotifName+"' against motifs from '"+motifCollectionName+"'",RAWDATA);
         outputobject.append("\n\n#Motif ID",RAWDATA);
         for (String metric:includeMetrics) {
-           outputobject.append(",",RAWDATA);
+           outputobject.append("\t",RAWDATA);
            outputobject.append(metric,RAWDATA);
         }
-        if (showSequenceLogos) outputobject.append(", motif consensus",RAWDATA); 
+        if (showSequenceLogos) outputobject.append("\tmotif consensus",RAWDATA); 
         outputobject.append("\n",RAWDATA); 
         for (int i=0;i<resultList.size();i++) {
             Object[] entry=resultList.get(i);
@@ -440,7 +440,7 @@ public class MotifComparisonAnalysis extends Analysis {
     public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         String sortkey="ID";
         String metricsString="";
-        String showSequenceLogosString=MOTIF_LOGO_NO;
+        String showSequenceLogosString="";
         boolean includeLegend=true;
         int logoheight=19;
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
@@ -449,18 +449,19 @@ public class MotifComparisonAnalysis extends Analysis {
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);   
         ArrayList<String> includeMetrics=new ArrayList<String>();        
         if (settings!=null) {
-          try {
-             Parameter[] defaults=getOutputParameters();
-             metricsString=(String)settings.getResolvedParameter("Metrics",defaults,engine);
-             sortkey=(String)settings.getResolvedParameter("Sort by",defaults,engine);
-             showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);             
-             includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine);
-          }
-          catch (ExecutionError e) {throw e;}
-          catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
+            try {
+                Parameter[] defaults=getOutputParameters(format);
+                metricsString=(String)settings.getResolvedParameter("Metrics",defaults,engine);
+                sortkey=(String)settings.getResolvedParameter("Sort by",defaults,engine);
+                showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);             
+                includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine);
+            }
+            catch (ExecutionError e) {throw e;}
+            catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        boolean showLogosAsImages=(showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_NEW) || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_SHARED));           
-        boolean showSequenceLogos=(showLogosAsImages || showSequenceLogosString.equalsIgnoreCase(MOTIF_LOGO_TEXT));      
+        boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);           
+        boolean showLogosAsImages = includeLogosInOutputAsImages(showSequenceLogosString);             
+   
         HashMap<String,String> abbrmap=new HashMap<String, String>();
         String[] metricnames=engine.getAllMotifComparatorNames(false);
         String[] metricabbr=engine.getAllMotifComparatorNames(true);
@@ -488,18 +489,17 @@ public class MotifComparisonAnalysis extends Analysis {
         if (comp!=null && !comp.isDistanceMetric()) ascending=false;
         ArrayList<Object[]> resultList=assembleList(includeMetrics, sortkey, ascending);
         int rownum=0;
-        HSSFWorkbook workbook = new HSSFWorkbook();
-        HSSFSheet sheet = workbook.createSheet(outputobject.getName());
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        String sheetName=outputobject.getName();
+        if (sheetName.startsWith("Output")) sheetName="Motif comparison to "+targetMotifName;
+        XSSFSheet sheet = workbook.createSheet(sheetName);
         CreationHelper helper = (showLogosAsImages)?workbook.getCreationHelper():null;
         Drawing drawing = (showLogosAsImages)?sheet.createDrawingPatriarch():null;       
         
-        CellStyle title=createExcelStyle(workbook, HSSFCellStyle.BORDER_NONE, (short)0, HSSFCellStyle.ALIGN_LEFT, false);      
-        addFontToExcelCellStyle(workbook, title, null, (short)(workbook.getFontAt((short)0).getFontHeightInPoints()*2.5), true, false);
-        CellStyle tableheader=createExcelStyle(workbook, HSSFCellStyle.BORDER_THIN, HSSFColor.LIGHT_YELLOW.index, HSSFCellStyle.ALIGN_CENTER, true);      
-                  
-        
+        CellStyle title=getExcelTitleStyle(workbook);      
+        CellStyle tableheader=getExcelTableHeaderStyle(workbook);
+                         
         // Make room for the header which will be added later
-
         Row row = null;
         int headerrows=5;
         if (includeLegend) {
@@ -554,13 +554,19 @@ public class MotifComparisonAnalysis extends Analysis {
                         int width=motif.getLength();
                         if (width>maxlogowidth) maxlogowidth=width;
                         byte[] image=getMotifLogoImageAsByteArray(sequencelogo, logoheight, border, "png");
-                        int imageIndex=workbook.addPicture(image, HSSFWorkbook.PICTURE_TYPE_PNG);
+                        int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
                         ClientAnchor anchor = helper.createClientAnchor();
                         anchor.setCol1(logocolumn);
                         anchor.setRow1(rownum);
-                        anchor.setAnchorType(ClientAnchor.MOVE_DONT_RESIZE);
+                        anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
                         Picture pict=drawing.createPicture(anchor, imageIndex);	
                         pict.resize();
+                        int offsetX=25000;
+                        int offsetY=25000;
+                        anchor.setDx1(offsetX);
+                        anchor.setDy1(offsetY);    
+                        anchor.setDx2(anchor.getDx2()+offsetX);
+                        anchor.setDy2(anchor.getDy2()+offsetY);                          
                     } catch (Exception e) {e.printStackTrace(System.err);}
                 }
                 else outputStringValuesInCells(row, new String[]{motif.getConsensusMotif()}, logocolumn);
@@ -574,14 +580,14 @@ public class MotifComparisonAnalysis extends Analysis {
             }
         }
         format.setProgress(95);
-        for (int j=0;j<logocolumn-1;j++) {
-           sheet.autoSizeColumn((short)j);
-        }
-        if (!showLogosAsImages) sheet.autoSizeColumn((short)logocolumn);   
+        
+        autoSizeExcelColumns(sheet, 0,includeMetrics.size()+2,800);
+
+        if (showSequenceLogos && !showLogosAsImages) sheet.autoSizeColumn((short)logocolumn);   
         //if (maxlogowidth>0) sheet.setColumnWidth(logocolumn, (int)(maxlogowidth*1.5*256)); // this does not work as I had hoped. It will resize the motif logos      
         
         // Add the header on top of the page
-        if (includeLegend) {        
+        if (includeLegend) {  
             sheet.createFreezePane(0,headerrows,0,headerrows);
             row=sheet.getRow(0);
             outputStringValueInCell(row, 0, "Motif similarity", title);
@@ -596,7 +602,7 @@ public class MotifComparisonAnalysis extends Analysis {
         }
         
         // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-        File excelFile=outputobject.createDependentBinaryFile(engine,"xls");        
+        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
         try {
             BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
             workbook.write(stream);

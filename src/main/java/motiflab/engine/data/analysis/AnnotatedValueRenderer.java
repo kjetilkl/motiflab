@@ -15,7 +15,6 @@ import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Comparator;
-import java.util.HashSet;
 import javax.imageio.ImageIO;
 import javax.swing.JLabel;
 import javax.swing.JTable;

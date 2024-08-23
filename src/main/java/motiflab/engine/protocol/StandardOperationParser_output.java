@@ -55,7 +55,7 @@ public class StandardOperationParser_output extends StandardOperationParser {
             msg+="output "+sourceName+" in "+outputformatName+" format";        
             StandardParametersParser spp=(StandardParametersParser)protocol.getParametersParser();
             String settings="";
-            if (analysis!=null) settings=spp.getParameterSettingsAsString(analysis.getOutputParameters(),task,Operation_output.OUTPUT_FORMAT_PARAMETERS, "output");
+            if (analysis!=null) settings=spp.getParameterSettingsAsString(analysis.getOutputParameters(outputformatName),task,Operation_output.OUTPUT_FORMAT_PARAMETERS, "output");
             else settings=spp.getParameterSettingsAsString(formatter,task,Operation_output.OUTPUT_FORMAT_PARAMETERS, "output");
             if (!settings.isEmpty()) msg+=" {"+settings+"}";
             if (subset!=null && !subset.equals(engine.getDefaultSequenceCollectionName())) msg+=" in collection "+subset;        
@@ -102,7 +102,7 @@ public class StandardOperationParser_output extends StandardOperationParser {
            if (outputFormatSettings!=null && !outputFormatSettings.isEmpty()) {   
                StandardParametersParser spp=(StandardParametersParser)protocol.getParametersParser();
                if (Analysis.class.isAssignableFrom(sourceclass)) {
-                   Parameter[] parameters=engine.getAnalysisForClass(sourceclass).getOutputParameters();
+                   Parameter[] parameters=engine.getAnalysisForClass(sourceclass).getOutputParameters(outputFormatName);
                    spp.parseFormatParameterSettings(outputFormatSettings,parameters,task,Operation_output.OUTPUT_FORMAT_PARAMETERS);
                } 
                else spp.parseFormatParameterSettings(outputFormatSettings,formatter,task,Operation_output.OUTPUT_FORMAT_PARAMETERS);
