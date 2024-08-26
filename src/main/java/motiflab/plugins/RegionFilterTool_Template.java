@@ -219,8 +219,17 @@ public abstract class RegionFilterTool_Template implements Plugin, RegionVisuali
             topPanel = new JPanel();     
             mainPanel = new JPanel();
             bottomPanel = new JPanel();
+            controlsPanel = new JPanel();
             mainPanel.setLayout(new BorderLayout());
 
+            controlsPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createRaisedBevelBorder(),
+                BorderFactory.createEmptyBorder(8, 8, 8, 8)
+            ));
+            controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.Y_AXIS));
+            setupDialog(controlsPanel);
+            mainPanel.add(controlsPanel,BorderLayout.CENTER);            
+            
             closeButton = new JButton("Close");
             closeButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -245,15 +254,7 @@ public abstract class RegionFilterTool_Template implements Plugin, RegionVisuali
                 if (model.getSize()>0) tracksCombobox.setSelectedIndex(0);
                 topPanel.add(tracksCombobox);
                 mainPanel.add(topPanel,BorderLayout.NORTH);
-            }
-
-            controlsPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createRaisedBevelBorder(),
-                BorderFactory.createEmptyBorder(8, 8, 8, 8)
-            ));
-            controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.Y_AXIS));
-            setupDialog(controlsPanel);
-            mainPanel.add(controlsPanel,BorderLayout.CENTER);            
+            }            
             getContentPane().add(mainPanel);
             pack();
         }              
