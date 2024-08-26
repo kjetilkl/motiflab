@@ -72,17 +72,20 @@ public class RegionDataset extends FeatureDataset implements Cloneable {
     }
 
     /**
-     * Returns the actual max score value in this dataset based on a search in the sequences
-     * (this is used by the SetRangeDialog)
+     * Returns the actual min and max values for a given numeric region property
+     * in this dataset based on a search through all the sequences.
+     * @propery The numeric region property to get values for. Defaults to "score" if null.
      */
-    public double getMinMaxValuesFromData() {
+    public double[] getMinMaxValuesFromData(String property) {
+        double min=Double.MAX_VALUE;
         double max=-Double.MAX_VALUE;
         ArrayList<FeatureSequenceData> sequences=getAllSequences();
         for (FeatureSequenceData seq:sequences) {
-            double seqmax=((RegionSequenceData)seq).getMaxScoreValueForThisSequenceFromData();
-            if (seqmax>max) max=seqmax;
+            double[] seqMinMax=((RegionSequenceData)seq).getMinMaxFromData(property);
+            if (seqMinMax[0]<min) min=seqMinMax[0];
+            if (seqMinMax[1]>max) max=seqMinMax[1];            
         }
-        return max;
+        return new double[]{min,max};
     }
 
 
