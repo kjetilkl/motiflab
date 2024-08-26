@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import motiflab.engine.DataListener;
 import motiflab.engine.ExecutionError;
 import motiflab.engine.MotifLabClient;
 import motiflab.engine.MotifLabEngine;
@@ -32,7 +33,7 @@ import motiflab.gui.VisualizationSettings;
  *
  * @author kjetikl
  */
-public abstract class RegionFilterTool_Template implements Plugin, RegionVisualizationFilter {
+public abstract class RegionFilterTool_Template implements Plugin, RegionVisualizationFilter, DataListener {
   
     private FilterDialog dialog = null;     
     private MotifLabGUI gui = null;
@@ -223,8 +224,10 @@ public abstract class RegionFilterTool_Template implements Plugin, RegionVisuali
             mainPanel.setLayout(new BorderLayout());
 
             controlsPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createRaisedBevelBorder(),
-                BorderFactory.createEmptyBorder(8, 8, 8, 8)
+                    BorderFactory.createCompoundBorder(
+                       BorderFactory.createEmptyBorder(2, 2, 2, 2),
+                       BorderFactory.createEtchedBorder()) ,
+                     BorderFactory.createEmptyBorder(6, 6, 6, 6)
             ));
             controlsPanel.setLayout(new BoxLayout(controlsPanel, BoxLayout.Y_AXIS));
             setupDialog(controlsPanel);
@@ -257,8 +260,54 @@ public abstract class RegionFilterTool_Template implements Plugin, RegionVisuali
             }            
             getContentPane().add(mainPanel);
             pack();
-        }              
-        
+        }                      
+    }
+     
+    private void updateRegionDatasetSelection() {
+        if (dialog!=null && dialog.tracksCombobox!=null) {
+            String selected = (String)dialog.tracksCombobox.getSelectedItem();
+            DefaultComboBoxModel model = dialog.getDataTracks();
+            dialog.tracksCombobox.setModel(model);
+            if (model.getSize()>0) {
+                if (model.getIndexOf(selected)>=0) dialog.tracksCombobox.setSelectedItem(selected);
+                else dialog.tracksCombobox.setSelectedIndex(0);
+            }
+        }
+    }
+
+    @Override
+    public void dataAdded(Data data) {
+        if (data instanceof RegionDataset && hasSingleTarget()) {
+           updateRegionDatasetSelection();
+        }
+    }
+
+    @Override
+    public void dataRemoved(Data data) {
+        if (data == targetDataset) {
+            targetDataset = null;
+        }        
+        if (data instanceof RegionDataset && hasSingleTarget()) {
+            updateRegionDatasetSelection();
+        }
+    }
+
+    @Override
+    public void dataAddedToSet(Data parentDataset, Data child) {}
+    
+    @Override
+    public void dataRemovedFromSet(Data parentDataset, Data child) {}
+
+    @Override
+    public void dataUpdated(Data data) {
+        if (data == targetDataset) filterUpdated();
+    }
+
+    @Override
+    public void dataUpdate(Data oldvalue, Data newvalue) {
+        if (oldvalue == targetDataset) filterUpdated();
     }
     
+     
+     
 }
