@@ -112,6 +112,10 @@ public abstract class RegionFilterTool_Template implements Plugin, RegionVisuali
         return gui;
     }
     
+    public void filterUpdated() {
+        gui.redraw();
+    }
+    
     public abstract boolean hasSingleTarget();
     public abstract boolean isPersistant();
     public abstract int getFilterPriority();
