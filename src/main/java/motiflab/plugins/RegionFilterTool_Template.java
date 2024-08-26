@@ -104,6 +104,13 @@ public abstract class RegionFilterTool_Template implements Plugin, RegionVisuali
         return getPluginName();
     }
        
+    public MotifLabEngine getEngine() {
+        return engine;
+    }
+    
+    public MotifLabGUI getGUI() {
+        return gui;
+    }
     
     public abstract boolean hasSingleTarget();
     public abstract boolean isPersistant();
