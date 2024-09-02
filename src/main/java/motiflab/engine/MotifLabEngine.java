@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,7 +34,6 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import motiflab.engine.data.*;
 import motiflab.engine.operations.*;
@@ -2769,7 +2769,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
      *  The method will also add all JAR-files residing beneath a lib/ directory to the class loader, so that they can be loaded when required
      */
     private Class loadClassesFromJar(File jarfile) throws Exception {
-        Class pluginclass=null;
+        Class pluginclass = null;
         // NOTE: The ! sign has special meaning in JAR paths as the separator between the path of the JAR file itself and the path to a file inside the JAR
         // jar:<URL for JAR file>!/<path within the JAR file>
         ArrayList<URL> allJars=new ArrayList<>(); // My first line of code written in Java 7 :-)
@@ -2795,7 +2795,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             className = className.replace('/', '.');
             Class newclass = loader.loadClass(className);
             if (Plugin.class.isAssignableFrom(newclass)) {
-                pluginclass=newclass;
+                if (!Modifier.isAbstract(newclass.getModifiers())) pluginclass = newclass;
             }
         }   
         return pluginclass;
