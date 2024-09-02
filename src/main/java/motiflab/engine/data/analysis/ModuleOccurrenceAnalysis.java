@@ -257,11 +257,12 @@ public class ModuleOccurrenceAnalysis extends Analysis {
 
     @Override
     public OutputData formatHTML(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
-        VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();        
+        VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();      
         String sortorder=SORT_BY_MODULE;
         String showSequenceLogosString="";
-        ModuleCollection include=null;
+        ModuleCollection include=null;        
         boolean showColorBoxes=false;
+        ModuleLogo modulelogo=new ModuleLogo(vizSettings);
         if (settings!=null) {
           try {
              Parameter[] defaults=getOutputParameters(format);
@@ -327,7 +328,7 @@ public class ModuleOccurrenceAnalysis extends Analysis {
             outputobject.append("<td class=\"num\">"+(int)((double)seqcount*100f/(double)sequenceCollectionSize)+"%</td>",HTML);
             if (showSequenceLogos) {              
                 outputobject.append("<td>",HTML);
-                outputobject.append(getModuleLogoTag(module, outputobject, showSequenceLogosString, engine),HTML);
+                outputobject.append(getModuleLogoTag(module, outputobject, modulelogo, showSequenceLogosString, engine),HTML);
                 outputobject.append("</td>",HTML);
             }
             outputobject.append("</tr>\n",HTML);

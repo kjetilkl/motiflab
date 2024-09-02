@@ -441,6 +441,7 @@ public class CollatedAnalysis extends Analysis {
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
         Color [] basecolors=vizSettings.getBaseColors();
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
+        ModuleLogo modulelogo=new ModuleLogo(vizSettings);
         String showSequenceLogosString="";
         boolean showOnlyMarkup=false;
         boolean showColorBoxes=false;
@@ -548,7 +549,7 @@ public class CollatedAnalysis extends Analysis {
                 }
                 else outputobject.append("<td>",HTML);
                 if (data instanceof Motif) outputobject.append(getMotifLogoTag((Motif)data, outputobject, sequencelogo, showSequenceLogosString, engine),HTML);
-                else if (data instanceof Module) outputobject.append(getModuleLogoTag((Module)data, outputobject, showSequenceLogosString, engine),HTML);               
+                else if (data instanceof Module) outputobject.append(getModuleLogoTag((Module)data, outputobject, modulelogo, showSequenceLogosString, engine),HTML);               
                 outputobject.append("</td>",HTML);
             }
             outputobject.append("</tr>\n",HTML);

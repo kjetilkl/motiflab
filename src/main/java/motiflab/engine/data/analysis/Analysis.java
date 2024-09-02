@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import motiflab.engine.data.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -558,7 +559,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
      * @return 
      */
     public static String[] getMotifLogoOptions(String dataformat) {
-        if (dataformat.equalsIgnoreCase(HTML)) return new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_SHARED,MOTIF_LOGO_TEXT};        
+        if (dataformat.equalsIgnoreCase(HTML)) return new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_NEW,MOTIF_LOGO_SHARED,MOTIF_LOGO_EMBEDDED,MOTIF_LOGO_TEXT};        
         else if (dataformat.equalsIgnoreCase(EXCEL))   return new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_INCLUDE,MOTIF_LOGO_TEXT};
         else if (dataformat.equalsIgnoreCase(RAWDATA)) return new String[]{MOTIF_LOGO_NO,MOTIF_LOGO_TEXT};        
         else return new String[]{""};
@@ -581,7 +582,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
      * @return 
      */
     public static boolean includeLogosInOutput(String option) {
-        return (option.equalsIgnoreCase(MOTIF_LOGO_NEW) || option.equalsIgnoreCase(MOTIF_LOGO_SHARED) || option.equalsIgnoreCase(MOTIF_LOGO_INCLUDE) || option.equalsIgnoreCase(MOTIF_LOGO_TEXT));
+        return (option.equalsIgnoreCase(MOTIF_LOGO_NEW) || option.equalsIgnoreCase(MOTIF_LOGO_SHARED) || option.equalsIgnoreCase(MOTIF_LOGO_INCLUDE) || option.equalsIgnoreCase(MOTIF_LOGO_EMBEDDED) || option.equalsIgnoreCase(MOTIF_LOGO_TEXT));
     }
     
     /**
@@ -600,7 +601,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
      * @return 
      */
     public static boolean includeLogosInOutputAsImages(String option) {
-        return (option.equalsIgnoreCase(MOTIF_LOGO_NEW) || option.equalsIgnoreCase(MOTIF_LOGO_SHARED) || option.equalsIgnoreCase(MOTIF_LOGO_INCLUDE));
+        return (option.equalsIgnoreCase(MOTIF_LOGO_NEW) || option.equalsIgnoreCase(MOTIF_LOGO_SHARED) || option.equalsIgnoreCase(MOTIF_LOGO_INCLUDE) || option.equalsIgnoreCase(MOTIF_LOGO_EMBEDDED));
     }
     
     /**
@@ -613,8 +614,8 @@ public abstract class Analysis extends Data implements ParameterExporter {
         return (option.equalsIgnoreCase(MOTIF_LOGO_SHARED));
     }     
 
-    /** Creates a motif logo image for the given motif, saves it to a temp-file and return an IMG-tag that can
-     *  be inserted in HTML-documents to display the image
+    /** Creates a motif logo image for the given motif, saves it to a temp-file if necessary and return a String 
+     *  or IMG-tag that can be inserted in HTML-documents to display the image or a textual representation thereof
      */
     protected String getMotifLogoTag(Motif motif, OutputData outputobject, MotifLogo sequencelogo, String logoFormat, MotifLabEngine engine) {
         int height=19; // an image height of 19 corresponds with a logo height of 22 which is "hardcoded" above (but probably should not be)
@@ -629,16 +630,25 @@ public abstract class Analysis extends Data implements ParameterExporter {
 //            height=(Integer)settings.getSettingAsType("motif.height", new Integer(19));  
             imageFormat=imageFormat.toLowerCase();
             if (!(imageFormat.equals("gif") || imageFormat.equals("png"))) imageFormat="gif";            
-            int width=0;
+            sequencelogo.setMotif(motif);
+            sequencelogo.setScaleByIC(scaleByIC);
+            int width=sequencelogo.getDefaultMotifWidth();
             File imagefile=null;
-            if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_SHARED)) {
+            if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_EMBEDDED)) {
+                sequencelogo.setMotif(motif);
+                sequencelogo.setScaleByIC(scaleByIC); 
+                try {
+                    byte[] image = getMotifLogoImageAsByteArray(sequencelogo, height, border, imageFormat);
+                    String base64String = Base64.getEncoder().encodeToString(image);
+                    return "<img src=\"data:image/"+imageFormat+";base64,"+base64String+"\" />";
+                } catch (IOException e) {
+                   engine.errorMessage("An error occurred when creating image: "+e.toString(),0); 
+                }
+            } else if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_SHARED)) {
                 String logofileID=motif.getName();
                 boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
                 OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, imageFormat, true); // returns new or existing shared dependency
                 if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file
-                    imagefile=dependency.getFile();
-                    sequencelogo.setMotif(motif);
-                    width=sequencelogo.getDefaultMotifWidth();
                     try {
                         saveMotifLogoImage(imagefile,sequencelogo, height, border, imageFormat); // an image height of 19 corresponds with a logo height of 22 which is "hardcoded" above (but probably should not be)
                     } catch (IOException e) {
@@ -649,9 +659,6 @@ public abstract class Analysis extends Data implements ParameterExporter {
                 }            
             } else { // always save any logo to a new file
                 imagefile=outputobject.createDependentFile(engine,imageFormat);
-                sequencelogo.setMotif(motif);
-                sequencelogo.setScaleByIC(scaleByIC);
-                width=sequencelogo.getDefaultMotifWidth();
                 try {              
                     saveMotifLogoImage(imagefile,sequencelogo, height, border, imageFormat); // an image height of 19 corresponds with a logo height of 22 which is "hardcoded" above (but probably should not be)
                 } catch (IOException e) {
@@ -727,28 +734,36 @@ public abstract class Analysis extends Data implements ParameterExporter {
         return array;
     }    
     
-    protected String getModuleLogoTag(Module module, OutputData outputobject, String logoFormat, MotifLabEngine engine) {
+    protected String getModuleLogoTag(Module module, OutputData outputobject, ModuleLogo modulelogo, String logoFormat, MotifLabEngine engine) {
         if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_NO)) return "";
         else if (module==null) return "?";        
         else if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_TEXT)) return escapeHTML(module.getModuleLogo());
         else { // logo as image
             VisualizationSettings settings=engine.getClient().getVisualizationSettings();
             String imageFormat=(String)settings.getSettingAsType("module.imageFormat","png");
-            boolean border=(Boolean)settings.getSettingAsType("module.border",Boolean.TRUE);            
-//            height=(Integer)settings.getSettingAsType("module.height", new Integer(19)); 
+            boolean border=(Boolean)settings.getSettingAsType("module.border",Boolean.FALSE);            
+            int height = (Integer)settings.getSettingAsType("module.height",28); // I think this will be OK...
             imageFormat=imageFormat.toLowerCase();
             if (!(imageFormat.equals("gif") || imageFormat.equals("png") || imageFormat.equals("svg"))) imageFormat="png";            
-            
-            int height=0,width=0;
+            int width=0;
             File imagefile=null;
-            if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_SHARED)) {
+            if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_EMBEDDED)) {
+                try {
+                    modulelogo.setModule(module);
+                    byte[] image = getModuleLogoImageAsByteArray(modulelogo, height, border, imageFormat);
+                    String base64String = Base64.getEncoder().encodeToString(image);
+                    return "<img src=\"data:image/"+imageFormat+";base64,"+base64String+"\" />";
+                } catch (IOException e) {
+                   engine.errorMessage("An error occurred when creating image: "+e.toString(),0); 
+                }
+            } else if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_SHARED)) {
                 String logofileID=module.getName();
                 boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
                 OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, imageFormat,true); // returns new or existing shared dependency
                 if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file
                     imagefile=dependency.getFile();
                     try {
-                        int[] size=savModuleLogoImage(imagefile,module,engine.getClient().getVisualizationSettings(), border, imageFormat); //
+                        int[] size=saveModuleLogoImage(imagefile,module,engine.getClient().getVisualizationSettings(), height, border, imageFormat); //
                         height=size[0];
                         width=size[1];
                     } catch (IOException e) {
@@ -760,7 +775,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
             } else { // always save any logo to a new file
                 imagefile=outputobject.createDependentFile(engine,imageFormat);
                 try {
-                    int[] size=savModuleLogoImage(imagefile,module,engine.getClient().getVisualizationSettings(), border, imageFormat); //
+                    int[] size=saveModuleLogoImage(imagefile,module,engine.getClient().getVisualizationSettings(), height, border, imageFormat); //
                     height=size[0];
                     width=size[1];                
                 } catch (IOException e) {
@@ -775,12 +790,11 @@ public abstract class Analysis extends Data implements ParameterExporter {
     }
     
 
-    private int[] savModuleLogoImage(File file, Module module, VisualizationSettings settings, boolean border, String imageFormat) throws IOException {
+    private int[] saveModuleLogoImage(File file, Module module, VisualizationSettings settings, int height, boolean border, String imageFormat) throws IOException {
         Font modulemotiffont=ModuleLogo.getModuleMotifFont();
         BufferedImage test=new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         FontMetrics modulelogometrics=test.getGraphics().getFontMetrics(modulemotiffont);
         int width=ModuleLogo.getLogoWidth(modulelogometrics,module)+2;
-        int height=28; // I think this will be OK...
         if (imageFormat==null) imageFormat="png";
         imageFormat=imageFormat.toLowerCase();
         if (!(imageFormat.equals("gif") || imageFormat.equals("png") || imageFormat.equals("svg"))) imageFormat="png";            
@@ -791,6 +805,10 @@ public abstract class Analysis extends Data implements ParameterExporter {
             g.setBackground(new Color(255, 255, 255, 0)); // make the image translucent white       
             g.clearRect(0,0, width+2, height+2); // bleed a little just in case
             ModuleLogo.paintModuleLogo(g, module, 5, 7, settings, null,0); //
+            if (border) {
+                g.setColor(Color.BLACK);
+                g.drawRect(0, 0, width-1, height-1);
+            }            
             OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
             ImageIO.write(image, imageFormat, output);
             output.close(); 
@@ -803,7 +821,11 @@ public abstract class Analysis extends Data implements ParameterExporter {
             else if (imageFormat.equals("eps")) g = new EPSGraphics2D(0, 0, width, height);
             else throw new IOException("Unknown image format: "+imageFormat);
             g.setClip(0, 0, width,height);
-            ModuleLogo.paintModuleLogo(g, module, 5, 7, settings, null,0); //                              
+            ModuleLogo.paintModuleLogo(g, module, 5, 7, settings, null,0); //    
+            if (border) {
+                g.setColor(Color.BLACK);
+                g.drawRect(0, 0, width-1, height-1);
+            }              
             FileOutputStream fileStream = new FileOutputStream(file);
             try {
                 fileStream.write(g.getBytes());
