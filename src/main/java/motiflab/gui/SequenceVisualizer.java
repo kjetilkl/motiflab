@@ -428,14 +428,6 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
        revalidate();     
     }
 
-    /**
-     * Returns the DataTrackVisualizer for the track with the given name (or null)
-     * @param trackName
-     * @return
-     */
-//    public DataTrackVisualizer getTrackVizualizer(String trackName) {
-//         return allTrackvisualizers.get(trackName);
-//    }
 
     /**
      * Returns the DataTrackVisualizer for the track with the given name (or null if something really bad happens)
@@ -461,7 +453,7 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
      * @param trackName
      * @return
      */
-    public DataTrackVisualizer getTrackVizualizer(Point point) {
+    public DataTrackVisualizer getTrackVisualizer(Point point) {
          if (!tracksPanel.getBounds().contains(point)) return null;
          Point relative=SwingUtilities.convertPoint(this, point, tracksPanel);
          for (java.awt.Component comp:tracksPanel.getComponents()) {
@@ -1526,11 +1518,11 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
         inputmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0), "Mark Sequence");
         actionmap.put("Mark Sequence", new AbstractAction() {public void actionPerformed(ActionEvent e) {markSequence();} });
         
-//        inputmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, 0), "Next Region");
-//        actionmap.put("Next Region", new AbstractAction() {public void actionPerformed(ActionEvent e) {goToNextRegion();} });
-//        
-//        inputmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, 0), "Previous Region");
-//        actionmap.put("Previous Region", new AbstractAction() {public void actionPerformed(ActionEvent e) {goToPreviousRegion();} });        
+        inputmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, 0), "Next Region");
+        actionmap.put("Next Region", new AbstractAction() {public void actionPerformed(ActionEvent e) {goToNextRegion();} });
+        
+        inputmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, 0), "Previous Region");
+        actionmap.put("Previous Region", new AbstractAction() {public void actionPerformed(ActionEvent e) {goToPreviousRegion();} });        
              
         inputmap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK), ACTION_COPY_SEQUENCE);
         actionmap.put(ACTION_COPY_SEQUENCE, copySequenceAction);
@@ -1572,20 +1564,46 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
         else settings.setSequenceMarked(sequenceName, true);
         SequenceVisualizer.this.repaint();
     }
+      
+    private void goToNextRegion() {
+        if (lastSelectedTrack!=null) {
+            DataTrackVisualizer viz=getTrackVisualizer(lastSelectedTrack);
+            if (viz instanceof DataTrackVisualizer_Region) {
+                Region region = ((DataTrackVisualizer_Region)viz).goToNextRegion();
+                if (region!=null) repositionToRegion(region);
+            }
+        }
+    }
     
-//    private void goToNextRegion() {
-//        if (lastSelectedTrack!=null) {
-//            DataTrackVisualizer viz=getTrackVizualizer(lastSelectedTrack);
-//            if (viz instanceof DataTrackVisualizer_Region) ((DataTrackVisualizer_Region)viz).goToNextRegion();
-//        }
-//    }
-//    
-//    private void goToPreviousRegion() {
-//        if (lastSelectedTrack!=null) {
-//            DataTrackVisualizer viz=getTrackVizualizer(lastSelectedTrack);
-//             if (viz instanceof DataTrackVisualizer_Region) ((DataTrackVisualizer_Region)viz).goToPreviousRegion();
-//        }
-//    } 
+    private void goToPreviousRegion() {
+        if (lastSelectedTrack!=null) {
+            DataTrackVisualizer viz=getTrackVisualizer(lastSelectedTrack);
+             if (viz instanceof DataTrackVisualizer_Region) {
+                 Region region = ((DataTrackVisualizer_Region)viz).goToPreviousRegion();
+                 if (region!=null) repositionToRegion(region);
+             }
+        }
+    } 
+    
+    /*
+    * Move the viewport so that the region is (at least partly) inside the viewport
+    */
+    private void repositionToRegion(Region region) {
+        int vpStart = settings.getSequenceViewPortStart(sequenceName);
+        int vpEnd = settings.getSequenceViewPortEnd(sequenceName);
+        int regionStart = region.getGenomicStart();
+        int regionEnd = region.getGenomicEnd();
+        int vpSize = vpEnd-vpStart+1;
+        int regionSize = regionEnd-regionStart+1;           
+        if (regionSize<vpSize) { // center the region in the viewport
+            int regionCenter = (int)(regionStart + (regionSize/2.0));
+            vpStart = (int)(regionCenter - (vpSize/2.0));
+            settings.setSequenceViewPort(sequenceName, vpStart, vpStart+vpSize-1);
+        } else {
+            settings.setSequenceViewPort(sequenceName, regionStart, regionStart+vpSize-1);
+        } 
+        settings.redraw();
+    }
     
     /**
      * Finds the first DNA sequence track and copies the DNA sequence(s) from the selected segments to the clipboard (in the orientation shown).

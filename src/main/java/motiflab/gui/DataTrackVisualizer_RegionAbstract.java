@@ -896,12 +896,18 @@ public abstract class DataTrackVisualizer_RegionAbstract extends DataTrackVisual
 
     @Override
     public Region getCurrentRegion() {
-        if (isExpanded()) return currentRegion;
+        if (currentRegion!=null) return currentRegion;
+        // if (isExpanded()) return currentRegion;
         else {
             currentRegion=getFirstVisibleRegion(currentmouseposition);
             return currentRegion;
         }
     }  
+    
+    @Override
+    public void setCurrentRegion(Region region) {
+        currentRegion = region;
+    }      
     
     /** Draws a glowing box around the region that the mouse currently points at to indicate that it has "focus" */
     protected void drawRegionHalo(Graphics2D graphics, Rectangle rectangle) { 

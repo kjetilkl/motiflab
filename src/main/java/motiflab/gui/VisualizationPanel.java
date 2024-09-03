@@ -488,7 +488,7 @@ public class VisualizationPanel extends javax.swing.JScrollPane implements Visua
         Component comp=mainVisualizationPanel.getComponentAt(point);
         if (comp instanceof SequenceVisualizer) {
            Point relative=SwingUtilities.convertPoint(mainVisualizationPanel, point, comp);
-           DataTrackVisualizer track=((SequenceVisualizer)comp).getTrackVizualizer(relative);
+           DataTrackVisualizer track=((SequenceVisualizer)comp).getTrackVisualizer(relative);
            if (track!=null) {
               if (track instanceof DataTrackVisualizer_Region) {
                   Region reg=((DataTrackVisualizer_Region)track).getCurrentRegion();
@@ -511,7 +511,7 @@ public class VisualizationPanel extends javax.swing.JScrollPane implements Visua
         Component comp=mainVisualizationPanel.getComponentAt(point);
         if (comp instanceof SequenceVisualizer) {
            Point relative=SwingUtilities.convertPoint(mainVisualizationPanel, point, comp);
-           DataTrackVisualizer track=((SequenceVisualizer)comp).getTrackVizualizer(relative);
+           DataTrackVisualizer track=((SequenceVisualizer)comp).getTrackVisualizer(relative);
            if (track!=null) {
               return track.sequencedata;
            }

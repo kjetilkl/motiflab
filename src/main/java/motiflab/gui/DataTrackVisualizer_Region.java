@@ -308,8 +308,57 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
      */
     public Region getCurrentRegion() {
         return getFirstVisibleRegion(currentmouseposition);
-    }     
+    }  
+    
+    /** 
+     * Sets the "current" region.
+     * @param region 
+     */
+    public abstract void setCurrentRegion(Region region);
+    
+    public Region goToNextRegion() {
+        Region next = getNextRegion(getCurrentRegion(), true);
+        setCurrentRegion(next);
+        return next;
+    }
+    
+    public Region goToPreviousRegion() {
+        Region previous = getPreviousRegion(getCurrentRegion(), true);
+        setCurrentRegion(previous);
+        return previous;        
+    }
+ 
+    public Region getNextRegion(Region current, boolean skipHidden) {
+        if (sequencedata==null) return null;     
+        Region next=((RegionSequenceData)sequencedata).getNextRegion(current);
+        if (skipHidden) {
+            RegionVisualizationFilter regionfilter=settings.getGUI().getRegionVisualizationFilter();
+            while (next!=null && regionIsHidden(next, regionfilter)) {
+                next = ((RegionSequenceData)sequencedata).getNextRegion(next);
+            }
+        }
+        return next;
+    }
+    
+    public Region getPreviousRegion(Region current, boolean skipHidden) {
+        if (sequencedata==null) return null;     
+        Region previous=((RegionSequenceData)sequencedata).getPreviousRegion(current);
+        if (skipHidden) {
+            RegionVisualizationFilter regionfilter=settings.getGUI().getRegionVisualizationFilter();
+            while (previous!=null && regionIsHidden(previous, regionfilter)) {
+                previous = ((RegionSequenceData)sequencedata).getPreviousRegion(previous);
+            }
+        }
+        return previous;
+    }    
 
+    private boolean regionIsHidden(Region region, RegionVisualizationFilter regionfilter) {
+           String type=region.getType();
+           if (!settings.isRegionTypeVisible(type)) return true;
+           if (regionfilter!=null && !regionfilter.shouldVisualizeRegion(region)) return true;
+           return false;        
+    }
+    
     /** Shows a dialog to edit the properties of a region and commits the changes
      *  if the OK button is pressed and the properties have been changes
      */
