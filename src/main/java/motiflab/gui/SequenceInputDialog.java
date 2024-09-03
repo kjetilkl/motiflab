@@ -1400,6 +1400,9 @@ private void parseGeneIDEntries() {
  * of GeneIDMappings is returned. This list must be processed to ensure that all genes are
  * present and the user must decide how to handle possible duplicate matches.
  * Once these issues have been dealt with, an AddSequencesTask can be scheduled for execution
+ * @param idlist The list of Gene identifier that the user has specified
+ * @param resolvedlist Information about those specified gene identifiers, as obtained from e.g. BioMart
+ * @param positionInfo Information about which sequence segment relative to the gene should be used (e.g. -1000 to +200 around TSS) 
  */
 private void processResolvedGeneIDs(ArrayList<GeneIdentifier> idlist, ArrayList<GeneIDmapping> resolvedlist, HashMap<GeneIdentifier,Object[]> positionInfo, boolean includeGO) throws ParseError {
     // for (GeneIDmapping mapping:resolvedlist) {gui.debugMessage("Resolved:  "+mapping.geneID+" => "+mapping.geneName+"   "+mapping.chromosome+":"+mapping.TSS+"-"+mapping.TES+" ("+mapping.strand+")");}
@@ -1469,7 +1472,7 @@ private void processResolvedGeneIDs(ArrayList<GeneIdentifier> idlist, ArrayList<
 private ArrayList<GeneIDmapping> getEntriesForID(ArrayList<GeneIDmapping> list, String id) {
     ArrayList<GeneIDmapping> result=new ArrayList<GeneIDmapping>();
     for (GeneIDmapping entry:list) {
-        if (entry.geneID.equals(id)) result.add(entry);
+        if (entry.geneID.equalsIgnoreCase(id)) result.add(entry);
     }
     return result;
 }

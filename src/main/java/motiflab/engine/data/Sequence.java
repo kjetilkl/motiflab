@@ -1393,7 +1393,7 @@ public final class Sequence extends Data implements BasicDataType {
     private static ArrayList<GeneIDmapping> getEntriesForID(ArrayList<GeneIDmapping> list, String id) {
         ArrayList<GeneIDmapping> result=new ArrayList<GeneIDmapping>();
         for (GeneIDmapping entry:list) {
-            if (entry.geneID.equals(id)) result.add(entry);
+            if (entry.geneID.equalsIgnoreCase(id)) result.add(entry);
         }
         return result;
     }

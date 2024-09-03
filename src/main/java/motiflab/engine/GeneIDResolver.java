@@ -708,9 +708,11 @@ public class GeneIDResolver {
             url=new URL(biomartURL); 
             xml=getXMLQueryString(idformat, database, useVirtualSchema, useConfigVersion, biomartAttributes, list, useTranscript, isOldBiomart(url), includeGO);         
             page=getPageUsingHttpPost(url,xml,engine.getNetworkTimeout());
-//            engine.logMessage("Fetching from BioMart: "+url.toString());
-//            engine.logMessage("QUERY: "+xml);
-//            engine.logMessage("Return: "+page);
+            // url=new URL(biomartURL+"?query="+xml);
+            // page=getPageUsingHttpGET(url, engine.getNetworkTimeout()); // deprecated
+            engine.logMessage("Fetching from BioMart: "+url.toString(), 0);
+            engine.logMessage("QUERY: "+xml, 0);
+            // engine.logMessage("Return: "+page);
         }       
         return parseResults(page);        
     }
@@ -780,7 +782,7 @@ public class GeneIDResolver {
                 }
             }
             if (line.startsWith("ERROR:") || line.startsWith("Query ERROR:")) throw new ParseError(line);
-            if (elements.length<numproperties) throw new ParseError("Expected "+numproperties+" columns in gene ID mapping table, got "+elements.length+": "+line); // allow for optional GO column(s)
+            if (elements.length<numproperties) throw new ParseError("Expected at least "+numproperties+" columns in gene ID mapping table but got "+elements.length+": "+line); // allow for optional GO column(s)
             try {
                 GeneIDmapping newmapping=null;
                 int start=Integer.parseInt(elements[3]); // coordinates are 1-based and inclusive!
