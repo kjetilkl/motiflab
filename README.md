@@ -23,13 +23,6 @@ MotifLab is written in Java. To build the project from source you will need:
 * [Java JDK 8](https://www.java.com) - programming language
 * [Maven](https://maven.apache.org/) - build and dependency manager
 
-Most of the dependencies are available from the central Maven repository and will be handled automatically.
-However, one dependency - [bigwig-1.0.jar](https://www.motiflab.org/dependencies/bigwig-1.0.jar) - must currently be dealt with manually. 
-To install this dependency in your local Maven repository, download the file and run the following command: (remember to change "pathTo" to the actual path of the file)
-
-```
-mvn install:install-file -Dfile=pathTo/bigwig-1.0.jar -DgroupId=org.broad.igv -DartifactId=bigwig -Dversion=1.0 -Dpackaging=jar
-```
 
 ### Building from source
 
@@ -39,7 +32,8 @@ To compile the Java files and package the project, go to the directory containin
 mvn package
 ```
 
-Maven will package MotifLab in a JAR-file and place it in the "target" subdirectory. Other dependencies will be placed in "target/lib". 
+Maven will package MotifLab into a JAR-file and place it in the "target" subdirectory. The "motiflab-2.0-standalone.jar" file is a "fat" JAR that also includes all external dependencies
+that are required to run MotifLab. The second JAR-file named "motiflab-2.0.jar" only contains the core MotifLab code, but the external dependencies can be found in the directory "target/lib". 
 
 
 ## Running MotifLab
@@ -50,7 +44,9 @@ To start MotifLab, go into the "target" directory and run:
 java -jar MotifLab-2.0.jar
 ```
 
-This will start up MotifLab with the normal graphical user interface. You can choose a simpler graphical interface with the command:
+This will start up MotifLab with the normal graphical user interface. On some operating systems you may also be able to start MotifLab simply by double-clicking the JAR-file.
+
+You can choose a simpler graphical interface with the command:
 
 ```
 java -jar MotifLab-2.0.jar -minimalGUI
