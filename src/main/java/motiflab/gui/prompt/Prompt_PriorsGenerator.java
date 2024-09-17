@@ -1671,7 +1671,9 @@ public class Prompt_PriorsGenerator extends Prompt implements ClassifierOutputLi
     private void saveConfigurationToFile(File configurationfile) throws Exception {
         Document document=getConfigurationAsXML();
         TransformerFactory factory=TransformerFactory.newInstance();
-        factory.setAttribute("indent-number", new Integer(3));
+        try {
+            factory.setAttribute("indent-number", new Integer(3));
+        } catch (IllegalArgumentException iae) {}
         Transformer transformer=factory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         DOMSource source=new DOMSource(document); 
