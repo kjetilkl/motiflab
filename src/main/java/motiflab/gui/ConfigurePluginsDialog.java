@@ -26,6 +26,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -203,6 +204,7 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
            if (pluginsModel.getValueAt(i,COLUMN_NAME).equals(pluginName)) {
                pluginsModel.removeRow(i);
                isConfigurable.remove(pluginName);
+               pluginsTable.revalidate();
                gui.pluginInstallationUpdated();
                break;
            }
@@ -486,7 +488,7 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
             public void done() { // this method is invoked on the EDT!
                 progressBar.setVisible(false);
                 closeButton.setEnabled(true);
-                if (ex!=null) {
+                if (ex!=null) {                    
                     JOptionPane.showMessageDialog(ConfigurePluginsDialog.this, ex.getMessage(), "Plugin Error", JOptionPane.ERROR_MESSAGE); 
                 } else { // install went OK
                     JOptionPane.showMessageDialog(ConfigurePluginsDialog.this, "The plugin was installed successfully", "Install Plugin", JOptionPane.INFORMATION_MESSAGE); 
@@ -552,11 +554,11 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
         plugin=null;
         try {       
             metadata=engine.readPluginMetaDataFromDirectory(pluginDir);
-            plugin=engine.instantiatePluginFromDirectory(pluginDir);
+            plugin=engine.instantiatePluginFromDirectory(pluginDir); // this loads the classes and instantiates the plugin object
         } catch (SystemError se) {
             plugin=null;
             removePluginDir(pluginDir);
-            throw new ExecutionError(se.getMessage());
+            throw new ExecutionError(se.getMessage(), se);
         }        
         // now initialize the plugin and register it
         try {
@@ -564,7 +566,7 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
         } catch (SystemError se) { // A critical initialization error has occurred. The plugin should not be registered with the engine, so we will delete the plugin files
             plugin=null;
             removePluginDir(pluginDir);
-            throw new ExecutionError(se.getMessage());
+            throw new ExecutionError(se.getMessage(), se);
         } catch (ExecutionError e) {
             gui.logMessage("Plugin error for \""+pluginName+"\" => "+e.getMessage()); // this is by definition a non-critical error
         }      

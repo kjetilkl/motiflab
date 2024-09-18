@@ -28,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -280,10 +281,15 @@ public class MainPanel extends JTabbedPane implements DataListener {
     public void dataAdded(Data data) {
         if (!(data instanceof OutputData)) return;
         if (data.isTemporary()) return; // do not show temporary data objects in tabs
-        OutputPanel newpanel=new OutputPanel((OutputData)data,gui);
-        addTab(data.getName(), newpanel, true);
-        setupViewMenu();
-        this.setSelectedComponent(newpanel);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                OutputPanel newpanel=new OutputPanel((OutputData)data,gui);
+                addTab(data.getName(), newpanel, true);
+                setupViewMenu();
+                MainPanel.this.setSelectedComponent(newpanel);
+            }
+        });        
     }
 
 
@@ -291,17 +297,22 @@ public class MainPanel extends JTabbedPane implements DataListener {
     public void dataRemoved(Data data) {
         if (!(data instanceof OutputData)) return;
         if (data.isTemporary()) return; // temporary data objects are not shown
-        int tabs=this.getTabCount();
-        for (int i=0;i<tabs;i++) {
-           String tabname=this.getTitleAt(i);
-           if (tabname.equals(data.getName())) {
-               try {
-                 this.removeTabAt(i);
-               } catch (Exception e) {} // to avoid ClassCastException
-               break;
-           }
-        }   
-        setupViewMenu();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int tabs=MainPanel.this.getTabCount();
+                for (int i=0;i<tabs;i++) {
+                   String tabname=MainPanel.this.getTitleAt(i);
+                   if (tabname.equals(data.getName())) {
+                       try {
+                           MainPanel.this.removeTabAt(i);
+                       } catch (Exception e) {} // to avoid ClassCastException
+                       break;
+                   }
+                }   
+                setupViewMenu();
+            }
+        });
     }
     
     public void dataUpdated(Data data) {

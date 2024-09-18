@@ -1060,11 +1060,6 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
 
     /** Creates a new ModuleCollection with new Modules based on the known interactions among motifs 
      * @param targetName A name for this ModuleCollection
-     * @param configuration A string describing what kind of interactions to return 
-     * @param motifs If non-null only motifs in this collection will be considered further. If null, all currently known motifs will be considered
-     * @param limit If set to a positive value greater than 0, this will be an upper limit on the number of new modules returned
-     * @param justTesting If TRUE, the modules themselves will not be created. Rather, the method estimates how many modules would have been created 
-     *        with the current 'configuration' (disregarding the 'limit') and adds a single NumericVariable object with this number to the collections payload
      * @return 
      */
     public static ModuleCollection createModuleCollectionFromInteractions(String targetName, ParameterSettings settings, MotifLabEngine engine, OperationTask task) throws ExecutionError {
