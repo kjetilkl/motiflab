@@ -384,6 +384,12 @@ public class RegionBrowserPanel extends JPanel {
                 } else if (e.getKeyCode()==KeyEvent.VK_L) {
                     motifLogorenderer.setScaleByIC(!motifLogorenderer.getScaleByIC());
                     regionTable.repaint();
+                } else if (e.getKeyCode()==KeyEvent.VK_G) {
+                    Region[] selectedRegions=getSelectedRegions();
+                    if (selectedRegions!=null && selectedRegions.length>0) {
+                        Region region=selectedRegions[0];
+                        gotoRegion(region, region.getParent().getSequenceName());
+                    }                 
                 } 
             }
         });
@@ -441,6 +447,30 @@ public class RegionBrowserPanel extends JPanel {
             gui.updatePartialDataItem(featureName, sequenceName, oldregion, regionclone); // update the registered dataset with the new data from the buffer (this will update the whole dataset not just the single sequence).
         }
     }
+    
+    /** Zooms in on the sequence so that the region is displayed in the center at 20% of the width of the sequence
+     *  The sequence is shown at the top of the sequence window (if possible)
+     */
+    protected void gotoRegion(Region region, String sequenceName) {
+        int start = region.getGenomicStart();
+        int end = region.getGenomicEnd();
+        int size = end-start+1;
+        int newstart = start - (size*2);
+        int newend = end + (size*2);
+        if (newstart<1) newstart=1;
+        Data sequence = gui.getEngine().getDataItem(sequenceName, Sequence.class);
+        if (sequence instanceof Sequence) {
+            int sequenceStart = ((Sequence)sequence).getRegionStart();
+            int sequenceEnd = ((Sequence)sequence).getRegionEnd();
+            if (newstart<sequenceStart) newstart = sequenceStart;
+            if (newend>sequenceEnd) newend = sequenceEnd;
+        }
+        settings.setSequenceViewPort(sequenceName, newstart, newend);
+        settings.setSequenceVisible(sequenceName, true);
+        settings.setRegionTypeVisible(region.getType(),true,false);
+        gui.getVisualizationPanel().goToSequence(sequenceName);
+        gui.redraw();
+    }    
     
     public JTable getTable() {
         return regionTable;
@@ -808,6 +838,7 @@ private class Filter extends RowFilter<Object,Object> {
 /** This private class implements the context menu */
 private class RegionTableContextMenu extends JPopupMenu implements ActionListener {
      private final String EDIT_REGION="Edit this region";
+     private final String GOTO_REGION="Go to region";     
      private final String SHOW="Show Region Type";
      private final String HIDE="Hide Region Type";
      private final String SHOW_ONLY_SELECTED="Show Only Selected Region Type";   
@@ -831,6 +862,7 @@ private class RegionTableContextMenu extends JPopupMenu implements ActionListene
      JMenuItem excludeAllItem=new JMenuItem("Exclude All Region Types");
      JMenuItem invertCollectionItem=new JMenuItem("Invert Collection");
      JMenuItem displayItem=new JMenuItem(EDIT_REGION);
+     JMenuItem gotoRegionItem=new JMenuItem(GOTO_REGION);     
      JMenuItem compareMotifToOthers=new JMenuItem("Compare"); // this text will be changed dynamically
      JMenuItem saveMotifLogoItem=new JMenuItem(SAVE_MOTIF_LOGO);
      JMenu selectRegionsFromMenu=new JMenu(SELECT_REGION_TYPES_FROM);
@@ -898,6 +930,7 @@ private class RegionTableContextMenu extends JPopupMenu implements ActionListene
          updateMenu();
          
          displayItem.addActionListener(this);
+         gotoRegionItem.addActionListener(this);
          showItem.addActionListener(this);
          showOnlySelectedItem.addActionListener(this);
          showAllItem.addActionListener(this);
@@ -909,7 +942,8 @@ private class RegionTableContextMenu extends JPopupMenu implements ActionListene
          compareMotifToOthers.addActionListener(this);
          saveMotifLogoItem.addActionListener(this);
          setColorMenu=new ColorMenu(COLOR_SUBMENU_HEADER, colormenulistener, RegionBrowserPanel.this);
-         this.add(displayItem);         
+         this.add(displayItem);
+         this.add(gotoRegionItem);         
          this.add(showItem);
          this.add(showOnlySelectedItem); 
          this.add(showAllItem);            
@@ -985,16 +1019,20 @@ private class RegionTableContextMenu extends JPopupMenu implements ActionListene
              if (compareMotifToOthers!=null) compareMotifToOthers.setVisible(false);
              if (saveMotifLogoItem!=null) saveMotifLogoItem.setVisible(false);
              displayItem.setVisible(false);
+             gotoRegionItem.setVisible(false);
         } else if (isMotifTrack) {
             String command="Compare "+targetRegionName+" To Other Motifs";
             compareMotifToOthers.setText(command);
             compareMotifToOthers.setVisible(true);
             saveMotifLogoItem.setVisible(true);
             displayItem.setText(EDIT_REGION+" ("+targetRegionName+")");
-            displayItem.setVisible(true);           
+            displayItem.setVisible(true);  
+            gotoRegionItem.setVisible(true);
         } else {
             compareMotifToOthers.setVisible(false);
-            saveMotifLogoItem.setVisible(false);             
+            saveMotifLogoItem.setVisible(false);
+            displayItem.setVisible(true);  
+            gotoRegionItem.setVisible(true);            
         }
     }
 
@@ -1052,6 +1090,12 @@ private class RegionTableContextMenu extends JPopupMenu implements ActionListene
                     Region region=selectedRegions[0];
                     editRegionProperties(region, regiontrack.getName(), region.getParent().getSequenceName());
                 }
+         } else if (e.getActionCommand().startsWith(GOTO_REGION)) {
+                Region[] selectedRegions=getSelectedRegions();
+                if (selectedRegions!=null && selectedRegions.length>0) {
+                    Region region=selectedRegions[0];
+                    gotoRegion(region, region.getParent().getSequenceName());
+                }                              
          } else if (e.getActionCommand().equals(SHOW_ONLY_SELECTED)) {
                 setVisibilityOnAllFeatureTypes(false);
                 VisualizationSettings settings=gui.getVisualizationSettings();
