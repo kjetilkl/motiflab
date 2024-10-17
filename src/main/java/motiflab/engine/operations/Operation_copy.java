@@ -14,7 +14,7 @@ import motiflab.gui.VisualizationSettings;
 public class Operation_copy extends Operation {
     private static final String name="copy";
     private static final String description="Creates a copy of an existing data item";
-    private Class[] datasourcePreferences=new Class[]{RegionDataset.class,DNASequenceDataset.class,NumericDataset.class, SequenceCollection.class, SequencePartition.class, SequenceTextMap.class, SequenceNumericMap.class, BackgroundModel.class, MotifCollection.class, MotifPartition.class, MotifTextMap.class, MotifNumericMap.class, Motif.class, ModuleCollection.class, ModulePartition.class, ModuleTextMap.class, ModuleNumericMap.class, Module.class, ExpressionProfile.class, NumericVariable.class, TextVariable.class, PriorsGenerator.class};
+    private Class[] datasourcePreferences=new Class[]{RegionDataset.class,DNASequenceDataset.class,NumericDataset.class, SequenceCollection.class, SequencePartition.class, SequenceTextMap.class, SequenceNumericMap.class, BackgroundModel.class, MotifCollection.class, MotifPartition.class, MotifTextMap.class, MotifNumericMap.class, Motif.class, ModuleCollection.class, ModulePartition.class, ModuleTextMap.class, ModuleNumericMap.class, ModuleCRM.class, ExpressionProfile.class, NumericVariable.class, TextVariable.class, PriorsGenerator.class};
     
 
     @Override

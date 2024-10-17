@@ -6,7 +6,7 @@
 package motiflab.gui;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleMotif;
 import motiflab.engine.data.Motif;
 
@@ -32,21 +32,21 @@ public class CheckBoxTreeNode extends DefaultMutableTreeNode {
     }
 
     public boolean isChecked() {
-       if (userObject instanceof Motif || userObject instanceof Module) return settings.isRegionTypeVisible(getName());
+       if (userObject instanceof Motif || userObject instanceof ModuleCRM) return settings.isRegionTypeVisible(getName());
        else if (userObject instanceof ModuleMotif) {
            CheckBoxTreeNode myparent=(CheckBoxTreeNode)getParent();
-           Module module=(Module)myparent.getUserObject();
-           return settings.isRegionTypeVisible(module.getName()+"."+((ModuleMotif)userObject).getRepresentativeName());
+           ModuleCRM cisRegModule=(ModuleCRM)myparent.getUserObject();
+           return settings.isRegionTypeVisible(cisRegModule.getName()+"."+((ModuleMotif)userObject).getRepresentativeName());
        }
        else return checked;
     }
     
     public void setChecked(boolean checkedvalue) {
-        if (userObject instanceof Motif || userObject instanceof Module) settings.setRegionTypeVisible(getName(),checkedvalue,false);
+        if (userObject instanceof Motif || userObject instanceof ModuleCRM) settings.setRegionTypeVisible(getName(),checkedvalue,false);
         else if (userObject instanceof ModuleMotif) {
            CheckBoxTreeNode myparent=(CheckBoxTreeNode)getParent();
-           Module module=(Module)myparent.getUserObject();
-           settings.setRegionTypeVisible(module.getName()+"."+((ModuleMotif)userObject).getRepresentativeName(),checkedvalue,false);
+           ModuleCRM cisRegModule=(ModuleCRM)myparent.getUserObject();
+           settings.setRegionTypeVisible(cisRegModule.getName()+"."+((ModuleMotif)userObject).getRepresentativeName(),checkedvalue,false);
         }
         else checked=checkedvalue;
     }

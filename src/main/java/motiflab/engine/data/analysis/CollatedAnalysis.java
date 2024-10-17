@@ -94,7 +94,7 @@ public class CollatedAnalysis extends Analysis {
 
     /** Adds a new (empty) column to this collated analysis
      *  @param columnname the name to use for the new column in this analysis
-     *  @param type The class of the Data object that this collated analysis contains (e.g. Motif.class, Module.class or Sequence.class)
+     *  @param type The class of the Data object that this collated analysis contains (e.g. Motif.class, ModuleCRM.class or Sequence.class)
      *  @param columnData
      *  @param origin A String pair defining the [0] Analysis of origin (or DataMap) for the column [1] name of the column in that analysis (or the keyword 'values' for DataMaps)
      */
@@ -102,8 +102,8 @@ public class CollatedAnalysis extends Analysis {
         if (columns!=null) {
             for (int i=0;i<columns.size();i++) if (columnname.equalsIgnoreCase(columns.get(i))) throw new ExecutionError("Duplicate column name '"+columnname+"' in analysis '"+name+"'");
         }
-        if ((collateType==Motif.class || collateType==Module.class) && columnname.equalsIgnoreCase("ID")) throw new ExecutionError("The column name 'ID' is reserved in analysis '"+name+"'");
-        if ((collateType==Motif.class || collateType==Module.class) && columnname.equalsIgnoreCase("Logo")) throw new ExecutionError("The column name 'Logo' is reserved in analysis '"+name+"'");
+        if ((collateType==Motif.class || collateType==ModuleCRM.class) && columnname.equalsIgnoreCase("ID")) throw new ExecutionError("The column name 'ID' is reserved in analysis '"+name+"'");
+        if ((collateType==Motif.class || collateType==ModuleCRM.class) && columnname.equalsIgnoreCase("Logo")) throw new ExecutionError("The column name 'Logo' is reserved in analysis '"+name+"'");
         if (columnname.equalsIgnoreCase("Name")) throw new ExecutionError("The column name 'Name' is reserved in analysis '"+name+"'");
         if (collateType==Motif.class && columnname.equalsIgnoreCase("Class")) throw new ExecutionError("The column name 'Class' is reserved in analysis '"+name+"'");
         columns.add(columnname);
@@ -212,11 +212,11 @@ public class CollatedAnalysis extends Analysis {
            if (variablename.equalsIgnoreCase(columns.get(i))) {
                Class type=columnTypes.get(i);
                if (Number.class.isAssignableFrom(type)) {
-                   if (collateType==Motif.class || collateType==Module.class || collateType==Sequence.class) return getColumnAsNumericMap(tabledata.get(i));
+                   if (collateType==Motif.class || collateType==ModuleCRM.class || collateType==Sequence.class) return getColumnAsNumericMap(tabledata.get(i));
                    else return getColumnAsTextVariable(tabledata.get(i)); // Numeric data for non-standard type
                }
                else {
-                   if (collateType==Motif.class || collateType==Module.class || collateType==Sequence.class) return getColumnAsTextMap(tabledata.get(i));
+                   if (collateType==Motif.class || collateType==ModuleCRM.class || collateType==Sequence.class) return getColumnAsTextMap(tabledata.get(i));
                    else return getColumnAsTextVariable(tabledata.get(i));
                }
            }
@@ -232,13 +232,13 @@ public class CollatedAnalysis extends Analysis {
                Class type=columnTypes.get(i);               
                if (Number.class.isAssignableFrom(type)) {
                         if (collateType==Motif.class) return MotifNumericMap.class;
-                   else if (collateType==Module.class) return ModuleNumericMap.class;
+                   else if (collateType==ModuleCRM.class) return ModuleNumericMap.class;
                    else if (collateType==Sequence.class) return SequenceNumericMap.class;
                    else return TextVariable.class; // this has not been accounted for, so I just return a text variable :|
                }
                else {
                         if (collateType==Motif.class) return MotifTextMap.class;
-                   else if (collateType==Module.class) return ModuleTextMap.class;
+                   else if (collateType==ModuleCRM.class) return ModuleTextMap.class;
                    else if (collateType==Sequence.class) return SequenceTextMap.class;
                    else return TextVariable.class; // this has not been accounted for, so I just return a text variable :|
                }              
@@ -250,7 +250,7 @@ public class CollatedAnalysis extends Analysis {
     private NumericMap getColumnAsNumericMap(HashMap<String, Object> column) {
         NumericMap result=null;
              if (collateType==Motif.class) result=new MotifNumericMap("temp",0);
-        else if (collateType==Module.class) result=new ModuleNumericMap("temp",0);
+        else if (collateType==ModuleCRM.class) result=new ModuleNumericMap("temp",0);
         else if (collateType==Sequence.class) result=new SequenceNumericMap("temp",0);
         ArrayList<String> rows=new ArrayList<String>(entryNames.size());
         rows.addAll(entryNames);
@@ -282,7 +282,7 @@ public class CollatedAnalysis extends Analysis {
     private TextMap getColumnAsTextMap(HashMap<String, Object> column) {
         TextMap result=null;
              if (collateType==Motif.class) result=new MotifTextMap("temp","");
-        else if (collateType==Module.class) result=new ModuleTextMap("temp","");
+        else if (collateType==ModuleCRM.class) result=new ModuleTextMap("temp","");
         else if (collateType==Sequence.class) result=new SequenceTextMap("temp","");
         for (String key:column.keySet()) {
             Object value=column.get(key);
@@ -459,7 +459,7 @@ public class CollatedAnalysis extends Analysis {
         }
         if (include!=null && include.getMembersClass()!=collateType) include=null; // ignore non-compatible collection
         boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
-        showSequenceLogos = (showSequenceLogos && (collateType==Motif.class || collateType==Module.class));
+        showSequenceLogos = (showSequenceLogos && (collateType==Motif.class || collateType==ModuleCRM.class));
         
         engine.createHTMLheader((headline!=null)?headline:"Collated Analysis", null, null, true, true, true, outputobject);
         outputobject.append("<h1 class=\"headline\">",HTML);
@@ -505,7 +505,7 @@ public class CollatedAnalysis extends Analysis {
             if (showColorBoxes) {
                 Color color=Color.WHITE;
                 Data data=engine.getDataItem(dataname);                
-                if (data instanceof Motif || data instanceof Module) color=vizSettings.getFeatureColor(dataname);
+                if (data instanceof Motif || data instanceof ModuleCRM) color=vizSettings.getFeatureColor(dataname);
                 else if (data instanceof Sequence) color=vizSettings.getSequenceLabelColor(dataname);               
                 String colorString=VisualizationSettings.convertColorToHTMLrepresentation(color);
                 outputobject.append("<td><div style=\"width:10px;height:10px;border:1px solid #000;background-color:"+colorString+";\"></div></td>",HTML);
@@ -549,7 +549,7 @@ public class CollatedAnalysis extends Analysis {
                 }
                 else outputobject.append("<td>",HTML);
                 if (data instanceof Motif) outputobject.append(getMotifLogoTag((Motif)data, outputobject, sequencelogo, showSequenceLogosString, engine),HTML);
-                else if (data instanceof Module) outputobject.append(getModuleLogoTag((Module)data, outputobject, modulelogo, showSequenceLogosString, engine),HTML);               
+                else if (data instanceof ModuleCRM) outputobject.append(getModuleLogoTag((ModuleCRM)data, outputobject, modulelogo, showSequenceLogosString, engine),HTML);               
                 outputobject.append("</td>",HTML);
             }
             outputobject.append("</tr>\n",HTML);
@@ -575,8 +575,8 @@ public class CollatedAnalysis extends Analysis {
         Color [] basecolors=vizSettings.getBaseColors();
         boolean border=(Boolean)vizSettings.getSettingAsType("motif.border", Boolean.TRUE);        
         MotifLogo sequencelogo = (collateType==Motif.class)?new MotifLogo(basecolors,sequencelogoSize):null;
-        ModuleLogo modulelogo = (collateType==Module.class)?new ModuleLogo(vizSettings):null;
-        int logoheight = (collateType==Module.class)?28:19;        
+        ModuleLogo modulelogo = (collateType==ModuleCRM.class)?new ModuleLogo(vizSettings):null;
+        int logoheight = (collateType==ModuleCRM.class)?28:19;        
         String showSequenceLogosString="";
         boolean showOnlyMarkup=false;
         boolean includeLegend=false;
@@ -594,7 +594,7 @@ public class CollatedAnalysis extends Analysis {
         }
         if (include!=null && include.getMembersClass()!=collateType) include=null; // ignore non-compatible collection
         boolean showLogos = includeLogosInOutput(showSequenceLogosString);
-        showLogos = (showLogos && (collateType==Motif.class || collateType==Module.class));
+        showLogos = (showLogos && (collateType==Motif.class || collateType==ModuleCRM.class));
         boolean showLogosAsText = (showLogos && includeLogosInOutputAsText(showSequenceLogosString));
         
         int rownum=0;
@@ -737,13 +737,13 @@ public class CollatedAnalysis extends Analysis {
                         picanchor.setDx2(picanchor.getDx2()+offsetX);
                         picanchor.setDy2(picanchor.getDy2()+offsetY);                         
                     } catch (Exception e) {throw new ExecutionError(e.getMessage());}                   
-                } else if (data instanceof Module && showLogosAsText) {                   
-                    cell.setCellValue( ((Module)data).getModuleLogo() );
-                } else if (data instanceof Module) {
-                    Module module = (Module)data;
+                } else if (data instanceof ModuleCRM && showLogosAsText) {                   
+                    cell.setCellValue(((ModuleCRM)data).getModuleLogo() );
+                } else if (data instanceof ModuleCRM) {
+                    ModuleCRM cisRegModule = (ModuleCRM)data;
                     try {
                         row.setHeightInPoints((short)(logoheight));                        
-                        modulelogo.setModule(module);                        
+                        modulelogo.setModule(cisRegModule);                        
                         byte[] image=getModuleLogoImageAsByteArray(modulelogo, logoheight, false, "png");
                         int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
                         ClientAnchor anchor = helper.createClientAnchor();
@@ -823,7 +823,7 @@ public class CollatedAnalysis extends Analysis {
         }
         if (include!=null && include.getMembersClass()!=collateType) include=null; // ignore non-compatible collection        
         boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
-        showSequenceLogos = (showSequenceLogos && (collateType==Motif.class || collateType==Module.class));
+        showSequenceLogos = (showSequenceLogos && (collateType==Motif.class || collateType==ModuleCRM.class));
         ArrayList<String> rows=new ArrayList<String>(entryNames.size());;
         if (include!=null) {
            for (String entry:include.getValues()) {
@@ -860,7 +860,7 @@ public class CollatedAnalysis extends Analysis {
                 outputobject.append("\t",RAWDATA);
                 Data data=engine.getDataItem(dataname);
                 if (data instanceof Motif) outputobject.append(((Motif)data).getConsensusMotif(),RAWDATA);
-                else if (data instanceof Module) outputobject.append(((Module)data).getModuleLogo(),RAWDATA);
+                else if (data instanceof ModuleCRM) outputobject.append(((ModuleCRM)data).getModuleLogo(),RAWDATA);
             }
             outputobject.append("\n",RAWDATA);
             if (i%100==0) {
@@ -886,7 +886,7 @@ public class CollatedAnalysis extends Analysis {
             String classname=(object instanceof Motif)?((Motif)object).getClassification():null;  
             output.append((classname!=null)?classname:"unknown", RAWDATA);
         
-        } else output.append(dataname, RAWDATA); // not anything more interresting for Module or Sequence so far     
+        } else output.append(dataname, RAWDATA); // not anything more interresting for ModuleCRM or Sequence so far     
     }
 
     private void outputPrefixColumnsHTML(OutputData output, String dataname, MotifLabEngine engine) {
@@ -913,7 +913,7 @@ public class CollatedAnalysis extends Analysis {
             output.append("<td>", HTML);
             output.append(escapeHTML(dataname), HTML);
             output.append("</td>", HTML);
-        } // not anything more interresting for Module or Sequence so far
+        } // not anything more interresting for ModuleCRM or Sequence so far
     }
     
     private int outputPrefixColumnsExcel(Row row, int column, String dataname, CellStyle style, MotifLabEngine engine) {
@@ -933,7 +933,7 @@ public class CollatedAnalysis extends Analysis {
             Cell cell = row.createCell(column++);
             cell.setCellValue(dataname);
             cell.setCellStyle(style);            
-        } // not anything more interresting for Module or Sequence so far
+        } // not anything more interresting for ModuleCRM or Sequence so far
         return column;
     }    
 
@@ -951,19 +951,19 @@ public class CollatedAnalysis extends Analysis {
         CollatedTableModel tablemodel=new CollatedTableModel(gui);
         GenericBrowserPanel panel;
         if (collateType==Motif.class) panel=new GenericMotifBrowserPanel(gui, tablemodel, modal);
-        else if (collateType==Module.class) panel=new GenericModuleBrowserPanel(gui, tablemodel, modal);
+        else if (collateType==ModuleCRM.class) panel=new GenericModuleBrowserPanel(gui, tablemodel, modal);
         else if (collateType==Sequence.class) panel=new GenericSequenceBrowserPanel(gui, tablemodel, modal);
         else panel=new GenericMotifBrowserPanel(gui, tablemodel, modal);
         ArrayList<String> headertooltips=new ArrayList<String>(columns.size()+5); // the +5 is not a 'constant', its just to make some extra room for whatever may come next
         if (collateType==Motif.class) {headertooltips.add("Color");headertooltips.add("ID");headertooltips.add("Name");headertooltips.add("Class");}
-        else if (collateType==Module.class) {headertooltips.add("Color");headertooltips.add("ID");}
+        else if (collateType==ModuleCRM.class) {headertooltips.add("Color");headertooltips.add("ID");}
         else if (collateType==Sequence.class) {headertooltips.add("Name");}
         for (int i=0;i<columns.size();i++) {
             String[] origin=originalColumns.get(i);
             if (origin!=null) headertooltips.add(origin[0]+" &rarr; "+origin[1]);
             else headertooltips.add(columns.get(i));
         }
-        if (collateType==Motif.class || collateType==Module.class) headertooltips.add("Logo");
+        if (collateType==Motif.class || collateType==ModuleCRM.class) headertooltips.add("Logo");
         JTable table=panel.getTable();
         ToolTipHeader header = new ToolTipHeader(table.getColumnModel(),headertooltips);
         table.setTableHeader(header);
@@ -1024,7 +1024,7 @@ private class CollatedTableModel extends AbstractTableModel {
             columnnames[3]="Class";
             for (int i=0;i<columns.size();i++) columnnames[i+PREFIX_COLUMNS_FOR_MOTIF]=columns.get(i);
             columnnames[columnnames.length-1]="Logo";
-        } else if (collateType==Module.class) {
+        } else if (collateType==ModuleCRM.class) {
             columnnames=new String[columns.size()+PREFIX_COLUMNS_FOR_MODULE+POSTFIX_COLUMNS_FOR_MODULE];
             columnnames[0]=" "; // this is for color
             columnnames[1]="ID";            
@@ -1047,10 +1047,10 @@ private class CollatedTableModel extends AbstractTableModel {
             else if (columnIndex==3) return String.class; // Class
             else if (columnIndex==columnnames.length-1) return Motif.class; // this is for the logo
             else return columnTypes.get(columnIndex-PREFIX_COLUMNS_FOR_MOTIF);
-        } else if (collateType==Module.class) {
+        } else if (collateType==ModuleCRM.class) {
             if (columnIndex==0) return Color.class;
             else if (columnIndex==1) return String.class; // ID
-            else if (columnIndex==columnnames.length-1) return Module.class; // this is for the logo
+            else if (columnIndex==columnnames.length-1) return ModuleCRM.class; // this is for the logo
             else return columnTypes.get(columnIndex-PREFIX_COLUMNS_FOR_MODULE);
         } else {
             if (columnIndex==0) return Sequence.class; // Name
@@ -1079,9 +1079,9 @@ private class CollatedTableModel extends AbstractTableModel {
         else return "unknown";
     }
 
-    public final Module getModule(String id) {
+    public final ModuleCRM getModule(String id) {
         Data data=engine.getDataItem(id);
-        if (data instanceof Module) return (Module)data;
+        if (data instanceof ModuleCRM) return (ModuleCRM)data;
         else return null;
     }
 
@@ -1106,7 +1106,7 @@ private class CollatedTableModel extends AbstractTableModel {
             else if (columnIndex==3) return getMotifClass(dataname); // Class
             else if (columnIndex==columnnames.length-1) return getMotif(dataname); // this is for the logo
             else columnIndex-=PREFIX_COLUMNS_FOR_MOTIF;
-        } else if (collateType==Module.class) {
+        } else if (collateType==ModuleCRM.class) {
             if (columnIndex==0) return getFeatureColor(dataname);
             else if (columnIndex==1) return dataname; // ID
             else if (columnIndex==columnnames.length-1) return getModule(dataname); // this is for the logo
@@ -1128,7 +1128,7 @@ private class CollatedTableModel extends AbstractTableModel {
 //            else if (columnIndex==3) return getMotifClass(dataname); // Class
 //            else if (columnIndex==columnnames.length-1) return getMotif(dataname); // this is for the logo
 //            else columnIndex-=PREFIX_COLUMNS_FOR_MOTIF;
-//        } else if (collateType==Module.class) {
+//        } else if (collateType==ModuleCRM.class) {
 //            if (columnIndex==0) return getFeatureColor(dataname);
 //            else if (columnIndex==1) return dataname; // ID
 //            else if (columnIndex==columnnames.length-1) return getModule(dataname); // this is for the logo

@@ -22,7 +22,7 @@ import javax.swing.JToolTip;
 import javax.swing.SwingUtilities;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.Region;
 import motiflab.engine.data.RegionSequenceData;
@@ -51,7 +51,7 @@ public class MotifTooltip extends JToolTip implements MouseMotionListener {
     protected Dimension lastsize=null; // keeps track of the last tooltip dimension
     protected ArrayList<Region> regions=null;
     protected Color[] basecolors=new Color[4];
-    protected ExpandedViewMotifTooltip expandedViewtooltip; // this is used to draw Module tooltips when there is only one module under the mouse pointer
+    protected ExpandedViewMotifTooltip expandedViewtooltip; // this is used to draw ModuleCRM tooltips when there is only one module under the mouse pointer
     private int maxLines=20; // maximum number of overlapping regions to display tooltip for
     
     public MotifTooltip(DataTrackVisualizer_Region trackvisualizer, VisualizationSettings settings) {
@@ -193,15 +193,15 @@ public class MotifTooltip extends JToolTip implements MouseMotionListener {
            for (int i=0;i<regions.size();i++) { //
                Region region=regions.get(i);
                Data data=engine.getDataItem(region.getType());
-               if (data instanceof Module) {
+               if (data instanceof ModuleCRM) {
                    if (targetModule==null) targetModule=data;
-                   else if (targetModule instanceof Module && !((Module)targetModule).equals((Module)data)) targetModule=""; // this string is just a flag to indicate non-homogenous modules in list
+                   else if (targetModule instanceof ModuleCRM && !((ModuleCRM)targetModule).equals((ModuleCRM)data)) targetModule=""; // this string is just a flag to indicate non-homogenous modules in list
                    list[i]=new Object[]{region,data};
                }
                else list[i]=region;
            }
-           if (targetModule instanceof Module) { // make room to draw module logo
-               ModuleLogo.paintModuleLogo((Graphics2D)g, (Module)targetModule, 5, yoffset+8, settings, null,0);
+           if (targetModule instanceof ModuleCRM) { // make room to draw module logo
+               ModuleLogo.paintModuleLogo((Graphics2D)g, (ModuleCRM)targetModule, 5, yoffset+8, settings, null,0);
                yoffset+=modulelogoheight;
            }
            // sort the array so that all regions with modules are first and second according to position (which is orientation dependent!)
@@ -210,19 +210,19 @@ public class MotifTooltip extends JToolTip implements MouseMotionListener {
            for (int i=0;i<list.length;i++) { // paint info for each region
                Object object=list[i];
                Region region=null;
-               Module module=null;
+               ModuleCRM cisRegModule=null;
                if (object instanceof Region) {
                    region=(Region)object;
                } else {
                    region=(Region)((Object[])object)[0];
-                   module=(Module)((Object[])object)[1];
+                   cisRegModule=(ModuleCRM)((Object[])object)[1];
                }
                g.setColor(settings.getFeatureColor(region.getType()));
                g.fillRect(1, yoffset, lineheight, lineheight);
-               String modulemotif=(module!=null)?getMotifAtPosition(region, module, regiontrack.getRelativePositionFromGenomic(pos)):null;
+               String modulemotif=(cisRegModule!=null)?getMotifAtPosition(region, cisRegModule, regiontrack.getRelativePositionFromGenomic(pos)):null;
                Color modulemotifcolor=null;
                if (modulemotif!=null) {
-                   modulemotifcolor=settings.getFeatureColor(module.getName()+"."+modulemotif);
+                   modulemotifcolor=settings.getFeatureColor(cisRegModule.getName()+"."+modulemotif);
                    g.setColor(modulemotifcolor);
                    g.fillRect(6, yoffset+5, 10, 10);
                    // bevel effect
@@ -238,7 +238,7 @@ public class MotifTooltip extends JToolTip implements MouseMotionListener {
                g.drawRect(1, yoffset, lineheight, lineheight);
                String moduletext=null;
                if (object instanceof Object[]) {
-                   moduletext=getRegionStringModule(region,module);
+                   moduletext=getRegionStringModule(region,cisRegModule);
                 } else {
                    moduletext=getRegionString(region,null);
                }
@@ -308,10 +308,10 @@ public class MotifTooltip extends JToolTip implements MouseMotionListener {
             for (int i=0;i<regions.size();i++) { // determine width of description string (excluding logo)
                 Region region=regions.get(i);
                 Data data=engine.getDataItem(region.getType());
-                if (data!=null && data instanceof Module) {
+                if (data!=null && data instanceof ModuleCRM) {
                    if (targetModule==null) targetModule=data;
-                   else if (targetModule instanceof Module && !((Module)targetModule).equals((Module)data)) targetModule=""; // this string is just a flag to indicate non-homogenous modules in list
-                   String string=getRegionStringModule(region,(Module)data);
+                   else if (targetModule instanceof ModuleCRM && !((ModuleCRM)targetModule).equals((ModuleCRM)data)) targetModule=""; // this string is just a flag to indicate non-homogenous modules in list
+                   String string=getRegionStringModule(region,(ModuleCRM)data);
                    int linewidth=metrics.stringWidth(string)+xoffset+10;
                    if (linewidth>width) width=linewidth;
                 } else { // region is not a motif
@@ -320,10 +320,10 @@ public class MotifTooltip extends JToolTip implements MouseMotionListener {
                    if (linewidth>width) width=linewidth;
                 }
             }
-            if (targetModule instanceof Module) { // make room to draw module logo
+            if (targetModule instanceof ModuleCRM) { // make room to draw module logo
                Font modulemotiffont=ModuleLogo.getModuleMotifFont();
                FontMetrics modulelogometrics=this.getFontMetrics(modulemotiffont);
-               int logowidth=ModuleLogo.getLogoWidth(modulelogometrics,(Module)targetModule)+10;
+               int logowidth=ModuleLogo.getLogoWidth(modulelogometrics,(ModuleCRM)targetModule)+10;
                if (logowidth>width) width=logowidth;
                modulelogospace=modulelogoheight;
             }
@@ -364,15 +364,15 @@ public class MotifTooltip extends JToolTip implements MouseMotionListener {
      * will be be presentation name of the motif. If motif==null then the returned name
      * will just be the type of the region
      */
-    private String getRegionStringModule(Region region, Module module) {
+    private String getRegionStringModule(Region region, ModuleCRM cisRegModule) {
         String orientation;
         if (region.getOrientation()==Region.DIRECT) orientation="+";
         else if (region.getOrientation()==Region.REVERSE) orientation="\u2013"; // &ndash;
         else orientation=".";
         String type=region.getType();
         if (type==null) type="UNKNOWN";
-        int[] stats=getModuleMotifRegionFullCount(region,module);
-        int cardinality=module.getCardinality();
+        int[] stats=getModuleMotifRegionFullCount(region,cisRegModule);
+        int cardinality=cisRegModule.getCardinality();
         int present=stats[1];
         int multiple=stats[3];
         StringBuilder builder=new StringBuilder();
@@ -391,8 +391,8 @@ public class MotifTooltip extends JToolTip implements MouseMotionListener {
         return builder.toString();
     }
 
-    private String getMotifAtPosition(Region region, Module module, int pos) {
-        for (String modulemotifname:module.getSingleMotifNames()) {
+    private String getMotifAtPosition(Region region, ModuleCRM cisRegModule, int pos) {
+        for (String modulemotifname:cisRegModule.getSingleMotifNames()) {
            Object mm=region.getProperty(modulemotifname);
            if (mm instanceof Region) {
                int start=((Region)mm).getRelativeStart();
@@ -530,9 +530,9 @@ public class MotifTooltip extends JToolTip implements MouseMotionListener {
       *  [2] => number of modulemotifs that are absent ([1]+[2] should sum to module cardinality)
       *  [3] => number of modulemotifs which multiple instances
       */
-    private int[] getModuleMotifRegionFullCount(Region region, Module module) {
+    private int[] getModuleMotifRegionFullCount(Region region, ModuleCRM cisRegModule) {
         int[] count=new int[]{0,0,0,0};
-        for (String mmname:(module).getSingleMotifNames()) {
+        for (String mmname:(cisRegModule).getSingleMotifNames()) {
             Object property=region.getProperty(mmname);
             if (property==null) {count[2]++;}
             else if(property instanceof Region) {

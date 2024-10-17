@@ -54,7 +54,7 @@ public class Operation_new extends Operation {
      * the data type with the longer name must be listed before the one with the shorter name!)
      */
     public static String[] getAvailableTypes() {
-        return new String[]{RegionDataset.getType(),DNASequenceDataset.getType(),NumericDataset.getType(), SequenceCollection.getType(), SequencePartition.getType(), SequenceTextMap.getType(), SequenceNumericMap.getType(), Sequence.getType(), BackgroundModel.getType(), MotifCollection.getType(), MotifPartition.getType(), MotifTextMap.getType(), MotifNumericMap.getType(), Motif.getType(), ModuleCollection.getType(), ModulePartition.getType(), ModuleTextMap.getType(), ModuleNumericMap.getType(), Module.getType(), ExpressionProfile.getType(), GeneralNumericMap.getType(), NumericVariable.getType(), TextVariable.getType(), PriorsGenerator.getType(), OutputData.getType()};
+        return new String[]{RegionDataset.getType(),DNASequenceDataset.getType(),NumericDataset.getType(), SequenceCollection.getType(), SequencePartition.getType(), SequenceTextMap.getType(), SequenceNumericMap.getType(), Sequence.getType(), BackgroundModel.getType(), MotifCollection.getType(), MotifPartition.getType(), MotifTextMap.getType(), MotifNumericMap.getType(), Motif.getType(), ModuleCollection.getType(), ModulePartition.getType(), ModuleTextMap.getType(), ModuleNumericMap.getType(), ModuleCRM.getType(), ExpressionProfile.getType(), GeneralNumericMap.getType(), NumericVariable.getType(), TextVariable.getType(), PriorsGenerator.getType(), OutputData.getType()};
     }
     
     @Override
@@ -209,9 +209,9 @@ public class Operation_new extends Operation {
             if (parameter!=null && !parameter.isEmpty()) {
                  newDataItem=Motif.parseMotifParameters(parameter,targetName,engine);
             } else throw new ExecutionError("Missing parameters for motif "+targetName);
-        } else if (datatype.equalsIgnoreCase(Module.getType())) {
+        } else if (datatype.equalsIgnoreCase(ModuleCRM.getType())) {
             if (parameter!=null && !parameter.isEmpty()) {
-                 newDataItem=Module.createModuleFromParameterString(targetName,parameter,engine);
+                 newDataItem=ModuleCRM.createModuleFromParameterString(targetName,parameter,engine);
             } else throw new ExecutionError("Missing parameters for module "+targetName);
         } else if (datatype.equalsIgnoreCase(ModuleCollection.getType())) {
             if (parameter!=null && !parameter.isEmpty()) {

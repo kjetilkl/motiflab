@@ -28,7 +28,7 @@ import motiflab.engine.ParameterSettings;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Data;
 import motiflab.engine.data.DataCollection;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.MotifCollection;
@@ -604,7 +604,7 @@ public class CompareCollectionsAnalysis extends Analysis {
         } else {
                  if (firstCollection instanceof SequenceCollection) backgroundCollection=task.getEngine().getDefaultSequenceCollection();
             else if (firstCollection instanceof MotifCollection) {backgroundCollection=new MotifCollection("temp"); ((MotifCollection)backgroundCollection).addMotifNames(task.getEngine().getNamesForAllDataItemsOfType(Motif.class));}
-            else if (firstCollection instanceof ModuleCollection) {backgroundCollection=new MotifCollection("temp"); ((ModuleCollection)backgroundCollection).addModuleNames(task.getEngine().getNamesForAllDataItemsOfType(Module.class));}
+            else if (firstCollection instanceof ModuleCollection) {backgroundCollection=new MotifCollection("temp"); ((ModuleCollection)backgroundCollection).addModuleNames(task.getEngine().getNamesForAllDataItemsOfType(ModuleCRM.class));}
         }
         firstCollectionName=firstCollection.getName();
         secondCollectionName=secondCollection.getName();

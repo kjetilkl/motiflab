@@ -44,7 +44,7 @@ import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.analysis.GroupRowSorter;
 import motiflab.gui.prompt.MyDefaultRowSorter;
@@ -265,7 +265,7 @@ public class JSearchTextField extends JTextField implements FocusListener, Mouse
                String valueString=null;
                if (cellvalue == doNotFilter) return true;
                if (cellvalue instanceof Motif) valueString=((Motif)cellvalue).getPresentationName().toLowerCase();               
-               else if (cellvalue instanceof Module) valueString=((Module)cellvalue).getNamePlusSingleMotifNames().toLowerCase();                             
+               else if (cellvalue instanceof ModuleCRM) valueString=((ModuleCRM)cellvalue).getNamePlusSingleMotifNames().toLowerCase();                             
                else valueString=entry.getStringValue(i).toLowerCase();
                if (isSearchMatch(valueString)) return true; // check one column at a time                       
            }

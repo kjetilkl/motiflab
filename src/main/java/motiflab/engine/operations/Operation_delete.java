@@ -53,7 +53,7 @@ public class Operation_delete extends Operation {
             if (data==engine.getDefaultSequenceCollection()) throw new ExecutionError("'"+engine.getDefaultSequenceCollectionName()+"' can not be deleted with the 'delete' operation",task.getLineNumber());
             if (data instanceof Sequence) throw new ExecutionError("Sequences can not be deleted with the 'delete' operation (use 'drop_sequences' instead)",task.getLineNumber());
             if (data instanceof Motif) throw new ExecutionError("Motifs can not be deleted with the 'delete' operation",task.getLineNumber());
-            if (data instanceof Module) throw new ExecutionError("Modules can not be deleted with the 'delete' operation",task.getLineNumber());
+            if (data instanceof ModuleCRM) throw new ExecutionError("Modules can not be deleted with the 'delete' operation",task.getLineNumber());
         }
         for (String source:sourceNames) {
             engine.removeDataItem(source);

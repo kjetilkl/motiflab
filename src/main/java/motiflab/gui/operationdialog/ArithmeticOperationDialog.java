@@ -15,7 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import motiflab.engine.data.DataCollection;
 import motiflab.engine.data.ExpressionProfile;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleNumericMap;
 import motiflab.engine.data.ModuleTextMap;
@@ -99,7 +99,7 @@ public abstract class ArithmeticOperationDialog extends FeatureTransformOperatio
         String sourceName=(String)sourceDataCombobox.getSelectedItem();
         if (sourceName!=null) sourceName=sourceName.trim();
         Class sourceType=getClassForDataItem(sourceName);
-        boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==Module.class);                
+        boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==ModuleCRM.class);                
         propertyCombobox=new JComboBox();
         operandPanel=new JPanel(new FlowLayout(FlowLayout.LEADING));
         operandPanel.setBorder(commonBorder);
@@ -152,7 +152,7 @@ public abstract class ArithmeticOperationDialog extends FeatureTransformOperatio
                 setOperandComboboxModelBasedOnSource(sourceType);
                 setVisibilityOfRangePanel(sourceType==NumericDataset.class || sourceType==RegionDataset.class);
                 regionOperatorCombobox.setVisible(sourceType==RegionDataset.class && operandType==NumericDataset.class);
-                boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==Module.class);                
+                boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==ModuleCRM.class);                
                 propertyCombobox.setModel(getPropertiesCombobox(sourceType));
                 propertyCombobox.setEditable(usePropertyBox);
                 pack();
@@ -168,7 +168,7 @@ public abstract class ArithmeticOperationDialog extends FeatureTransformOperatio
                 Class sourceType=getClassForDataItem(sourceName);
                 Class operandType=getClassForDataItem(operandString);
                 regionOperatorCombobox.setVisible(sourceType==RegionDataset.class && operandType==NumericDataset.class);
-                boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==Module.class);                
+                boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==ModuleCRM.class);                
                 Object currentSelectionObject=propertyCombobox.getSelectedItem();
                 propertyCombobox.setModel(getPropertiesCombobox(sourceType));
                 propertyCombobox.setEditable(usePropertyBox);
@@ -215,7 +215,7 @@ public abstract class ArithmeticOperationDialog extends FeatureTransformOperatio
         else if (sourceType==ModuleTextMap.class) operandCombobox.setModel(model_ModuleTextMap);        
         else if (sourceType==ExpressionProfile.class) operandCombobox.setModel(model_ExpressionProfile);  
         else if (sourceType==Motif.class || sourceType==MotifCollection.class) operandCombobox.setModel(model_Motif);  
-        else if (sourceType==Module.class || sourceType==ModuleCollection.class) operandCombobox.setModel(model_Module);  
+        else if (sourceType==ModuleCRM.class || sourceType==ModuleCollection.class) operandCombobox.setModel(model_Module);  
         else if (sourceType==Sequence.class || sourceType==SequenceCollection.class) operandCombobox.setModel(model_Sequence);  
         else operandCombobox.setModel(model_NumericVariable);              
     }
@@ -252,7 +252,7 @@ public abstract class ArithmeticOperationDialog extends FeatureTransformOperatio
           }
         }
         if (sourceType==RegionDataset.class && operandType==NumericDataset.class) parameters.setParameter(ArithmeticOperation.REGION_OPERATOR, (String)regionOperatorCombobox.getSelectedItem());
-        boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==Module.class);                      
+        boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==ModuleCRM.class);                      
         if (usePropertyBox) {
             String property=((String)propertyCombobox.getSelectedItem()).trim();
             if (property.isEmpty()) property=null;
@@ -362,8 +362,8 @@ public abstract class ArithmeticOperationDialog extends FeatureTransformOperatio
         } else if (type==Motif.class || type==MotifCollection.class) {
             String[] props=Motif.getAllEditableProperties(engine);
             return new DefaultComboBoxModel(props);
-        } else if (type==Module.class || type==ModuleCollection.class) {
-            String[] props=Module.getAllEditableProperties(engine);
+        } else if (type==ModuleCRM.class || type==ModuleCollection.class) {
+            String[] props=ModuleCRM.getAllEditableProperties(engine);
             return new DefaultComboBoxModel(props);
         } else return new DefaultComboBoxModel(new String[]{"value"});
     }

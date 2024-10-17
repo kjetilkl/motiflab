@@ -18,7 +18,7 @@ import motiflab.engine.ExecutionError;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.protocol.ParseError;
 import motiflab.engine.Parameter;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleMotif;
 import motiflab.engine.data.MotifCollection;
@@ -169,7 +169,7 @@ public class DataFormat_ClusterBuster extends DataFormat {
                 try {
                   motifscore=Double.parseDouble(elements[4]);
                 } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numeric score for motif in ClusterBuster-format: '"+line+"'", count);}
-                int orientation=(elements[3].equals("-"))?Module.REVERSE:Module.DIRECT;
+                int orientation=(elements[3].equals("-"))?ModuleCRM.REVERSE:ModuleCRM.DIRECT;
                 Region motifregion=new Region(null, motifstart, motifend, motifname, motifscore, orientation);
                 singlemotifs.add(motifregion);
             } else if (line.trim().isEmpty()) { // this means end of section
@@ -184,30 +184,30 @@ public class DataFormat_ClusterBuster extends DataFormat {
         return target;
     }
 
-    /** Adds a cluster to the target Data object either as Module or as a site */
+    /** Adds a cluster to the target Data object either as ModuleCRM or as a site */
     @SuppressWarnings("unchecked")
     private void registerCluster(Data target, String sequencename, int clusterIndex, int start, int end, double score, ArrayList<Region> singlemotifs) {
         String moduleName=sequencename+"_"+clusterIndex;
         //engine.logMessage("Register cluster "+moduleName+" to "+target.getTypeDescription()+"  location="+start+"-"+end+", score="+score+"  motifs="+singlemotifs.size());
-        if (target instanceof ModuleCollection) { // register Module
-            Module module=new Module(moduleName);
-            module.setMaxLength(end-start+1);
-            module.setOrdered(false);
+        if (target instanceof ModuleCollection) { // register ModuleCRM
+            ModuleCRM cisRegModule=new ModuleCRM(moduleName);
+            cisRegModule.setMaxLength(end-start+1);
+            cisRegModule.setOrdered(false);
             if (singlemotifs!=null) {
                 for (Region motif:singlemotifs) {
                     String motifname=motif.getType();
-                    ModuleMotif mm=module.getModuleMotif(motifname);
+                    ModuleMotif mm=cisRegModule.getModuleMotif(motifname);
                     if (mm==null) { // register new module motif for this motif
                         MotifCollection collection=new MotifCollection(moduleName+"_"+motifname);
                         collection.addMotifName(motifname);
-                        module.addModuleMotif(motifname, collection, Module.INDETERMINED);
+                        cisRegModule.addModuleMotif(motifname, collection, ModuleCRM.INDETERMINED);
                     }
                 }
             }
-            ((ModuleCollection)target).addModuleToPayload(module);
-        } else { // register Module site
+            ((ModuleCollection)target).addModuleToPayload(cisRegModule);
+        } else { // register ModuleCRM site
             RegionSequenceData regionsequence=(RegionSequenceData)((RegionDataset)target).getSequenceByName(sequencename);
-            Region moduleRegion=new Region(regionsequence, start, end, moduleName, score, Module.DIRECT);
+            Region moduleRegion=new Region(regionsequence, start, end, moduleName, score, ModuleCRM.DIRECT);
             if (singlemotifs!=null) {
                 for (Region motif:singlemotifs) {
                     motif.setParent(regionsequence);

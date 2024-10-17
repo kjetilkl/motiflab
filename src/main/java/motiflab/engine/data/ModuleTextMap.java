@@ -36,12 +36,12 @@ public class ModuleTextMap extends TextMap {
 
     @Override
     public ArrayList<String> getAllKeys(MotifLabEngine engine) {
-        return engine.getNamesForAllDataItemsOfType(Module.class);
+        return engine.getNamesForAllDataItemsOfType(ModuleCRM.class);
     }
 
     @Override
     public Class getMembersClass() {
-        return Module.class;
+        return ModuleCRM.class;
     }
 
     @Override
@@ -160,7 +160,7 @@ public class ModuleTextMap extends TextMap {
              return new ModuleNumericMap("temp",ranks, ranks.size()+1);             
          } else {
              Data data=engine.getDataItem(variablename);
-             if (data instanceof Module) return new TextVariable("temp",getValue(variablename));             
+             if (data instanceof ModuleCRM) return new TextVariable("temp",getValue(variablename));             
          } 
          throw new ExecutionError("'"+getName()+"' does not have a result for '"+variablename+"'");
     }
@@ -187,13 +187,13 @@ public class ModuleTextMap extends TextMap {
         if (parameterString==null || parameterString.isEmpty()) return data;
         if (parameterString.startsWith(Operation_new.FROM_PROPERTY_PREFIX)) {
             String property=parameterString.substring(Operation_new.FROM_PROPERTY_PREFIX.length()).trim();
-            ArrayList<Data> modules=engine.getAllDataItemsOfType(Module.class);
-            for (Data module:modules) {
-                Object value=((Module)module).getPropertyValue(property, engine);
+            ArrayList<Data> modules=engine.getAllDataItemsOfType(ModuleCRM.class);
+            for (Data cisRegModule:modules) {
+                Object value=((ModuleCRM)cisRegModule).getPropertyValue(property, engine);
                 String valueString="";
                 if (value instanceof List) valueString=MotifLabEngine.splice((List)value, ","); // un-nest lists
                 else if (value!=null) valueString=value.toString();
-                data.setValue(module.getName(),valueString);                
+                data.setValue(cisRegModule.getName(),valueString);                
             }
             data.setFromPropertyName(property);
         } else {
@@ -224,7 +224,7 @@ public class ModuleTextMap extends TextMap {
                 value=value.trim();
                 Data dataobject=null;
                 if (entry.equals(DEFAULT_KEY)) {data.setDefaultValue(value); continue;}
-                else if (entry.contains("->")) { // entry refers to a cluster within a Module Partition
+                else if (entry.contains("->")) { // entry refers to a cluster within a ModuleCRM Partition
                    String[] partitionelements=entry.split("->");
                    if (partitionelements.length!=2) {
                        if (silentMode) {notfound.add(entry+" : Syntax error");continue;} else throw new ExecutionError("Syntax error: "+entry);
@@ -257,16 +257,16 @@ public class ModuleTextMap extends TextMap {
                    } catch(NumberFormatException nf) {
                       if (silentMode) {notfound.add(entry+" : Problem with range specification"); continue;} else throw new ExecutionError("Problem with range specification: "+entry); 
                    }
-                   ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpressionInNumericRange(range1[0], range1[2], start, end, Module.class);
+                   ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpressionInNumericRange(range1[0], range1[2], start, end, ModuleCRM.class);
                    ModuleCollection tempCollection=new ModuleCollection("_temp");
                    for (Data object:regexmatches) {
-                       tempCollection.addModule((Module)object);
+                       tempCollection.addModule((ModuleCRM)object);
                    }
                    addToModuleMapValues(data,tempCollection,value);
                    continue; 
                } else if (entry.matches(".*\\W.*")) { // contains non-word characters (not letter,number or underscore)                
                    if (entry.contains("*")) entry=entry.replace("*", ".*"); // convert wildcard * to proper regex
-                   ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpression(entry, Module.class);
+                   ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpression(entry, ModuleCRM.class);
                    for (Data object:regexmatches) {
                        addToModuleMapValues(data,object,value);
                    }
@@ -275,7 +275,7 @@ public class ModuleTextMap extends TextMap {
                    dataobject=engine.getDataItem(entry);
                 }
                      if (dataobject==null) {if (silentMode) notfound.add(entry+" : Unknown data item"); else throw new ExecutionError("Unknown data item: "+entry);}
-                else if (!(dataobject instanceof Module || dataobject instanceof ModuleCollection)) {if (silentMode) notfound.add(entry+" : Not a Module or Module Collection)"); else throw new ExecutionError("Data item '"+entry+"' is not a Module or Module Collection");}
+                else if (!(dataobject instanceof ModuleCRM || dataobject instanceof ModuleCollection)) {if (silentMode) notfound.add(entry+" : Not a Module or Module Collection)"); else throw new ExecutionError("Data item '"+entry+"' is not a Module or Module Collection");}
                 else {
                    addToModuleMapValues(data,dataobject,value);
                 }           
@@ -287,11 +287,11 @@ public class ModuleTextMap extends TextMap {
     
      private static void addToModuleMapValues(ModuleTextMap target, Object other, String value) {
         if (other==null) return;
-        if (other instanceof Module) {
-            target.setValue(((Module)other).getName(), value);
+        if (other instanceof ModuleCRM) {
+            target.setValue(((ModuleCRM)other).getName(), value);
         } else if (other instanceof ModuleCollection) {
-            for (String module:((ModuleCollection)other).getAllModuleNames()) {
-                target.setValue(module, value);
+            for (String modulename:((ModuleCollection)other).getAllModuleNames()) {
+                target.setValue(modulename, value);
             }
         } else {
             System.err.println("SYSTEM ERROR: In ModuleTextMap.addToModuleMapValues. Parameter is neither Module nor Module Collection but rather: "+other.getClass().getSimpleName());

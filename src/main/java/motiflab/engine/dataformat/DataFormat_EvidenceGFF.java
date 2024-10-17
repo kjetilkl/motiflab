@@ -28,7 +28,7 @@ import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.DNASequenceData;
 import motiflab.engine.data.DNASequenceDataset;
 import motiflab.engine.data.DataCollection;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.NumericDataset;
 import motiflab.engine.data.NumericMap;
@@ -484,11 +484,11 @@ public class DataFormat_EvidenceGFF extends DataFormat {
         } else if (evidenceName.equals("module")) {
             String type=region.getType();
             if (type==null || type.isEmpty()) return "";
-            Data module=engine.getDataItem(type);
-            if (!(module instanceof Module)) return "N/A";           
+            Data cisRegModule=engine.getDataItem(type);
+            if (!(cisRegModule instanceof ModuleCRM)) return "N/A";           
             String property=(String)evidenceEntry[1];
             try {
-                Object propertyValue=((Module)module).getPropertyValue(property, engine);
+                Object propertyValue=((ModuleCRM)cisRegModule).getPropertyValue(property, engine);
                 return getValueAsString(propertyValue);
             } catch (ExecutionError e) {return "";}
         } else if (evidenceName.equals("sequence")) {
@@ -606,7 +606,7 @@ public class DataFormat_EvidenceGFF extends DataFormat {
                          if (rangeObject instanceof Integer) range=(Integer)rangeObject;
                     else if (rangeObject instanceof NumericVariable) range=((NumericVariable)rangeObject).getValue().intValue();
                     else if (rangeObject instanceof SequenceNumericMap) range=((SequenceNumericMap)rangeObject).getValue(sequenceName).intValue();
-                    else if (rangeObject instanceof NumericMap) { // other Numeric Maps (e.g. Motif or Module maps)
+                    else if (rangeObject instanceof NumericMap) { // other Numeric Maps (e.g. Motif or ModuleCRM maps)
                        String type=region.getType();
                        if (type==null) range=((NumericMap)rangeObject).getValue().intValue();
                        else range=((NumericMap)rangeObject).getValue(type).intValue();
@@ -753,11 +753,11 @@ public class DataFormat_EvidenceGFF extends DataFormat {
                         } catch (ExecutionError e) {}                       
                     }
                 } else if (moduleProperty) {
-                    Module module=(Module)engine.getDataItem(type, Module.class);
-                    if (module==null) valueAsString="N/A";
+                    ModuleCRM cisRegModule=(ModuleCRM)engine.getDataItem(type, ModuleCRM.class);
+                    if (cisRegModule==null) valueAsString="N/A";
                     else {
                         try {
-                            Object propValue=module.getPropertyValue(property, engine);
+                            Object propValue=cisRegModule.getPropertyValue(property, engine);
                             valueAsString=getValueAsString(propValue);
                         } catch (ExecutionError e) {}                       
                     }                    

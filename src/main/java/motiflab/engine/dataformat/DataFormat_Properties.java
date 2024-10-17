@@ -22,7 +22,7 @@ import motiflab.engine.Parameter;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.data.BasicDataType;
 import motiflab.engine.data.DataCollection;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.MotifCollection;
@@ -46,7 +46,7 @@ public class DataFormat_Properties extends DataFormat {
     private static final String MISSING_SKIP_LINE="Skip lines";    
 
     private final String name="Properties";  
-    private final Class[] supportedTypes=new Class[]{MotifCollection.class, Motif.class, ModuleCollection.class, Module.class, SequenceCollection.class, Sequence.class};
+    private final Class[] supportedTypes=new Class[]{MotifCollection.class, Motif.class, ModuleCollection.class, ModuleCRM.class, SequenceCollection.class, Sequence.class};
     private static final Pattern fieldcode=Pattern.compile("(?<!\\\\)\\{(.+?)\\}"); // matches {XXX} not preceeded by the escape character \ 
 
     public DataFormat_Properties() {
@@ -62,12 +62,12 @@ public class DataFormat_Properties extends DataFormat {
 
     @Override
     public boolean canFormatOutput(Data data) {
-        return (data instanceof DataCollection || data instanceof Motif || data instanceof Module || data instanceof Sequence);
+        return (data instanceof DataCollection || data instanceof Motif || data instanceof ModuleCRM || data instanceof Sequence);
     }
 
     @Override
     public boolean canFormatOutput(Class dataclass) {
-        return (DataCollection.class.isAssignableFrom(dataclass) || dataclass.equals(Motif.class) || dataclass.equals(Module.class) || dataclass.equals(Sequence.class));
+        return (DataCollection.class.isAssignableFrom(dataclass) || dataclass.equals(Motif.class) || dataclass.equals(ModuleCRM.class) || dataclass.equals(Sequence.class));
     }
 
     @Override
@@ -125,7 +125,7 @@ public class DataFormat_Properties extends DataFormat {
         if (!(dataobject instanceof DataCollection)) { // convert single item to collection instead
             Data item=dataobject;
             if (item instanceof Motif) {dataobject=new MotifCollection("tmp");((MotifCollection)dataobject).addMotif((Motif)item);}
-            else if (item instanceof Module) {dataobject=new ModuleCollection("tmp");((ModuleCollection)dataobject).addModule((Module)item);}
+            else if (item instanceof ModuleCRM) {dataobject=new ModuleCollection("tmp");((ModuleCollection)dataobject).addModule((ModuleCRM)item);}
             else if (item instanceof Sequence) {dataobject=new SequenceCollection("tmp");((SequenceCollection)dataobject).addSequence((Sequence)item);}           
         } 
 
@@ -455,7 +455,7 @@ public class DataFormat_Properties extends DataFormat {
            if (property.equals("*")) {
                String[] props=null;
                if (type==Motif.class) props=Motif.getAllProperties(true, engine);
-               else if (type==Module.class) props=Module.getAllProperties(true, engine);
+               else if (type==ModuleCRM.class) props=ModuleCRM.getAllProperties(true, engine);
                else if (type==Sequence.class) props=Sequence.getAllProperties(engine);
                if (props!=null) {
                    List list=Arrays.asList(props);
@@ -465,7 +465,7 @@ public class DataFormat_Properties extends DataFormat {
            } else if (property.equalsIgnoreCase("*user") || property.equalsIgnoreCase("*U")) {
                String[] props=null;
                if (type==Motif.class) props=Motif.getAllUserDefinedProperties(engine);
-               else if (type==Module.class) props=Module.getAllUserDefinedProperties(engine);
+               else if (type==ModuleCRM.class) props=ModuleCRM.getAllUserDefinedProperties(engine);
                else if (type==Sequence.class) props=Sequence.getAllUserDefinedProperties(engine);
                if (props!=null) {
                    List list=Arrays.asList(props);
@@ -475,7 +475,7 @@ public class DataFormat_Properties extends DataFormat {
            } else if (property.equalsIgnoreCase("*standard") || property.equalsIgnoreCase("*S")) {
                String[] props=null;
                if (type==Motif.class) props=Motif.getAllStandardProperties(true);
-               else if (type==Module.class) props=Module.getAllStandardProperties(true);
+               else if (type==ModuleCRM.class) props=ModuleCRM.getAllStandardProperties(true);
                else if (type==Sequence.class) props=Sequence.getAllStandardProperties(engine);
                if (props!=null) {
                    List list=Arrays.asList(props);

@@ -23,7 +23,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.Region;
 import motiflab.engine.data.RegionSequenceData;
@@ -199,21 +199,21 @@ public class EditRegionPropertiesDialog extends javax.swing.JDialog {
     }    
     
     private HashMap<String,Object[]> getAdditionalProperties() {
-        Module module=getModuleForRegion();
+        ModuleCRM cisRegModule=getModuleForRegion();
         HashMap<String, Object[]> props=new HashMap<String,Object[]>();
         for (String key:region.getAllPropertyNames()) {
             Boolean editable=Boolean.TRUE;
-            if (module!=null && module.hasMotif(key)) editable=Boolean.FALSE; // Module motif. Do not edit! (do not display it either)
+            if (cisRegModule!=null && cisRegModule.hasMotif(key)) editable=Boolean.FALSE; // ModuleCRM motif. Do not edit! (do not display it either)
             Object value=region.getProperty(key);
             props.put(key, new Object[]{value,editable});
         }
         return props;
     }
     
-    private Module getModuleForRegion() {
+    private ModuleCRM getModuleForRegion() {
         if (region.isModule()) {
             Data data=gui.getEngine().getDataItem(region.getType());
-            if (data instanceof Module) return (Module)data;
+            if (data instanceof ModuleCRM) return (ModuleCRM)data;
         }     
         return null;
     }
@@ -379,7 +379,7 @@ public class EditRegionPropertiesDialog extends javax.swing.JDialog {
         }        
         
         // parse additional properties
-        Module module=getModuleForRegion();
+        ModuleCRM cisRegModule=getModuleForRegion();
         TableModel additionalPropertiesTableModel=additionalPropertiesTable.getModel();
         int rows=additionalPropertiesTable.getRowCount();
         for (int i=0;i<rows;i++) {
@@ -396,7 +396,7 @@ public class EditRegionPropertiesDialog extends javax.swing.JDialog {
                additionalPropertiesTable.scrollRectToVisible(additionalPropertiesTable.getCellRect(i,0,true));                   
                return false;                   
            }
-           if (module!=null && module.hasMotif(propertyName)) {
+           if (cisRegModule!=null && cisRegModule.hasMotif(propertyName)) {
                messageLabel.setText("Property '"+propertyName+"' can not be altered");
                additionalPropertiesTable.setRowSelectionInterval(i, i);
                additionalPropertiesTable.setColumnSelectionInterval(0, 0);
@@ -751,7 +751,7 @@ public class EditRegionPropertiesDialog extends javax.swing.JDialog {
         if (region.isMotif()) data=getMotifForRegion();
         else if (region.isModule()) data=getModuleForRegion();            
        
-        if (data!=null) gui.getMotifsPanel().showPrompt(data, false, true); // showPrompt in MotifsPanel will show different prompt depending on whether the Data object is a Motif or a Module
+        if (data!=null) gui.getMotifsPanel().showPrompt(data, false, true); // showPrompt in MotifsPanel will show different prompt depending on whether the Data object is a Motif or a ModuleCRM
     }//GEN-LAST:event_showDataPressed
 
 

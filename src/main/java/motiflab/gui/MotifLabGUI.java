@@ -2577,7 +2577,7 @@ private void addDataItemMenuHandler(java.awt.event.ActionEvent evt) {//GEN-FIRST
          else if (type.equals(BackgroundModel.getType())) prompt=new Prompt_BackgroundModel(this, null, null, true);
          else if (type.equals(TextVariable.getType())) prompt=new Prompt_TextVariable(this, null, null, true);
          else if (type.equals(Motif.getType())) prompt=new Prompt_Motif(this, null, null,visualizationSettings, true);
-         else if (type.equals(Module.getType())) prompt=new Prompt_Module(this, null, null, true);
+         else if (type.equals(ModuleCRM.getType())) prompt=new Prompt_Module(this, null, null, true);
          else if (type.equals(MotifCollection.getType())) prompt=new Prompt_MotifCollection(this, null, null, true);
          else if (type.equals(MotifPartition.getType())) prompt=new Prompt_MotifPartition(this, null, null, true);
          else if (type.equals(ModuleCollection.getType())) prompt=new Prompt_ModuleCollection(this, null, null, true);
@@ -2656,7 +2656,7 @@ private void addDataItemMenuHandler(java.awt.event.ActionEvent evt) {//GEN-FIRST
         int MIndex=submenunames.indexOf("Module");
         if (mIndex>=0 && MIndex>=0) {
             submenunames.remove("Motif");
-            submenunames.add(MIndex, "Motif"); // sort Motif before Module if both are present
+            submenunames.add(MIndex, "Motif"); // sort Motif before ModuleCRM if both are present
         }
         for (String submenuname:submenunames) {
             JMenu submenu=new JMenu(submenuname);
@@ -2742,7 +2742,7 @@ private void addDataItemMenuHandler(java.awt.event.ActionEvent evt) {//GEN-FIRST
             if (submenunames[i].equals("Motif")) mIndex=i;
             else if (submenunames[i].equals("Module")) MIndex=i;
         }
-        if (mIndex>=0 && MIndex>=0) { // sort Motif before Module if both are present
+        if (mIndex>=0 && MIndex>=0) { // sort Motif before ModuleCRM if both are present
             submenunames[MIndex]="Motif"; // swap these two labels
             submenunames[mIndex]="Module";// swap these two labels
         }
@@ -4087,7 +4087,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         else if (item instanceof TextVariable) prompt=new Prompt_TextVariable(this, message, (TextVariable)item, modal);
         else if (item instanceof Sequence) prompt=new Prompt_Sequence(this, message, (Sequence)item,visualizationSettings, modal);
         else if (item instanceof Motif) prompt=new Prompt_Motif(this, message, (Motif)item,visualizationSettings, modal);
-        else if (item instanceof Module) prompt=new Prompt_Module(this, message, (Module)item, modal);
+        else if (item instanceof ModuleCRM) prompt=new Prompt_Module(this, message, (ModuleCRM)item, modal);
         else if (item instanceof MotifCollection) prompt=new Prompt_MotifCollection(this, message, (MotifCollection)item, modal);
         else if (item instanceof MotifPartition) prompt=new Prompt_MotifPartition(this, message, (MotifPartition)item, modal);
         else if (item instanceof ModuleCollection) prompt=new Prompt_ModuleCollection(this, message, (ModuleCollection)item, modal);
@@ -4375,7 +4375,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         else if (type==SequenceCollection.class) {prefix="SequenceCollection";}
         else if (type==SequencePartition.class) {prefix="SequencePartition";}
         else if (type==Motif.class) {prefix="MM";}
-        else if (type==Module.class) {prefix="MOD";}
+        else if (type==ModuleCRM.class) {prefix="MOD";}
         else if (type==MotifCollection.class) {prefix="MotifCollection";}
         else if (type==MotifPartition.class) {prefix="MotifPartition";}
         else if (type==ModuleCollection.class) {prefix="ModuleCollection";}
@@ -4418,11 +4418,11 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             }            
         }
         String name;
-        if (type==Motif.class || type==Module.class) name=prefix+motifcounterformat.format(counter);
+        if (type==Motif.class || type==ModuleCRM.class) name=prefix+motifcounterformat.format(counter);
         else name=prefix+counter;
         while (engine.getDataItem(name)!=null || (datatypetable!=null && datatypetable.contains(name)) || reservedDataNames.contains(name)) {
             counter++; // adjust counter if name is taken already
-            if (type==Motif.class || type==Module.class) name=prefix+motifcounterformat.format(counter);
+            if (type==Motif.class || type==ModuleCRM.class) name=prefix+motifcounterformat.format(counter);
             else name=prefix+counter;
         }
         return name;
@@ -4446,7 +4446,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             else if (type==SequenceCollection.class) {prefix="SequenceCollection";}
             else if (type==SequencePartition.class) {prefix="SequencePartition";}
             else if (type==Motif.class) {prefix="MM";}
-            else if (type==Module.class) {prefix="MOD";}
+            else if (type==ModuleCRM.class) {prefix="MOD";}
             else if (type==MotifCollection.class) {prefix="MotifCollection";}
             else if (type==MotifPartition.class) {prefix="MotifPartition";}
             else if (type==ModuleCollection.class) {prefix="ModuleCollection";}
@@ -4466,11 +4466,11 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                 if (type!=SequenceCollection.class) counter++; // this will start the SequenceCollection counter at 1 even thought there is already a (default) SequenceCollection registered
             }
             String name;
-            if (type==Motif.class || type==Module.class) name=prefix+motifcounterformat.format(counter);
+            if (type==Motif.class || type==ModuleCRM.class) name=prefix+motifcounterformat.format(counter);
             else name=prefix+counter;
             while (engine.getDataItem(name)!=null || arrayContainsString(resultnames,name) || (datatypetable!=null && datatypetable.contains(name)) || reservedDataNames.contains(name)) {
                 counter++; // adjust counter if name is taken already
-                if (type==Motif.class || type==Module.class) name=prefix+motifcounterformat.format(counter);
+                if (type==Motif.class || type==ModuleCRM.class) name=prefix+motifcounterformat.format(counter);
                 else name=prefix+counter;
             }
             resultnames[index]=name;
@@ -4944,7 +4944,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                         int vpend=settings.getSequenceViewPortEnd(element.getName());
                         if (vpstart>=0) VPregion.put(element.getName(), new int[]{vpstart,vpend}); // save VP to correctly restore it later...
                         engine.storeDataItem(element);
-                    } else if (element instanceof Motif || element instanceof Module) {
+                    } else if (element instanceof Motif || element instanceof ModuleCRM) {
                         engine.storeDataItem(element);
                     }
                 }
@@ -4959,7 +4959,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                     engine.storeDataItem(element); // this will show the tab
                 }
                 for (Data element:datalist) {
-                    if (!(element instanceof Sequence || element instanceof OutputData || element instanceof Motif || element instanceof Module)) try {engine.storeDataItem(element);} catch (ExecutionError e) {JOptionPane.showMessageDialog(getFrame(), "An error occurred during session restore:\n"+e.getMessage(),"Restore Session Error" ,JOptionPane.ERROR_MESSAGE);}
+                    if (!(element instanceof Sequence || element instanceof OutputData || element instanceof Motif || element instanceof ModuleCRM)) try {engine.storeDataItem(element);} catch (ExecutionError e) {JOptionPane.showMessageDialog(getFrame(), "An error occurred during session restore:\n"+e.getMessage(),"Restore Session Error" ,JOptionPane.ERROR_MESSAGE);}
                 }
                 SequenceCollection col=engine.getDefaultSequenceCollection();
                 col.setSequenceOrder(defaultCollectionCopy.getAllSequenceNames());
@@ -5180,7 +5180,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                             int vpend=settings.getSequenceViewPortEnd(element.getName());
                             if (vpstart>=0) VPregion.put(element.getName(), new int[]{vpstart,vpend}); // save VP to correctly restore it later...
                             engine.storeDataItem(element);
-                        } else if (element instanceof Motif || element instanceof Module) {
+                        } else if (element instanceof Motif || element instanceof ModuleCRM) {
                             engine.storeDataItem(element);
                         }
                       } catch (ExecutionError e) {
@@ -5208,7 +5208,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                     }
                     // restore the remaining data objects
                     for (Data element:datalist) {
-                        if (!(element instanceof Sequence || element instanceof OutputData || element instanceof Motif || element instanceof Module)) {
+                        if (!(element instanceof Sequence || element instanceof OutputData || element instanceof Motif || element instanceof ModuleCRM)) {
                             try {
                                 engine.storeDataItem(element);
                             } catch (ExecutionError e) {

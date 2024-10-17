@@ -132,14 +132,14 @@ public class Prompt_ModuleNumericMap extends Prompt {
 
 
     private void setupManualEntryPanel() {
-        ArrayList<Data> dataset=engine.getAllDataItemsOfType(Module.class);
+        ArrayList<Data> dataset=engine.getAllDataItemsOfType(ModuleCRM.class);
         int size=dataset.size();
         Object[][] rowData=new Object[dataset.size()][4];
         for (int i=0;i<size;i++) {
-            Module module=(Module)dataset.get(i);
-            rowData[i][1]=module.getName();
-            rowData[i][3]=module;
-            if (data.contains(module.getName())) rowData[i][2]=data.getValue(module.getName());
+            ModuleCRM cisRegModule=(ModuleCRM)dataset.get(i);
+            rowData[i][1]=cisRegModule.getName();
+            rowData[i][3]=cisRegModule;
+            if (data.contains(cisRegModule.getName())) rowData[i][2]=data.getValue(cisRegModule.getName());
             else rowData[i][2]=null;
         }
         DefaultTableModel model=new DefaultTableModel(rowData, new String[]{" ","Module","Value","Logo"}) {
@@ -149,7 +149,7 @@ public class Prompt_ModuleNumericMap extends Prompt {
                     case 0: return Color.class;
                     case 1: return String.class;
                     case 2: return Double.class;
-                    case 3: return Module.class;
+                    case 3: return ModuleCRM.class;
                     default: return String.class;
                 }
             }
@@ -238,7 +238,7 @@ public class Prompt_ModuleNumericMap extends Prompt {
         internal.setLayout(new FlowLayout(FlowLayout.CENTER));
         internal.setBorder(BorderFactory.createEmptyBorder(50, 10, 20, 10));
         fromPropertyPanel.setLayout(new BorderLayout());
-        fromPropertyCombobox=new JComboBox(Module.getNumericProperties(engine));
+        fromPropertyCombobox=new JComboBox(ModuleCRM.getNumericProperties(engine));
         if (data.getFromPropertyName()!=null) { // initialize fields according to current partition configuration
             fromPropertyCombobox.setSelectedItem(data.getFromPropertyName());
         }
@@ -434,7 +434,7 @@ public class Prompt_ModuleNumericMap extends Prompt {
                 if (showExisting) { // create a complete new map so that it can be compared with (and replace) the current data object
                     createDataObjectInBackground(new Object[]{"track",data.getName(),fromTrackString}); // this returns right away but spawns a lengthy background process which will eventually close the prompt             
                     return false; // keeps the dialog open until the background task is finished         
-                } else { // the prompt is shown in response to an "Add New Module Numeric Map" request. Just set the basic parameters needed for a command line. A "new" operation task will be run later to create the finished data object and this avoids creating the map twice
+                } else { // the prompt is shown in response to an "Add New ModuleCRM Numeric Map" request. Just set the basic parameters needed for a command line. A "new" operation task will be run later to create the finished data object and this avoids creating the map twice
                     data=new ModuleNumericMap(data.getName(),0);
                     data.setFromTrackString(fromTrackString);
                 }                  
@@ -484,7 +484,7 @@ public class Prompt_ModuleNumericMap extends Prompt {
                 Object tablevalue=table.getValueAt(i, 1);
                 if (tablevalue==null) continue; // this could happen if the user has deleted entries in the name column
                 String moduleName=tablevalue.toString().trim();              
-                if (!engine.dataExists(moduleName, Module.class)) {
+                if (!engine.dataExists(moduleName, ModuleCRM.class)) {
                    reportErrorInTable("Unknown module: "+moduleName, i);
                    return false;
                 }
@@ -563,10 +563,10 @@ private class CellRenderer_Name extends DefaultTableCellRenderer {
     }
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        Data module=(value instanceof String)?engine.getDataItem((String)value):null;
+        Data cisRegModule=(value instanceof String)?engine.getDataItem((String)value):null;
         String shownString;
-        if (module instanceof Module) {
-            shownString=((Module)module).getName();
+        if (cisRegModule instanceof ModuleCRM) {
+            shownString=((ModuleCRM)cisRegModule).getName();
         } else shownString=(value!=null)?value.toString():null;
         Component component=super.getTableCellRendererComponent(table, shownString, isSelected, hasFocus, row, column);
         String name="";

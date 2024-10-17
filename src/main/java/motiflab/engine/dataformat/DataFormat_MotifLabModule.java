@@ -17,7 +17,7 @@ import motiflab.engine.ExecutionError;
 import motiflab.engine.Parameter;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.protocol.ParseError;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleMotif;
 import motiflab.engine.data.Motif;
@@ -32,7 +32,7 @@ import motiflab.gui.VisualizationSettings;
 public class DataFormat_MotifLabModule extends DataFormat { 
     private String name="MotifLabModule";
     
-    private Class[] supportedTypes=new Class[]{ModuleCollection.class, Module.class};
+    private Class[] supportedTypes=new Class[]{ModuleCollection.class, ModuleCRM.class};
 
     
     public DataFormat_MotifLabModule() {
@@ -50,22 +50,22 @@ public class DataFormat_MotifLabModule extends DataFormat {
     
     @Override
     public boolean canFormatOutput(Data data) {
-        return (data instanceof ModuleCollection || data instanceof Module);
+        return (data instanceof ModuleCollection || data instanceof ModuleCRM);
     }
     
     @Override
     public boolean canFormatOutput(Class dataclass) {
-        return (dataclass.equals(ModuleCollection.class) || dataclass.equals(Module.class));
+        return (dataclass.equals(ModuleCollection.class) || dataclass.equals(ModuleCRM.class));
     }
     
     @Override
     public boolean canParseInput(Data data) {
-        return (data instanceof ModuleCollection || data instanceof Module);
+        return (data instanceof ModuleCollection || data instanceof ModuleCRM);
     }
     
     @Override
     public boolean canParseInput(Class dataclass) {
-        return (dataclass.equals(ModuleCollection.class) || dataclass.equals(Module.class));
+        return (dataclass.equals(ModuleCollection.class) || dataclass.equals(ModuleCRM.class));
     }
     
       
@@ -110,15 +110,15 @@ public class DataFormat_MotifLabModule extends DataFormat {
         outputString.append("#\n");
         ArrayList<String> singlemotifs=(includeSingleMotifs)?new ArrayList<String>():null;
         if (dataobject instanceof ModuleCollection) {
-            ArrayList<Module> modulelist=((ModuleCollection)dataobject).getAllModules(engine);
+            ArrayList<ModuleCRM> modulelist=((ModuleCollection)dataobject).getAllModules(engine);
             int size=modulelist.size();
             int i=0;
-            for (Module module:modulelist) {
+            for (ModuleCRM cisRegModule:modulelist) {
                 if (task!=null) task.checkExecutionLock(); // checks to see if this task should suspend execution
                 if (Thread.interrupted() || (task!=null && task.getStatus().equals(ExecutableTask.ABORTED))) throw new InterruptedException();
-                outputModule(module, outputString,includeUserDefined, includeColorInfo);
+                outputModule(cisRegModule, outputString,includeUserDefined, includeColorInfo);
                 if (includeSingleMotifs) {
-                    ArrayList<ModuleMotif> mmlist=module.getModuleMotifs();
+                    ArrayList<ModuleMotif> mmlist=cisRegModule.getModuleMotifs();
                     for (ModuleMotif mm:mmlist) mergeMotifsList(singlemotifs,mm.getMotifAsCollection());
                 }
                 // task.setStatusMessage("Motif "+(i+1)+" of "+size);
@@ -126,10 +126,10 @@ public class DataFormat_MotifLabModule extends DataFormat {
                 i++;
                 if (i%100==0) Thread.yield();
             } 
-        } else if (dataobject instanceof Module){
-            outputModule((Module)dataobject,outputString, includeUserDefined, includeColorInfo);
+        } else if (dataobject instanceof ModuleCRM){
+            outputModule((ModuleCRM)dataobject,outputString, includeUserDefined, includeColorInfo);
             if (includeSingleMotifs) {
-                ArrayList<ModuleMotif> mmlist=((Module)dataobject).getModuleMotifs();
+                ArrayList<ModuleMotif> mmlist=((ModuleCRM)dataobject).getModuleMotifs();
                 for (ModuleMotif mm:mmlist) mergeMotifsList(singlemotifs,mm.getMotifAsCollection());
             }
         } else throw new ExecutionError("Unable to format object '"+dataobject+"' in "+name+" format");
@@ -151,9 +151,9 @@ public class DataFormat_MotifLabModule extends DataFormat {
     }
     
     /** outputformats a single module */
-    private void outputModule(Module module, StringBuilder outputString, boolean includeUserDefined, boolean includeColorInfo) {
-            outputString.append("#ModuleID = ");outputString.append(module.getName());outputString.append("\n");
-            ArrayList<ModuleMotif> motiflist=module.getModuleMotifs();
+    private void outputModule(ModuleCRM cisRegModule, StringBuilder outputString, boolean includeUserDefined, boolean includeColorInfo) {
+            outputString.append("#ModuleID = ");outputString.append(cisRegModule.getName());outputString.append("\n");
+            ArrayList<ModuleMotif> motiflist=cisRegModule.getModuleMotifs();
             outputString.append("Motifs = ");
             for (int i=0;i<motiflist.size();i++) {
                 if (i>0) outputString.append(",");
@@ -161,11 +161,11 @@ public class DataFormat_MotifLabModule extends DataFormat {
             }
             outputString.append("\n");
             outputString.append("Ordered = ");
-            outputString.append(module.isOrdered());
+            outputString.append(cisRegModule.isOrdered());
             outputString.append("\n");
-            if (module.getMaxLength()>0) {
+            if (cisRegModule.getMaxLength()>0) {
                 outputString.append("MaxLength = ");
-                outputString.append(module.getMaxLength());
+                outputString.append(cisRegModule.getMaxLength());
                 outputString.append("\n");
             }
             for (int i=0;i<motiflist.size();i++) {
@@ -178,23 +178,23 @@ public class DataFormat_MotifLabModule extends DataFormat {
             }
             for (int i=0;i<motiflist.size();i++) {
                 int orientation=motiflist.get(i).getOrientation();
-                if (orientation==Module.DIRECT) {
+                if (orientation==ModuleCRM.DIRECT) {
                     outputString.append("Orientation(");
                     outputString.append(motiflist.get(i).getRepresentativeName());
                     outputString.append(") = Direct");
                     outputString.append("\n");
-                } else if (orientation==Module.REVERSE) {
+                } else if (orientation==ModuleCRM.REVERSE) {
                     outputString.append("Orientation(");
                     outputString.append(motiflist.get(i).getRepresentativeName());
                     outputString.append(") = Reverse");
                     outputString.append("\n");
                 }
             }
-            for (int[] constraint:module.getDistanceConstraints()) {
+            for (int[] constraint:cisRegModule.getDistanceConstraints()) {
                  String max=(constraint[3]==Integer.MAX_VALUE)?"*":""+constraint[3];
                  String min=(constraint[2]==Integer.MIN_VALUE)?"*":""+constraint[2];
-                 String motif1=module.getSingleMotifName(constraint[0]);
-                 String motif2=module.getSingleMotifName(constraint[1]);
+                 String motif1=cisRegModule.getSingleMotifName(constraint[0]);
+                 String motif2=cisRegModule.getSingleMotifName(constraint[1]);
                  outputString.append("Distance(");
                  outputString.append(motif1);
                  outputString.append(",");
@@ -205,17 +205,17 @@ public class DataFormat_MotifLabModule extends DataFormat {
                  outputString.append(max);
                  outputString.append("]\n");
             }
-            ArrayList<String> goTerms=module.getGOterms();
+            ArrayList<String> goTerms=cisRegModule.getGOterms();
             if (goTerms!=null && !goTerms.isEmpty()) {
                outputString.append("GO = ");
                outputArrayList(goTerms,outputString);
                outputString.append("\n");
             } 
             if (includeUserDefined) {
-                Set<String> userDefined=module.getUserDefinedProperties();
+                Set<String> userDefined=cisRegModule.getUserDefinedProperties();
                 if (userDefined!=null) {
                     for (String propertyName:userDefined) {
-                        String value=(String)module.getUserDefinedPropertyValueAsType(propertyName, String.class);
+                        String value=(String)cisRegModule.getUserDefinedPropertyValueAsType(propertyName, String.class);
                         if (value!=null) {
                             // outputString.append("#");  // leading # is optional
                             outputString.append(propertyName);
@@ -228,7 +228,7 @@ public class DataFormat_MotifLabModule extends DataFormat {
             }            
             if (includeColorInfo) {
                 VisualizationSettings settings=engine.getClient().getVisualizationSettings();
-                java.awt.Color color=settings.getFeatureColor(module.getName());
+                java.awt.Color color=settings.getFeatureColor(cisRegModule.getName());
                 if (color!=null) {
                     String colorString=VisualizationSettings.convertColorToHTMLrepresentation(color);
                     outputString.append("$color=");
@@ -237,7 +237,7 @@ public class DataFormat_MotifLabModule extends DataFormat {
                 }                
                 for (int i=0;i<motiflist.size();i++) {
                     String modulemotifname=motiflist.get(i).getRepresentativeName();
-                    color=settings.getFeatureColor(module.getName()+"."+modulemotifname);
+                    color=settings.getFeatureColor(cisRegModule.getName()+"."+modulemotifname);
                     if (color!=null) {
                         String colorString=VisualizationSettings.convertColorToHTMLrepresentation(color);
                         outputString.append("$color(");
@@ -268,12 +268,12 @@ public class DataFormat_MotifLabModule extends DataFormat {
     public Data parseInput(ArrayList<String> input, Data target, ParameterSettings settings, ExecutableTask task) throws ParseError, InterruptedException  {
         if (target==null) throw new ParseError("Unable to parse unknown (null) target Data in DataFormat_MotifLabModule.parseInput(ArrayList<String> input, Data target)");
              if (target instanceof ModuleCollection) return parseModuleCollection(input, (ModuleCollection)target, task);
-        else if (target instanceof Module) return parseModule(input, (Module)target, true);
+        else if (target instanceof ModuleCRM) return parseModule(input, (ModuleCRM)target, true);
         else throw new ParseError("Unable to parse Module input to target data of type "+target.getTypeDescription());
     }
     
 
-    private Module parseModule(List<String> input, Module target, boolean redraw) throws ParseError {
+    private ModuleCRM parseModule(List<String> input, ModuleCRM target, boolean redraw) throws ParseError {
        String moduleID="unknown";
        String[] modulemotifnames=null;
        int maxlength=0;
@@ -283,7 +283,7 @@ public class DataFormat_MotifLabModule extends DataFormat {
        HashMap<String,String[]> singlemotifs=new HashMap<String,String[]>(); //
        String[] goterms=null;       
        int count=0;
-       if (target==null) target=new Module("unknown");
+       if (target==null) target=new ModuleCRM("unknown");
        int lineNumber=0;
        for (String line:input) {
            lineNumber++;
@@ -316,8 +316,8 @@ public class DataFormat_MotifLabModule extends DataFormat {
                String modulemotifname=split[0].replaceAll(".*\\(\\s*","");
                modulemotifname=modulemotifname.replaceAll("\\s*\\)\\s*","");
                if (modulemotifnames==null || !arrayContains(modulemotifnames, modulemotifname)) throw new ParseError("Unknown module motif reference in line: "+line, lineNumber);
-               if (value.equalsIgnoreCase("DIRECT") || value.equalsIgnoreCase("1") || value.equalsIgnoreCase("+1") || value.equalsIgnoreCase("+")) orientations.put(modulemotifname, Module.DIRECT);
-               else if (value.equalsIgnoreCase("REVERSE") || value.equalsIgnoreCase("-") || value.equalsIgnoreCase("-1")) orientations.put(modulemotifname, Module.REVERSE);
+               if (value.equalsIgnoreCase("DIRECT") || value.equalsIgnoreCase("1") || value.equalsIgnoreCase("+1") || value.equalsIgnoreCase("+")) orientations.put(modulemotifname, ModuleCRM.DIRECT);
+               else if (value.equalsIgnoreCase("REVERSE") || value.equalsIgnoreCase("-") || value.equalsIgnoreCase("-1")) orientations.put(modulemotifname, ModuleCRM.REVERSE);
            } else if (property.startsWith("distance")) {
                if (!property.matches("distance\\(\\s*\\S+\\s*,\\s*\\S+\\s*\\)")) throw new ParseError("Unable to parse distance line for module '"+moduleID+"' Proper format is Distamce(X,Y)=[min,max]. Got: "+line, lineNumber);
                String pairstring=split[0].replaceAll(".*\\(\\s*","");
@@ -349,10 +349,10 @@ public class DataFormat_MotifLabModule extends DataFormat {
                java.awt.Color color=VisualizationSettings.convertHTMLrepresentationToColor(value);
                if (color!=null) engine.getClient().getVisualizationSettings().setFeatureColor(featureName, color, false);                            
            } else { // unknown property (i.e. user-defined, non-standard)
-                if (!Module.isValidUserDefinedPropertyKey(property)) throw new ParseError("Not a valid property name: '"+property+"' for module '"+moduleID+"'", lineNumber);
+                if (!ModuleCRM.isValidUserDefinedPropertyKey(property)) throw new ParseError("Not a valid property name: '"+property+"' for module '"+moduleID+"'", lineNumber);
                 if (value.endsWith(";")) value=value.substring(0,value.length()-1); // allow one ';' at the end but remove it if present
                 if (value.contains(";")) throw new ParseError("Value for property '"+property+"' for module '"+moduleID+"' contains illegal character ';'", lineNumber);
-                Object valueobject=Module.getObjectForPropertyValueString(value);
+                Object valueobject=ModuleCRM.getObjectForPropertyValueString(value);
                 if (valueobject!=null) target.setUserDefinedPropertyValue(property, valueobject);
            } 
        }
@@ -366,7 +366,7 @@ public class DataFormat_MotifLabModule extends DataFormat {
            String[] singles=singlemotifs.get(modulemotifname);
            if (singles==null || singles.length==0) singles=new String[]{modulemotifname}; //
            for (String mname:singles) motcol.addMotifName(mname);
-           target.addModuleMotif(modulemotifname, motcol, ((orientation!=null)?orientation.intValue():Module.INDETERMINED));
+           target.addModuleMotif(modulemotifname, motcol, ((orientation!=null)?orientation.intValue():ModuleCRM.INDETERMINED));
        }
        for (String pair:distance.keySet()) {
            String[] motifs=pair.split("\\t");
@@ -408,8 +408,8 @@ public class DataFormat_MotifLabModule extends DataFormat {
                 } else { // start of new module/motif also marks end of previous si output previous motif encountered
                     last=i;
                     if (ismodule) {
-                        Module module=parseModule(input.subList(first, last), null, false);
-                        target.addModuleToPayload(module);
+                        ModuleCRM cisRegModule=parseModule(input.subList(first, last), null, false);
+                        target.addModuleToPayload(cisRegModule);
                     } else {
                         Motif motif=motiflabmotifformat.parseMotif(input.subList(first, last), null, false);
                         target.addMotifToPayload(motif);
@@ -422,8 +422,8 @@ public class DataFormat_MotifLabModule extends DataFormat {
         }
         if (first>0) { // if there only was one module/motif it hasn't been output before
             if (ismodule) {
-                Module module=parseModule(input.subList(first, size), null, false);
-                target.addModuleToPayload(module);
+                ModuleCRM cisRegModule=parseModule(input.subList(first, size), null, false);
+                target.addModuleToPayload(cisRegModule);
             } else {
                 Motif motif=motiflabmotifformat.parseMotif(input.subList(first, size), null,false);
                 target.addMotifToPayload(motif);

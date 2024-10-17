@@ -461,7 +461,7 @@ public abstract class NumericMap extends DataMap {
      */
     public static NumericMap createMapForType(String name, Class targetType, double defaultValue) {
              if (targetType == Motif.class) return new MotifNumericMap(name,defaultValue); 
-        else if (targetType == Module.class) return new ModuleNumericMap(name, defaultValue);
+        else if (targetType == ModuleCRM.class) return new ModuleNumericMap(name, defaultValue);
         else if (targetType == Sequence.class) return new SequenceNumericMap(name, defaultValue); 
         else return null;
     }
@@ -472,7 +472,7 @@ public abstract class NumericMap extends DataMap {
      */
     public static Class getMapTypeForDataType(Class targetType) {
              if (targetType == Motif.class) return MotifNumericMap.class;
-        else if (targetType == Module.class) return ModuleNumericMap.class;
+        else if (targetType == ModuleCRM.class) return ModuleNumericMap.class;
         else if (targetType == Sequence.class) return SequenceNumericMap.class;
         else return null;
     }
@@ -483,7 +483,7 @@ public abstract class NumericMap extends DataMap {
      */
     public static Class getDataTypeForMapType(Class mapType) {
              if (mapType == MotifNumericMap.class) return Motif.class;
-        else if (mapType == ModuleNumericMap.class) return Module.class;
+        else if (mapType == ModuleNumericMap.class) return ModuleCRM.class;
         else if (mapType == SequenceNumericMap.class) return Sequence.class;
         else return null;
     }

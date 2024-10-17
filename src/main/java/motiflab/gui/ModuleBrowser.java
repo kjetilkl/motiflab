@@ -18,7 +18,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
 import javax.swing.table.TableModel;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 
 /**
  *
@@ -157,16 +157,16 @@ private void visualizefilterchanged(java.awt.event.ActionEvent evt) {//GEN-FIRST
              int size=table.getRowCount();
              for (int i=0;i<size;i++) {
                  int row=table.convertRowIndexToModel(i);
-                 Module module=(Module)model.getValueAt(row, 1);
-                 settings.setRegionTypeVisible(module.getName(), true, false);
+                 ModuleCRM cisRegModule=(ModuleCRM)model.getValueAt(row, 1);
+                 settings.setRegionTypeVisible(cisRegModule.getName(), true, false);
              }              
          } else if (selection.equals(VISUALIZE_SELECTED)) {
              modulebrowser.setVisibilityOnAllModules(false);
              int[] selected = table.getSelectedRows();            
              for (int row:selected) {
                  int modelrow=table.convertRowIndexToModel(row);
-                 Module module=(Module)model.getValueAt(modelrow, 1);
-                 settings.setRegionTypeVisible(module.getName(), true, false);
+                 ModuleCRM cisRegModule=(ModuleCRM)model.getValueAt(modelrow, 1);
+                 settings.setRegionTypeVisible(cisRegModule.getName(), true, false);
              }    
          } else {
             return;

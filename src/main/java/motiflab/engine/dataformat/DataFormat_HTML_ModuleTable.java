@@ -28,7 +28,7 @@ import motiflab.engine.MotifLabEngine;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.Parameter;
 import motiflab.engine.data.DataMap;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleNumericMap;
 import motiflab.engine.data.ModuleTextMap;
@@ -46,10 +46,10 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
     private String name="HTML_ModuleTable";
     private static final String HTML=DataFormat_HTML.HTML;
 
-    private Class[] supportedTypes=new Class[]{ModuleCollection.class, Module.class};
+    private Class[] supportedTypes=new Class[]{ModuleCollection.class, ModuleCRM.class};
     
     public DataFormat_HTML_ModuleTable() {      
-        String[] standard=Module.getProperties(engine);
+        String[] standard=ModuleCRM.getProperties(engine);
         String[] standardExt=new String[standard.length+1];
         System.arraycopy(standard, 0, standardExt, 0, standard.length);
         standardExt[standardExt.length-1]="Logo"; 
@@ -81,12 +81,12 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
     
     @Override
     public boolean canFormatOutput(Data data) {
-        return (data instanceof ModuleCollection || data instanceof Module);
+        return (data instanceof ModuleCollection || data instanceof ModuleCRM);
     }
     
     @Override
     public boolean canFormatOutput(Class dataclass) {
-        return (dataclass.equals(ModuleCollection.class) || dataclass.equals(Module.class));
+        return (dataclass.equals(ModuleCollection.class) || dataclass.equals(ModuleCRM.class));
     }
     
     @Override
@@ -176,20 +176,20 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
         ModuleLogo sequencelogo=null;   
 
         if (dataobject instanceof ModuleCollection) {
-            ArrayList<Module> modulelist=((ModuleCollection)dataobject).getAllModules(engine);
+            ArrayList<ModuleCRM> modulelist=((ModuleCollection)dataobject).getAllModules(engine);
             int size=modulelist.size();
             int i=0;
-            for (Module module:modulelist) {
+            for (ModuleCRM cisRegModule:modulelist) {
                 if (task!=null) task.checkExecutionLock(); // checks to see if this task should suspend execution
                 if (Thread.interrupted() || (task!=null && task.getStatus().equals(ExecutableTask.ABORTED))) throw new InterruptedException();
-                outputModule(module, outputobject, properties, multiline, sequencelogo, sequenceLogoMaxWidth, showSequenceLogosString);
+                outputModule(cisRegModule, outputobject, properties, multiline, sequencelogo, sequenceLogoMaxWidth, showSequenceLogosString);
                 // task.setStatusMessage("Motif "+(i+1)+" of "+size);
                 setProgress(i+1, size);
                 i++;
                 if (i%100==0) Thread.yield();
             }
-        } else if (dataobject instanceof Module){
-                outputModule((Module)dataobject, outputobject, properties, multiline, sequencelogo, sequenceLogoMaxWidth, showSequenceLogosString);
+        } else if (dataobject instanceof ModuleCRM){
+                outputModule((ModuleCRM)dataobject, outputobject, properties, multiline, sequencelogo, sequenceLogoMaxWidth, showSequenceLogosString);
         } else throw new ExecutionError("Unable to format object '"+dataobject+"' in "+name+" format");
         outputobject.append("</table>\n",HTML);
         outputobject.append("</body>\n",HTML);
@@ -200,7 +200,7 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
 
 
     /** output-formats a single module */
-    protected void outputModule(Module module, OutputData outputobject, String[][] properties, boolean multiline, ModuleLogo sequencelogo, int sequenceLogoMaxWidth, String logoFormat) throws ExecutionError {
+    protected void outputModule(ModuleCRM cisRegModule, OutputData outputobject, String[][] properties, boolean multiline, ModuleLogo sequencelogo, int sequenceLogoMaxWidth, String logoFormat) throws ExecutionError {
         outputobject.append("<tr>", HTML);
         for (String[] propertyPair:properties) {
             String property=propertyPair[0];
@@ -209,10 +209,10 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
             if (tooltip!=null) {
                Object tooltipvalue=null;
                try {
-                   module.getPropertyValue(tooltip,engine);
+                   cisRegModule.getPropertyValue(tooltip,engine);
                } catch (Exception e) { // check if the property could be a map instead
                    Data item=engine.getDataItem(tooltip);
-                   if (item instanceof ModuleTextMap || item instanceof ModuleNumericMap) tooltipvalue=((DataMap)item).getValue(module.getName());
+                   if (item instanceof ModuleTextMap || item instanceof ModuleNumericMap) tooltipvalue=((DataMap)item).getValue(cisRegModule.getName());
                    else throw new ExecutionError("'"+property+"' is not a recognized module property or applicable Map");
                }
                if (tooltipvalue!=null) {
@@ -224,15 +224,15 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
             // append td-class here if necessary
             outputobject.append(">", HTML);
             if (property.equalsIgnoreCase("Logo")) {
-                String link=getModuleLogoTag(module, outputobject, logoFormat, sequenceLogoMaxWidth, engine);
+                String link=getModuleLogoTag(cisRegModule, outputobject, logoFormat, sequenceLogoMaxWidth, engine);
                 outputobject.append(link, HTML);    
             } else {
                 Object value=null;
                 try {
-                    value=module.getPropertyValue(property,engine);
+                    value=cisRegModule.getPropertyValue(property,engine);
                 } catch (Exception e) { // check if the property could be a map instead
                    Data item=engine.getDataItem(property);
-                   if (item instanceof ModuleTextMap || item instanceof ModuleNumericMap) value=((DataMap)item).getValue(module.getName());
+                   if (item instanceof ModuleTextMap || item instanceof ModuleNumericMap) value=((DataMap)item).getValue(cisRegModule.getName());
                    else throw new ExecutionError("'"+property+"' is not a recognized module property or applicable Map");
                 }
                 if (value==null && (property.equalsIgnoreCase("class") || property.equalsIgnoreCase("classification"))) value="unknown";
@@ -272,20 +272,20 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
     /** Creates a sequence logo image for the given module, saves it to a temp-file and return an IMG-tag that can 
      *  be inserted in HTML-documents to display the image
      */
-    protected String getModuleLogoTag(Module module, OutputData outputobject, String logoFormat, int maxwidth, MotifLabEngine engine) {
+    protected String getModuleLogoTag(ModuleCRM cisRegModule, OutputData outputobject, String logoFormat, int maxwidth, MotifLabEngine engine) {
         if (!Analysis.includeLogosInOutput(logoFormat)) return "";
-        else if (module==null) return "?";        
-        else if (Analysis.includeLogosInOutputAsText(logoFormat)) return escapeHTML(module.getModuleLogo());
+        else if (cisRegModule==null) return "?";        
+        else if (Analysis.includeLogosInOutputAsText(logoFormat)) return escapeHTML(cisRegModule.getModuleLogo());
         else { 
             File imagefile=null;
             if (Analysis.includeLogosInOutputAsSharedImages(logoFormat)) {
-                String logofileID=module.getName();
+                String logofileID=cisRegModule.getName();
                 boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
                 OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, "gif",true); // returns new or existing shared dependency
                 if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file
                     imagefile=dependency.getFile();
                     try {
-                        savModuleLogoImage(imagefile,module,engine.getClient().getVisualizationSettings(),maxwidth); //
+                        savModuleLogoImage(imagefile,cisRegModule,engine.getClient().getVisualizationSettings(),maxwidth); //
                     } catch (IOException e) {
                         engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
                     }
@@ -295,7 +295,7 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
             } else { // always save any logo to a new file
                 imagefile=outputobject.createDependentFile(engine,"gif");
                 try {
-                    savModuleLogoImage(imagefile,module,engine.getClient().getVisualizationSettings(),maxwidth); //
+                    savModuleLogoImage(imagefile,cisRegModule,engine.getClient().getVisualizationSettings(),maxwidth); //
                 } catch (IOException e) {
                     engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
                 }
@@ -305,17 +305,17 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
     }
 
 
-    private void savModuleLogoImage(File file, Module module, VisualizationSettings settings,int maxwidth) throws IOException {
+    private void savModuleLogoImage(File file, ModuleCRM cisRegModule, VisualizationSettings settings,int maxwidth) throws IOException {
         Font modulemotiffont=ModuleLogo.getModuleMotifFont();
         BufferedImage test=new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         FontMetrics modulelogometrics=test.getGraphics().getFontMetrics(modulemotiffont);
-        int width=ModuleLogo.getLogoWidth(modulelogometrics,module)+2;
+        int width=ModuleLogo.getLogoWidth(modulelogometrics,cisRegModule)+2;
         int height=28; // I think this will be OK...
         BufferedImage image=new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g=image.createGraphics();
         g.setBackground(new Color(255, 255, 255, 0)); // make the image translucent white       
         g.clearRect(0,0, width+2, height+2); // bleed a little just in case
-        ModuleLogo.paintModuleLogo(g, module, 5, 7, settings, null, maxwidth); //
+        ModuleLogo.paintModuleLogo(g, cisRegModule, 5, 7, settings, null, maxwidth); //
         OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
         ImageIO.write(image, "png", output);
         output.close(); 

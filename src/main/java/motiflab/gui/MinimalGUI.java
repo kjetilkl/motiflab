@@ -2350,7 +2350,7 @@ public final class MinimalGUI extends FrameView implements MotifLabClient, java.
                 engine.clearAllData();
                 getVisualizationSettings().importSettings(settings);            
                 for (Data element:datalist) { // restore all sequences and motifs first, since these are referred to by collections!           
-                    if (element instanceof Sequence || element instanceof Motif || element instanceof Module) {
+                    if (element instanceof Sequence || element instanceof Motif || element instanceof ModuleCRM) {
                         engine.storeDataItem(element);
                     }
                 }
@@ -2360,7 +2360,7 @@ public final class MinimalGUI extends FrameView implements MotifLabClient, java.
                     engine.storeDataItem(element); // this will show the tab
                 }
                 for (Data element:datalist) {
-                    if (!(element instanceof Sequence || element instanceof OutputData || element instanceof Motif || element instanceof Module)) engine.storeDataItem(element);
+                    if (!(element instanceof Sequence || element instanceof OutputData || element instanceof Motif || element instanceof ModuleCRM)) engine.storeDataItem(element);
                 }
                 SequenceCollection col=engine.getDefaultSequenceCollection();
                 col.setSequenceOrder(defaultCollectionCopy.getAllSequenceNames());   

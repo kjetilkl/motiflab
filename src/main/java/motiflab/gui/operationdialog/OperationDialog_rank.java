@@ -25,7 +25,7 @@ import javax.swing.JTextField;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.task.OperationTask;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.NumericMap;
 import motiflab.engine.data.Sequence;
@@ -68,7 +68,7 @@ public class OperationDialog_rank extends OperationDialog {
         System.arraycopy(standardProps, 0, motifproperties, 0, standardProps.length);
         System.arraycopy(userProps, 0, motifproperties, standardProps.length, userProps.length);
         Arrays.sort(motifproperties);
-        moduleproperties=Module.getNumericProperties(engine);
+        moduleproperties=ModuleCRM.getNumericProperties(engine);
         sequenceproperties=Sequence.getNumericProperties(engine);
         initColumnsPanel();
         initAddColumnButtonPanel();
@@ -108,7 +108,7 @@ public class OperationDialog_rank extends OperationDialog {
         targetPanel.add(new JLabel("Store results in  "));
         targetPanel.add(targetDataTextfield);
 
-        rankTypeComboBox=new JComboBox(new String[]{Motif.getType(),Module.getType(),Sequence.getType()});
+        rankTypeComboBox=new JComboBox(new String[]{Motif.getType(),ModuleCRM.getType(),Sequence.getType()});
         rankTypePanel.add(new JLabel("    Data type  "));
         rankTypePanel.add(rankTypeComboBox);
 
@@ -265,7 +265,7 @@ public class OperationDialog_rank extends OperationDialog {
             propertymodel=new DefaultComboBoxModel();
         } else if (sourceName.equals(Motif.getType())) {
             propertymodel=new DefaultComboBoxModel(motifproperties);
-        } else if (sourceName.equals(Module.getType())) {
+        } else if (sourceName.equals(ModuleCRM.getType())) {
             propertymodel=new DefaultComboBoxModel(moduleproperties);
         } else if (sourceName.equals(Sequence.getType())) {
             propertymodel=new DefaultComboBoxModel(sequenceproperties);
@@ -286,8 +286,8 @@ public class OperationDialog_rank extends OperationDialog {
             return null;
         } else if (sourceName.equals(Motif.getType())) {
             return Motif.class;
-        } else if (sourceName.equals(Module.getType())) {
-            return Module.class;
+        } else if (sourceName.equals(ModuleCRM.getType())) {
+            return ModuleCRM.class;
         } else if (sourceName.equals(Sequence.getType())) {
             return Sequence.class;
         } else {

@@ -26,13 +26,13 @@ import motiflab.engine.protocol.ParseError;
  *
  * @author kjetikl
  */
-public class Module extends Data implements BasicDataType {
+public class ModuleCRM extends Data implements BasicDataType {
     public static final int DIRECT=1;
     public static final int REVERSE=-1;
     public static final int INDETERMINED=0;
 
     private static String typedescription="Module";
-    private String name=null; // usually accession. This is the name or ID used when referencing this Module
+    private String name=null; // usually accession. This is the name or ID used when referencing this ModuleCRM
     private ArrayList<ModuleMotif> singleMotifs;
     private ArrayList<int[]> distance; // space constraints int[] should have length 4.  2 first elements are single motif references (index from "singleMotifs"), the two next is min and max distance between the two single motifs.
     private int maxLength=0; // the maximum length span of the whole module. Applicable if maxLength>0;
@@ -43,11 +43,11 @@ public class Module extends Data implements BasicDataType {
 
     private static transient HashMap<String,Class> userdefinedpropertyClasses=null; // contains a lookup-table defining the class-type of each user-defined property
      /**
-     * Constructs a new Motif object with the given name
+     * Constructs a new Module object with the given name
      *
      * @param name
      */
-    public Module(String name){
+    public ModuleCRM(String name){
          this.name=name;
          singleMotifs=new ArrayList<ModuleMotif>();
          distance=new ArrayList<int[]>();
@@ -131,7 +131,7 @@ public class Module extends Data implements BasicDataType {
      */
     public boolean isOriented() {
         for (ModuleMotif mm:singleMotifs) {
-            if (mm.getOrientation()!=Module.INDETERMINED) return true;
+            if (mm.getOrientation()!=ModuleCRM.INDETERMINED) return true;
         }
         return false;
     }    
@@ -189,8 +189,8 @@ public class Module extends Data implements BasicDataType {
             ModuleMotif mm=singleMotifs.get(i);
             string.append(mm.getRepresentativeName());
             int orientation=mm.getOrientation();
-            if (orientation==Module.DIRECT) string.append("(+)");
-            else if (orientation==Module.REVERSE) string.append("(-)");
+            if (orientation==ModuleCRM.DIRECT) string.append("(+)");
+            else if (orientation==ModuleCRM.REVERSE) string.append("(-)");
         }
         if (ordered) string.append(" >"); else string.append(" }");
         if (maxLength>0) {
@@ -336,7 +336,7 @@ public class Module extends Data implements BasicDataType {
         else {
             ModuleMotif motif=singleMotifs.get(index);
             if (!motif.getMotifAsCollection().contains(motifname)) return false;
-            if (motif.getOrientation()==Module.INDETERMINED) return true;
+            if (motif.getOrientation()==ModuleCRM.INDETERMINED) return true;
             else return motif.getOrientation()==orientation;
         }
     }
@@ -346,8 +346,8 @@ public class Module extends Data implements BasicDataType {
         boolean hasDirect=false;
         boolean hasReverse=false;
         for (ModuleMotif mm:singleMotifs) {
-            if (mm.getOrientation()==Module.DIRECT) hasDirect=true;
-            else if (mm.getOrientation()==Module.REVERSE) hasReverse=true;
+            if (mm.getOrientation()==ModuleCRM.DIRECT) hasDirect=true;
+            else if (mm.getOrientation()==ModuleCRM.REVERSE) hasReverse=true;
             if (hasDirect && hasReverse) return true;
         }
         return false;
@@ -546,7 +546,7 @@ public class Module extends Data implements BasicDataType {
 
     @Override
     public void importData(Data source) {
-          Module other=((Module)source);
+          ModuleCRM other=((ModuleCRM)source);
           this.name=other.name;
           this.maxLength=other.maxLength;
           this.ordered=other.ordered;
@@ -558,13 +558,13 @@ public class Module extends Data implements BasicDataType {
           for (int[] constraint:other.distance) {
              this.distance.add(constraint.clone());
           }
-          this.GOterms=((Module)source).GOterms;
-          this.properties=((Module)source).properties;          
+          this.GOterms=((ModuleCRM)source).GOterms;
+          this.properties=((ModuleCRM)source).properties;          
     }
 
     @Override
-    public Module clone() {
-        Module newmodule=new Module(this.name);
+    public ModuleCRM clone() {
+        ModuleCRM newmodule=new ModuleCRM(this.name);
         newmodule.maxLength=this.maxLength;
         newmodule.ordered=this.ordered;
         newmodule.singleMotifs=new ArrayList<ModuleMotif>();
@@ -596,24 +596,24 @@ public class Module extends Data implements BasicDataType {
     }    
 
     /**
-     * Returns true if this Module equals the other given Module
+     * Returns true if this ModuleCRM equals the other given ModuleCRM
      * @param other
      * @return
      */
     @Override
     public boolean containsSameData(Data other) {
-        if (other==null || !(other instanceof Module)) return false;
-        if (this.maxLength!=((Module)other).maxLength) return false;
-        if (this.ordered!=((Module)other).ordered) return false;
-        if (!this.distance.equals(((Module)other).distance)) return false;
-        if (!containsSameModuleMotifs(((Module)other))) return false;
-        if ((((Module)other).GOterms==null && this.GOterms!=null) || (((Module)other).GOterms!=null && this.GOterms==null) ||  (((Module)other).GOterms!=null && this.GOterms!=null && !MotifLabEngine.listcompare(this.GOterms,((Module)other).GOterms))) return false;     
-        if ((((Module)other).properties==null && this.properties!=null) || (((Module)other).properties!=null && this.properties==null) ||  (((Module)other).properties!=null && this.properties!=null && !this.properties.equals(((Module)other).properties))) return false;
+        if (other==null || !(other instanceof ModuleCRM)) return false;
+        if (this.maxLength!=((ModuleCRM)other).maxLength) return false;
+        if (this.ordered!=((ModuleCRM)other).ordered) return false;
+        if (!this.distance.equals(((ModuleCRM)other).distance)) return false;
+        if (!containsSameModuleMotifs(((ModuleCRM)other))) return false;
+        if ((((ModuleCRM)other).GOterms==null && this.GOterms!=null) || (((ModuleCRM)other).GOterms!=null && this.GOterms==null) ||  (((ModuleCRM)other).GOterms!=null && this.GOterms!=null && !MotifLabEngine.listcompare(this.GOterms,((ModuleCRM)other).GOterms))) return false;     
+        if ((((ModuleCRM)other).properties==null && this.properties!=null) || (((ModuleCRM)other).properties!=null && this.properties==null) ||  (((ModuleCRM)other).properties!=null && this.properties!=null && !this.properties.equals(((ModuleCRM)other).properties))) return false;
     
         return true;
     }
 
-    private boolean containsSameModuleMotifs(Module other) {
+    private boolean containsSameModuleMotifs(ModuleCRM other) {
         if (this.singleMotifs==null && other.singleMotifs==null) return true;
         if (this.singleMotifs!=null && other.singleMotifs==null) return false;
         if (this.singleMotifs==null && other.singleMotifs!=null) return false;                
@@ -643,8 +643,8 @@ public class Module extends Data implements BasicDataType {
     @Override
     public String getTypeDescription() {return typedescription;}
 
-    public static Module createModuleFromParameterString(String name, String parameterString, MotifLabEngine engine) throws ExecutionError {
-        Module module=new Module(name);
+    public static ModuleCRM createModuleFromParameterString(String name, String parameterString, MotifLabEngine engine) throws ExecutionError {
+        ModuleCRM cisRegModule=new ModuleCRM(name);
         String[] elements=parameterString.split("\\s*;\\s*");
         if (!elements[0].startsWith("CARDINALITY:") || elements[0].length()<=12) throw new ExecutionError("CARDINALITY property should be first parameter for module '"+name+"'");
         String cardinalityString=elements[0].substring(12);
@@ -660,14 +660,14 @@ public class Module extends Data implements BasicDataType {
             if (elements[i].startsWith("MAXLENGTH:")) {
                 String maxlengthstring=elements[i].substring(10);
                  try {
-                    module.setMaxLength(Integer.parseInt(maxlengthstring));
+                    cisRegModule.setMaxLength(Integer.parseInt(maxlengthstring));
                 } catch (NumberFormatException nfe) {
                     throw new ExecutionError("Unable to parse maximum length (integer) for module '"+name+"' => "+maxlengthstring);
                 }
             } else if (elements[i].equals("ORDERED")) {
-                 module.setOrdered(true);
+                 cisRegModule.setOrdered(true);
             } else if (elements[i].equals("UNORDERED")) {
-                 module.setOrdered(false);
+                 cisRegModule.setOrdered(false);
             } else if (elements[i].startsWith("MOTIF")) {
                 Matcher matcher=motifpattern.matcher(elements[i]);
                 if (matcher.matches()) {
@@ -683,7 +683,7 @@ public class Module extends Data implements BasicDataType {
                         else if (!(item instanceof Motif)) throw new ExecutionError("'"+motifname+"' referenced in module '"+name+"' is not a Motif");
                         else collection.addMotif((Motif)item);
                     }
-                    module.addModuleMotif(singlemotifname, collection, orientation);
+                    cisRegModule.addModuleMotif(singlemotifname, collection, orientation);
                     found++;
                 } else throw new ExecutionError("Unable to parse parameters for MOTIF in module '"+name+"'. Syntax should be MOTIF(name)[+|-|.]{comma-separated list of motifs}");
             } else if (elements[i].startsWith("DISTANCE(")) {
@@ -705,12 +705,12 @@ public class Module extends Data implements BasicDataType {
                         throw new ExecutionError("Unable to parse expected numeric value for DISTANCE parameter in module '"+name+"' => "+numbers[j]);
                     }
                 }
-                module.addDistanceConstraint(numbers[0],numbers[1],values[0],values[1]);
+                cisRegModule.addDistanceConstraint(numbers[0],numbers[1],values[0],values[1]);
             } else if (elements[i].startsWith("GO-TERMS:")) { //
                 String goString=elements[i].substring("GO-TERMS:".length()).trim();
                 String[] GO=goString.split("\\s*,\\s*");
                 try {
-                    module.setGOterms(GO);
+                    cisRegModule.setGOterms(GO);
                 } catch (ParseError p) {
                     throw new ExecutionError(p.getMessage(),p);
                 }
@@ -719,18 +719,18 @@ public class Module extends Data implements BasicDataType {
                 int colonindex=segment.indexOf(':');
                 if (colonindex<=0 || colonindex>=segment.length()-1)  throw new ExecutionError("Unable to parse module parameter. Not a key-value pair: "+segment); // throws exception if string contains no colon or if the colon is the first or last character
                 String key=segment.substring(0, colonindex);
-                if (!Module.isValidUserDefinedPropertyKey(key)) throw new ExecutionError("Not a valid name for a property: "+key);
+                if (!ModuleCRM.isValidUserDefinedPropertyKey(key)) throw new ExecutionError("Not a valid name for a property: "+key);
                 String valuestring=segment.substring(colonindex+1);
                 Object value=getObjectForPropertyValueString(valuestring);
-                module.setUserDefinedPropertyValue(key,value); //                   
+                cisRegModule.setUserDefinedPropertyValue(key,value); //                   
             }            
         }
         if (found!=cardinality) throw new ExecutionError("Expected "+cardinality+" motifs for module '"+name+"'. Found "+found);
-        return module;
+        return cisRegModule;
     }
 
 
-    /** Returns the names of all properties that can be obtained from Module objects */
+    /** Returns the names of all properties that can be obtained from ModuleCRM objects */
     public static String[] getProperties(MotifLabEngine engine) {
         return new String[] {"ID","Cardinality","Consensus","Motifs","Ordered","Oriented","Max length","Max IC", "Min IC"};
     }
@@ -786,7 +786,7 @@ public class Module extends Data implements BasicDataType {
         ArrayList<String> numericProps=new ArrayList<String>();
         String[] props=getAllStandardProperties(includeDerived);
         for (String prop:props) {
-            Class propclass=Module.getPropertyClass(prop,null);
+            Class propclass=ModuleCRM.getPropertyClass(prop,null);
             if (propclass!=null && Number.class.isAssignableFrom(propclass)) numericProps.add(prop);
         }
         String[] result=new String[numericProps.size()];
@@ -801,9 +801,9 @@ public class Module extends Data implements BasicDataType {
     public static String[] getAllUserDefinedProperties(MotifLabEngine engine) {
         HashSet<String> propertyNamesSet=new HashSet<String>();
         String[] propertynames=new String[propertyNamesSet.size()];
-        ArrayList<Data> modules=engine.getAllDataItemsOfType(Module.class);
-        for (Data module:modules) {
-            Set<String> moduleprops=((Module)module).getUserDefinedProperties();
+        ArrayList<Data> modules=engine.getAllDataItemsOfType(ModuleCRM.class);
+        for (Data cisRegModule:modules) {
+            Set<String> moduleprops=((ModuleCRM)cisRegModule).getUserDefinedProperties();
             if (moduleprops!=null) propertyNamesSet.addAll(moduleprops);
         }
         return propertyNamesSet.toArray(propertynames);
@@ -816,7 +816,7 @@ public class Module extends Data implements BasicDataType {
         ArrayList<String> numericProps=new ArrayList<String>();
         String[] props=getAllUserDefinedProperties(engine);
         for (String prop:props) {
-            Class propclass=Module.getPropertyClass(prop,engine);
+            Class propclass=ModuleCRM.getPropertyClass(prop,engine);
             if (propclass!=null && Number.class.isAssignableFrom(propclass)) numericProps.add(prop);
         }
         String[] result=new String[numericProps.size()];
@@ -850,15 +850,15 @@ public class Module extends Data implements BasicDataType {
         else if (propertyName.equalsIgnoreCase("Oriented")) return Boolean.class;
         else if (propertyName.equalsIgnoreCase("Max IC")) return Double.class;
         else if (propertyName.equalsIgnoreCase("Min IC")) return Double.class;
-        else return Module.getClassForUserDefinedProperty(propertyName, engine);                    
+        else return ModuleCRM.getClassForUserDefinedProperty(propertyName, engine);                    
     }      
 
-    /** Returns the names of all numeric properties that can be obtained from Module objects */
+    /** Returns the names of all numeric properties that can be obtained from ModuleCRM objects */
     public static String[] getNumericProperties(MotifLabEngine engine) {
         ArrayList<String> numericProps=new ArrayList<String>();
-        String[] props=Module.getProperties(engine);
+        String[] props=ModuleCRM.getProperties(engine);
         for (String prop:props) {
-            Class propclass=Module.getPropertyClass(prop,engine);
+            Class propclass=ModuleCRM.getPropertyClass(prop,engine);
             if (propclass!=null && Number.class.isAssignableFrom(propclass)) numericProps.add(prop);
         }
         String[] result=new String[numericProps.size()];
@@ -874,7 +874,7 @@ public class Module extends Data implements BasicDataType {
      * @return 
      */
     public static boolean isNumericProperty(String propertyName, MotifLabEngine engine) {
-        Class type=Module.getPropertyClass(propertyName, engine);
+        Class type=ModuleCRM.getPropertyClass(propertyName, engine);
         if (type==null) return false;
         return (type==Integer.class || type==Double.class);
     }    
@@ -984,14 +984,14 @@ public class Module extends Data implements BasicDataType {
          else {
              if (!(value instanceof Double || value instanceof Integer || value instanceof Boolean || value instanceof List || value instanceof String)) value=value.toString(); // convert 'unknown' types to String just in case
              properties.put(propertyName, value);
-             Module.setUserDefinedPropertyClass(propertyName, value.getClass(), false);
+             ModuleCRM.setUserDefinedPropertyClass(propertyName, value.getClass(), false);
          }
     }    
     
     public static Class getClassForUserDefinedProperty(String propertyName, MotifLabEngine engine) {
         if (userdefinedpropertyClasses!=null && userdefinedpropertyClasses.containsKey(propertyName)) return userdefinedpropertyClasses.get(propertyName); // cached entries
         Class type=getClassForUserDefinedPropertyDynamically(propertyName, engine);
-        if (type!=null) Module.setUserDefinedPropertyClass(propertyName,type,true); // cache the class in this lookup-table
+        if (type!=null) ModuleCRM.setUserDefinedPropertyClass(propertyName,type,true); // cache the class in this lookup-table
         return type;       
     }    
     
@@ -999,9 +999,9 @@ public class Module extends Data implements BasicDataType {
         if (engine==null) return null;
         // try to determine the type dynamically by querying all Modules
         Class firstclass=null;
-        ArrayList<Data> modules=engine.getAllDataItemsOfType(Module.class);
-        for (Data module:modules) {
-            Object value=((Module)module).getUserDefinedPropertyValue(propertyName);
+        ArrayList<Data> modules=engine.getAllDataItemsOfType(ModuleCRM.class);
+        for (Data cisRegModule:modules) {
+            Object value=((ModuleCRM)cisRegModule).getUserDefinedPropertyValue(propertyName);
             if (value==null) continue;
             else if (firstclass==null) firstclass=value.getClass();
             else if (firstclass.equals(Integer.class) && value.getClass().equals(Double.class)) firstclass=Double.class; // return Double if values are a mix of Integers and Doubles
@@ -1043,7 +1043,7 @@ public class Module extends Data implements BasicDataType {
     /** updates the lookup table for all userdefined properties defined for this dataitem
      *  This could perhaps be more efficient?
      */
-    public static void updateUserdefinedPropertiesLookupTable(Module dataitem, MotifLabEngine engine) {
+    public static void updateUserdefinedPropertiesLookupTable(ModuleCRM dataitem, MotifLabEngine engine) {
         Set<String> props=dataitem.getUserDefinedProperties();
         if (props==null || props.isEmpty()) return;
         for (String prop:props) {
@@ -1223,7 +1223,7 @@ public class Module extends Data implements BasicDataType {
     
     
     // ------------ Serialization ---------
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
          short currentinternalversion=1; // this is an internal version number for serialization of objects of this type

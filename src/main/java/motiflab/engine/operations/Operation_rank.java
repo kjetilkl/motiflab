@@ -89,9 +89,9 @@ public class Operation_rank extends Operation {
            if (weights[i]<0) throw new ExecutionError("The weight '"+weightString+"' is a negative value");
            //
            if (   propertysource.equals(engine.getTypeNameForDataClass(motiflab.engine.data.Motif.class))
-               || propertysource.equals(engine.getTypeNameForDataClass(motiflab.engine.data.Module.class))
+               || propertysource.equals(engine.getTypeNameForDataClass(motiflab.engine.data.ModuleCRM.class))
                || propertysource.equals(engine.getTypeNameForDataClass(motiflab.engine.data.Sequence.class))
-           ) { // property source is a Data type like Motif, Module or Sequence
+           ) { // property source is a Data type like Motif, ModuleCRM or Sequence
                Class propertysourcetype=engine.getDataClassForTypeName(propertysource);
                if (targetType!=propertysourcetype) throw new ExecutionError("Properties from "+propertysource.toLowerCase()+"s can not be combined with the type of data found in the previous entries ("+engine.getTypeNameForDataClass(targetType)+")",task.getLineNumber());
                 // now add the specified property of the data type the collated object!
@@ -205,14 +205,14 @@ public class Operation_rank extends Operation {
 
     private Class getPropertyClass(String propertyName, Class targetType) throws ExecutionError {
              if (targetType==Motif.class) return Motif.getPropertyClass(propertyName,engine);
-        else if (targetType==Module.class) return Module.getPropertyClass(propertyName,engine);
+        else if (targetType==ModuleCRM.class) return ModuleCRM.getPropertyClass(propertyName,engine);
         else if (targetType==Sequence.class) return Sequence.getPropertyClass(propertyName,engine);
         else return null; // this should never happen
     }
 
     private Object getPropertyValue(String dataname, String propertyName, Class targetType) throws ExecutionError {
              if (targetType==Motif.class) return getPropertyFromMotif(dataname,propertyName);
-        else if (targetType==Module.class) return getPropertyFromModule(dataname,propertyName);
+        else if (targetType==ModuleCRM.class) return getPropertyFromModule(dataname,propertyName);
         else if (targetType==Sequence.class) return getPropertyFromSequence(dataname,propertyName);
         else return null; // this should never happen
     }
@@ -226,8 +226,8 @@ public class Operation_rank extends Operation {
     }
     private Object getPropertyFromModule(String modulename, String property) throws ExecutionError {
         Data data=engine.getDataItem(modulename);
-        if (!(data instanceof Module)) throw new ExecutionError("'"+modulename+"' is not a Module");
-        Object value=((Module)data).getPropertyValue(property,engine);
+        if (!(data instanceof ModuleCRM)) throw new ExecutionError("'"+modulename+"' is not a Module");
+        Object value=((ModuleCRM)data).getPropertyValue(property,engine);
         if (value instanceof ArrayList) value=MotifLabEngine.splice((ArrayList)value, ","); // flatten lists
         return value;
     }

@@ -19,7 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JToolTip;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleMotif;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.MotifCollection;
@@ -69,14 +69,14 @@ public class SingleMotifTooltip extends JToolTip {
         return builder.toString();
     }
 
-    private String getModuleDescription(Module module) {
+    private String getModuleDescription(ModuleCRM cisRegModule) {
         StringBuilder builder=new StringBuilder();
         builder.append("<html><nobr><b>");
-        builder.append(module.getName());
+        builder.append(cisRegModule.getName());
         builder.append("</b>&nbsp;&nbsp;&nbsp;(");
-        builder.append(module.getCardinality());
+        builder.append(cisRegModule.getCardinality());
         builder.append(" component motif");
-        if (module.getCardinality()!=1) builder.append("s");
+        if (cisRegModule.getCardinality()!=1) builder.append("s");
         builder.append(")</nobr></html>");
         return builder.toString();
     }
@@ -124,22 +124,22 @@ public class SingleMotifTooltip extends JToolTip {
              Dimension dim=getPreferredSize();
              setTipText(oldtiptext);
              paintSequenceLogo(g, (Motif)data, xoffset, dim.height, 0, false);
-       } else if (data instanceof Module) {
-            setTipText(getModuleDescription((Module)data));
+       } else if (data instanceof ModuleCRM) {
+            setTipText(getModuleDescription((ModuleCRM)data));
             super.paintComponent(g);
             Dimension dim=getPreferredSize();
             setTipText(oldtiptext);
             int logoYoffset=dim.height+6; // "approx"
-            paintModuleLogo((Graphics2D)g, (Module)data, xoffset, logoYoffset);
-            int size=((Module)data).getCardinality();
+            paintModuleLogo((Graphics2D)g, (ModuleCRM)data, xoffset, logoYoffset);
+            int size=((ModuleCRM)data).getCardinality();
             FontMetrics mmMetrics=getFontMetrics(modulemotiffont);
             int boxheight=mmMetrics.getHeight()+2;            
             int currentY=logoYoffset+boxheight+24; // 24 is for margins and padding
             for (int i=0;i<size;i++) {
-                ModuleMotif mm=((Module)data).getSingleMotif(i);
+                ModuleMotif mm=((ModuleCRM)data).getSingleMotif(i);
                 Motif motif=mm.getFirstMotifInCollection(engine);
                 if (motif==null) continue; // do not draw if no motifs are present (this has been accounted for in preferred size)
-                   Color mmColor=settings.getFeatureColor(((Module)data).getName()+"."+mm.getRepresentativeName());
+                   Color mmColor=settings.getFeatureColor(((ModuleCRM)data).getName()+"."+mm.getRepresentativeName());
                    g.setColor(mmColor);
                    g.fillRect(xoffset, currentY, lineheight, lineheight);
                    g.setColor(settings.getFeatureColor(motif.getName()));
@@ -154,9 +154,9 @@ public class SingleMotifTooltip extends JToolTip {
            int colonpos=oldtiptext.indexOf(':');
            String modulename=oldtiptext.substring(4,colonpos);
            String modulemotifname=oldtiptext.substring(colonpos+1,oldtiptext.length());
-           Data module=engine.getDataItem(modulename);
-           if (module instanceof Module) {
-               ModuleMotif modulemotif=((Module)module).getModuleMotif(modulemotifname);
+           Data cisRegModule=engine.getDataItem(modulename);
+           if (cisRegModule instanceof ModuleCRM) {
+               ModuleMotif modulemotif=((ModuleCRM)cisRegModule).getModuleMotif(modulemotifname);
                MotifCollection motifs=modulemotif.getMotifAsCollection();
                setTipText(getModuleMotifDescription(modulemotif, motifs.size(),modulename));
                super.paintComponent(g);
@@ -238,13 +238,13 @@ public class SingleMotifTooltip extends JToolTip {
             int charwidth=getFontMetrics(logofont).charWidth('G');
             int logowidth=charwidth*((Motif)data).getLength()+10; // 10 is margin
             return new Dimension((width>logowidth)?width:logowidth,labeldim.height+lineheight+14); // 12 is just a margin
-        } if (data instanceof Module) {
-            int size=((Module)data).getCardinality();
-            JLabel testlabel=new JLabel(getModuleDescription((Module)data));
+        } if (data instanceof ModuleCRM) {
+            int size=((ModuleCRM)data).getCardinality();
+            JLabel testlabel=new JLabel(getModuleDescription((ModuleCRM)data));
             testlabel.setFont(getFont());
             Dimension labeldim=testlabel.getPreferredSize();
             int width=labeldim.width+9;
-            int modulewidth=getModuleLogoWidth((Module)data)+xoffset+9;
+            int modulewidth=getModuleLogoWidth((ModuleCRM)data)+xoffset+9;
             if (modulewidth>width) width=modulewidth;
             FontMetrics metrics=getFontMetrics(getFont());
             FontMetrics mmMetrics=getFontMetrics(modulemotiffont);
@@ -252,7 +252,7 @@ public class SingleMotifTooltip extends JToolTip {
             int height=labeldim.height+boxheight+40; // 40 is margin/padding. this number will be added to later
             int maxmotiflinewidth=0;
             for (int i=0;i<size;i++) {
-                ModuleMotif mm=((Module)data).getSingleMotif(i);
+                ModuleMotif mm=((ModuleCRM)data).getSingleMotif(i);
                 Motif motif=mm.getFirstMotifInCollection(engine);
                 if (motif==null) continue;
                 int motiflength=motif.getLength();
@@ -268,9 +268,9 @@ public class SingleMotifTooltip extends JToolTip {
             int colonpos=oldtiptext.indexOf(':');
             String modulename=oldtiptext.substring(4,colonpos);
             String modulemotifname=oldtiptext.substring(colonpos+1,oldtiptext.length());
-            Data module=engine.getDataItem(modulename);
-            if (!(module instanceof Module)) return dim;
-            ModuleMotif modulemotif=((Module)module).getModuleMotif(modulemotifname);
+            Data cisRegModule=engine.getDataItem(modulename);
+            if (!(cisRegModule instanceof ModuleCRM)) return dim;
+            ModuleMotif modulemotif=((ModuleCRM)cisRegModule).getModuleMotif(modulemotifname);
             MotifCollection motifs=modulemotif.getMotifAsCollection();
             ArrayList<Motif> motiflist=motifs.getAllMotifs(engine);
             int maxmotifsize=0;
@@ -408,14 +408,14 @@ public class SingleMotifTooltip extends JToolTip {
 
     }
 
-   private int getModuleLogoWidth(Module module) {
+   private int getModuleLogoWidth(ModuleCRM cisRegModule) {
        FontMetrics metrics=getFontMetrics(modulemotiffont);
        int boxspacing=19;
        int width=0;
-       int size=module.getCardinality();
+       int size=cisRegModule.getCardinality();
        for (int i=0;i<size;i++) {
            if (i>0) {width+=boxspacing;}
-           ModuleMotif mm=module.getSingleMotif(i);
+           ModuleMotif mm=cisRegModule.getSingleMotif(i);
            String mmName=mm.getRepresentativeName();
            int namewidth=metrics.stringWidth(mmName);
            width+=(namewidth+6); // 3px border on each side
@@ -424,9 +424,9 @@ public class SingleMotifTooltip extends JToolTip {
    }
 
    /** Paints a small graphical representation of the module (with motifs rendered as boxes) */
-   private void paintModuleLogo(Graphics2D graphics, Module module, int xoffset, int yoffset) {
+   private void paintModuleLogo(Graphics2D graphics, ModuleCRM cisRegModule, int xoffset, int yoffset) {
        Object alias=graphics.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-       int size=module.getCardinality();
+       int size=cisRegModule.getCardinality();
        int x=xoffset;
        int y=yoffset+6;
        int boxspacing=19; // Note duplicate in getModuleLogoWidth(). This should be 18 but must be 19 because of drawRect drawing "outside"
@@ -436,8 +436,8 @@ public class SingleMotifTooltip extends JToolTip {
        graphics.setFont(modulemotiffont);
        for (int i=0;i<size;i++) {
            if (i>0) {
-               if (module.isOrdered()) { // draw distance constraint
-                   int[] distance=module.getDistance(i-1, i);
+               if (cisRegModule.isOrdered()) { // draw distance constraint
+                   int[] distance=cisRegModule.getDistance(i-1, i);
                    //graphics.setColor((distance!=null)?Color.RED:Color.BLACK);
                    graphics.setColor(Color.BLACK);
                    // draw lines between boxes;
@@ -458,11 +458,11 @@ public class SingleMotifTooltip extends JToolTip {
                }
                x+=boxspacing;
            }
-           ModuleMotif mm=module.getSingleMotif(i);
+           ModuleMotif mm=cisRegModule.getSingleMotif(i);
            String mmName=mm.getRepresentativeName();
            int namewidth=metrics.stringWidth(mmName);
            int boxwidth=namewidth+6; // 3px border on each side
-           Color mmColor=settings.getFeatureColor(module.getName()+"."+mmName);
+           Color mmColor=settings.getFeatureColor(cisRegModule.getName()+"."+mmName);
            boolean isDark=VisualizationSettings.isDark(mmColor);
            graphics.setColor(mmColor);
            graphics.fillRect(x, y, boxwidth, boxheight);
@@ -473,12 +473,12 @@ public class SingleMotifTooltip extends JToolTip {
            graphics.drawString(mmName, x+4, y+boxheight-4);
            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, alias);
            int orientation=mm.getOrientation();
-           if (orientation!=Module.INDETERMINED) {
-              graphics.setColor((orientation==Module.DIRECT)?darkGreen:Color.RED);
+           if (orientation!=ModuleCRM.INDETERMINED) {
+              graphics.setColor((orientation==ModuleCRM.DIRECT)?darkGreen:Color.RED);
               graphics.drawLine(x, y-3, x+boxwidth, y-3);
               graphics.drawLine(x, y-4, x+boxwidth, y-4);
-              int l1=((orientation==Module.DIRECT))?x+boxwidth-2:x+2; // larger line
-              int l2=((orientation==Module.DIRECT))?x+boxwidth-1:x+1; // smaller line
+              int l1=((orientation==ModuleCRM.DIRECT))?x+boxwidth-2:x+2; // larger line
+              int l2=((orientation==ModuleCRM.DIRECT))?x+boxwidth-1:x+1; // smaller line
               graphics.drawLine(l1, y-6, l1, y-1);
               graphics.drawLine(l2, y-5, l2, y-2);
            }

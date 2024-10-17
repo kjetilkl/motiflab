@@ -83,7 +83,7 @@ public class StandardOperationParser_plant extends StandardOperationParser {
 
            Class plantObjectclass=lookup.getClassFor(plantObjectName);
            //if (plantObjectclass==null) throw new ParseError("Unrecognized object: "+plantObjectName);
-           if (plantObjectclass!=null && !(plantObjectclass==Motif.class || plantObjectclass==MotifCollection.class || plantObjectclass==Module.class)) throw new ParseError("'"+plantObjectName+"' is not a Motif, Motif Collection or Module");
+           if (plantObjectclass!=null && !(plantObjectclass==Motif.class || plantObjectclass==MotifCollection.class || plantObjectclass==ModuleCRM.class)) throw new ParseError("'"+plantObjectName+"' is not a Motif, Motif Collection or Module");
 
            //Class oldclass=lookup.getClassFor(targetName);
            //if (oldclass!=null && oldclass!=RegionDataset.class) throw new ParseError("Unable to output to "+targetName+". Target data object exists and is not a Region Dataset!");

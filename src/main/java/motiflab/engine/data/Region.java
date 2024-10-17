@@ -384,9 +384,9 @@ public class Region implements Cloneable,Serializable {
                 return null;
             } else if (property.toLowerCase().startsWith("module:")) { // return property of module
                 property=property.substring("module:".length());
-                Module module=(Module)MotifLabEngine.getEngine().getDataItem(type, Module.class);
-                if (module!=null) try {
-                    return module.getPropertyValue(property, MotifLabEngine.getEngine());
+                ModuleCRM cisRegModule=(ModuleCRM)MotifLabEngine.getEngine().getDataItem(type, ModuleCRM.class);
+                if (cisRegModule!=null) try {
+                    return cisRegModule.getPropertyValue(property, MotifLabEngine.getEngine());
                 } catch (ExecutionError e) {}
                 return null;
             }    

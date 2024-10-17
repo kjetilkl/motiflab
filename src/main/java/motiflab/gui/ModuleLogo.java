@@ -10,7 +10,7 @@ import java.awt.RenderingHints;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleMotif;
 
 /**
@@ -21,7 +21,7 @@ public class ModuleLogo extends DefaultTableCellRenderer {
     private static Font modulemotiffont = new Font(Font.SANS_SERIF, Font.BOLD, 11);
     private static final Color darkGreen=new Color(0,200,0);
     private VisualizationSettings settings;
-    private Module module;
+    private ModuleCRM cisRegModule;
     private static int boxspacing=19;
     private static int boxmargin=3;
     private static int logomargin=5;
@@ -40,12 +40,12 @@ public class ModuleLogo extends DefaultTableCellRenderer {
         return modulemotiffont;
     }
 
-    public void setModule(Module module) {
-        this.module=module;
+    public void setModule(ModuleCRM cisRegModule) {
+        this.cisRegModule=cisRegModule;
     }
     
-    public Module getModule() {
-        return module;
+    public ModuleCRM getModule() {
+        return cisRegModule;
     }    
     
     /** Sets a maximum width int pixels for the logo (this only applies outside)
@@ -57,18 +57,18 @@ public class ModuleLogo extends DefaultTableCellRenderer {
 
     public int getLogoWidth(Graphics graphics) {
         FontMetrics metrics=graphics.getFontMetrics(modulemotiffont);
-        return getLogoWidth(metrics, module);
+        return getLogoWidth(metrics, cisRegModule);
     }
     
     /** Returns the expected with of the rendered module */
-    public static int getLogoWidth(FontMetrics metrics, Module module) {
-       int size=module.getCardinality();
+    public static int getLogoWidth(FontMetrics metrics, ModuleCRM cisRegModule) {
+       int size=cisRegModule.getCardinality();
        int x=0;
        for (int i=0;i<size;i++) {
            if (i>0) {
                x+=boxspacing;
            }
-           ModuleMotif mm=module.getSingleMotif(i);
+           ModuleMotif mm=cisRegModule.getSingleMotif(i);
            String mmName=mm.getRepresentativeName();
            int namewidth=metrics.stringWidth(mmName);
            int boxwidth=namewidth+boxmargin+boxmargin;
@@ -79,10 +79,10 @@ public class ModuleLogo extends DefaultTableCellRenderer {
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        if (value!=null && value instanceof Module) module=(Module)value;
-        else module=null;
+        if (value!=null && value instanceof ModuleCRM) cisRegModule=(ModuleCRM)value;
+        else cisRegModule=null;
         value=""; // this avoids text being painted by super-class
-        if (module!=null && showTooltip) table.setToolTipText(module.getName());
+        if (cisRegModule!=null && showTooltip) table.setToolTipText(cisRegModule.getName());
         else table.setToolTipText(null);
         return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }
@@ -91,20 +91,20 @@ public class ModuleLogo extends DefaultTableCellRenderer {
     @SuppressWarnings("unchecked")
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (module!=null) paintModuleLogo((Graphics2D)g, module, logomargin, 9, settings, this, 0);
+        if (cisRegModule!=null) paintModuleLogo((Graphics2D)g, cisRegModule, logomargin, 9, settings, this, 0);
     }
 
    public void paintModuleLogo(Graphics2D graphics, int x, int y) {
-      if (module!=null) paintModuleLogo(graphics, module, logomargin+x, 9+y, settings, this, maxwidth); 
+      if (cisRegModule!=null) paintModuleLogo(graphics, cisRegModule, logomargin+x, 9+y, settings, this, maxwidth); 
    }   
     
    /** Paints a small graphical representation of the module (with motifs rendered as boxes) */
-   public static void paintModuleLogo(Graphics2D graphics, Module module, int x, int y, VisualizationSettings vizsettings, JComponent component, int maxwidth) {
+   public static void paintModuleLogo(Graphics2D graphics, ModuleCRM cisRegModule, int x, int y, VisualizationSettings vizsettings, JComponent component, int maxwidth) {
        Font current=graphics.getFont();
        Object alias=graphics.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-       int size=module.getCardinality();
+       int size=cisRegModule.getCardinality();
        FontMetrics metrics=graphics.getFontMetrics(modulemotiffont);
-       int logowidth=getLogoWidth(metrics, module);
+       int logowidth=getLogoWidth(metrics, cisRegModule);
        int boxheight=metrics.getHeight()+2;
        graphics.setFont(modulemotiffont);
        int width=(component!=null)?component.getWidth():0;
@@ -113,8 +113,8 @@ public class ModuleLogo extends DefaultTableCellRenderer {
        graphics.scale(scaleX, 1); // scale X-direction so that logo fits irrespective of size
        for (int i=0;i<size;i++) {
            if (i>0) {
-               if (module.isOrdered()) { // draw distance constraint
-                   int[] distance=module.getDistance(i-1, i);
+               if (cisRegModule.isOrdered()) { // draw distance constraint
+                   int[] distance=cisRegModule.getDistance(i-1, i);
                    //graphics.setColor((distance!=null)?Color.RED:Color.BLACK);
                    graphics.setColor(Color.BLACK);
                    // draw lines between boxes;
@@ -136,11 +136,11 @@ public class ModuleLogo extends DefaultTableCellRenderer {
                }
                x+=boxspacing;
            }
-           ModuleMotif mm=module.getSingleMotif(i);
+           ModuleMotif mm=cisRegModule.getSingleMotif(i);
            String mmName=mm.getRepresentativeName();
            int namewidth=metrics.stringWidth(mmName);
            int boxwidth=namewidth+boxmargin+boxmargin; // 3px border on each side
-           Color mmColor=vizsettings.getFeatureColor(module.getName()+"."+mmName);
+           Color mmColor=vizsettings.getFeatureColor(cisRegModule.getName()+"."+mmName);
            boolean isDark=VisualizationSettings.isDark(mmColor);
            graphics.setColor(mmColor);
            graphics.fillRect(x, y, boxwidth, boxheight);
@@ -151,12 +151,12 @@ public class ModuleLogo extends DefaultTableCellRenderer {
            graphics.drawString(mmName, x+boxmargin+1, y+boxheight-4);
            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, alias);
            int orientation=mm.getOrientation();
-           if (orientation!=Module.INDETERMINED) {
-              graphics.setColor((orientation==Module.DIRECT)?darkGreen:Color.RED);
+           if (orientation!=ModuleCRM.INDETERMINED) {
+              graphics.setColor((orientation==ModuleCRM.DIRECT)?darkGreen:Color.RED);
               graphics.drawLine(x, y-3, x+boxwidth, y-3);
               graphics.drawLine(x, y-4, x+boxwidth, y-4);
-              int l1=((orientation==Module.DIRECT))?x+boxwidth-2:x+2; // larger line
-              int l2=((orientation==Module.DIRECT))?x+boxwidth-1:x+1; // smaller line
+              int l1=((orientation==ModuleCRM.DIRECT))?x+boxwidth-2:x+2; // larger line
+              int l2=((orientation==ModuleCRM.DIRECT))?x+boxwidth-1:x+1; // smaller line
               graphics.drawLine(l1, y-6, l1, y-1);
               graphics.drawLine(l2, y-5, l2, y-2);
            }

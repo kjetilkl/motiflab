@@ -114,7 +114,7 @@ public class MotifsPanel extends DataPanel {
       return (   type.equals(Motif.getType())
               || type.equals(MotifCollection.getType())
               || type.equals(MotifPartition.getType())
-              || type.equals(Module.getType())
+              || type.equals(ModuleCRM.getType())
               || type.equals(ModuleCollection.getType())
               || type.equals(ModulePartition.getType()));
   }
@@ -124,7 +124,7 @@ public class MotifsPanel extends DataPanel {
       return (   data instanceof Motif
               || data instanceof MotifCollection
               || data instanceof MotifPartition
-              || data instanceof Module
+              || data instanceof ModuleCRM
               || data instanceof ModuleCollection
               || data instanceof ModulePartition);
   }  
@@ -328,13 +328,13 @@ public class MotifsPanel extends DataPanel {
                           Object[] nodepath=path.getPath();
                           for (Object parentnode:nodepath) {
                               Object userObject=((CheckBoxTreeNode)parentnode).getUserObject();
-                              if (userObject instanceof Module || userObject instanceof ModuleMotif) break;
+                              if (userObject instanceof ModuleCRM || userObject instanceof ModuleMotif) break;
                               ((CheckBoxTreeNode)parentnode).setChecked(false);
                           }
                        }
                        if (!checknode.isLeaf()) {
                            Object userObject=checknode.getUserObject();
-                           if (userObject==null || !(userObject instanceof Module)) setCheckedRecursively(checknode,checknode.isChecked());
+                           if (userObject==null || !(userObject instanceof ModuleCRM)) setCheckedRecursively(checknode,checknode.isChecked());
                        }
                        gui.redraw();
                        motifsTree.repaint();
@@ -499,8 +499,8 @@ public void showPrompt(final Data selectedData, boolean editable, boolean modal)
           prompt=new Prompt_MotifCollection(gui, null, (MotifCollection)selectedData.clone(), modal);
      } else if (selectedData instanceof MotifPartition) {
           prompt=new Prompt_MotifPartition(gui, null, (MotifPartition)selectedData.clone(), modal);
-     } else if (selectedData instanceof Module) {
-          prompt=new Prompt_Module(gui, null, (Module)selectedData.clone(), modal);
+     } else if (selectedData instanceof ModuleCRM) {
+          prompt=new Prompt_Module(gui, null, (ModuleCRM)selectedData.clone(), modal);
      } else if (selectedData instanceof ModuleCollection) {
           prompt=new Prompt_ModuleCollection(gui, null, (ModuleCollection)selectedData.clone(), modal);
      } else if (selectedData instanceof ModulePartition) {
@@ -553,19 +553,19 @@ public void setColorOnSelectedRows(Color color) {
                     if (motifClassification==null) motifClassification=MotifClassification.UNKNOWN_CLASS_LABEL;
                     affectedClasses.add(motifClassification);
                 }
-            } else if (data instanceof Module) {
+            } else if (data instanceof ModuleCRM) {
                 settings.setFeatureColor(data.toString(), color, false);
             } else {
                 if (model instanceof MotifsPanelTreeModel_GroupByClass) affectedClasses.add(node.getName());
             }                     
         } // end node is leaf
-        else if (node.getUserObject() instanceof Module) {
-            settings.setFeatureColor(((Module)node.getUserObject()).getName(), color, false);
+        else if (node.getUserObject() instanceof ModuleCRM) {
+            settings.setFeatureColor(((ModuleCRM)node.getUserObject()).getName(), color, false);
         }
         else if (node.getUserObject() instanceof ModuleMotif) {
             CheckBoxTreeNode modulenode=(CheckBoxTreeNode)node.getParent();
-            Module module=(Module)modulenode.getUserObject();
-            settings.setFeatureColor(module.getName()+"."+((ModuleMotif)node.getUserObject()).getRepresentativeName(), color, false);
+            ModuleCRM cisRegModule=(ModuleCRM)modulenode.getUserObject();
+            settings.setFeatureColor(cisRegModule.getName()+"."+((ModuleMotif)node.getUserObject()).getRepresentativeName(), color, false);
         }
         else { // internal node (class or group (MotifCollection/ModuleCollection) )
             String nodeName=node.getName();
@@ -641,7 +641,7 @@ private void setColorsRecursively(CheckBoxTreeNode node, Color color, HashSet<St
                   if (motifClass==null) motifClass=MotifClassification.UNKNOWN_CLASS_LABEL;
                   labels.add(motifClass);
               }
-          } else if (data instanceof Module) {
+          } else if (data instanceof ModuleCRM) {
               settings.setFeatureColor(data.toString(), color, false);
           }
       }
@@ -664,17 +664,17 @@ public void setVisibilityOnSelectedRows(boolean show) {
         if (node.isProcessed()) continue;
         if (node.isLeaf()) {
             Object data=node.getUserObject();
-            if (data instanceof Motif || data instanceof Module) {settings.setRegionTypeVisible(data.toString(), show, false);}
+            if (data instanceof Motif || data instanceof ModuleCRM) {settings.setRegionTypeVisible(data.toString(), show, false);}
         }
-        else if (node.getUserObject() instanceof Module) {
+        else if (node.getUserObject() instanceof ModuleCRM) {
             node.setChecked(show);
             settings.setRegionTypeVisible(node.getUserObject().toString(), show, false);
         }
         else if (node.getUserObject() instanceof ModuleMotif) {
             node.setChecked(show);
             CheckBoxTreeNode modulenode=(CheckBoxTreeNode)node.getParent();
-            Module module=(Module)modulenode.getUserObject();
-            settings.setRegionTypeVisible(module.toString()+"."+((ModuleMotif)node.getUserObject()).getRepresentativeName(), show, false);
+            ModuleCRM cisRegModule=(ModuleCRM)modulenode.getUserObject();
+            settings.setRegionTypeVisible(cisRegModule.toString()+"."+((ModuleMotif)node.getUserObject()).getRepresentativeName(), show, false);
             setVisibilityRecursively(node, show);
             setProcessedRecursively(node, true);
         }
@@ -699,7 +699,7 @@ private void setVisibilityRecursively(CheckBoxTreeNode node, boolean show) {
       if (!child.isLeaf()) {child.setChecked(show);setVisibilityRecursively(child,show);}
       else {
           Object data=child.getUserObject();
-          if (data instanceof Motif || data instanceof Module) {settings.setRegionTypeVisible(data.toString(), show, false);}
+          if (data instanceof Motif || data instanceof ModuleCRM) {settings.setRegionTypeVisible(data.toString(), show, false);}
       }
     }
 }
@@ -852,14 +852,14 @@ private void collapsePathRecursively(TreePath path) {
      model=new MotifsPanelTreeModel_GroupByModuleCollection(gui.getEngine(),this);
      model.addTreeModelListener(treelistener);
      motifsTree.setModel(model);
-     //motifCollectionPanelLabel.setText("Module Collections");
+     //motifCollectionPanelLabel.setText("ModuleCRM Collections");
  }
  private void setGroupingByModulePartition() {
      if (model!=null) model.removeTreeModelListener(treelistener);
      model=new MotifsPanelTreeModel_GroupByModulePartition(gui.getEngine(),this);
      model.addTreeModelListener(treelistener);
      motifsTree.setModel(model);
-     //motifCollectionPanelLabel.setText("Module Collections");
+     //motifCollectionPanelLabel.setText("ModuleCRM Collections");
  }
  
 
@@ -999,7 +999,7 @@ private void collapsePathRecursively(TreePath path) {
          JMenuItem addMotif=new JMenuItem(Motif.getType());
          JMenuItem addMotifCollection=new JMenuItem(MotifCollection.getType());
          JMenuItem addMotifPartition=new JMenuItem(MotifPartition.getType());
-         JMenuItem addModule=new JMenuItem(Module.getType());
+         JMenuItem addModule=new JMenuItem(ModuleCRM.getType());
          JMenuItem addModuleCollection=new JMenuItem(ModuleCollection.getType());
          JMenuItem addModulePartition=new JMenuItem(ModulePartition.getType());
          addDataPopupMenuListener listener=new addDataPopupMenuListener();
@@ -1028,7 +1028,7 @@ private void collapsePathRecursively(TreePath path) {
               if (type.equals(MotifCollection.getType())) prompt=new Prompt_MotifCollection(gui, null, null);
          else if (type.equals(Motif.getType())) prompt=new Prompt_Motif(gui, null, null,settings);
          else if (type.equals(MotifPartition.getType())) prompt=new Prompt_MotifPartition(gui, null, null);
-         else if (type.equals(Module.getType())) prompt=new Prompt_Module(gui, null, null);
+         else if (type.equals(ModuleCRM.getType())) prompt=new Prompt_Module(gui, null, null);
          else if (type.equals(ModuleCollection.getType())) prompt=new Prompt_ModuleCollection(gui, null, null);
          else if (type.equals(ModulePartition.getType())) prompt=new Prompt_ModulePartition(gui, null, null);
          prompt.setLocation(gui.getFrame().getWidth()/2-prompt.getWidth()/2, gui.getFrame().getHeight()/2-prompt.getHeight()/2);
@@ -1058,13 +1058,13 @@ private void collapsePathRecursively(TreePath path) {
     } 
 }
  /** Sets the layout of the panel to show data items of the given type
-  *  @param type A string specifying the data item type. Use the static getType() method in data class, eg MotifCollection.getType() or Module.getType() 
+  *  @param type A string specifying the data item type. Use the static getType() method in data class, eg MotifCollection.getType() or ModuleCRM.getType() 
   */
  public void setContentType(String type) {
           if (type.equals(MotifCollection.getType())) selectContentCombobox.setSelectedItem(SHOW_MOTIF_COLLECTIONS);
      else if (type.equals(Motif.getType())) selectContentCombobox.setSelectedItem(SHOW_MOTIFS);
      else if (type.equals(MotifPartition.getType())) selectContentCombobox.setSelectedItem(SHOW_MOTIF_PARTITIONS);
-     else if (type.equals(Module.getType())) selectContentCombobox.setSelectedItem(SHOW_MODULES);
+     else if (type.equals(ModuleCRM.getType())) selectContentCombobox.setSelectedItem(SHOW_MODULES);
      else if (type.equals(ModuleCollection.getType())) selectContentCombobox.setSelectedItem(SHOW_MODULE_COLLECTIONS);
      else if (type.equals(ModulePartition.getType())) selectContentCombobox.setSelectedItem(SHOW_MODULE_PARTITIONS);
  }
@@ -1259,13 +1259,13 @@ private class CheckBoxTreeCellRenderer extends JPanel implements TreeCellRendere
            return this;
         } else if (valueAsObject instanceof ModuleMotif) {
             CheckBoxTreeNode modulenode=(CheckBoxTreeNode)((CheckBoxTreeNode)value).getParent();
-            Module module=(Module)((CheckBoxTreeNode)modulenode).getUserObject();
+            ModuleCRM cisRegModule=(ModuleCRM)((CheckBoxTreeNode)modulenode).getUserObject();
             String modulemotifname=((ModuleMotif)valueAsObject).getRepresentativeName();
-            Color modulemotifcolor=settings.getFeatureColor(module.getName()+"."+modulemotifname);
+            Color modulemotifcolor=settings.getFeatureColor(cisRegModule.getName()+"."+modulemotifname);
             selectedicon.setForegroundColor(modulemotifcolor);
             button.setSelectedIcon(selectedicon);
             button.setIcon(unselectedIcon);
-            setToolTipText("#MM#"+module.getName()+":"+modulemotifname);
+            setToolTipText("#MM#"+cisRegModule.getName()+":"+modulemotifname);
             label.setText(modulemotifname);
             return this;
         }
@@ -1274,7 +1274,7 @@ private class CheckBoxTreeCellRenderer extends JPanel implements TreeCellRendere
         if (valueAsObject instanceof Data) data=(Data)valueAsObject;
 	String stringValue=null;
         if (data instanceof Motif) stringValue=((Motif)data).getPresentationName();
-        else if (data instanceof Module) stringValue=((Module)data).getName();
+        else if (data instanceof ModuleCRM) stringValue=((ModuleCRM)data).getName();
         else stringValue=valueAsObject.toString();
         label.setText(stringValue);
         this.revalidate();
@@ -1287,7 +1287,7 @@ private class CheckBoxTreeCellRenderer extends JPanel implements TreeCellRendere
             button.setIcon(unselectedIcon);
             setToolTipText(name); // use only the motif name here, since this will be used as a key to look up the motif itself          
             if (!settings.isRegionTypeVisible(name)) label.setForeground(Color.LIGHT_GRAY);
-        } else if (data instanceof Module) {
+        } else if (data instanceof ModuleCRM) {
             String name=data.getName();
             selectedicon.setForegroundColor(settings.getFeatureColor(name));
             button.setSelectedIcon(selectedicon);

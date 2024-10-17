@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.DataCollection;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.operations.Condition;
 import motiflab.engine.operations.Operation;
@@ -137,7 +137,7 @@ public abstract class StandardArithmeticsOperationParser extends StandardOperati
                if (sourceclass==RegionDataset.class) parseWhereRegionCondition(whereString, task);
                else if (sourceclass==NumericDataset.class) parseWherePositionCondition(whereString,task);
            }
-           if ((propertyName!=null && !propertyName.isEmpty()) && !(sourceclass==RegionDataset.class || sourceclass==Motif.class || sourceclass==Module.class || sourceclass==Sequence.class || DataCollection.class.isAssignableFrom(sourceclass))) throw new ParseError(engine.getTypeNameForDataClass(sourceclass)+" '"+sourceName+"' can not have a property named '"+propertyName+"'");
+           if ((propertyName!=null && !propertyName.isEmpty()) && !(sourceclass==RegionDataset.class || sourceclass==Motif.class || sourceclass==ModuleCRM.class || sourceclass==Sequence.class || DataCollection.class.isAssignableFrom(sourceclass))) throw new ParseError(engine.getTypeNameForDataClass(sourceclass)+" '"+sourceName+"' can not have a property named '"+propertyName+"'");
            if (sourceclass!=RegionDataset.class && operandValueString.startsWith("region[")) throw new ParseError(engine.getTypeNameForDataClass(sourceclass)+" '"+sourceName+"' can not be modified by '"+operandValueString+"'");
            
            lookup.register(targetName, sourceclass);

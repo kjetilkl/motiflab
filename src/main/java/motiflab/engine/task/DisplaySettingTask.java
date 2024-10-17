@@ -18,7 +18,7 @@ import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Data;
 import motiflab.engine.data.DataCollection;
 import motiflab.engine.data.FeatureDataset;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.NumericDataset;
 import motiflab.engine.data.OutputData;
@@ -504,7 +504,7 @@ public class DisplaySettingTask extends ExecutableTask {
      */
     private void resolveNames() throws InterruptedException, ExecutionError {
              if (isMotifSetting(settingName)) targetNames=parseDataNames(settingName, targets, Motif.class);
-        else if (isModuleSetting(settingName)) targetNames=parseDataNames(settingName, targets, Module.class);
+        else if (isModuleSetting(settingName)) targetNames=parseDataNames(settingName, targets, ModuleCRM.class);
         else if (isSequenceSetting(settingName)) targetNames=parseDataNames(settingName, targets, Sequence.class);
         else if (settingName.equalsIgnoreCase("setting") || settingName.equalsIgnoreCase("import") || settingName.equalsIgnoreCase("option") || settingName.equalsIgnoreCase("clear") || settingName.equalsIgnoreCase("macro") || settingName.equalsIgnoreCase("dump") || settingName.equalsIgnoreCase("log") || settingName.equalsIgnoreCase("message")) targetNames=null; // not needed
         else if (settingName.equalsIgnoreCase("saveSession") || settingName.equalsIgnoreCase("restoreSession") || settingName.equalsIgnoreCase("saveOutput")) targetNames=null; // not needed

@@ -21,7 +21,7 @@ import motiflab.engine.data.DataMap;
 import motiflab.engine.data.ExpressionProfile;
 import motiflab.engine.data.FeatureDataset;
 import motiflab.engine.data.FeatureSequenceData;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleNumericMap;
 import motiflab.engine.data.ModuleTextMap;
@@ -80,7 +80,7 @@ public class Operation_transform extends FeatureTransformOperation {
     public static final String TYPE_REPLACE="type-replace";
     
 
-    private Class[] datasourcePreferences=new Class[]{NumericDataset.class, NumericVariable.class, NumericMap.class, RegionDataset.class, ExpressionProfile.class, Motif.class, Module.class, Sequence.class, MotifCollection.class, ModuleCollection.class, SequenceCollection.class};
+    private Class[] datasourcePreferences=new Class[]{NumericDataset.class, NumericVariable.class, NumericMap.class, RegionDataset.class, ExpressionProfile.class, Motif.class, ModuleCRM.class, Sequence.class, MotifCollection.class, ModuleCollection.class, SequenceCollection.class};
 
     @Override
     public String getOperationGroup() {

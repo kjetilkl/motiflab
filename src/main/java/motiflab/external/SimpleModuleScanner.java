@@ -20,7 +20,7 @@ import motiflab.engine.ExecutionError;
 import motiflab.engine.task.OperationTask;
 import motiflab.engine.data.MotifCollection;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.Region;
 import motiflab.engine.data.RegionDataset;
@@ -49,14 +49,14 @@ public class SimpleModuleScanner extends ModuleScanning {
     private void processAdditionalParameters(OperationTask task) throws Exception {
         ModuleCollection modules=(ModuleCollection)task.getParameter("Modules");
         HashMap<String,HashSet<String>> motifnames=new HashMap<String,HashSet<String>>();
-        for (Module module:modules.getAllModules(engine)) {
+        for (ModuleCRM cisRegModule:modules.getAllModules(engine)) {
             HashSet<String> names=new HashSet<String>();
-            int size=module.getCardinality();
+            int size=cisRegModule.getCardinality();
             for (int i=0;i<size;i++) {
-               MotifCollection col=module.getMotifAsCollection(i);
+               MotifCollection col=cisRegModule.getMotifAsCollection(i);
                for (String mname:col.getAllMotifNames()) names.add(mname);
             }
-            motifnames.put(module.getName(), names);
+            motifnames.put(cisRegModule.getName(), names);
         }
         task.setParameter("Motifnames",motifnames); // these names are used to filter out regions for motifs that are not used in the modules we search for
     }
@@ -123,44 +123,44 @@ public class SimpleModuleScanner extends ModuleScanning {
         HashMap<String,HashSet<String>> motifnames=(HashMap<String,HashSet<String>>)task.getParameter("Motifnames");        
         ModuleCollection modules=(ModuleCollection)task.getParameter("Modules");
         
-        for (Module module:modules.getAllModules(engine)) {
+        for (ModuleCRM cisRegModule:modules.getAllModules(engine)) {
             boolean allowoverlap=(Boolean)task.getParameter("Overlap");
-            int size=module.getCardinality();
+            int size=cisRegModule.getCardinality();
             if (size==0) return;
             int[] motifcounts=new int[size]; // count the number of occurrences for each modulemotif
             int totalmotifcounts=0;
 
-            ArrayList<Region> candidateRegions=sourceSequence.getAllRegions(motifnames.get(module.getName())); // these are the regions corresponding to motifs in the module
+            ArrayList<Region> candidateRegions=sourceSequence.getAllRegions(motifnames.get(cisRegModule.getName())); // these are the regions corresponding to motifs in the module
             // check that all module motifs are indeed present in the sequence. If not, continue with next module
             for (Region region:candidateRegions) {
                 for (int i=0;i<motifcounts.length;i++) {
-                    if (module.isMotifCandidate(i,region.getType())) {motifcounts[i]++;totalmotifcounts++;}
+                    if (cisRegModule.isMotifCandidate(i,region.getType())) {motifcounts[i]++;totalmotifcounts++;}
                 }               
             }            
             for (int i=0;i<motifcounts.length;i++) {
                 if (motifcounts[i]==0) continue;
             }
             // now search for motifs within the candidate regions
-            if (module.isOrdered()) { // motifs have to appear in order
+            if (cisRegModule.isOrdered()) { // motifs have to appear in order
                 ArrayList<Region> included=new ArrayList<Region>(size);
                 for (int i=0;i<=candidateRegions.size()-size;i++) {
                     //System.err.println("search "+i+"/"+(candidateRegions.size()-size)+"   candidates="+candidateRegions.size()+" size="+size+" included="+included.size());
-                    searchModuleRecursivelyDirectStrand(candidateRegions, i, 0, targetSequence, module, included); // this will search for applicable combinations and add them
+                    searchModuleRecursivelyDirectStrand(candidateRegions, i, 0, targetSequence, cisRegModule, included); // this will search for applicable combinations and add them
                 }
                 Collections.sort(candidateRegions,new ReverseOrderComparator()); // sort in reverse order
                 included.clear();
                 for (int i=0;i<=candidateRegions.size()-size;i++) {
                     //System.err.println("search "+i+"/"+(candidateRegions.size()-size)+"   candidates="+candidateRegions.size()+" size="+size+" included="+included.size());
-                    searchModuleRecursivelyReverseStrand(candidateRegions, i, 0, targetSequence, module, included); // this will search for applicable combinations and add them
+                    searchModuleRecursivelyReverseStrand(candidateRegions, i, 0, targetSequence, cisRegModule, included); // this will search for applicable combinations and add them
                 }
             } else { // // motifs do not have to appear in order, but orientation constraints should apply!
                 ArrayList<Region> included=new ArrayList<Region>(size);
                 for (int i=0;i<=candidateRegions.size()-size;i++) {
                     //System.err.println("search "+i+"/"+(candidateRegions.size()-size)+"   candidates="+candidateRegions.size()+" size="+size+" included="+included.size());
-                    searchUnorderedModuleRecursivelyDirectStrand(candidateRegions, i, 0, targetSequence, module, included, allowoverlap); // this will search for applicable combinations and add them
+                    searchUnorderedModuleRecursivelyDirectStrand(candidateRegions, i, 0, targetSequence, cisRegModule, included, allowoverlap); // this will search for applicable combinations and add them
                 }
             } // 
-        } // end: for each Module   
+        } // end: for each ModuleCRM   
     }
 
     /**
@@ -175,19 +175,19 @@ public class SimpleModuleScanner extends ModuleScanning {
      * @param moduleregion The module region which is tested recursively
      * @return a flag indicating status. 0=everything OK, 1=motif type or region not applicable, 2=did not satisfy local space constraint, 3=did not satisfy global space constrainst
      */
-    private int searchModuleRecursivelyDirectStrand(ArrayList<Region> sequenceregionslist, int regionIndex, int prevRegionEnd, RegionSequenceData targetsequence, Module module,  ArrayList<Region> included) {
+    private int searchModuleRecursivelyDirectStrand(ArrayList<Region> sequenceregionslist, int regionIndex, int prevRegionEnd, RegionSequenceData targetsequence, ModuleCRM cisRegModule,  ArrayList<Region> included) {
          int singlemotifindex=included.size();
-         int size=module.getCardinality();
+         int size=cisRegModule.getCardinality();
          Region nextRegion=sequenceregionslist.get(regionIndex); // the next candidate to potentially add to the list
-         if (!module.isMotifCandidate(singlemotifindex, nextRegion.getType(), nextRegion.getOrientation())) return 1; // region is not of correct motif type or orientation
+         if (!cisRegModule.isMotifCandidate(singlemotifindex, nextRegion.getType(), nextRegion.getOrientation())) return 1; // region is not of correct motif type or orientation
          if (singlemotifindex>0) {
-             int[] distanceConstraint=module.getDistance(singlemotifindex-1, singlemotifindex);
-             if (module.getMaxLength()>0) {
+             int[] distanceConstraint=cisRegModule.getDistance(singlemotifindex-1, singlemotifindex);
+             if (cisRegModule.getMaxLength()>0) {
                  int start=included.get(0).getRelativeStart();
                  int nextStart=nextRegion.getRelativeStart();
                  int end=nextRegion.getRelativeEnd();
-                 if (nextStart-start+1>module.getMaxLength()) return 2; // this candidate did not satisfy the global and neither can anyone coming after
-                 if (end-start+1>module.getMaxLength()) return 3; // this candidate did not satisfy the global constraint
+                 if (nextStart-start+1>cisRegModule.getMaxLength()) return 2; // this candidate did not satisfy the global and neither can anyone coming after
+                 if (end-start+1>cisRegModule.getMaxLength()) return 3; // this candidate did not satisfy the global constraint
              }
              if (distanceConstraint!=null) {
                  int distance=nextRegion.getRelativeStart()-(prevRegionEnd+1);
@@ -201,7 +201,7 @@ public class SimpleModuleScanner extends ModuleScanning {
              // check next region as next candidate. if that does not hold check the ones after that until end.
              int result=0;
              for (int j=regionIndex+1;j<=sequenceregionslist.size()-(size-included.size());j++) {
-                result=searchModuleRecursivelyDirectStrand(sequenceregionslist, j, nextRegion.getRelativeEnd(), targetsequence, module, included); // this will search for applicable combinations and add them
+                result=searchModuleRecursivelyDirectStrand(sequenceregionslist, j, nextRegion.getRelativeEnd(), targetsequence, cisRegModule, included); // this will search for applicable combinations and add them
                 if (result==2 || result==5) break;  // the distance constraint is not satisfied. No further candidates can be build from this base. Break out and backtrack!
              }
              result=0; // clear the mark since it only applies to one level
@@ -209,7 +209,7 @@ public class SimpleModuleScanner extends ModuleScanning {
              return result;
          } else { // all motifs are found and applicable. create module region and add it!
                Region moduleregion=new Region(targetsequence, included.get(0).getRelativeStart(), nextRegion.getRelativeEnd());
-               moduleregion.setType(module.getName());
+               moduleregion.setType(cisRegModule.getName());
                moduleregion.setOrientation(Region.DIRECT);
                double scoreSum=0;
                double scoreMax=0;
@@ -218,7 +218,7 @@ public class SimpleModuleScanner extends ModuleScanning {
                    scoreSum+=singlemotif.getScore();
                    if (singlemotif.getScore()>scoreMax) scoreMax=singlemotif.getScore();
                    singlemotif.setParent(targetsequence);
-                   moduleregion.setProperty(module.getSingleMotifName(i), singlemotif);
+                   moduleregion.setProperty(cisRegModule.getSingleMotifName(i), singlemotif);
                }
                moduleregion.setScore(scoreMax); // or use scoreSum?
                targetsequence.addRegion(moduleregion); // if (!targetsequence.containsRegion(moduleregion)) ...
@@ -229,19 +229,19 @@ public class SimpleModuleScanner extends ModuleScanning {
     }
 
 
-    private int searchModuleRecursivelyReverseStrand(ArrayList<Region> sequenceregionslist, int regionIndex, int prevRegionEnd, RegionSequenceData targetsequence, Module module,  ArrayList<Region> included) {
+    private int searchModuleRecursivelyReverseStrand(ArrayList<Region> sequenceregionslist, int regionIndex, int prevRegionEnd, RegionSequenceData targetsequence, ModuleCRM cisRegModule,  ArrayList<Region> included) {
          int singlemotifindex=included.size();
-         int size=module.getCardinality();
+         int size=cisRegModule.getCardinality();
          Region nextRegion=sequenceregionslist.get(regionIndex); // the next candidate to potentially add to the list
-         if (!module.isMotifCandidate(singlemotifindex, nextRegion.getType(), nextRegion.getOrientation()*(-1))) return 1; // NOTE: orientation flip *-1
+         if (!cisRegModule.isMotifCandidate(singlemotifindex, nextRegion.getType(), nextRegion.getOrientation()*(-1))) return 1; // NOTE: orientation flip *-1
          if (singlemotifindex>0) {
-             int[] distanceConstraint=module.getDistance(singlemotifindex-1, singlemotifindex);
-             if (module.getMaxLength()>0) {
+             int[] distanceConstraint=cisRegModule.getDistance(singlemotifindex-1, singlemotifindex);
+             if (cisRegModule.getMaxLength()>0) {
                  int start=included.get(0).getRelativeEnd(); // using End instead
                  int nextStart=nextRegion.getRelativeEnd();
                  int end=nextRegion.getRelativeStart();
-                 if (start-nextStart+1>module.getMaxLength()) return 2; // this candidate did not satisfy the global and neither can anyone coming after
-                 if (start-end+1>module.getMaxLength()) return 3; // this candidate did not satisfy the global constraint
+                 if (start-nextStart+1>cisRegModule.getMaxLength()) return 2; // this candidate did not satisfy the global and neither can anyone coming after
+                 if (start-end+1>cisRegModule.getMaxLength()) return 3; // this candidate did not satisfy the global constraint
              }
              if (distanceConstraint!=null) {
                  int distance=prevRegionEnd-(nextRegion.getRelativeEnd()+1);
@@ -255,7 +255,7 @@ public class SimpleModuleScanner extends ModuleScanning {
              // check next region as next candidate. Ff that does not hold, check the ones after that until end.
              int result=0;
              for (int j=regionIndex+1;j<=sequenceregionslist.size()-(size-included.size());j++) {
-                result=searchModuleRecursivelyReverseStrand(sequenceregionslist, j, nextRegion.getRelativeStart(), targetsequence, module, included); // this will search for applicable combinations and add them
+                result=searchModuleRecursivelyReverseStrand(sequenceregionslist, j, nextRegion.getRelativeStart(), targetsequence, cisRegModule, included); // this will search for applicable combinations and add them
                 if (result==2 || result==5) break; // the distance constraint is not satisfied. No further candidates can be build from this base. Break out and backtrack!
              }
              result=0; // clear the mark since it only applies to one level
@@ -263,14 +263,14 @@ public class SimpleModuleScanner extends ModuleScanning {
              return result;
          } else { // all motifs are found and applicable. create module region and add it!
                Region moduleregion=new Region(targetsequence, nextRegion.getRelativeStart(), included.get(0).getRelativeEnd());
-               moduleregion.setType(module.getName());
+               moduleregion.setType(cisRegModule.getName());
                moduleregion.setOrientation(Region.REVERSE); 
                double score=0;
                for (int i=0;i<included.size();i++) {
                    Region singlemotif=included.get(i).clone();
                    score+=singlemotif.getScore();
                    singlemotif.setParent(targetsequence);
-                   moduleregion.setProperty(module.getSingleMotifName(i), singlemotif);
+                   moduleregion.setProperty(cisRegModule.getSingleMotifName(i), singlemotif);
                }
                moduleregion.setScore(score);
                targetsequence.addRegion(moduleregion); // if (!targetsequence.containsRegion(moduleregion)) ...
@@ -292,9 +292,9 @@ public class SimpleModuleScanner extends ModuleScanning {
      * @param moduleregion The module region which is tested recursively
      * @return a flag indicating status. 0=everything OK, 1=motif type or region not applicable, 2=did not satisfy local space constraint, 3=did not satisfy global space constrainst
      */
-    private int searchUnorderedModuleRecursivelyDirectStrand(ArrayList<Region> sequenceregionslist, int regionIndex, int prevRegionEnd, RegionSequenceData targetsequence, Module module,  ArrayList<Region> included, boolean allowoverlap) {
+    private int searchUnorderedModuleRecursivelyDirectStrand(ArrayList<Region> sequenceregionslist, int regionIndex, int prevRegionEnd, RegionSequenceData targetsequence, ModuleCRM cisRegModule,  ArrayList<Region> included, boolean allowoverlap) {
          int singlemotifindex=included.size();
-         int size=module.getCardinality();
+         int size=cisRegModule.getCardinality();
          Region nextRegion=sequenceregionslist.get(regionIndex); // the next candidate to potentially add to the list
          if (singlemotifindex>0) { // check if we the current TFBS set is still within the max distance
              if (!allowoverlap) {
@@ -302,12 +302,12 @@ public class SimpleModuleScanner extends ModuleScanning {
                  int nextStart=nextRegion.getRelativeStart();   
                  if (nextStart<prevEnd) return 4; // signal overlap
              }
-             if (module.getMaxLength()>0) {
+             if (cisRegModule.getMaxLength()>0) {
                  int start=included.get(0).getRelativeStart();
                  int nextStart=nextRegion.getRelativeStart();
                  int end=nextRegion.getRelativeEnd();
-                 if (nextStart-start+1>module.getMaxLength()) return 2; // this candidate did not satisfy the global and neither can anyone coming after
-                 if (end-start+1>module.getMaxLength()) return 3; // this candidate did not satisfy the global constraint
+                 if (nextStart-start+1>cisRegModule.getMaxLength()) return 2; // this candidate did not satisfy the global and neither can anyone coming after
+                 if (end-start+1>cisRegModule.getMaxLength()) return 3; // this candidate did not satisfy the global constraint
              }
          }
          included.add(nextRegion);
@@ -315,7 +315,7 @@ public class SimpleModuleScanner extends ModuleScanning {
              // check next region as next candidate. if that does not hold check the ones after that until end.
              int result=0;
              for (int j=regionIndex+1;j<=sequenceregionslist.size()-size;j++) {
-                result=searchUnorderedModuleRecursivelyDirectStrand(sequenceregionslist, j, nextRegion.getRelativeEnd(), targetsequence, module, included, allowoverlap); // this will search for applicable combinations and add them
+                result=searchUnorderedModuleRecursivelyDirectStrand(sequenceregionslist, j, nextRegion.getRelativeEnd(), targetsequence, cisRegModule, included, allowoverlap); // this will search for applicable combinations and add them
                 if (result==2) break;  // the distance constraint is not satisfied. No further candidates can be build from this base. Break out and backtrack!
             }
             result=0; // clear the mark since it only applies to one level
@@ -323,9 +323,9 @@ public class SimpleModuleScanner extends ModuleScanning {
             return result;
          } else { // all motifs are found and so far applicable. Check if the motif set fits the module template, and, if so, create module region and add it!
                int regionOrientation=Region.DIRECT;
-               HashMap<String,Region> match=isModuleMatch(module, included, true); // true means direct orientation
-               if (match==null && module.motifsHaveOpposingOrientations()) {
-                   match=isModuleMatch(module, included, false); // false means reverse orientation
+               HashMap<String,Region> match=isModuleMatch(cisRegModule, included, true); // true means direct orientation
+               if (match==null && cisRegModule.motifsHaveOpposingOrientations()) {
+                   match=isModuleMatch(cisRegModule, included, false); // false means reverse orientation
                    if (match!=null) regionOrientation=Region.REVERSE;
                }
                if (match!=null) {
@@ -339,7 +339,7 @@ public class SimpleModuleScanner extends ModuleScanning {
                    }
                    // now create module
                    Region moduleregion=new Region(targetsequence, moduleStart, moduleEnd); 
-                   moduleregion.setType(module.getName());
+                   moduleregion.setType(cisRegModule.getName());
                    moduleregion.setOrientation(regionOrientation);
                    double score=0;
                    for (String modulemotifname:match.keySet()) {
@@ -362,18 +362,18 @@ public class SimpleModuleScanner extends ModuleScanning {
      *  their orientations must satisfy any given constraints
      *  The candidates should have already been verified to be within the maximum module span allowed 
      */
-    private HashMap<String,Region> isModuleMatch(Module module, ArrayList<Region> candidates, boolean directorientation) {
+    private HashMap<String,Region> isModuleMatch(ModuleCRM cisRegModule, ArrayList<Region> candidates, boolean directorientation) {
         // the method works by creating a MxN matrix for M modulemotifs and N region candidates (M and N will usually be the same value).
         // Next, for each modulemotif we check if each of the regions can be a match for this modulemotif
-        boolean[][] matchmatrix=new boolean[module.getCardinality()][candidates.size()]; // each cell is TRUE if the given Region (by index) is a match for the module motif (by index)
-        int modulesize=module.getCardinality();
+        boolean[][] matchmatrix=new boolean[cisRegModule.getCardinality()][candidates.size()]; // each cell is TRUE if the given Region (by index) is a match for the module motif (by index)
+        int modulesize=cisRegModule.getCardinality();
         int regionssize=candidates.size(); // these two sizes should be equal !!!
         for (int i=0;i<modulesize;i++) {
             for (int j=0;j<regionssize;j++) {
                 Region candidate=candidates.get(j);
                 int orientation=candidate.getOrientation();
                 if (!directorientation) orientation=orientation*(-1);
-                matchmatrix[i][j]=module.isMotifCandidate(i, candidate.getType(), orientation);
+                matchmatrix[i][j]=cisRegModule.isMotifCandidate(i, candidate.getType(), orientation);
             }
         }
         boolean[] allpresent=new boolean[modulesize];
@@ -393,7 +393,7 @@ public class SimpleModuleScanner extends ModuleScanning {
             HashMap<String,Region> map=new HashMap<String,Region>();
             for (int i=0;i<modulesize;i++) {
                 int col=getMatchingColumn(matchmatrix, i);
-                String mmname=module.getSingleMotifName(i);
+                String mmname=cisRegModule.getSingleMotifName(i);
                 map.put(mmname, candidates.get(col));
             }
             return map;
@@ -404,7 +404,7 @@ public class SimpleModuleScanner extends ModuleScanning {
             if (found) {
                 HashMap<String,Region> map=new HashMap<String,Region>();
                 for (int i=0;i<modulesize;i++) {
-                    String mmname=module.getSingleMotifName(i);
+                    String mmname=cisRegModule.getSingleMotifName(i);
                     map.put(mmname, candidates.get(solution[i]));
                 }
                 return map;

@@ -75,7 +75,7 @@ public class Operation_collate extends Operation {
            String propertysource=entries[i][0];
            String columnname=entries[i][1];
            String newcolumnName=entries[i][2]; 
-           if (isBasicClassProperty(propertysource)) { // property source is a Data type like Motif, Module or Sequence
+           if (isBasicClassProperty(propertysource)) { // property source is a Data type like Motif, ModuleCRM or Sequence
                Class propertysourcetype=engine.getDataClassForTypeName(propertysource);
                if (collateType!=propertysourcetype) throw new ExecutionError("Properties from "+propertysource.toLowerCase()+"s can not be combined with the type of data found in the previous columns ("+engine.getTypeNameForDataClass(collateType)+")",task.getLineNumber());
                 // now add the specified property of the data type the collated object!
@@ -88,7 +88,7 @@ public class Operation_collate extends Operation {
                    targetData.addColumn(newcolumnName, columnType, columnData, new String[]{propertysource,columnname});          
                    resolveProperties.add(new String[]{columnname,newcolumnName});              
                } else {
-                  // I will allow "emtpy" column names to create a Motif, Module or Sequence collated analysis with no columns 
+                  // I will allow "emtpy" column names to create a Motif, ModuleCRM or Sequence collated analysis with no columns 
                }
            } else { //  property source should be an Analysis object or Numeric Map
                Data data=engine.getDataItem(propertysource);
@@ -175,21 +175,21 @@ public class Operation_collate extends Operation {
     private boolean isBasicClassProperty(String propertysource) {
         return  (  
                   propertysource.equals(engine.getTypeNameForDataClass(motiflab.engine.data.Motif.class))
-               || propertysource.equals(engine.getTypeNameForDataClass(motiflab.engine.data.Module.class))
+               || propertysource.equals(engine.getTypeNameForDataClass(motiflab.engine.data.ModuleCRM.class))
                || propertysource.equals(engine.getTypeNameForDataClass(motiflab.engine.data.Sequence.class))
         );        
     }
     
     private Class getPropertyClass(String propertyName, Class collateType) throws ExecutionError {
              if (collateType==Motif.class) return Motif.getPropertyClass(propertyName,engine);
-        else if (collateType==Module.class) return Module.getPropertyClass(propertyName,engine);
+        else if (collateType==ModuleCRM.class) return ModuleCRM.getPropertyClass(propertyName,engine);
         else if (collateType==Sequence.class) return Sequence.getPropertyClass(propertyName,engine);
         else return null; // this should never happen
     }    
     
     private Object getPropertyValue(String dataname, String propertyName, Class collateType) throws ExecutionError {
              if (collateType==Motif.class) return getPropertyFromMotif(dataname,propertyName);
-        else if (collateType==Module.class) return getPropertyFromModule(dataname,propertyName);
+        else if (collateType==ModuleCRM.class) return getPropertyFromModule(dataname,propertyName);
         else if (collateType==Sequence.class) return getPropertyFromSequence(dataname,propertyName);
         else return null; // this should never happen
     }
@@ -203,8 +203,8 @@ public class Operation_collate extends Operation {
     }
     private Object getPropertyFromModule(String modulename, String property) throws ExecutionError {
         Data data=engine.getDataItem(modulename);
-        if (!(data instanceof Module)) throw new ExecutionError("'"+modulename+"' is not a Module");
-        Object value=((Module)data).getPropertyValue(property,engine);
+        if (!(data instanceof ModuleCRM)) throw new ExecutionError("'"+modulename+"' is not a Module");
+        Object value=((ModuleCRM)data).getPropertyValue(property,engine);
         if (value instanceof ArrayList) value=MotifLabEngine.splice((ArrayList)value, ","); // flatten lists
         return value;
     }

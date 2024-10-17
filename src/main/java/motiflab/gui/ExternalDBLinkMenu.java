@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Data;
 import motiflab.engine.data.Motif;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Sequence;
 
 
@@ -55,7 +55,7 @@ public class ExternalDBLinkMenu extends JMenu implements ActionListener {
         Set<String> userprops=null;
         if (data instanceof Motif) userprops=((Motif)data).getUserDefinedProperties();          
         if (data instanceof Sequence) userprops=((Sequence)data).getUserDefinedProperties();     
-        if (data instanceof Module) userprops=((Module)data).getUserDefinedProperties();             
+        if (data instanceof ModuleCRM) userprops=((ModuleCRM)data).getUserDefinedProperties();             
         for (String db:xDB) { // check all known databases against motif/module/sequence properties
             if (userprops!=null && userprops.contains(db)) {
                 Object dbObject=null;
@@ -65,9 +65,9 @@ public class ExternalDBLinkMenu extends JMenu implements ActionListener {
                 } else if (data instanceof Sequence) {
                     dbObject=((Sequence)data).getUserDefinedPropertyValue(db);
                     if (dbObject==null) dbObject=((Sequence)data).getUserDefinedPropertyValue(db.toLowerCase()); // just in case...                                      
-                } else if (data instanceof Module) {
-                    dbObject=((Module)data).getUserDefinedPropertyValue(db);
-                    if (dbObject==null) dbObject=((Module)data).getUserDefinedPropertyValue(db.toLowerCase()); // just in case...                                      
+                } else if (data instanceof ModuleCRM) {
+                    dbObject=((ModuleCRM)data).getUserDefinedPropertyValue(db);
+                    if (dbObject==null) dbObject=((ModuleCRM)data).getUserDefinedPropertyValue(db.toLowerCase()); // just in case...                                      
                 }
                 if (dbObject==null) continue;
                 ArrayList<String> dbrefs=null;

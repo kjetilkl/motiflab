@@ -139,7 +139,7 @@ public class Operation_plant extends Operation implements ParameterExporter {
         if (motifsName==null || motifsName.isEmpty()) throw new ExecutionError("Missing name for motifs or module",task.getLineNumber());
         Object motifobject=engine.getDataItem(motifsName);
         if (motifobject==null) throw new ExecutionError("No such data object '"+motifsName+"'",task.getLineNumber());
-        if (!(motifobject instanceof Motif || motifobject instanceof MotifCollection || motifobject instanceof Module)) throw new ExecutionError("'"+motifsName+"' is not a Motif, Motif Collection or Module",task.getLineNumber());
+        if (!(motifobject instanceof Motif || motifobject instanceof MotifCollection || motifobject instanceof ModuleCRM)) throw new ExecutionError("'"+motifsName+"' is not a Motif, Motif Collection or Module",task.getLineNumber());
         if (motifobject instanceof MotifCollection && ((MotifCollection)motifobject).size()>5) throw new ExecutionError("A maximum of 5 motifs can be planted at a time (Size of "+motifsName+" is "+((MotifCollection)motifobject).size()+").",task.getLineNumber());
         if (motifobject instanceof MotifCollection && ((MotifCollection)motifobject).isEmpty()) throw new ExecutionError(motifsName+" does not contain any motifs",task.getLineNumber());
         resolveParameters(task);
@@ -153,8 +153,8 @@ public class Operation_plant extends Operation implements ParameterExporter {
         }
              if (motifobject instanceof Motif) plantSingleMotif(targetDNAdataset, targetSitesTrack, (Motif)motifobject, sequenceCollection, task);
         else if (motifobject instanceof MotifCollection) plantMotifCollection(targetDNAdataset, targetSitesTrack, (MotifCollection)motifobject, sequenceCollection, task);
-        else if (motifobject instanceof Module) plantModule(targetDNAdataset, targetSitesTrack, (Module)motifobject, sequenceCollection, task);
-        if (motifobject instanceof Module) targetSitesTrack.setModuleTrack(true);
+        else if (motifobject instanceof ModuleCRM) plantModule(targetDNAdataset, targetSitesTrack, (ModuleCRM)motifobject, sequenceCollection, task);
+        if (motifobject instanceof ModuleCRM) targetSitesTrack.setModuleTrack(true);
         else targetSitesTrack.setMotifTrack(true);
         task.setProgress(100);
         task.checkExecutionLock(); // checks to see if this task should suspend execution
@@ -365,7 +365,7 @@ public class Operation_plant extends Operation implements ParameterExporter {
     }
 
 
-    private void plantModule(DNASequenceDataset targetDNADataset, RegionDataset targetSitesDataset, Module module, SequenceCollection sequenceCollection, OperationTask task)  throws Exception {
+    private void plantModule(DNASequenceDataset targetDNADataset, RegionDataset targetSitesDataset, ModuleCRM cisRegModule, SequenceCollection sequenceCollection, OperationTask task)  throws Exception {
         MotifSampler sampler=new MotifSampler();
         boolean useSamePattern=(Boolean)task.getParameter("Use same pattern");
         double reverseProbability=(Double)task.getParameter("Reverse probability");
@@ -381,16 +381,16 @@ public class Operation_plant extends Operation implements ParameterExporter {
         if (prior!=null) {
             if (priorsGotNegativeValues(prior)) throw new ExecutionError("The positional priors track '"+prior.getName()+"' contains negative values");
         }
-        ArrayList<MotifStruct> samepattern=(useSamePattern)?sampleModule(module, minMatch, maxMatch, sampler):null; //
+        ArrayList<MotifStruct> samepattern=(useSamePattern)?sampleModule(cisRegModule, minMatch, maxMatch, sampler):null; //
 
         for (int i=0;i<sequenceCollection.size();i++) {
-            if (Math.random()<probability && module.getCardinality()>0) {
+            if (Math.random()<probability && cisRegModule.getCardinality()>0) {
                 String sequenceName=sequenceCollection.getSequenceNameByIndex(i);
                 NumericSequenceData priorsequence=(prior!=null)?(NumericSequenceData)prior.getSequenceByName(sequenceName):null;
                 RegionSequenceData targetSitesSequence=(RegionSequenceData)targetSitesDataset.getSequenceByName(sequenceName);
                 DNASequenceData targetSequence=(DNASequenceData)targetDNADataset.getSequenceByName(sequenceName);
                 // decide how the planted module should look. Which motifs/patterns, their relative orientation, order and distances
-                ArrayList<MotifStruct> modulepattern=(useSamePattern)?samepattern:sampleModule(module, minMatch, maxMatch, sampler);
+                ArrayList<MotifStruct> modulepattern=(useSamePattern)?samepattern:sampleModule(cisRegModule, minMatch, maxMatch, sampler);
                 int modulespan=modulepattern.get(modulepattern.size()-1).distance;
                 int orientation=(Math.random()<reverseProbability)?Region.REVERSE:Region.DIRECT;
                 if (targetSequence.getStrandOrientation()==Sequence.REVERSE) {
@@ -403,7 +403,7 @@ public class Operation_plant extends Operation implements ParameterExporter {
                 int position=(priorsequence!=null)?sampleSitePosition(priorsequence,modulespan,useforprior):(int)(Math.random()*(targetSequence.getSize()-modulespan+1)); // 
                 if (position<0 && forceplant) position=(int)(Math.random()*(targetSequence.getSize()-modulespan+1));
                 if (position>=0) { // found eligible position, now start planting the motifs
-                    Region modulesite=new Region(targetSitesSequence, position, position+modulespan-1, module.getName(), 0 , orientation);
+                    Region modulesite=new Region(targetSitesSequence, position, position+modulespan-1, cisRegModule.getName(), 0 , orientation);
                     double modulescore=0;
                     double motifmaxscore=0;
                     if (orientation==Region.REVERSE) position=(position+modulespan)-1;
@@ -426,13 +426,11 @@ public class Operation_plant extends Operation implements ParameterExporter {
                         Region motifsite=new Region(targetSitesSequence, motifposition, motifposition+pattern.length-1, singlemotif.motifname, score, singlemotif.orientation);
                         motifsite.setProperty("sequence", bindingSequence);
                         motifsite.setParent(targetSitesSequence);
-                        modulesite.setProperty(module.getSingleMotifName(singlemotif.modulemotifIndex), motifsite);
+                        modulesite.setProperty(cisRegModule.getSingleMotifName(singlemotif.modulemotifIndex), motifsite);
                         int distToNext=singlemotif.pattern.length+singlemotif.distance;
                         //engine.logMessage("distToNext="+distToNext+"   motiflength="+singlemotif.pattern.length+"  distance="+singlemotif.distance);
                         if (orientation==Region.DIRECT) position+=distToNext; else position-=distToNext;
                     }
-
-
                     //modulesite.setScore(modulescore); // use sum of motifscores
                     modulesite.setScore(motifmaxscore); // use max of motifscores
                     targetSitesSequence.addRegion(modulesite);
@@ -455,26 +453,26 @@ public class Operation_plant extends Operation implements ParameterExporter {
      *  is the distance to the next motif in the module. However, for the very last of the motifs this distance value
      *  is the full span of the entire planted module.
      */
-    private ArrayList<MotifStruct> sampleModule(Module module, double minMatch, double maxMatch, MotifSampler sampler) {
-        int modulesize=module.getCardinality();
+    private ArrayList<MotifStruct> sampleModule(ModuleCRM cisRegModule, double minMatch, double maxMatch, MotifSampler sampler) {
+        int modulesize=cisRegModule.getCardinality();
         ArrayList<Integer> motiforder=new ArrayList<Integer>(modulesize);
         for (int i=0;i<modulesize;i++) motiforder.add(i); // default order is 0,1,2,3...,N
-        if (!module.isOrdered()) Collections.shuffle(motiforder); // choose a random order if order is irrelevant
+        if (!cisRegModule.isOrdered()) Collections.shuffle(motiforder); // choose a random order if order is irrelevant
         ArrayList<MotifStruct> chosenMotifs=new ArrayList<MotifStruct>(modulesize); // Ordered in the same was as the chosen motiforder, Each Object[] array will hold name of single Motif, pattern of single motif and selected orientation
         int totalTFBSspan=0; // the total span of planted TFBS not counting distance between them
         for (int i=0;i<modulesize;i++) { // for each ModuleMotif: select a representative Motif and TFBS pattern as well as relative orientation
-            ModuleMotif modulemotif=module.getSingleMotif(motiforder.get(i));
+            ModuleMotif modulemotif=cisRegModule.getSingleMotif(motiforder.get(i));
             MotifCollection set=modulemotif.getMotifAsCollection();
             int chosenIndex=(int)(Math.random()*set.size());
             Motif motif=set.getMotifByIndex(chosenIndex, engine); // The Motif choosen to represent this ModuleMotif
             char[] motifpattern=sampler.sample(motif, minMatch, maxMatch);
             double score=getMatchScore(motifpattern, motif);
             int orientation=modulemotif.getOrientation();
-            if (orientation==Module.INDETERMINED) orientation=(Math.random()<0.5)?Module.DIRECT:Module.REVERSE; // chose a random orientation if no constraint is set
+            if (orientation==ModuleCRM.INDETERMINED) orientation=(Math.random()<0.5)?ModuleCRM.DIRECT:ModuleCRM.REVERSE; // chose a random orientation if no constraint is set
             totalTFBSspan+=motifpattern.length;
             chosenMotifs.add(new MotifStruct(motiforder.get(i),motif.getName(),motifpattern,orientation,score,0));
         }
-        int maxlength=module.getMaxLength(); // maximum allowed length span for entire module
+        int maxlength=cisRegModule.getMaxLength(); // maximum allowed length span for entire module
         int maxdistanceleft=maxlength-totalTFBSspan;
         if (maxdistanceleft<0) maxdistanceleft=(modulesize-1)*10; // this can happen if maxlength is not set explicitly. Use an average distance of 10bp between motifs
         int totaldistance=0; // total span of intra-module distances  (so far)
@@ -484,7 +482,7 @@ public class Operation_plant extends Operation implements ParameterExporter {
             int distance=0;
             if (i==modulesize-1) distance=totalTFBSspan+totaldistance; // for the last motif the distance should be set to full module distance
             else {// for the other motifs, select a random distance to next motif!
-                int[] spacingconstraint=module.getDistance(i, i+1);
+                int[] spacingconstraint=cisRegModule.getDistance(i, i+1);
                 if (spacingconstraint!=null) {
                     if (spacingconstraint[0]<0) spacingconstraint[0]=0; // to avoid overlapping motifs do not allow negative distances
                     if (spacingconstraint[1]<0) spacingconstraint[1]=0; // to avoid overlapping motifs do not allow negative distances
@@ -708,7 +706,7 @@ public class Operation_plant extends Operation implements ParameterExporter {
         int modulemotifIndex=0;
         String motifname=null;
         char[] pattern=null;
-        int orientation=Module.INDETERMINED;
+        int orientation=ModuleCRM.INDETERMINED;
         double score=0;
         int distance=0; // distance to next motif
         public MotifStruct(int modulemotifIndex, String motifname, char[] pattern, int orientation, double score, int distance) {
@@ -907,12 +905,12 @@ public class Operation_plant extends Operation implements ParameterExporter {
 
     } // end class MotifSampler
 
-    private void debugModule(Region moduleregion, ArrayList<MotifStruct> module) {
+    private void debugModule(Region moduleregion, ArrayList<MotifStruct> cisRegModule) {
         FeatureSequenceData parent=moduleregion.getParent();
         String sequence=moduleregion.getParent().getName();
         engine.logMessage("==Module== ["+sequence+"]   pos="+parent.getGenomicPositionFromRelative(moduleregion.getRelativeStart())+" - "+parent.getGenomicPositionFromRelative(moduleregion.getRelativeEnd())+" ["+moduleregion.getOrientation()+"]");
         int i=0;
-        for (MotifStruct motif:module) {
+        for (MotifStruct motif:cisRegModule) {
             i++;
             engine.logMessage(" ["+i+"]  "+motif.motifname+"("+motif.modulemotifIndex+")  pattern="+(new String(motif.pattern))+"  orientation="+motif.orientation+"  distance="+motif.distance);
         }

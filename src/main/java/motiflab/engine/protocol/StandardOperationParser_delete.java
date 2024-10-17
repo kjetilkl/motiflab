@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import motiflab.engine.operations.Operation;
 import motiflab.engine.task.OperationTask;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.Sequence;
 
@@ -70,7 +70,7 @@ public class StandardOperationParser_delete extends StandardOperationParser {
            if (sourceclass==null) return; // this could mean that the command has been executed and the object has already been deleted. We should not complain about this?           
            if (sourceclass==Sequence.class) throw new ParseError("Sequences can not be deleted with the 'delete' operation");
            if (sourceclass==Motif.class) throw new ParseError("Motifs can not be deleted with the 'delete' operation");
-           if (sourceclass==Module.class) throw new ParseError("Modules can not be deleted with the 'delete' operation");
+           if (sourceclass==ModuleCRM.class) throw new ParseError("Modules can not be deleted with the 'delete' operation");
         }
     }
 

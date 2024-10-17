@@ -12,7 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import javax.swing.JToolTip;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.RegionSequenceData;
 import motiflab.engine.data.Region;
@@ -519,8 +519,8 @@ public abstract class DataTrackVisualizer_RegionAbstract extends DataTrackVisual
     
     /** Draws a parent module region (or rather a connector) in a module track and then loops through and draws all the nested motif children */    
     private void drawModuleRegion(Graphics2D graphics, Region region, RegionSequenceData sequencedata, Rectangle bounds, int orientation, int graphicsXoffset, Color regioncolor, RegionVisualizationFilter filter) { 
-        Module module=(Module)settings.getEngine().getDataItem(region.getType(), Module.class);
-        if (module==null) { // the region type does not correspond to a known module type. Just draw a regular region box                 
+        ModuleCRM cisRegModule=(ModuleCRM)settings.getEngine().getDataItem(region.getType(), ModuleCRM.class);
+        if (cisRegModule==null) { // the region type does not correspond to a known module type. Just draw a regular region box                 
             drawRegularRegion(graphics, region, (RegionSequenceData)sequencedata, bounds, null, null, orientation, regioncolor, filter);
         } else { // this is a proper module region. Draw connectors and all nested regions also
             Color dynamicRegionColor = (filter!=null)?filter.getDynamicRegionColor(region):null;
@@ -541,8 +541,8 @@ public abstract class DataTrackVisualizer_RegionAbstract extends DataTrackVisual
             }
             if (drawNested) {
                 Rectangle nestedRegionBounds=null;                
-                for (int i=0;i<module.getCardinality();i++) {
-                    String singlemotifname=module.getSingleMotifName(i);
+                for (int i=0;i<cisRegModule.getCardinality();i++) {
+                    String singlemotifname=cisRegModule.getSingleMotifName(i);
                     Object singlemotifregion=region.getProperty(singlemotifname);
                     if (singlemotifregion==null) continue;
                     String mmfeaturename=region.getType()+"."+singlemotifname;

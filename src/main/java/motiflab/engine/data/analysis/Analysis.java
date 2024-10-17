@@ -734,10 +734,10 @@ public abstract class Analysis extends Data implements ParameterExporter {
         return array;
     }    
     
-    protected String getModuleLogoTag(Module module, OutputData outputobject, ModuleLogo modulelogo, String logoFormat, MotifLabEngine engine) {
+    protected String getModuleLogoTag(ModuleCRM cisRegModule, OutputData outputobject, ModuleLogo modulelogo, String logoFormat, MotifLabEngine engine) {
         if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_NO)) return "";
-        else if (module==null) return "?";        
-        else if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_TEXT)) return escapeHTML(module.getModuleLogo());
+        else if (cisRegModule==null) return "?";        
+        else if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_TEXT)) return escapeHTML(cisRegModule.getModuleLogo());
         else { // logo as image
             VisualizationSettings settings=engine.getClient().getVisualizationSettings();
             String imageFormat=(String)settings.getSettingAsType("module.imageFormat","png");
@@ -749,7 +749,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
             File imagefile=null;
             if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_EMBEDDED)) {
                 try {
-                    modulelogo.setModule(module);
+                    modulelogo.setModule(cisRegModule);
                     byte[] image = getModuleLogoImageAsByteArray(modulelogo, height, border, imageFormat);
                     String base64String = Base64.getEncoder().encodeToString(image);
                     return "<img src=\"data:image/"+imageFormat+";base64,"+base64String+"\" />";
@@ -757,13 +757,13 @@ public abstract class Analysis extends Data implements ParameterExporter {
                    engine.errorMessage("An error occurred when creating image: "+e.toString(),0); 
                 }
             } else if (logoFormat.equalsIgnoreCase(MOTIF_LOGO_SHARED)) {
-                String logofileID=module.getName();
+                String logofileID=cisRegModule.getName();
                 boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
                 OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, imageFormat,true); // returns new or existing shared dependency
                 if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file
                     imagefile=dependency.getFile();
                     try {
-                        int[] size=saveModuleLogoImage(imagefile,module,engine.getClient().getVisualizationSettings(), height, border, imageFormat); //
+                        int[] size=saveModuleLogoImage(imagefile,cisRegModule,engine.getClient().getVisualizationSettings(), height, border, imageFormat); //
                         height=size[0];
                         width=size[1];
                     } catch (IOException e) {
@@ -775,7 +775,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
             } else { // always save any logo to a new file
                 imagefile=outputobject.createDependentFile(engine,imageFormat);
                 try {
-                    int[] size=saveModuleLogoImage(imagefile,module,engine.getClient().getVisualizationSettings(), height, border, imageFormat); //
+                    int[] size=saveModuleLogoImage(imagefile,cisRegModule,engine.getClient().getVisualizationSettings(), height, border, imageFormat); //
                     height=size[0];
                     width=size[1];                
                 } catch (IOException e) {
@@ -790,11 +790,11 @@ public abstract class Analysis extends Data implements ParameterExporter {
     }
     
 
-    private int[] saveModuleLogoImage(File file, Module module, VisualizationSettings settings, int height, boolean border, String imageFormat) throws IOException {
+    private int[] saveModuleLogoImage(File file, ModuleCRM cisRegModule, VisualizationSettings settings, int height, boolean border, String imageFormat) throws IOException {
         Font modulemotiffont=ModuleLogo.getModuleMotifFont();
         BufferedImage test=new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         FontMetrics modulelogometrics=test.getGraphics().getFontMetrics(modulemotiffont);
-        int width=ModuleLogo.getLogoWidth(modulelogometrics,module)+2;
+        int width=ModuleLogo.getLogoWidth(modulelogometrics,cisRegModule)+2;
         if (imageFormat==null) imageFormat="png";
         imageFormat=imageFormat.toLowerCase();
         if (!(imageFormat.equals("gif") || imageFormat.equals("png") || imageFormat.equals("svg"))) imageFormat="png";            
@@ -804,7 +804,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
             Graphics2D g=image.createGraphics();
             g.setBackground(new Color(255, 255, 255, 0)); // make the image translucent white       
             g.clearRect(0,0, width+2, height+2); // bleed a little just in case
-            ModuleLogo.paintModuleLogo(g, module, 5, 7, settings, null,0); //
+            ModuleLogo.paintModuleLogo(g, cisRegModule, 5, 7, settings, null,0); //
             if (border) {
                 g.setColor(Color.BLACK);
                 g.drawRect(0, 0, width-1, height-1);
@@ -821,7 +821,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
             else if (imageFormat.equals("eps")) g = new EPSGraphics2D(0, 0, width, height);
             else throw new IOException("Unknown image format: "+imageFormat);
             g.setClip(0, 0, width,height);
-            ModuleLogo.paintModuleLogo(g, module, 5, 7, settings, null,0); //    
+            ModuleLogo.paintModuleLogo(g, cisRegModule, 5, 7, settings, null,0); //    
             if (border) {
                 g.setColor(Color.BLACK);
                 g.drawRect(0, 0, width-1, height-1);

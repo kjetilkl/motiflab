@@ -16,7 +16,7 @@ import motiflab.engine.data.*;
 public class Operation_decrease extends ArithmeticOperation {
     private static final String name="decrease";
     private static final String description="Subtraction operator. Decreases selected numeric values in a data object by a specified number";
-    private Class[] datasourcePreferences=new Class[]{NumericDataset.class, NumericVariable.class, NumericMap.class, RegionDataset.class, ExpressionProfile.class, Sequence.class, Motif.class, Module.class, SequenceCollection.class, MotifCollection.class, ModuleCollection.class, TextMap.class};
+    private Class[] datasourcePreferences=new Class[]{NumericDataset.class, NumericVariable.class, NumericMap.class, RegionDataset.class, ExpressionProfile.class, Sequence.class, Motif.class, ModuleCRM.class, SequenceCollection.class, MotifCollection.class, ModuleCollection.class, TextMap.class};
 
 
 

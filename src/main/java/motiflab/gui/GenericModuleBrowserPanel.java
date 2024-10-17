@@ -27,7 +27,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 
 /**
  * This class is meant as a generic class for displaying tables where each
@@ -92,14 +92,14 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
                     int modulecolumn=getModuleColumn();
                     if (modulecolumn<0) return;
                     for (int row:rows) {
-                        Object module=model.getValueAt(table.convertRowIndexToModel(row),modulecolumn);
-                        if (module instanceof Module && settings.isRegionTypeVisible(((Module)module).getName())) visibleRows++;
+                        Object cisRegModule=model.getValueAt(table.convertRowIndexToModel(row),modulecolumn);
+                        if (cisRegModule instanceof ModuleCRM && settings.isRegionTypeVisible(((ModuleCRM)cisRegModule).getName())) visibleRows++;
                     }
                     boolean doShow=Boolean.TRUE;
                     if (visibleRows==rows.length) doShow=Boolean.FALSE;
                     for (int row:rows) {
-                        Object module=model.getValueAt(table.convertRowIndexToModel(row),modulecolumn);
-                        if (module instanceof Module) settings.setRegionTypeVisible(((Module)module).getName(),doShow,false);
+                        Object cisRegModule=model.getValueAt(table.convertRowIndexToModel(row),modulecolumn);
+                        if (cisRegModule instanceof ModuleCRM) settings.setRegionTypeVisible(((ModuleCRM)cisRegModule).getName(),doShow,false);
                     }
                     settings.redraw();                    
                 } else if ((e.getKeyCode()==KeyEvent.VK_S || e.getKeyCode()==KeyEvent.VK_H) && !e.isShiftDown()) {
@@ -108,8 +108,8 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
                     if (modulecolumn<0) return;
                     boolean doShow=e.getKeyCode()==KeyEvent.VK_S;
                     for (int row:rows) {
-                        Object module=model.getValueAt(table.convertRowIndexToModel(row),modulecolumn);
-                        if (module instanceof Module) settings.setRegionTypeVisible(((Module)module).getName(),doShow,false);
+                        Object cisRegModule=model.getValueAt(table.convertRowIndexToModel(row),modulecolumn);
+                        if (cisRegModule instanceof ModuleCRM) settings.setRegionTypeVisible(((ModuleCRM)cisRegModule).getName(),doShow,false);
                     }
                     settings.redraw();                    
                 } else if ((e.getKeyCode()==KeyEvent.VK_S || e.getKeyCode()==KeyEvent.VK_H) && e.isShiftDown()) {
@@ -121,8 +121,8 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
                     int modulecolumn=getModuleColumn();
                     if (modulecolumn<0) return;
                     for (int row:rows) {
-                        Object module=model.getValueAt(table.convertRowIndexToModel(row),modulecolumn);
-                        if (module instanceof Module) settings.setRegionTypeVisible(((Module)module).getName(),true,false);
+                        Object cisRegModule=model.getValueAt(table.convertRowIndexToModel(row),modulecolumn);
+                        if (cisRegModule instanceof ModuleCRM) settings.setRegionTypeVisible(((ModuleCRM)cisRegModule).getName(),true,false);
                     }                  
                     settings.redraw();
                 } else if (e.getKeyCode()==KeyEvent.VK_C && !e.isControlDown()) {
@@ -134,10 +134,10 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
                      if (modulecolumn<0) return;
                      for (int row:rows) {
                          int modelrow=table.convertRowIndexToModel(row);
-                         Object module=model.getValueAt(modelrow, modulecolumn);
-                         if (!(module instanceof Module)) continue;
+                         Object cisRegModule=model.getValueAt(modelrow, modulecolumn);
+                         if (!(cisRegModule instanceof ModuleCRM)) continue;
                          if (first) first=false; else modulestring.append(separator);
-                         modulestring.append(((Module)module).getName());
+                         modulestring.append(((ModuleCRM)cisRegModule).getName());
                      }
                      String modules=modulestring.toString();
                      gui.logMessage(modules);
@@ -154,9 +154,9 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
                     int modelrow=table.convertRowIndexToModel(table.getSelectedRow());
                     int modulecolumn=getModuleColumn();
                     if (modulecolumn<0) return;
-                    Object module=model.getValueAt(modelrow, modulecolumn);
-                    if (module instanceof Module) {
-                        gui.showPrompt((Module)module, false, isModal);
+                    Object cisRegModule=model.getValueAt(modelrow, modulecolumn);
+                    if (cisRegModule instanceof ModuleCRM) {
+                        gui.showPrompt((ModuleCRM)cisRegModule, false, isModal);
                     }
                 }
             }
@@ -182,7 +182,7 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
         ModuleLogoComparator logocomparator=new ModuleLogoComparator();
         for (int i=0;i<table.getColumnCount();i++) {
             Class columnclass=model.getColumnClass(i);
-            if (columnclass==Module.class) {
+            if (columnclass==ModuleCRM.class) {
                 table.getColumnModel().getColumn(i).setCellRenderer(logorenderer);
                 ((TableRowSorter)table.getRowSorter()).setComparator(i, logocomparator);
             }
@@ -257,10 +257,10 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
         return isModal;
     }
     
-    /** Returns the index of the first column containing Module objects, or -1 if no such column was found */
+    /** Returns the index of the first column containing ModuleCRM objects, or -1 if no such column was found */
     public final int getModuleColumn() {
        for (int i=0;i<table.getColumnCount();i++) {
-            if (model.getColumnClass(i)==Module.class) return i;
+            if (model.getColumnClass(i)==ModuleCRM.class) return i;
        }
        return -1;
     }
@@ -282,8 +282,8 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
         if (modulecolumn<0) return null;
         String[] selectedModuleNames=new String[selection.length];
         for (int i=0;i<selection.length;i++) {
-            Object module=table.getValueAt(selection[i], modulecolumn);
-            if (module instanceof Module) selectedModuleNames[i]=((Module)module).getName();
+            Object cisRegModule=table.getValueAt(selection[i], modulecolumn);
+            if (cisRegModule instanceof ModuleCRM) selectedModuleNames[i]=((ModuleCRM)cisRegModule).getName();
             else return null;
         }
         return selectedModuleNames;
@@ -333,7 +333,7 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
             for (int j=0;j<colCount;j++) {
                 Object value=table.getValueAt(nextRow, j);
                 if (value!=null && !(value instanceof Color)) {
-                    String valueString=(value instanceof Module)?(((Module)value).getNamePlusSingleMotifNames()):value.toString();
+                    String valueString=(value instanceof ModuleCRM)?(((ModuleCRM)value).getNamePlusSingleMotifNames()):value.toString();
                     valueString=valueString.toLowerCase();
                     if (searchfield.isSearchMatch(valueString)) { // previously:  if (valueString.indexOf(text)>=0) { 
                         matchAt=nextRow;
@@ -350,7 +350,7 @@ public class GenericModuleBrowserPanel extends GenericBrowserPanel {
     }
 
    protected void setVisibilityOnAllModules(boolean show, boolean redraw) {
-       for (Data data:gui.getEngine().getAllDataItemsOfType(Module.class)) {
+       for (Data data:gui.getEngine().getAllDataItemsOfType(ModuleCRM.class)) {
            settings.setRegionTypeVisible(data.getName(), show, false);
        }
        if (redraw) gui.redraw();       
@@ -373,9 +373,9 @@ private class ColorCellRenderer extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component thiscomponent=super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         if (modulecolumn<0) return thiscomponent;
-        Module module=(Module)table.getValueAt(row, modulecolumn);
-        if (module!=null) {
-            String modulename=module.getName();
+        ModuleCRM cisRegModule=(ModuleCRM)table.getValueAt(row, modulecolumn);
+        if (cisRegModule!=null) {
+            String modulename=cisRegModule.getName();
             boolean isVisible=settings.isRegionTypeVisible(modulename);            
             selectedicon.setForegroundColor(settings.getFeatureColor(modulename));
             selectedicon.setBorderColor((isVisible)?Color.BLACK:Color.LIGHT_GRAY);
@@ -387,7 +387,7 @@ private class ColorCellRenderer extends DefaultTableCellRenderer {
         setText(null);         
         return thiscomponent;
     }    
-} 
+    } 
 
 
 private class CellRenderer extends DefaultTableCellRenderer {    
@@ -403,9 +403,9 @@ private class CellRenderer extends DefaultTableCellRenderer {
 }
 
     /** A class to sort module logos based on the names of ModuleMotifs in order */
-    private class ModuleLogoComparator implements java.util.Comparator<Module> {
+    private class ModuleLogoComparator implements java.util.Comparator<ModuleCRM> {
         @Override
-        public int compare(Module mod1, Module mod2) {
+        public int compare(ModuleCRM mod1, ModuleCRM mod2) {
             int size1=mod1.getCardinality();
             int size2=mod2.getCardinality();
             int size=(size1<size2)?size1:size2;

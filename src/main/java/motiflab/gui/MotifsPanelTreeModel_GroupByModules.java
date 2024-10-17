@@ -13,7 +13,7 @@ import motiflab.engine.MotifLabEngine;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleMotif;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.MotifCollection;
@@ -25,7 +25,7 @@ import motiflab.engine.data.MotifCollection;
  */
 public class MotifsPanelTreeModel_GroupByModules extends MotifsPanelTreeModel {
     private MotifLabEngine engine=null;
-    private Class classfilter[]=new Class[]{Module.class, Motif.class};
+    private Class classfilter[]=new Class[]{ModuleCRM.class, Motif.class};
     private MotifsPanel panel;
 
 
@@ -34,9 +34,9 @@ public class MotifsPanelTreeModel_GroupByModules extends MotifsPanelTreeModel {
         this.engine=engine;
         this.panel=panel;
         engine.addDataListener(this);
-        ArrayList<Data> list=engine.getAllDataItemsOfType(Module.class);
-        for (Data module:list) {
-           dataAdded(module);
+        ArrayList<Data> list=engine.getAllDataItemsOfType(ModuleCRM.class);
+        for (Data cisRegModule:list) {
+           dataAdded(cisRegModule);
         }
         //if (((TreeNode)getRoot()).isLeaf()) insertNodeInto(new CheckBoxTreeNode("-EMTPY-"),((CheckBoxTreeNode)getRoot()),0);
         //insertNodeInto(new CheckBoxTreeNode("-EMTPY-"),((CheckBoxTreeNode)getRoot()),0);
@@ -53,7 +53,7 @@ public class MotifsPanelTreeModel_GroupByModules extends MotifsPanelTreeModel {
         if (MotifLabEngine.isTemporary(data)) return; // do not show temporary data items
         Runnable runner=new Runnable() {
             public void run() {
-                if (data instanceof Module) {
+                if (data instanceof ModuleCRM) {
                     for (int i=0;i<root.getChildCount();i++) {// check if node already exists!!!
                          CheckBoxTreeNode node=(CheckBoxTreeNode)root.getChildAt(i);
                          Object val=node.getUserObject();
@@ -63,7 +63,7 @@ public class MotifsPanelTreeModel_GroupByModules extends MotifsPanelTreeModel {
                     int index=findCorrectIndex((CheckBoxTreeNode)root,data.getName());
                     insertNodeInto(moduleNode, (CheckBoxTreeNode)root, index);
                     JTree tree=panel.getTree();
-                    ArrayList<ModuleMotif> singlemotifslist=((Module)data).getModuleMotifs();
+                    ArrayList<ModuleMotif> singlemotifslist=((ModuleCRM)data).getModuleMotifs();
                     for (ModuleMotif singlemotif:singlemotifslist) {
                        CheckBoxTreeNode singlemotifNode=new CheckBoxTreeNode(singlemotif);
                        int singlemotifindex=moduleNode.getChildCount();
@@ -97,7 +97,7 @@ public class MotifsPanelTreeModel_GroupByModules extends MotifsPanelTreeModel {
         if (!isAccepted(data)) return;
          Runnable runner=new Runnable() {
             public void run() {
-                if (data instanceof Module) {
+                if (data instanceof ModuleCRM) {
                     for (int i=0;i<root.getChildCount();i++) {
                         CheckBoxTreeNode node=(CheckBoxTreeNode)root.getChildAt(i);
                         if (!(node.getUserObject() instanceof Data)) continue;
@@ -122,10 +122,10 @@ public class MotifsPanelTreeModel_GroupByModules extends MotifsPanelTreeModel {
      * @param data
      */
     public void dataUpdated(final Data data) {
-     if (!(data instanceof Module || data instanceof Motif)) return;
+     if (!(data instanceof ModuleCRM || data instanceof Motif)) return;
           Runnable runner=new Runnable() {
             public void run() {
-                if (data instanceof Module) {
+                if (data instanceof ModuleCRM) {
                     CheckBoxTreeNode moduleNode=null;
                     for (int i=0;i<root.getChildCount();i++) {
                         CheckBoxTreeNode node =(CheckBoxTreeNode)root.getChildAt(i);
@@ -143,7 +143,7 @@ public class MotifsPanelTreeModel_GroupByModules extends MotifsPanelTreeModel {
                         removeNodeFromParent(node);
                     }
                     // add the constituent motifs anew                   
-                    ArrayList<ModuleMotif> singlemotifslist=((Module)data).getModuleMotifs();
+                    ArrayList<ModuleMotif> singlemotifslist=((ModuleCRM)data).getModuleMotifs();
                     for (ModuleMotif singlemotif:singlemotifslist) {
                        CheckBoxTreeNode singlemotifNode=new CheckBoxTreeNode(singlemotif);
                        int singlemotifindex=moduleNode.getChildCount();

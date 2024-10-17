@@ -13,6 +13,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import motiflab.engine.task.ExecutableTask;
 import motiflab.engine.ExecutionError;
+import motiflab.engine.SystemError;
 import motiflab.engine.TaskRunner;
 import motiflab.engine.data.*;
 import motiflab.gui.VisualizationSettings;
@@ -176,6 +177,9 @@ public abstract class FeatureTransformOperation extends Operation {
             if (Thread.interrupted() || task.getStatus().equals(ExecutableTask.ABORTED)) throw new InterruptedException();
             FeatureSequenceData sourceSequence=(FeatureSequenceData)sourceDataset.getSequenceByName(sequencename);
             FeatureSequenceData targetSequence=(FeatureSequenceData)targetDataset.getSequenceByName(sequencename);
+            
+            if (sourceSequence==null) throw new SystemError("Unexpected error: No source sequence found named '"+sequencename+"'");
+            if (targetSequence==null) throw new SystemError("Unexpected error: No target sequence found named '"+sequencename+"'");            
 
             transformSequence(sourceSequence, targetSequence, task);
             

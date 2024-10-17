@@ -14,7 +14,7 @@ import motiflab.engine.operations.Operation;
 import motiflab.engine.task.OperationTask;
 import motiflab.engine.data.Data;
 import motiflab.engine.data.DataMap;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.Sequence;
 import motiflab.engine.data.analysis.Analysis;
@@ -142,9 +142,9 @@ public class StandardOperationParser_collate extends StandardOperationParser {
            if (sourceName.equals(engine.getTypeNameForDataClass(Motif.class))) {
                 if (collateType==null) collateType=Motif.class;
                 else if (collateType!=Motif.class) throw new ParseError("Motif properties can not be collated together with previous columns ("+engine.getTypeNameForDataClass(collateType)+")");
-           } else if (sourceName.equals(engine.getTypeNameForDataClass(Module.class))) {
-                if (collateType==null) collateType=Module.class;
-                else if (collateType!=Module.class) throw new ParseError("Module properties can not be collated together with previous columns ("+engine.getTypeNameForDataClass(collateType)+")");
+           } else if (sourceName.equals(engine.getTypeNameForDataClass(ModuleCRM.class))) {
+                if (collateType==null) collateType=ModuleCRM.class;
+                else if (collateType!=ModuleCRM.class) throw new ParseError("Module properties can not be collated together with previous columns ("+engine.getTypeNameForDataClass(collateType)+")");
            } else if (sourceName.equals(engine.getTypeNameForDataClass(Sequence.class))) {
                 if (collateType==null) collateType=Sequence.class;
                 else if (collateType!=Sequence.class) throw new ParseError("Sequence properties can not be collated together with previous columns ("+engine.getTypeNameForDataClass(collateType)+")");

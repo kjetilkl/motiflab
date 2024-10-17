@@ -12,9 +12,9 @@ import java.util.HashMap;
 import motiflab.engine.MotifLabEngine;
 
 /**
- * This class represents constituent single Motifs of a Module (CRM)
- * Each constituent motif can be represented by several "equivalent" Motif models (usually different models for the same TF)
- * Note that ModuleMotif is not a subclass of Data and can thus not be stored directly in the engine.
+ * This class represents constituent single Motifs of a ModuleCRM (CRM)
+ Each constituent motif can be represented by several "equivalent" Motif models (usually different models for the same TF)
+ Note that ModuleMotif is not a subclass of Data and can thus not be stored directly in the engine.
  * @author Kjetil Klepper
  */
 public class ModuleMotif implements Serializable, Cloneable {
@@ -69,7 +69,7 @@ public class ModuleMotif implements Serializable, Cloneable {
     }
 
     /** Returns the orientation constraint imposed on this ModuleMotif
-     *  This could be Module.DIRECT, Module.REVERSE or Module.INDETERMINED (if no specific constraing is set)
+  This could be ModuleCRM.DIRECT, ModuleCRM.REVERSE or ModuleCRM.INDETERMINED (if no specific constraing is set)
      */
     public int getOrientation() {
         return orientation;
@@ -177,8 +177,8 @@ public class ModuleMotif implements Serializable, Cloneable {
 
     public String getValueAsParameterString() {
         String orientationString;
-        if (orientation==Module.DIRECT) orientationString="+";
-        else if (orientation==Module.REVERSE) orientationString="-";
+        if (orientation==ModuleCRM.DIRECT) orientationString="+";
+        else if (orientation==ModuleCRM.REVERSE) orientationString="-";
         else orientationString=".";
         String parameter="MOTIF("+representativeName+")["+orientationString+"]{";
         ArrayList<String> motifNames=equivalenceClass.getAllMotifNames();

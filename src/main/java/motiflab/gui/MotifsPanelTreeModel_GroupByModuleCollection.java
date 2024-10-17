@@ -10,7 +10,7 @@ import motiflab.engine.data.Data;
 import motiflab.engine.MotifLabEngine;
 import javax.swing.SwingUtilities;
 import motiflab.engine.data.ModuleCollection;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 
 
 /**
@@ -19,7 +19,7 @@ import motiflab.engine.data.Module;
  */
 public class MotifsPanelTreeModel_GroupByModuleCollection extends MotifsPanelTreeModel {
     private MotifLabEngine engine=null;
-    private Class classfilter[]=new Class[]{ModuleCollection.class, Module.class};
+    private Class classfilter[]=new Class[]{ModuleCollection.class, ModuleCRM.class};
     private MotifsPanel panel;
 
     public MotifsPanelTreeModel_GroupByModuleCollection(MotifLabEngine engine,MotifsPanel panel) {
@@ -55,13 +55,13 @@ public class MotifsPanelTreeModel_GroupByModuleCollection extends MotifsPanelTre
                     CheckBoxTreeNode collectionNode=new CheckBoxTreeNode(data);
                     int index=findCorrectIndex((CheckBoxTreeNode)root,data.getName());
                     insertNodeInto(collectionNode, (CheckBoxTreeNode)root, index);
-                    ArrayList<Module> modulelist=((ModuleCollection)data).getAllModules(engine);
-                    for (Module module:modulelist) {
-                       CheckBoxTreeNode moduleNode=new CheckBoxTreeNode(module);
-                       int moduleindex=findCorrectIndex(collectionNode,module.getName());
+                    ArrayList<ModuleCRM> modulelist=((ModuleCollection)data).getAllModules(engine);
+                    for (ModuleCRM cisRegModule:modulelist) {
+                       CheckBoxTreeNode moduleNode=new CheckBoxTreeNode(cisRegModule);
+                       int moduleindex=findCorrectIndex(collectionNode,cisRegModule.getName());
                        insertNodeInto(moduleNode, collectionNode, moduleindex);
                     }
-                } else if (data instanceof Module) {
+                } else if (data instanceof ModuleCRM) {
                     dataUpdated(data);
                 }
            }
@@ -102,7 +102,7 @@ public class MotifsPanelTreeModel_GroupByModuleCollection extends MotifsPanelTre
      * @param data
      */
     public void dataUpdated(final Data data) {
-     if (!(data instanceof ModuleCollection || data instanceof Module)) return; // No need to respond to Module changes since the module tree node does not change in the current structure
+     if (!(data instanceof ModuleCollection || data instanceof ModuleCRM)) return; // No need to respond to ModuleCRM changes since the module tree node does not change in the current structure
           Runnable runner=new Runnable() {
             public void run() {
                 if (data instanceof ModuleCollection) {
@@ -122,13 +122,13 @@ public class MotifsPanelTreeModel_GroupByModuleCollection extends MotifsPanelTre
                         CheckBoxTreeNode node =(CheckBoxTreeNode)parentnode.getChildAt(0); //
                         removeNodeFromParent(node);
                     }
-                    ArrayList<Module> modulelist=((ModuleCollection)data).getAllModules(engine);
-                    for (Module module:modulelist) {
-                       CheckBoxTreeNode moduleNode=new CheckBoxTreeNode(module);
-                       int moduleindex=findCorrectIndex(parentnode,module.getName());
+                    ArrayList<ModuleCRM> modulelist=((ModuleCollection)data).getAllModules(engine);
+                    for (ModuleCRM cisRegModule:modulelist) {
+                       CheckBoxTreeNode moduleNode=new CheckBoxTreeNode(cisRegModule);
+                       int moduleindex=findCorrectIndex(parentnode,cisRegModule.getName());
                        insertNodeInto(moduleNode, parentnode, moduleindex);
                     }
-                } else if (data instanceof Module) {
+                } else if (data instanceof ModuleCRM) {
                     updateUserObjectDataRecursively((CheckBoxTreeNode)root, data);
                 }
            } // end run()

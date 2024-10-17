@@ -251,7 +251,7 @@ public class CompareClustersToCollectionAnalysis extends Analysis {
         } else {
                  if (collection instanceof SequenceCollection) backgroundCollection=task.getEngine().getDefaultSequenceCollection();
             else if (collection instanceof MotifCollection) {backgroundCollection=new MotifCollection("temp"); ((MotifCollection)backgroundCollection).addMotifNames(task.getEngine().getNamesForAllDataItemsOfType(Motif.class));}
-            else if (collection instanceof ModuleCollection) {backgroundCollection=new MotifCollection("temp"); ((ModuleCollection)backgroundCollection).addModuleNames(task.getEngine().getNamesForAllDataItemsOfType(Module.class));}
+            else if (collection instanceof ModuleCollection) {backgroundCollection=new MotifCollection("temp"); ((ModuleCollection)backgroundCollection).addModuleNames(task.getEngine().getNamesForAllDataItemsOfType(ModuleCRM.class));}
         }
         collectionName=collection.getName();
         partitionName=partition.getName();

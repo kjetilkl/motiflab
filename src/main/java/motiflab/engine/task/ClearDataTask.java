@@ -14,7 +14,7 @@ import motiflab.engine.data.DataMap;
 import motiflab.engine.data.Sequence;
 import motiflab.engine.data.ExpressionProfile;
 import motiflab.engine.data.FeatureDataset;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleNumericMap;
 import motiflab.engine.data.ModulePartition;
@@ -160,7 +160,7 @@ public class ClearDataTask extends ExecutableTask {
         for (Data item:list) {
             names.add(item.getName());
         }
-        list=engine.getAllDataItemsOfType(Module.class);
+        list=engine.getAllDataItemsOfType(ModuleCRM.class);
         for (Data item:list) {
             names.add(item.getName()); 
         }
@@ -194,7 +194,7 @@ public class ClearDataTask extends ExecutableTask {
         for (Data item:list) { // First add all non-Sequence data items
               if (    item instanceof Sequence 
                    || item instanceof Motif
-                   || item instanceof Module
+                   || item instanceof ModuleCRM
                    || item instanceof FeatureDataset
                    || item instanceof DataGroup  // covers all collections and partitions
                    || item instanceof DataMap    // covers all numeric and text maps

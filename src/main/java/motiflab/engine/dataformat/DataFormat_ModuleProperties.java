@@ -16,7 +16,7 @@ import motiflab.engine.Parameter;
 import motiflab.engine.ParameterSettings;
 import motiflab.engine.data.DataMap;
 import motiflab.engine.protocol.ParseError;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleNumericMap;
 import motiflab.engine.data.ModuleTextMap;
@@ -32,11 +32,11 @@ public class DataFormat_ModuleProperties extends DataFormat {
     public static final String COMMA="Comma";
     public static final String COLON="Colon";    
     public static final String PIPE="Vertical bar";    
-    private Class[] supportedTypes=new Class[]{ModuleCollection.class, Module.class};
+    private Class[] supportedTypes=new Class[]{ModuleCollection.class, ModuleCRM.class};
 
 
     public DataFormat_ModuleProperties() {
-        String[] standard=Module.getProperties(engine);
+        String[] standard=ModuleCRM.getProperties(engine);
 
         Arrays.sort(standard);
         StringBuilder builder=new StringBuilder();
@@ -60,12 +60,12 @@ public class DataFormat_ModuleProperties extends DataFormat {
 
     @Override
     public boolean canFormatOutput(Data data) {
-        return (data instanceof ModuleCollection || data instanceof Module);
+        return (data instanceof ModuleCollection || data instanceof ModuleCRM);
     }
 
     @Override
     public boolean canFormatOutput(Class dataclass) {
-        return (dataclass.equals(ModuleCollection.class) || dataclass.equals(Module.class));
+        return (dataclass.equals(ModuleCollection.class) || dataclass.equals(ModuleCRM.class));
     }
 
     @Override
@@ -141,21 +141,21 @@ public class DataFormat_ModuleProperties extends DataFormat {
             outputString.append("\n");
         }
         if (dataobject instanceof ModuleCollection) {
-            ArrayList<Module> modulelist=((ModuleCollection)dataobject).getAllModules(engine);
+            ArrayList<ModuleCRM> modulelist=((ModuleCollection)dataobject).getAllModules(engine);
             if (sortOrder!=null) sortOrder.sortDataAccordingToMap(modulelist);
             int size=modulelist.size();
             int i=0;
-            for (Module module:modulelist) {
+            for (ModuleCRM cisRegModule:modulelist) {
                 if (task!=null) task.checkExecutionLock(); // checks to see if this task should suspend execution
                 if (Thread.interrupted() || (task!=null && task.getStatus().equals(ExecutableTask.ABORTED))) throw new InterruptedException();
-                outputModule(module, outputString, properties, separator, listseparator);
-                // task.setStatusMessage("Module "+(i+1)+" of "+size);
+                outputModule(cisRegModule, outputString, properties, separator, listseparator);
+                // task.setStatusMessage("ModuleCRM "+(i+1)+" of "+size);
                 setProgress(i+1, size);
                 i++;
                 if (i%100==0) Thread.yield();
             }
-        } else if (dataobject instanceof Module){
-            outputModule((Module)dataobject, outputString, properties, separator, listseparator);
+        } else if (dataobject instanceof ModuleCRM){
+            outputModule((ModuleCRM)dataobject, outputString, properties, separator, listseparator);
         } else throw new ExecutionError("Unable to format object '"+dataobject+"' in "+name+" format");
         outputobject.append(outputString.toString(),getName());
         return outputobject;
@@ -163,16 +163,16 @@ public class DataFormat_ModuleProperties extends DataFormat {
 
 
     /** output formats a single module */
-    protected void outputModule(Module module, StringBuilder outputString, String[] properties, String separator, String listseparator) throws ExecutionError {
+    protected void outputModule(ModuleCRM cisRegModule, StringBuilder outputString, String[] properties, String separator, String listseparator) throws ExecutionError {
             boolean first=true;
             for (String property:properties) {
                 if (first) first=false; else outputString.append(separator);          
                 Object value=null;
                 try {
-                   value=module.getPropertyValue(property,engine); // this throws ExecutionError if property is not recognized
+                   value=cisRegModule.getPropertyValue(property,engine); // this throws ExecutionError if property is not recognized
                 } catch (Exception e) { // check if the property could be a map instead
                    Data item=engine.getDataItem(property);
-                   if (item instanceof ModuleTextMap || item instanceof ModuleNumericMap) value=((DataMap)item).getValue(module.getName());
+                   if (item instanceof ModuleTextMap || item instanceof ModuleNumericMap) value=((DataMap)item).getValue(cisRegModule.getName());
                    else throw new ExecutionError("'"+property+"' is not a recognized module property or applicable Map");
                 }                
                 if (value instanceof ArrayList) outputArrayList((ArrayList)value,outputString,listseparator);

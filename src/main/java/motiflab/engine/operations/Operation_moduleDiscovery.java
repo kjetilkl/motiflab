@@ -200,9 +200,9 @@ public class Operation_moduleDiscovery extends Operation {
                 if (newtype==null) newtype=oldtype; // this should not happen
                 moduleregion.setType(newtype);
                 if (renameSingleMotifs) { // rename references to single motifs in the module regions
-                    Module module=modules.getModuleFromPayload(newtype);
-                    if (module!=null) {
-                        for (ModuleMotif mm:module.getModuleMotifs()) {
+                    ModuleCRM cisRegModule=modules.getModuleFromPayload(newtype);
+                    if (cisRegModule!=null) {
+                        for (ModuleMotif mm:cisRegModule.getModuleMotifs()) {
                             String modulemotifname=mm.getRepresentativeName();
                             String oldmotifname=(String)moduleregion.getProperty(modulemotifname);
                             if (oldmotifname!=null) { // region has this motif
@@ -240,10 +240,10 @@ public class Operation_moduleDiscovery extends Operation {
         if (modules!=null && modules.hasPayload()) {
             HashMap<String,Color> assignedColors=new HashMap<String, Color>();        
             for (Data data:modules.getPayload()) {
-                if (data instanceof Module) {
-                    Module module=(Module)data;
-                    String modulename=module.getName();
-                    for (ModuleMotif mm:module.getModuleMotifs()) {
+                if (data instanceof ModuleCRM) {
+                    ModuleCRM cisRegModule=(ModuleCRM)data;
+                    String modulename=cisRegModule.getName();
+                    for (ModuleMotif mm:cisRegModule.getModuleMotifs()) {
                         String modulemotifname=mm.getRepresentativeName();
                         String originalMMname=getModuleMotifNamePrefix(modulemotifname); // this is an attempt to give similar modulemotifs (that have been fitted with "_2" etc because the names have to be unique) the same color
                         assignModuleMotifColor(modulename,originalMMname,modulemotifname,assignedColors);

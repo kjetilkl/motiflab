@@ -14,7 +14,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.RegionSequenceData;
 import motiflab.engine.data.Region;
@@ -189,7 +189,7 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
               Region region=regions.get(0);
               String type=region.getType();
               Data motifdata=gui.getEngine().getDataItem(type);
-              if (motifdata!=null && (motifdata instanceof Motif || motifdata instanceof Module)) showPrompt(motifdata);
+              if (motifdata!=null && (motifdata instanceof Motif || motifdata instanceof ModuleCRM)) showPrompt(motifdata);
        } else {
            final JPopupMenu menu=new JPopupMenu();
            ActionListener menulistener=new ActionListener() {
@@ -209,10 +209,10 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
            for (Region region:regions) {
               String type=region.getType();
               Data motifdata=gui.getEngine().getDataItem(type);
-              if (motifdata!=null && (motifdata instanceof Motif || motifdata instanceof Module)) {
+              if (motifdata!=null && (motifdata instanceof Motif || motifdata instanceof ModuleCRM)) {
                   String command=null;
                   if (motifdata instanceof Motif) command=((Motif)motifdata).getPresentationName();
-                  else if (motifdata instanceof Module) command=((Module)motifdata).getName();
+                  else if (motifdata instanceof ModuleCRM) command=((ModuleCRM)motifdata).getName();
                   if (menuContainsItem(menu, command)) continue;
                   JMenuItem menuitem=new JMenuItem(command);
                   menuitem.addActionListener(menulistener);
@@ -243,7 +243,7 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
 
     protected void showPrompt(Data data) {
         gui.getFrame().setCursor(Cursor.getDefaultCursor());
-        gui.getMotifsPanel().showPrompt(data, false, false); // showPrompt in MotifsPanel will show different prompt depending on whether the Data object is a Motif or a Module
+        gui.getMotifsPanel().showPrompt(data, false, false); // showPrompt in MotifsPanel will show different prompt depending on whether the Data object is a Motif or a ModuleCRM
     }
 
 

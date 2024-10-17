@@ -23,7 +23,7 @@ import javax.swing.WindowConstants;
 import javax.swing.tree.TreeNode;
 import motiflab.engine.Parameter;
 import motiflab.engine.ParameterSettings;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleMotif;
 import motiflab.engine.data.ModulePartition;
@@ -140,7 +140,7 @@ public static MotifsPanelContextMenu getInstance(JTree tree, MotifLabGUI gui, Mo
               public void newColorSelected(Color color) {
                 if (color==null) return;
                      if (dataitem instanceof Motif) {setColorForMotif((Motif)dataitem,color);}
-                else if (dataitem instanceof Module) {setColorForModule((Module)dataitem,color);}
+                else if (dataitem instanceof ModuleCRM) {setColorForModule((ModuleCRM)dataitem,color);}
                 else if (node!=null && node.getUserObject() instanceof ModuleMotif) {setColorForModuleMotif(node,color);}
                 else {panel.setColorOnSelectedRows(color);} // multiple rows selected
              }
@@ -305,10 +305,10 @@ public static MotifsPanelContextMenu getInstance(JTree tree, MotifLabGUI gui, Mo
            } else if (e.getActionCommand().equals(HIDE_ALL)) {
                 panel.setVisibilityOnAll(false);
            } else if (e.getActionCommand().equals(SHOW)) {
-                if (dataitem instanceof Motif || dataitem instanceof Module) {gui.getVisualizationSettings().setRegionTypeVisible(dataitem.getName(),true,true);}
+                if (dataitem instanceof Motif || dataitem instanceof ModuleCRM) {gui.getVisualizationSettings().setRegionTypeVisible(dataitem.getName(),true,true);}
                 else {panel.setVisibilityOnSelectedRows(true);}
            } else if (e.getActionCommand().equals(HIDE)) {
-                if (dataitem instanceof Motif || dataitem instanceof Module) {gui.getVisualizationSettings().setRegionTypeVisible(dataitem.getName(),false,true);}
+                if (dataitem instanceof Motif || dataitem instanceof ModuleCRM) {gui.getVisualizationSettings().setRegionTypeVisible(dataitem.getName(),false,true);}
                 else {panel.setVisibilityOnSelectedRows(false);}
            } else if (e.getActionCommand().equals(EXPAND_NODE)) {
                 panel.expandSelectedRows();
@@ -380,17 +380,17 @@ public static MotifsPanelContextMenu getInstance(JTree tree, MotifLabGUI gui, Mo
     }
 
 
-    private void setColorForModule(Module module, Color newColor) {
+    private void setColorForModule(ModuleCRM cisRegModule, Color newColor) {
         VisualizationSettings settings=gui.getVisualizationSettings();
-        settings.setFeatureColor(module.getName(), newColor, true);
+        settings.setFeatureColor(cisRegModule.getName(), newColor, true);
     }
 
     private void setColorForModuleMotif(CheckBoxTreeNode node, Color newColor) {
         VisualizationSettings settings=gui.getVisualizationSettings();
         ModuleMotif modulemotif=(ModuleMotif)node.getUserObject();
         CheckBoxTreeNode modulenode=(CheckBoxTreeNode)node.getParent();
-        Module module=(Module)modulenode.getUserObject();
-        settings.setFeatureColor(module.getName()+"."+modulemotif.getRepresentativeName(), newColor, true);
+        ModuleCRM cisRegModule=(ModuleCRM)modulenode.getUserObject();
+        settings.setFeatureColor(cisRegModule.getName()+"."+modulemotif.getRepresentativeName(), newColor, true);
     }
 
     private void setColorForMotif(Motif motif, Color newColor) {

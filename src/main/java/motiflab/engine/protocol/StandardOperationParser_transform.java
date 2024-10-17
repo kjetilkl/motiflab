@@ -9,7 +9,7 @@ package motiflab.engine.protocol;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import motiflab.engine.data.DataCollection;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.NumericDataset;
 import motiflab.engine.operations.Condition;
@@ -106,7 +106,7 @@ public class StandardOperationParser_transform extends StandardOperationParser {
                if (sourceclass==RegionDataset.class) parseWhereRegionCondition(whereString, task);
                else if (sourceclass==NumericDataset.class) parseWherePositionCondition(whereString,task);
            }
-           if ((propertyName!=null && !propertyName.isEmpty()) && !(sourceclass==RegionDataset.class || sourceclass==Motif.class || sourceclass==Module.class || sourceclass==Sequence.class || DataCollection.class.isAssignableFrom(sourceclass))) throw new ParseError(engine.getTypeNameForDataClass(sourceclass)+" '"+sourceName+"' can not have a property named '"+propertyName+"'");
+           if ((propertyName!=null && !propertyName.isEmpty()) && !(sourceclass==RegionDataset.class || sourceclass==Motif.class || sourceclass==ModuleCRM.class || sourceclass==Sequence.class || DataCollection.class.isAssignableFrom(sourceclass))) throw new ParseError(engine.getTypeNameForDataClass(sourceclass)+" '"+sourceName+"' can not have a property named '"+propertyName+"'");
                       
            
            lookup.register(targetName, sourceclass);

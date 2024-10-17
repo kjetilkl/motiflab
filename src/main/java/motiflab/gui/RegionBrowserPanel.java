@@ -41,7 +41,7 @@ import javax.swing.table.TableRowSorter;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Data;
 import motiflab.engine.data.FeatureSequenceData;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.MotifCollection;
 import motiflab.engine.data.MotifPartition;
@@ -488,7 +488,7 @@ public class RegionBrowserPanel extends JPanel {
     /** Shows or hides all motifs depending on the argument, but does not update visualization */
     public void setVisibilityOnAllFeatureTypes(boolean visible) {
          if (isMotifTrack || isModuleTrack) {
-             for (Data data:engine.getAllDataItemsOfType((isMotifTrack)?Motif.class:Module.class)) {
+             for (Data data:engine.getAllDataItemsOfType((isMotifTrack)?Motif.class:ModuleCRM.class)) {
                 settings.setRegionTypeVisible(data.getName(), visible, false); 
              }
          } else {
@@ -592,7 +592,7 @@ private class RegionTableModel extends AbstractTableModel {
         else if (c==LOCATION_COLUMN) return String.class; //         
         else if (c==LOGO_COLUMN) {
             if (isMotifTrack) return Motif.class;
-            else if (isModuleTrack) return Module.class;
+            else if (isModuleTrack) return ModuleCRM.class;
             else return Region.class;
         }
         else { // c==FILTER_COLUMN
@@ -630,7 +630,7 @@ private class RegionTableModel extends AbstractTableModel {
         else if (columnIndex==LOGO_COLUMN) {
             Region region=(Region)regions.get(rowIndex);
             if (isMotifTrack) return (Motif)engine.getDataItem(region.getType(), Motif.class);           
-            else if (isModuleTrack) return (Module)engine.getDataItem(region.getType(), Module.class);            
+            else if (isModuleTrack) return (ModuleCRM)engine.getDataItem(region.getType(), ModuleCRM.class);            
             else return region;
         }
         else if (columnIndex==SEQUENCE_COLUMN) return (String)regions.get(rowIndex).getParent().getSequenceName();

@@ -43,7 +43,7 @@ import javax.swing.table.TableRowSorter;
 import motiflab.engine.DataListener;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModulePartition;
 
@@ -114,7 +114,7 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
     @SuppressWarnings("unchecked")
     private void setupManualEntryPanel(boolean allowCreateCollection) {
         setupFilterColumns();
-        ArrayList<Data> modules=engine.getAllDataItemsOfType(Module.class);
+        ArrayList<Data> modules=engine.getAllDataItemsOfType(ModuleCRM.class);
         model=new ManualSelectionTableModel(modules,columnHeaders);
         columnModel = new DefaultTableColumnModel();
         for (int i=0;i<columnHeaders.length;i++) {
@@ -186,22 +186,22 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
                     int[] rows=manualSelectionTable.getSelectedRows();
                     int visibleRows=0;
                     for (int row:rows) {
-                        Module module=(Module)model.getValueAt(manualSelectionTable.convertRowIndexToModel(row),MODULE_COLUMN);
-                        if (settings.isRegionTypeVisible(module.getName())) visibleRows++;
+                        ModuleCRM cisRegModule=(ModuleCRM)model.getValueAt(manualSelectionTable.convertRowIndexToModel(row),MODULE_COLUMN);
+                        if (settings.isRegionTypeVisible(cisRegModule.getName())) visibleRows++;
                     }
                     boolean doShow=Boolean.TRUE;
                     if (visibleRows==rows.length) doShow=Boolean.FALSE;
                     for (int row:rows) {
-                        Module module=(Module)model.getValueAt(manualSelectionTable.convertRowIndexToModel(row),MODULE_COLUMN);
-                        settings.setRegionTypeVisible(module.getName(),doShow,false);
+                        ModuleCRM cisRegModule=(ModuleCRM)model.getValueAt(manualSelectionTable.convertRowIndexToModel(row),MODULE_COLUMN);
+                        settings.setRegionTypeVisible(cisRegModule.getName(),doShow,false);
                     }
                     settings.redraw();                    
                 } else if ((e.getKeyCode()==KeyEvent.VK_S || e.getKeyCode()==KeyEvent.VK_H) && !e.isShiftDown()) {
                     int[] rows=manualSelectionTable.getSelectedRows();
                     boolean doShow=e.getKeyCode()==KeyEvent.VK_S;
                     for (int row:rows) {
-                        Module module=(Module)model.getValueAt(manualSelectionTable.convertRowIndexToModel(row),MODULE_COLUMN);
-                        settings.setRegionTypeVisible(module.getName(),doShow,false);                        
+                        ModuleCRM cisRegModule=(ModuleCRM)model.getValueAt(manualSelectionTable.convertRowIndexToModel(row),MODULE_COLUMN);
+                        settings.setRegionTypeVisible(cisRegModule.getName(),doShow,false);                        
                     }
                     settings.redraw();                    
                 } else if ((e.getKeyCode()==KeyEvent.VK_S || e.getKeyCode()==KeyEvent.VK_H) && e.isShiftDown()) {
@@ -212,8 +212,8 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
                     setVisibilityOnAllModules(false);                    
                     int[] rows=manualSelectionTable.getSelectedRows();
                     for (int row:rows) {
-                        Module module=(Module)model.getValueAt(manualSelectionTable.convertRowIndexToModel(row),MODULE_COLUMN);
-                        settings.setRegionTypeVisible(module.getName(),true,false);
+                        ModuleCRM cisRegModule=(ModuleCRM)model.getValueAt(manualSelectionTable.convertRowIndexToModel(row),MODULE_COLUMN);
+                        settings.setRegionTypeVisible(cisRegModule.getName(),true,false);
                     }
                     settings.redraw();                    
                 } else if (e.getKeyCode()==KeyEvent.VK_C && !e.isControlDown()) {
@@ -224,7 +224,7 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
                      for (int row:rows) {
                          if (first) first=false; else string.append(separator);
                          int modelrow=manualSelectionTable.convertRowIndexToModel(row);
-                         String name=((Module)model.getValueAt(modelrow, 1)).getName();
+                         String name=((ModuleCRM)model.getValueAt(modelrow, 1)).getName();
                          string.append(name);
                      }
                      String modulestring=string.toString();
@@ -296,9 +296,9 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
                     int column = manualSelectionTable.columnAtPoint(evt.getPoint()); //
                     if (column==0) return; // clicked the checkbox
                     int modelrow=manualSelectionTable.convertRowIndexToModel(manualSelectionTable.getSelectedRow());
-                    Module module=(Module)model.getValueAt(modelrow, 1);
-                    if (module!=null) {
-                        gui.showPrompt(module, false, isModal);
+                    ModuleCRM cisRegModule=(ModuleCRM)model.getValueAt(modelrow, 1);
+                    if (cisRegModule!=null) {
+                        gui.showPrompt(cisRegModule, false, isModal);
                     }
                 }
             }
@@ -332,8 +332,8 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
             manualSelectionTable.getRowSorter().toggleSortOrder(MODULE_COLUMN);
             if (modulecollection!=null) {
                for (int i=0;i<model.getRowCount();i++) {
-                   Module module=(Module)model.getValueAt(i, 1);
-                   model.setValueAt(modulecollection.contains(module), i, 0);
+                   ModuleCRM cisRegModule=(ModuleCRM)model.getValueAt(i, 1);
+                   model.setValueAt(modulecollection.contains(cisRegModule), i, 0);
                }
                manualSelectionTable.getRowSorter().toggleSortOrder(SELECTED_COLUMN); // show checked first
                manualSelectionTable.getRowSorter().toggleSortOrder(SELECTED_COLUMN); // show checked first - must sort twice to get checked on top
@@ -353,35 +353,35 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
         return manualSelectionTable;
     }
 
-    /** Updates the current Module Collection (if set) to reflect the new selection */
+    /** Updates the current ModuleCRM Collection (if set) to reflect the new selection */
     public void updateModuleCollection() {
         if (modulecollection==null) return;
         modulecollection.clearAll(engine);
         for (int i=0;i<model.getRowCount();i++) {
             if ((Boolean)model.getValueAt(i,0)) {
-                Module module=(Module)model.getValueAt(i, 1);
-                modulecollection.addModule((Module)module);
+                ModuleCRM cisRegModule=(ModuleCRM)model.getValueAt(i, 1);
+                modulecollection.addModule((ModuleCRM)cisRegModule);
             }
         }
     }
 
     @Override
     public void dataAdded(Data data) {
-        if (!(data instanceof Module)) return;
-        model.addModule((Module)data);
+        if (!(data instanceof ModuleCRM)) return;
+        model.addModule((ModuleCRM)data);
     }
 
     @Override
     public void dataRemoved(Data data) {
-        if (!(data instanceof Module)) return;
-        model.removeModule((Module)data);
+        if (!(data instanceof ModuleCRM)) return;
+        model.removeModule((ModuleCRM)data);
     }
 
     @Override
     public void dataUpdate(Data oldvalue, Data newvalue) {}
     @Override
     public void dataUpdated(Data data) {
-         if (!(data instanceof Module)) return;
+         if (!(data instanceof ModuleCRM)) return;
          model.fireTableDataChanged();
     }
 
@@ -395,7 +395,7 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
     public void setVisibilityOnAllModules(boolean visible) {
          VisualizationSettings settings=gui.getVisualizationSettings();
          for (int i=0;i<model.getRowCount();i++) {
-             settings.setRegionTypeVisible(((Module)model.getValueAt(i,1)).getName(), visible, false);
+             settings.setRegionTypeVisible(((ModuleCRM)model.getValueAt(i,1)).getName(), visible, false);
          }
     }
 
@@ -422,7 +422,7 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
         int firstSelected=manualSelectionTable.getSelectedRow();
         if (firstSelected>=0 && selectedCount==1) {
             int modelrow=manualSelectionTable.convertRowIndexToModel(firstSelected);
-            manualSelectionContextMenu.setSingleModuleSelected(((Module)model.getValueAt(modelrow,1)).getName());
+            manualSelectionContextMenu.setSingleModuleSelected(((ModuleCRM)model.getValueAt(modelrow,1)).getName());
         } else {          
             manualSelectionContextMenu.setSingleModuleSelected(null);
         }
@@ -447,7 +447,7 @@ private class ManualSelectionTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int c) {
         if (c==SELECTED_COLUMN) return Boolean.class; // first column
-        else if (c==MODULE_COLUMN || c==LOGO_COLUMN) return Module.class; // 
+        else if (c==MODULE_COLUMN || c==LOGO_COLUMN) return ModuleCRM.class; // 
         else { // c==FILTER_COLUMN
             return filterPropertyClass.get(filterColumn);
         }
@@ -467,7 +467,7 @@ private class ManualSelectionTableModel extends AbstractTableModel {
         fireTableCellUpdated(rowIndex, columnIndex);
     }
 
-    public void addModule(Module newmodule) {
+    public void addModule(ModuleCRM newmodule) {
         int index=modules.size();
         modules.add(newmodule);
         checked.add(Boolean.FALSE);
@@ -476,8 +476,8 @@ private class ManualSelectionTableModel extends AbstractTableModel {
         } catch (ArrayIndexOutOfBoundsException e) {}        
     }
 
-    public void removeModule(Module module) {
-        int index=modules.indexOf(module);
+    public void removeModule(ModuleCRM cisRegModule) {
+        int index=modules.indexOf(cisRegModule);
         if (index>=0) {
             modules.remove(index);
             checked.remove(index);
@@ -500,16 +500,16 @@ private class ManualSelectionTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex==SELECTED_COLUMN) return checked.get(rowIndex);
-        else if (columnIndex==MODULE_COLUMN || columnIndex==LOGO_COLUMN) return (Module)modules.get(rowIndex);
+        else if (columnIndex==MODULE_COLUMN || columnIndex==LOGO_COLUMN) return (ModuleCRM)modules.get(rowIndex);
         else { // value from filter column
-                 if (filterColumn.equals("ID")) return ((Module)modules.get(rowIndex)).getName();
-            else if (filterColumn.equals("Motifs")) return ((Module)modules.get(rowIndex)).getSingleMotifNamesAsString(",");
-            else if (filterColumn.equals("Motif names")) return ((Module)modules.get(rowIndex)).getSingleMotifShortNamesAsString(engine);
-            else if (filterColumn.equals("Motif IDs")) return ((Module)modules.get(rowIndex)).getSingleMotifIDsAsString();
-            else if (filterColumn.equals("Cardinality")) return ((Module)modules.get(rowIndex)).getCardinality();
-            else if (filterColumn.equals("Ordered")) return convertBooleanToString(((Module)modules.get(rowIndex)).isOrdered());
-            else if (filterColumn.equals("Oriented")) return convertBooleanToString(((Module)modules.get(rowIndex)).isOriented());
-            else if (filterColumn.equals("Max length")) return ((Module)modules.get(rowIndex)).getMaxLength();
+                 if (filterColumn.equals("ID")) return ((ModuleCRM)modules.get(rowIndex)).getName();
+            else if (filterColumn.equals("Motifs")) return ((ModuleCRM)modules.get(rowIndex)).getSingleMotifNamesAsString(",");
+            else if (filterColumn.equals("Motif names")) return ((ModuleCRM)modules.get(rowIndex)).getSingleMotifShortNamesAsString(engine);
+            else if (filterColumn.equals("Motif IDs")) return ((ModuleCRM)modules.get(rowIndex)).getSingleMotifIDsAsString();
+            else if (filterColumn.equals("Cardinality")) return ((ModuleCRM)modules.get(rowIndex)).getCardinality();
+            else if (filterColumn.equals("Ordered")) return convertBooleanToString(((ModuleCRM)modules.get(rowIndex)).isOrdered());
+            else if (filterColumn.equals("Oriented")) return convertBooleanToString(((ModuleCRM)modules.get(rowIndex)).isOriented());
+            else if (filterColumn.equals("Max length")) return ((ModuleCRM)modules.get(rowIndex)).getMaxLength();
             else return "error";
         }
     }
@@ -534,8 +534,8 @@ private class CellRenderer_Module extends DefaultTableCellRenderer {
     }
     @Override
     public void setValue(Object value) {
-       if (value!=null && value instanceof Module) {
-           setText(((Module)value).getName());
+       if (value!=null && value instanceof ModuleCRM) {
+           setText(((ModuleCRM)value).getName());
        }
        else setText("");
     }
@@ -543,15 +543,15 @@ private class CellRenderer_Module extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c=super.getTableCellRendererComponent(table,value,isSelected,hasFocus,row,column);
-        Module module=(Module)table.getValueAt(row, MODULE_COLUMN);
+        ModuleCRM cisRegModule=(ModuleCRM)table.getValueAt(row, MODULE_COLUMN);
         if (modulecollection==null) { // if used as MotifBrowser (and not to create a motif collection)
-           if (!gui.getVisualizationSettings().isRegionTypeVisible(module.getName())) this.setForeground((isSelected)?Color.LIGHT_GRAY:Color.GRAY);
+           if (!gui.getVisualizationSettings().isRegionTypeVisible(cisRegModule.getName())) this.setForeground((isSelected)?Color.LIGHT_GRAY:Color.GRAY);
            else this.setForeground((isSelected)?Color.WHITE:Color.BLACK);
         }
-        if (customTooltip!=null) setToolTipText(module.getName());
+        if (customTooltip!=null) setToolTipText(cisRegModule.getName());
         return c;
     }
-}// end class CellRenderer_Module
+    }// end class CellRenderer_Module
 
 
 private class CellRenderer_FilterColumn extends DefaultTableCellRenderer {
@@ -582,9 +582,9 @@ private class CellRenderer_FilterColumn extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c=super.getTableCellRendererComponent(table,value,isSelected,hasFocus,row,column);
-        Module module=(Module)table.getValueAt(row, MODULE_COLUMN);
+        ModuleCRM cisRegModule=(ModuleCRM)table.getValueAt(row, MODULE_COLUMN);
         if (modulecollection==null) { // if used as ModuleBrowser (and not to create a module collection)
-           if (!gui.getVisualizationSettings().isRegionTypeVisible(module.getName())) this.setForeground((isSelected)?Color.LIGHT_GRAY:Color.GRAY);
+           if (!gui.getVisualizationSettings().isRegionTypeVisible(cisRegModule.getName())) this.setForeground((isSelected)?Color.LIGHT_GRAY:Color.GRAY);
            else this.setForeground((isSelected)?Color.WHITE:Color.BLACK);
         }
         return c;
@@ -658,7 +658,7 @@ private class ManualSelectionContextMenu extends JPopupMenu implements ActionLis
                 VisualizationSettings settings=gui.getVisualizationSettings();
                 for (int i=0;i<selectedRows.length;i++) {
                     int modelrow=manualSelectionTable.convertRowIndexToModel(selectedRows[i]);
-                    settings.setFeatureColor(((Module)model.getValueAt(modelrow, 1)).getName(), color, false);
+                    settings.setFeatureColor(((ModuleCRM)model.getValueAt(modelrow, 1)).getName(), color, false);
                 }
                 manualSelectionTable.repaint();
                 gui.redraw();
@@ -800,8 +800,8 @@ private class ManualSelectionContextMenu extends JPopupMenu implements ActionLis
              }
          } else if (e.getActionCommand().startsWith(DISPLAY_MODULE)) {
                 String[] selectedModuleNames=getSelectedModuleNames();
-                Data module=gui.getEngine().getDataItem(selectedModuleNames[0]);
-                if (module instanceof Module) gui.showPrompt((Module)module, false, isModal);
+                Data cisRegModule=gui.getEngine().getDataItem(selectedModuleNames[0]);
+                if (cisRegModule instanceof ModuleCRM) gui.showPrompt((ModuleCRM)cisRegModule, false, isModal);
            } else if (e.getActionCommand().equals(SHOW_ONLY_SELECTED)) {
                 setVisibilityOnAllModules(false);
                 VisualizationSettings settings=gui.getVisualizationSettings();
@@ -834,7 +834,7 @@ private class ManualSelectionContextMenu extends JPopupMenu implements ActionLis
                 gui.promptAndCreateModuleCollection(list);
            } else if (e.getActionCommand().equals(SELECT_SHOWN_MODULES)) {
                 VisualizationSettings settings=gui.getVisualizationSettings();
-                ArrayList<String> allModules=engine.getNamesForAllDataItemsOfType(Module.class);
+                ArrayList<String> allModules=engine.getNamesForAllDataItemsOfType(ModuleCRM.class);
                 HashSet<String> shownModules=new HashSet<String>(allModules.size());
                 for (String modulename:allModules) {
                    if (settings.isRegionTypeVisible(modulename)) shownModules.add(modulename);
@@ -842,7 +842,7 @@ private class ManualSelectionContextMenu extends JPopupMenu implements ActionLis
                 selectRowsForModules(shownModules,false);
            } else if (e.getActionCommand().equals(SELECT_ONLY_SHOWN_MODULES)) {
                 VisualizationSettings settings=gui.getVisualizationSettings();
-                ArrayList<String> allModules=engine.getNamesForAllDataItemsOfType(Module.class);
+                ArrayList<String> allModules=engine.getNamesForAllDataItemsOfType(ModuleCRM.class);
                 HashSet<String> shownModules=new HashSet<String>(allModules.size());
                 for (String modulename:allModules) {
                    if (settings.isRegionTypeVisible(modulename)) shownModules.add(modulename);
@@ -862,8 +862,8 @@ private class ManualSelectionContextMenu extends JPopupMenu implements ActionLis
         if (selection==null || selection.length==0) return null;
         String[] selectedModuleNames=new String[selection.length];
         for (int i=0;i<selection.length;i++) {
-            Object module=manualSelectionTable.getValueAt(selection[i], MODULE_COLUMN);
-            if (module instanceof Module) selectedModuleNames[i]=((Module)module).getName();   
+            Object cisRegModule=manualSelectionTable.getValueAt(selection[i], MODULE_COLUMN);
+            if (cisRegModule instanceof ModuleCRM) selectedModuleNames[i]=((ModuleCRM)cisRegModule).getName();   
             else return null;
         }        
         return selectedModuleNames;
@@ -906,7 +906,7 @@ private class ManualSelectionContextMenu extends JPopupMenu implements ActionLis
         int modulecolumn=MODULE_COLUMN;
         for (int i=0;i<manualSelectionTable.getRowCount();i++) {
             Object value=manualSelectionTable.getValueAt(i, modulecolumn);      
-            String modulename=((Module)value).getName();
+            String modulename=((ModuleCRM)value).getName();
             if (modules.contains(modulename)) {
                 selection.addSelectionInterval(i,i); 
             }
@@ -930,20 +930,20 @@ private class FeatureColorCellRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); // this is necessary in order to get correct alternating row rendering 
-        Module module=(Module)table.getValueAt(row, column+1);
-        String modulename=module.getName();
+        ModuleCRM cisRegModule=(ModuleCRM)table.getValueAt(row, column+1);
+        String modulename=cisRegModule.getName();
         selectedicon.setForegroundColor(settings.getFeatureColor(modulename));
         selectedicon.setBorderColor((settings.isRegionTypeVisible(modulename))?Color.BLACK:Color.LIGHT_GRAY);
-        if (customTooltip!=null) setToolTipText(module.getName());
+        if (customTooltip!=null) setToolTipText(cisRegModule.getName());
         setText(null); 
         return this;
     }           
-}   
+    }   
 
     /** A class to sort module logos based on the names of ModuleMotifs in order */
-    private class ModuleLogoComparator implements java.util.Comparator<Module> {
+    private class ModuleLogoComparator implements java.util.Comparator<ModuleCRM> {
         @Override
-        public int compare(Module mod1, Module mod2) {
+        public int compare(ModuleCRM mod1, ModuleCRM mod2) {
             int size1=mod1.getCardinality();
             int size2=mod2.getCardinality();
             int size=(size1<size2)?size1:size2;

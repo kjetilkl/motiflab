@@ -527,7 +527,7 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
         String dataname=collection.getName();
         if (message==null || message.isEmpty()) clientConsole.println("\nPlease select modules for collection '"+collection.getName()+"': ");
         else clientConsole.println("\n"+message+": ");  
-        boolean hasModules=engine.hasDataItemsOfType(Module.class);
+        boolean hasModules=engine.hasDataItemsOfType(ModuleCRM.class);
         
         boolean ok=false;
         boolean showUsage=true;
@@ -589,18 +589,18 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
                 if (fileOK) ok=true;
             } else if (selectedOption.equals("4") && hasModules) { // answer Yes/No for each sequence
                 collection.clearAll(engine);
-                ArrayList<Data> modules=engine.getAllDataItemsOfType(Module.class);
+                ArrayList<Data> modules=engine.getAllDataItemsOfType(ModuleCRM.class);
                 Collections.sort(modules, new Comparator<Data>() {
                     @Override
                     public int compare(Data o1, Data o2) {
                        return o1.getName().compareTo(o2.getName());
                     }               
                 });                
-                for (Data module:modules) {
-                    clientConsole.print("Include module '"+module.getName()+"' [Y/n]: ");
+                for (Data cisregModule:modules) {
+                    clientConsole.print("Include module '"+cisregModule.getName()+"' [Y/n]: ");
                     String userInput=clientConsole.readLine();
-                    if (userInput==null || userInput.trim().isEmpty()) collection.addModule((Module)module);
-                    else if (userInput.startsWith("y") || userInput.startsWith("Y")) collection.addModule((Module)module);
+                    if (userInput==null || userInput.trim().isEmpty()) collection.addModule((ModuleCRM)cisregModule);
+                    else if (userInput.startsWith("y") || userInput.startsWith("Y")) collection.addModule((ModuleCRM)cisregModule);
                 }
                 ok=true;
             } else if (selectedOption.equals("5") && hasModules) {
@@ -624,7 +624,7 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
                       clientConsole.println(output);
                       clientConsole.println("");
                    } else if (userInput.equals("?")) {
-                       ArrayList<String> modules=engine.getNamesForAllDataItemsOfType(Module.class);      
+                       ArrayList<String> modules=engine.getNamesForAllDataItemsOfType(ModuleCRM.class);      
                        String output=MotifLabEngine.splice(modules, ",");
                        clientConsole.println("Available modules:");
                        clientConsole.println(output);
@@ -633,7 +633,7 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
                       String[] entries=userInput.split("\\s*,\\s*");
                       for (String entry:entries) {
                           Data data=engine.getDataItem(entry);
-                          if (data instanceof Module) collection.addModule((Module)data);
+                          if (data instanceof ModuleCRM) collection.addModule((ModuleCRM)data);
                           else clientConsole.println("ERROR: '"+entry+"' is not a known module");
                       }
                    }             
@@ -1445,7 +1445,7 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
         return data;   
     }    
     
-    /** Returns a Module Collection loaded from file */
+    /** Returns a ModuleCRM Collection loaded from file */
     private ModuleCollection getModuleCollectionFromFile(String targetName, File file) throws ExecutionError {
         BufferedReader inputStream=null;
         ArrayList<String> input=new ArrayList<String>();
@@ -1870,7 +1870,7 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
                 engine.clearAllData();
                 getVisualizationSettings().importSettings(settings);            
                 for (Data element:datalist) { // restore all sequences and motifs first, since these are referred to by collections!           
-                    if (element instanceof Sequence || element instanceof Motif || element instanceof Module) {
+                    if (element instanceof Sequence || element instanceof Motif || element instanceof ModuleCRM) {
                         engine.storeDataItem(element);
                     }
                 }
@@ -1880,7 +1880,7 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
                     engine.storeDataItem(element); // this will show the tab
                 }
                 for (Data element:datalist) {
-                    if (!(element instanceof Sequence || element instanceof OutputData || element instanceof Motif || element instanceof Module)) engine.storeDataItem(element);
+                    if (!(element instanceof Sequence || element instanceof OutputData || element instanceof Motif || element instanceof ModuleCRM)) engine.storeDataItem(element);
                 }
                 SequenceCollection col=engine.getDefaultSequenceCollection();
                 col.setSequenceOrder(defaultCollectionCopy.getAllSequenceNames());   

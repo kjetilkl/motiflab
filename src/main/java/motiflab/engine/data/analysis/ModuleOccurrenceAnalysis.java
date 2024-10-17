@@ -96,7 +96,7 @@ public class ModuleOccurrenceAnalysis extends Analysis {
 
     @Override
     public boolean canUseAsSourceProxy(Data data) {
-        if (data instanceof RegionDataset) return ((RegionDataset)data).isModuleTrack(); // only allow Module Tracks as input
+        if (data instanceof RegionDataset) return ((RegionDataset)data).isModuleTrack(); // only allow ModuleCRM Tracks as input
         else return (data instanceof ModuleCollection);
     }     
     
@@ -151,8 +151,8 @@ public class ModuleOccurrenceAnalysis extends Analysis {
                     double[] c=counts.get(modulename);
                     double occurrences=c[1];
                     if (occurrences>0) {
-                        Data module=engine.getDataItem(modulename);
-                        if (module instanceof Module) collection.addModule((Module)module);
+                        Data cisRegModule=engine.getDataItem(modulename);
+                        if (cisRegModule instanceof ModuleCRM) collection.addModule((ModuleCRM)cisRegModule);
                     }
             }
             return collection;
@@ -174,7 +174,7 @@ public class ModuleOccurrenceAnalysis extends Analysis {
 
     @Override
     public Class getCollateType() {
-        return Module.class;
+        return ModuleCRM.class;
     }
 
     @Override
@@ -313,12 +313,12 @@ public class ModuleOccurrenceAnalysis extends Analysis {
             String modulename=(String)entry[0];
             int seqcount=(Integer)entry[1];
             int totalcount=(Integer)entry[2];
-            Module module=null;
-            if (engine.dataExists(modulename, Module.class)) module=(Module)engine.getDataItem(modulename);             
+            ModuleCRM cisRegModule=null;
+            if (engine.dataExists(modulename, ModuleCRM.class)) cisRegModule=(ModuleCRM)engine.getDataItem(modulename);             
             outputobject.append("<tr>",HTML);
             if (showColorBoxes) {
                 Color color=Color.WHITE;               
-                if (module!=null) color=vizSettings.getFeatureColor(modulename);             
+                if (cisRegModule!=null) color=vizSettings.getFeatureColor(modulename);             
                 String colorString=VisualizationSettings.convertColorToHTMLrepresentation(color);
                 outputobject.append("<td><div style=\"width:10px;height:10px;border:1px solid #000;background-color:"+colorString+";\"></div></td>",HTML);
             }              
@@ -328,7 +328,7 @@ public class ModuleOccurrenceAnalysis extends Analysis {
             outputobject.append("<td class=\"num\">"+(int)((double)seqcount*100f/(double)sequenceCollectionSize)+"%</td>",HTML);
             if (showSequenceLogos) {              
                 outputobject.append("<td>",HTML);
-                outputobject.append(getModuleLogoTag(module, outputobject, modulelogo, showSequenceLogosString, engine),HTML);
+                outputobject.append(getModuleLogoTag(cisRegModule, outputobject, modulelogo, showSequenceLogosString, engine),HTML);
                 outputobject.append("</td>",HTML);
             }
             outputobject.append("</tr>\n",HTML);
@@ -413,14 +413,14 @@ public class ModuleOccurrenceAnalysis extends Analysis {
             col+=1;
             outputNumericValuesInCells(row, new double[]{totalcount,seqcount}, col, normal);
             col+=2;
-            Module module=null;
-            if (engine.dataExists(modulename, Module.class)) module=(Module)engine.getDataItem(modulename);             
+            ModuleCRM cisRegModule=null;
+            if (engine.dataExists(modulename, ModuleCRM.class)) cisRegModule=(ModuleCRM)engine.getDataItem(modulename);             
 
-            if (showSequenceLogos && module!=null) {
+            if (showSequenceLogos && cisRegModule!=null) {
                 if (showLogosAsImages) {
                     try {
                         row.setHeightInPoints((short)(logoheight));                        
-                        modulelogo.setModule(module);                        
+                        modulelogo.setModule(cisRegModule);                        
                         byte[] image=getModuleLogoImageAsByteArray(modulelogo, logoheight, border, "png");
                         int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
                         ClientAnchor anchor = helper.createClientAnchor();
@@ -438,7 +438,7 @@ public class ModuleOccurrenceAnalysis extends Analysis {
                         anchor.setDy2(anchor.getDy2()+offSetY); // bottom-right
                     } catch (Exception e) {throw new ExecutionError(e.getMessage(),e);}
                 }
-                else outputStringValuesInCells(row, new String[]{module.getModuleLogo()}, logocolumn, normal);
+                else outputStringValuesInCells(row, new String[]{cisRegModule.getModuleLogo()}, logocolumn, normal);
             }
  
             if (i%10==0) {
@@ -531,11 +531,11 @@ public class ModuleOccurrenceAnalysis extends Analysis {
             String modulename=(String)entry[0];
             int seqcount=(Integer)entry[1];
             int totalcount=(Integer)entry[2];
-            Module module=null;
-            if (engine.dataExists(modulename, Module.class)) module=(Module)engine.getDataItem(modulename);
+            ModuleCRM cisRegModule=null;
+            if (engine.dataExists(modulename, ModuleCRM.class)) cisRegModule=(ModuleCRM)engine.getDataItem(modulename);
             outputobject.append(modulename+"\t"+totalcount+"\t"+seqcount+"\t"+sequenceCollectionSize+"\t"+(int)((double)seqcount*100/(double)sequenceCollectionSize)+"%",RAWDATA);
             if (showSequenceLogos) {
-                if (module!=null) outputobject.append("\t"+module.getModuleLogo(),RAWDATA);
+                if (cisRegModule!=null) outputobject.append("\t"+cisRegModule.getModuleLogo(),RAWDATA);
                 else outputobject.append("\t?",RAWDATA);
             }
             outputobject.append("\n",RAWDATA);
@@ -595,8 +595,8 @@ public class ModuleOccurrenceAnalysis extends Analysis {
               }
             }
             // increase sequence support for modules present in this sequences
-            for (String module:present) {
-                double[] modulecounts=counts.get(module);
+            for (String modulename:present) {
+                double[] modulecounts=counts.get(modulename);
                 modulecounts[0]++; // sequence occurrences
             }
         } // end for each sequence
@@ -717,14 +717,14 @@ private class ModuleOccurrenceTableModel extends AbstractTableModel {
             case MODULE_ID:return String.class;
             case SEQUENCE_SUPPORT:return Integer.class;
             case TOTAL:return Integer.class;
-            case LOGO:return Module.class;
+            case LOGO:return ModuleCRM.class;
             default:return Object.class;
         }
     }
 
-    public final Module getModule(String id) {
+    public final ModuleCRM getModule(String id) {
         Data data=engine.getDataItem(id);
-        if (data instanceof Module) return (Module)data;
+        if (data instanceof ModuleCRM) return (ModuleCRM)data;
         else return null;
     }
 

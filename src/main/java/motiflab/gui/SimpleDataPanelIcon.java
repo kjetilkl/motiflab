@@ -904,7 +904,7 @@ public class SimpleDataPanelIcon implements Icon {
         else if (datatype.equals(Motif.getType())) return MOTIF_ICON;
         else if (datatype.equals(MotifCollection.getType())) return MOTIF_COLLECTION_ICON;
         else if (datatype.equals(MotifPartition.getType())) return MOTIF_PARTITION_ICON;
-        else if (datatype.equals(Module.getType())) return MODULE_ICON;       
+        else if (datatype.equals(ModuleCRM.getType())) return MODULE_ICON;       
         else if (datatype.equals(ModulePartition.getType())) return MODULE_PARTITION_ICON;      
         else if (datatype.equals(ModuleCollection.getType())) return MODULE_COLLECTION_ICON;  
         else if (datatype.equals(OutputData.getType())) return OUTPUT_DATA_ICON;          
@@ -933,7 +933,7 @@ public class SimpleDataPanelIcon implements Icon {
         else if (data instanceof Motif) return MOTIF_ICON;
         else if (data instanceof MotifCollection) return MOTIF_COLLECTION_ICON;
         else if (data instanceof MotifPartition) return MOTIF_PARTITION_ICON;
-        else if (data instanceof Module) return MODULE_ICON;
+        else if (data instanceof ModuleCRM) return MODULE_ICON;
         else if (data instanceof ModuleCollection) return MODULE_COLLECTION_ICON;        
         else if (data instanceof ModulePartition) return MODULE_PARTITION_ICON;
         else if (data instanceof OutputData) return OUTPUT_DATA_ICON;
@@ -963,7 +963,7 @@ public class SimpleDataPanelIcon implements Icon {
         else if (type==Motif.class) return MOTIF_ICON;
         else if (type==MotifCollection.class) return MOTIF_COLLECTION_ICON;
         else if (type==MotifPartition.class) return MOTIF_PARTITION_ICON;
-        else if (type==Module.class) return MODULE_ICON;
+        else if (type==ModuleCRM.class) return MODULE_ICON;
         else if (type==ModuleCollection.class) return MODULE_COLLECTION_ICON;        
         else if (type==ModulePartition.class) return MODULE_PARTITION_ICON;
         else if (type==OutputData.class) return OUTPUT_DATA_ICON;

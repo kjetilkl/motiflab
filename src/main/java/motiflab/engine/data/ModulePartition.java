@@ -35,11 +35,11 @@ public class ModulePartition extends DataPartition {
 
     @Override
     public Class getMembersClass() {
-        return Module.class;
+        return ModuleCRM.class;
     }
 
     /**
-     * Constructs a new initially "empty" Module partition with the given name
+     * Constructs a new initially "empty" ModuleCRM partition with the given name
      *
      * @param datasetName A name for this dataset
      */
@@ -82,8 +82,8 @@ public class ModulePartition extends DataPartition {
      * Returns the name of the cluster the module is a member of
      * or NULL if the module is not member of any clusters in this partition
      */
-    public String getClusterForModule(Module module) {
-        return storage.get(module.getName());
+    public String getClusterForModule(ModuleCRM cisRegModule) {
+        return storage.get(cisRegModule.getName());
     }
 
     /**
@@ -109,7 +109,7 @@ public class ModulePartition extends DataPartition {
     /**
      * Returns the names of all the Modules in the cluster with the given name
      * @param clusterName
-     * @return A list of Module names (in random order)
+     * @return A list of ModuleCRM names (in random order)
      */
     @SuppressWarnings("unchecked")
     public ArrayList<String> getAllModuleNamesInCluster(String clustername) {
@@ -121,19 +121,19 @@ public class ModulePartition extends DataPartition {
     }
 
     /**
-     * Returns all the Module objects in the cluster with the given name
-     * (if they are currently registered with the engine)
+     * Returns all the ModuleCRM objects in the cluster with the given name
+ (if they are currently registered with the engine)
      * @param clusterName
      * @param engine
-     * @return A list of Module objects (in random order)
+     * @return A list of ModuleCRM objects (in random order)
      */
-    public ArrayList<Module> getAllModulesInCluster(String clustername, MotifLabEngine engine) {
+    public ArrayList<ModuleCRM> getAllModulesInCluster(String clustername, MotifLabEngine engine) {
 
-        ArrayList<Module> list=new ArrayList<Module>();
+        ArrayList<ModuleCRM> list=new ArrayList<ModuleCRM>();
         for (String moduleName:storage.keySet()) {
             if (storage.get(moduleName).equals(clustername)) {
                 Data item=engine.getDataItem(moduleName);
-                if (item!=null && item instanceof Module) list.add((Module)item);
+                if (item!=null && item instanceof ModuleCRM) list.add((ModuleCRM)item);
             }
         }
         return list;
@@ -151,7 +151,7 @@ public class ModulePartition extends DataPartition {
         for (String moduleName:storage.keySet()) {
             if (storage.get(moduleName).equals(clustername)) {
                 Data item=engine.getDataItem(moduleName);
-                if (item!=null && item instanceof Module) collection.addModule((Module)item);
+                if (item!=null && item instanceof ModuleCRM) collection.addModule((ModuleCRM)item);
             }
         }
         return collection;
@@ -160,10 +160,10 @@ public class ModulePartition extends DataPartition {
     /**
      * Returns true if cluster with the given name contains the module
      */
-    public boolean contains(String clusterName, Module module) {
-        if (module==null || clusterName==null) return false;
-        if (!storage.containsKey(module.getName())) return false;
-        return storage.get(module.getName()).equals(clusterName);
+    public boolean contains(String clusterName, ModuleCRM cisRegModule) {
+        if (cisRegModule==null || clusterName==null) return false;
+        if (!storage.containsKey(cisRegModule.getName())) return false;
+        return storage.get(cisRegModule.getName()).equals(clusterName);
     }
 
 
@@ -172,9 +172,9 @@ public class ModulePartition extends DataPartition {
      * @param module
      * @return
      */
-    public boolean contains(Module module) {
-        if (module==null) return false;
-        return storage.containsKey(module.getName());
+    public boolean contains(ModuleCRM cisRegModule) {
+        if (cisRegModule==null) return false;
+        return storage.containsKey(cisRegModule.getName());
     }
 
 
@@ -204,30 +204,30 @@ public class ModulePartition extends DataPartition {
      * Adds a new Module object to the given cluster.
     *  If the clusterName is NULL the module will be removed if already present
      *
-     * @param module The Module to be added
+     * @param module The ModuleCRM to be added
      * @param clusterName The name of the target cluster
      */
-    public void addModule(Module module, String clusterName) {
-        if (clusterName==null) {removeModule(module); return;}
-        storage.put(module.getName(),clusterName); // add to local storage
-        notifyListenersOfDataAddition(module);
+    public void addModule(ModuleCRM cisRegModule, String clusterName) {
+        if (clusterName==null) {removeModule(cisRegModule); return;}
+        storage.put(cisRegModule.getName(),clusterName); // add to local storage
+        notifyListenersOfDataAddition(cisRegModule);
     }
 
     @Override
     public void addItem(Data item, String clusterName) throws ExecutionError {
         if (!isValidClusterName(clusterName)) throw new ExecutionError("Invalid cluster name: "+clusterName);
-        if (item instanceof Module) addModule((Module)item,clusterName);
+        if (item instanceof ModuleCRM) addModule((ModuleCRM)item,clusterName);
         else throw new ExecutionError("Only Modules can be added to a Module Partition. Tried to add a "+item.getDynamicType());
     }    
 
    /**
-     * Adds a new Module object to a new cluster (with default name)
+     * Adds a new ModuleCRM object to a new cluster (with default name)
      *
-     * @param module The Module to be added
+     * @param module The ModuleCRM to be added
      */
-    public void addModule(Module module) {
+    public void addModule(ModuleCRM cisRegModule) {
         int nextCluster=getNumberOfClusters()+1;
-        addModule(module,"Cluster"+nextCluster);
+        addModule(cisRegModule,"Cluster"+nextCluster);
     }
 
 
@@ -236,12 +236,12 @@ public class ModulePartition extends DataPartition {
      * Moves a Module object into a new cluster. Empty clusters are 'removed'
      * If the clusterName is NULL the module will be removed if already present
      *
-     * @param module The Module to be moved
+     * @param module The ModuleCRM to be moved
     *  @param clusterName the name of the new cluster
      */
-    public void moveModule(Module module, String clusterName) {
-        if (clusterName==null) {removeModule(module); return;}
-        storage.put(module.getName(),clusterName);
+    public void moveModule(ModuleCRM cisRegModule, String clusterName) {
+        if (clusterName==null) {removeModule(cisRegModule); return;}
+        storage.put(cisRegModule.getName(),clusterName);
         notifyListenersOfDataUpdate();
     }
 
@@ -249,11 +249,11 @@ public class ModulePartition extends DataPartition {
    /**
      * Removes a Module object from this partition. Empty clusters are 'removed'
      *
-     * @param module The Module to be removed
+     * @param module The ModuleCRM to be removed
      */
-    public void removeModule(Module module) {
-        String res=storage.remove(module.getName()); // remove from local storage
-        if (res!=null) notifyListenersOfDataRemoval(module);
+    public void removeModule(ModuleCRM cisRegModule) {
+        String res=storage.remove(cisRegModule.getName()); // remove from local storage
+        if (res!=null) notifyListenersOfDataRemoval(cisRegModule);
     }
 
 
@@ -265,7 +265,7 @@ public class ModulePartition extends DataPartition {
             iterator.remove();
             Data item=null;
             if (engine!=null) item=engine.getDataItem(name);
-            if (item!=null && item instanceof Module) notifyListenersOfDataRemoval((Module)item);
+            if (item!=null && item instanceof ModuleCRM) notifyListenersOfDataRemoval((ModuleCRM)item);
         }
         this.fromMap=null;
         this.fromList=null;
@@ -332,8 +332,8 @@ public class ModulePartition extends DataPartition {
                 if (!ModulePartition.isValidClusterName(clustername)) throw new ParseError("Invalid cluster name: '"+clustername+"'");
                 Data data=engine.getDataItem(moduleName);
                 if (data==null) throw new ParseError("No such module: "+line);
-                else if (!(data instanceof Module)) throw new ParseError("'"+line+"' is not a Module object");
-                else addModule((Module)data, clustername);
+                else if (!(data instanceof ModuleCRM)) throw new ParseError("'"+line+"' is not a Module object");
+                else addModule((ModuleCRM)data, clustername);
 
             } // end: matcher.matches()
         } // end: for each input line
@@ -468,9 +468,9 @@ public class ModulePartition extends DataPartition {
        } else {
           config=map.getName()+""+operator+""+firstOperand+":"+clustername; // sets the 'config' string
        }
-       ArrayList<Data> allModules=engine.getAllDataItemsOfType(Module.class);
-       for (Data module:allModules) {
-           String moduleName=module.getName();
+       ArrayList<Data> allModules=engine.getAllDataItemsOfType(ModuleCRM.class);
+       for (Data cisRegModule:allModules) {
+           String moduleName=cisRegModule.getName();
            if (moduleSatisfiesCondition(moduleName, map, operator, firstOperandData, secondOperandData)) storage.put(moduleName,clustername);
        }
        return config;
@@ -503,13 +503,13 @@ public class ModulePartition extends DataPartition {
    }
 
 /**
- * Parses a configuration string for Module Partition cluster creation from a Numeric map
- * and returns an Object list containing parsed elements:
- * [0] Name of ModuleNumericMap (String)
- * [1] Operator (String)
- * [2] First operand (this could be a literal numeric constant or the name of a data object (or another string))
- * [3] Second operand (this could be a literal numeric constant or the name of a data object (or another string))
- * [4] cluster name (String)
+ * Parses a configuration string for ModuleCRM Partition cluster creation from a Numeric map
+ and returns an Object list containing parsed elements:
+ [0] Name of ModuleNumericMap (String)
+ [1] Operator (String)
+ [2] First operand (this could be a literal numeric constant or the name of a data object (or another string))
+ [3] Second operand (this could be a literal numeric constant or the name of a data object (or another string))
+ [4] cluster name (String)
  * @param configString. Format example: "ModuleNumericMap >= 0.4 : clustername" or "ModuleNumericMap in [0,10]:clustername"
  * @return
  */
@@ -605,7 +605,7 @@ public static ModulePartition parseModulePartitionParameters(String text, String
                }
                String[] entries=leftSide.split("\\s*,\\s*");
                for (String entry:entries) {
-                   if (entry.contains("->")) { // entry refers to a cluster within a Module Partition
+                   if (entry.contains("->")) { // entry refers to a cluster within a ModuleCRM Partition
                        String[] elements=entry.split("->");
                        if (elements.length!=2) {
                            if (silentMode) {notfound.add(entry+" : Syntax error");continue;} else throw new ExecutionError("Syntax error: "+entry);
@@ -638,14 +638,14 @@ public static ModulePartition parseModulePartitionParameters(String text, String
                            } catch(NumberFormatException nf) {
                               if (silentMode) {notfound.add(entry+" : Problem with range specification"); continue;} else throw new ExecutionError("Problem with range specification: "+entry); 
                            }
-                           ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpressionInNumericRange(range1[0], range1[2], start, end, Module.class);
+                           ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpressionInNumericRange(range1[0], range1[2], start, end, ModuleCRM.class);
                            for (Data object:regexmatches) {
                                addToModulePartitionCluster(partition,object,targetCluster,engine);
                            }
                            continue; 
                    } else if (entry.matches(".*\\W.*")) { // contains non-word characters (not letter,number or underscore)
                        if (entry.contains("*")) entry=entry.replace("*", ".*"); // convert wildcard * to proper regex
-                       ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpression(entry, Module.class);
+                       ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpression(entry, ModuleCRM.class);
                        for (Data object:regexmatches) {
                            addToModulePartitionCluster(partition,object,targetCluster,engine);
                        }
@@ -656,7 +656,7 @@ public static ModulePartition parseModulePartitionParameters(String text, String
 
                         if (dataobject==null) {if (silentMode) notfound.add(entry+" : Unknown data item"); else throw new ExecutionError("Unknown data item: "+entry);}
                    else if (dataobject instanceof ModulePartition) {if (silentMode) notfound.add(entry+" : Missing cluster for Module Partition)"); else throw new ExecutionError("Missing specification of cluster for Module Partition '"+entry+"'. (use format: Partition.Cluster)");}
-                   else if (!(dataobject instanceof Module || dataobject instanceof ModuleCollection)) {if (silentMode) notfound.add(entry+" : Not a Module or Module Collection)"); else throw new ExecutionError("Data item '"+entry+"' is not a Module or Module Collection");}
+                   else if (!(dataobject instanceof ModuleCRM || dataobject instanceof ModuleCollection)) {if (silentMode) notfound.add(entry+" : Not a Module or Module Collection)"); else throw new ExecutionError("Data item '"+entry+"' is not a Module or Module Collection");}
                    else {
                        addToModulePartitionCluster(partition,dataobject,targetCluster,engine);
                    }
@@ -667,14 +667,14 @@ public static ModulePartition parseModulePartitionParameters(String text, String
         }
     }
 
-    /** Adds a single Module or Module collection (other) to a target cluster in a ModulePartition */
+    /** Adds a single ModuleCRM or ModuleCRM collection (other) to a target cluster in a ModulePartition */
     private static void addToModulePartitionCluster(ModulePartition target, Object other, String clusterName, MotifLabEngine engine) {
         if (other==null) return;
-        if (other instanceof Module) {
-            target.addModule((Module)other, clusterName);
+        if (other instanceof ModuleCRM) {
+            target.addModule((ModuleCRM)other, clusterName);
         } else if (other instanceof ModuleCollection) {
-            for (Module module:((ModuleCollection)other).getAllModules(engine)) {
-                target.addModule(module, clusterName);
+            for (ModuleCRM cisRegModule:((ModuleCollection)other).getAllModules(engine)) {
+                target.addModule(cisRegModule, clusterName);
             }
         } else {
             System.err.println("SYSTEM ERROR: In ModulePartition.addToModulePartitionCluster. Parameter is neither Module nor Module Collection but rather: "+other.getClass().getSimpleName());

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import motiflab.engine.data.Data;
 import motiflab.engine.MotifLabEngine;
 import javax.swing.SwingUtilities;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModulePartition;
 
 
@@ -19,7 +19,7 @@ import motiflab.engine.data.ModulePartition;
  */
 public class MotifsPanelTreeModel_GroupByModulePartition extends MotifsPanelTreeModel {
     private MotifLabEngine engine=null;
-    private Class classfilter[]=new Class[]{ModulePartition.class, Module.class};
+    private Class classfilter[]=new Class[]{ModulePartition.class, ModuleCRM.class};
     private MotifsPanel panel;
 
     /** Creates and new Tree Model that groups motifs by class up to a given level between 1 and 4*/
@@ -61,14 +61,14 @@ public class MotifsPanelTreeModel_GroupByModulePartition extends MotifsPanelTree
                        int clusterindex=findCorrectIndex(partitionNode,cluster);
                        insertNodeInto(clusterNode, partitionNode, clusterindex);
                        // insert modules in this cluster
-                        ArrayList<Module> modulelist=((ModulePartition)data).getAllModulesInCluster(cluster, engine);
-                        for (Module module:modulelist) {
-                           CheckBoxTreeNode moduleNode=new CheckBoxTreeNode(module);
-                           int moduleindex=findCorrectIndex(clusterNode,module.getName());
+                        ArrayList<ModuleCRM> modulelist=((ModulePartition)data).getAllModulesInCluster(cluster, engine);
+                        for (ModuleCRM cisRegModule:modulelist) {
+                           CheckBoxTreeNode moduleNode=new CheckBoxTreeNode(cisRegModule);
+                           int moduleindex=findCorrectIndex(clusterNode,cisRegModule.getName());
                            insertNodeInto(moduleNode, clusterNode, moduleindex);
                         }
                    }
-                } else if (data instanceof Module) {
+                } else if (data instanceof ModuleCRM) {
                     dataUpdated(data);
                 }
            }
@@ -105,7 +105,7 @@ public class MotifsPanelTreeModel_GroupByModulePartition extends MotifsPanelTree
 
     /** This is called when a Module changes cluster. We don't know which cluster is affected so just update all of them */
     public void dataUpdated(final Data data) {
-     if (!(data instanceof ModulePartition || data instanceof Module)) return;
+     if (!(data instanceof ModulePartition || data instanceof ModuleCRM)) return;
           Runnable runner=new Runnable() {
             public void run() {
                 if (data instanceof ModulePartition) {
@@ -132,14 +132,14 @@ public class MotifsPanelTreeModel_GroupByModulePartition extends MotifsPanelTree
                        int clusterindex=findCorrectIndex(parentnode,cluster);
                        insertNodeInto(clusterNode, parentnode, clusterindex);
                        // insert modules in this cluster
-                        ArrayList<Module> modulelist=((ModulePartition)data).getAllModulesInCluster(cluster, engine);
-                        for (Module module:modulelist) {
-                           CheckBoxTreeNode moduleNode=new CheckBoxTreeNode(module);
-                           int moduleindex=findCorrectIndex(clusterNode,module.getName());
+                        ArrayList<ModuleCRM> modulelist=((ModulePartition)data).getAllModulesInCluster(cluster, engine);
+                        for (ModuleCRM cisRegModule:modulelist) {
+                           CheckBoxTreeNode moduleNode=new CheckBoxTreeNode(cisRegModule);
+                           int moduleindex=findCorrectIndex(clusterNode,cisRegModule.getName());
                            insertNodeInto(moduleNode, clusterNode, moduleindex);
                         }
                    }
-                } else if (data instanceof Module) {
+                } else if (data instanceof ModuleCRM) {
                     updateUserObjectDataRecursively((CheckBoxTreeNode)root, data);
                 }
            } // end run()
@@ -152,10 +152,10 @@ public class MotifsPanelTreeModel_GroupByModulePartition extends MotifsPanelTree
     public void dataAddedToSet(final Data parent, final Data child) {
         //if (!isAccepted(child)) return;
         if (!(parent instanceof ModulePartition)) return;
-        if (!(child instanceof Module)) return;
+        if (!(child instanceof ModuleCRM)) return;
         Runnable runner=new Runnable() {
             public void run() {
-                String targetClusterName=((ModulePartition)parent).getClusterForModule((Module)child);
+                String targetClusterName=((ModulePartition)parent).getClusterForModule((ModuleCRM)child);
                 for (int i=0;i<root.getChildCount();i++) {
                     CheckBoxTreeNode parentnode=(CheckBoxTreeNode)root.getChildAt(i);
                     Data nodedata=(Data)parentnode.getUserObject();
@@ -182,7 +182,7 @@ public class MotifsPanelTreeModel_GroupByModulePartition extends MotifsPanelTree
     public void dataRemovedFromSet(final Data parent, final Data child) {
         //if (!isAccepted(child)) return;
         if (!(parent instanceof ModulePartition)) return;
-        if (!(child instanceof Module)) return;
+        if (!(child instanceof ModuleCRM)) return;
         Runnable runner=new Runnable() {
             public void run() {
                 CheckBoxTreeNode parentnode=null;

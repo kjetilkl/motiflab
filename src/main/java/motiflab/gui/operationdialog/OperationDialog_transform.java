@@ -85,7 +85,7 @@ public class OperationDialog_transform extends FeatureTransformOperationDialog {
         Class sourceType=getClassForDataItem(sourceName);        
         transformpanel=new JPanel(new FlowLayout(FlowLayout.LEADING));        
         transformpanel.setBorder(commonBorder);
-        boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==Module.class);                
+        boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==ModuleCRM.class);                
         propertyCombobox=new JComboBox();        
         argumentLabel=new JLabel("   Argument ");
         String[] availableTransforms=(String[])Operation_transform.getAvailableTransforms().clone();
@@ -158,7 +158,7 @@ public class OperationDialog_transform extends FeatureTransformOperationDialog {
                 setWhereClausePanelBasedOnSource(sourceType);
                 setSubsetPanel(sourceType);
                 setVisibilityOfRangePanel(sourceType==NumericDataset.class || sourceType==RegionDataset.class);
-                boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==Module.class);                
+                boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==ModuleCRM.class);                
                 propertyCombobox.setModel(getPropertiesCombobox(sourceType));
                 propertyCombobox.setEditable(usePropertyBox);                
                 pack();
@@ -217,7 +217,7 @@ public class OperationDialog_transform extends FeatureTransformOperationDialog {
              if (datacollectionname!=null && datacollectionname.isEmpty()) datacollectionname=null;
           }
         }
-        boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==Module.class);                      
+        boolean usePropertyBox=(sourceType==RegionDataset.class || DataCollection.class.isAssignableFrom(sourceType) || sourceType==Sequence.class || sourceType==Motif.class || sourceType==ModuleCRM.class);                      
         if (usePropertyBox) {
             String property=((String)propertyCombobox.getSelectedItem()).trim();
             if (property.isEmpty()) property=null;
@@ -333,7 +333,7 @@ public class OperationDialog_transform extends FeatureTransformOperationDialog {
         else if (type==ModuleNumericMap.class) return model_ModuleNumericMap;
         else if (type==NumericVariable.class) return model_NumericVariable;
         else if (type==Motif.class || type==MotifCollection.class) return model_Motif;
-        else if (type==Module.class || type==ModuleCollection.class) return model_Module;
+        else if (type==ModuleCRM.class || type==ModuleCollection.class) return model_Module;
         else if (type==Sequence.class || type==SequenceCollection.class) return model_Sequence;
         else if (type==RegionDataset.class) {
             String transformName=(String)transformCombobox.getSelectedItem();
@@ -351,8 +351,8 @@ public class OperationDialog_transform extends FeatureTransformOperationDialog {
         } else if (type==Motif.class || type==MotifCollection.class) {
             String[] props=Motif.getAllEditableProperties(engine);
             return new DefaultComboBoxModel(props);
-        } else if (type==Module.class || type==ModuleCollection.class) {
-            String[] props=Module.getAllEditableProperties(engine);
+        } else if (type==ModuleCRM.class || type==ModuleCollection.class) {
+            String[] props=ModuleCRM.getAllEditableProperties(engine);
             return new DefaultComboBoxModel(props);
         } else return new DefaultComboBoxModel(new String[]{"value"});
     }    

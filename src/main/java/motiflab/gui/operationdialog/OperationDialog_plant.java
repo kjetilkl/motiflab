@@ -42,7 +42,7 @@ public class OperationDialog_plant extends OperationDialog {
     private JComboBox motifsComboBox;
     private ParametersPanel parametersPanel=null;
     private ParameterSettings parameterSettings=null;
-    private Class[] allowedtypes=new Class[]{MotifCollection.class,Module.class,Motif.class};
+    private Class[] allowedtypes=new Class[]{MotifCollection.class,ModuleCRM.class,Motif.class};
 
     public OperationDialog_plant(JFrame parent) {
         super(parent);

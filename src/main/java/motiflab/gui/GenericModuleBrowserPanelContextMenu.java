@@ -15,7 +15,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModulePartition;
 
@@ -199,8 +199,8 @@ public class GenericModuleBrowserPanelContextMenu extends JPopupMenu  {
        public void actionPerformed(ActionEvent e) {
            if (e.getActionCommand().startsWith(DISPLAY_MODULE)) {
                 if (selectedModuleNames==null || selectedModuleNames.length<1) return;               
-                Data module=gui.getEngine().getDataItem(selectedModuleNames[0]);
-                if (module instanceof Module) gui.showPrompt((Module)module, false, panel.isPanelModal());
+                Data cisRegModule=gui.getEngine().getDataItem(selectedModuleNames[0]);
+                if (cisRegModule instanceof ModuleCRM) gui.showPrompt((ModuleCRM)cisRegModule, false, panel.isPanelModal());
            } else if (e.getActionCommand().equals(SHOW_ONLY_SELECTED)) {
                 panel.setVisibilityOnAllModules(false,false);
                 VisualizationSettings settings=gui.getVisualizationSettings();
@@ -238,7 +238,7 @@ public class GenericModuleBrowserPanelContextMenu extends JPopupMenu  {
                 gui.promptAndCreateModuleCollection(list);
            } else if (e.getActionCommand().equals(SELECT_SHOWN_MODULES)) {
                 VisualizationSettings settings=gui.getVisualizationSettings();
-                ArrayList<String> allModules=engine.getNamesForAllDataItemsOfType(Module.class);
+                ArrayList<String> allModules=engine.getNamesForAllDataItemsOfType(ModuleCRM.class);
                 HashSet<String> shownModules=new HashSet<String>(allModules.size());
                 for (String modulename:allModules) {
                    if (settings.isRegionTypeVisible(modulename)) shownModules.add(modulename);
@@ -246,7 +246,7 @@ public class GenericModuleBrowserPanelContextMenu extends JPopupMenu  {
                 selectRowsForModules(shownModules, false);
            } else if (e.getActionCommand().equals(SELECT_ONLY_SHOWN_MODULES)) {
                 VisualizationSettings settings=gui.getVisualizationSettings();
-                ArrayList<String> allModules=engine.getNamesForAllDataItemsOfType(Module.class);
+                ArrayList<String> allModules=engine.getNamesForAllDataItemsOfType(ModuleCRM.class);
                 HashSet<String> shownModules=new HashSet<String>(allModules.size());
                 for (String modulename:allModules) {
                    if (settings.isRegionTypeVisible(modulename)) shownModules.add(modulename);
@@ -265,7 +265,7 @@ public class GenericModuleBrowserPanelContextMenu extends JPopupMenu  {
         ListSelectionModel selection=table.getSelectionModel();
         for (int i=0;i<table.getRowCount();i++) {
             Object value=table.getValueAt(i, modulecolumn);
-            String modulename=((Module)value).getName();
+            String modulename=((ModuleCRM)value).getName();
             if (modules.contains(modulename)) {
                 selection.addSelectionInterval(i,i);
             }

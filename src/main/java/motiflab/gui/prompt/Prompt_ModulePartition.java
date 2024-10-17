@@ -146,14 +146,14 @@ public class Prompt_ModulePartition extends Prompt {
     }
 
     private void setupManualEntryPanel() {
-        ArrayList<Data> dataset=engine.getAllDataItemsOfType(Module.class);
+        ArrayList<Data> dataset=engine.getAllDataItemsOfType(ModuleCRM.class);
         int size=dataset.size();
         Object[][] rowData=new Object[dataset.size()][4];
         for (int i=0;i<size;i++) {
-            Module module=(Module)dataset.get(i);
-            rowData[i][COLUMN_MODULE_NAME]=module.getName();
-            rowData[i][COLUMN_LOGO]=module.getName();
-            if (partition.contains(module.getName())) rowData[i][COLUMN_CLUSTER]=partition.getClusterForModule(module.getName());
+            ModuleCRM cisRegModule=(ModuleCRM)dataset.get(i);
+            rowData[i][COLUMN_MODULE_NAME]=cisRegModule.getName();
+            rowData[i][COLUMN_LOGO]=cisRegModule.getName();
+            if (partition.contains(cisRegModule.getName())) rowData[i][COLUMN_CLUSTER]=partition.getClusterForModule(cisRegModule.getName());
             else rowData[i][COLUMN_CLUSTER]=null;
         }
         partitionTableModel=new DefaultTableModel(rowData, new String[]{" ","Module","Cluster","Logo"}) {
@@ -163,7 +163,7 @@ public class Prompt_ModulePartition extends Prompt {
                     case COLUMN_COLOR: return Color.class;
                     case COLUMN_MODULE_NAME: return String.class;
                     case COLUMN_CLUSTER: return String.class;
-                    case COLUMN_LOGO: return Module.class;
+                    case COLUMN_LOGO: return ModuleCRM.class;
                     default: return String.class;
                 }
             }
@@ -177,7 +177,7 @@ public class Prompt_ModulePartition extends Prompt {
                 if (column==COLUMN_LOGO) {
                     String modulename=(String)super.getValueAt(row, column);
                     Data data=engine.getDataItem(modulename);
-                    if (data instanceof Module) return data;
+                    if (data instanceof ModuleCRM) return data;
                     else return null;
                 }
                 if (column==COLUMN_COLOR) {
@@ -438,7 +438,7 @@ public class Prompt_ModulePartition extends Prompt {
             }
         } else if (tabbedPanel.getSelectedComponent()==manualEntryPanel) {
             for (int i=0;i<partitionTableModel.getRowCount();i++) {
-                Module rowmodule=(Module)partitionTableModel.getValueAt(i, COLUMN_LOGO);
+                ModuleCRM rowmodule=(ModuleCRM)partitionTableModel.getValueAt(i, COLUMN_LOGO);
                 if (rowmodule==null) continue; // this could happen if the user has deleted entries in the name column                            
                 String moduleName=rowmodule.getName();
                 String clusterName=(String)partitionTableModel.getValueAt(i, COLUMN_CLUSTER);
@@ -454,14 +454,14 @@ public class Prompt_ModulePartition extends Prompt {
                 if (oldcluster==null && clusterName==null) continue; // no old mapping and no new mapping
                 else if(partition.contains(clusterName, moduleName)) continue; // the same assignment already exists in cluster (no change)
                 else if (!partition.contains(moduleName) && clusterName!=null) { // add new module to a cluster
-                    Module module=(Module)engine.getDataItem(moduleName);
-                    partition.addModule(module,clusterName);
+                    ModuleCRM cisRegModule=(ModuleCRM)engine.getDataItem(moduleName);
+                    partition.addModule(cisRegModule,clusterName);
                 } else if (partition.contains(moduleName) && clusterName==null) { // remove from the partition entirely
-                    Module module=(Module)engine.getDataItem(moduleName);
-                    partition.removeModule(module);
+                    ModuleCRM cisRegModule=(ModuleCRM)engine.getDataItem(moduleName);
+                    partition.removeModule(cisRegModule);
                 } else { // move to a different partition
-                    Module module=(Module)engine.getDataItem(moduleName);
-                    partition.moveModule(module,clusterName);
+                    ModuleCRM cisRegModule=(ModuleCRM)engine.getDataItem(moduleName);
+                    partition.moveModule(cisRegModule,clusterName);
                 }
             }
         } else if (tabbedPanel.getSelectedComponent()==parseListPanel) {

@@ -119,7 +119,7 @@ public class Prompt_ModuleCollection extends Prompt {
         setupFromPropertyPanel();        
         setupFromMapPanel();
         setupFromTrackPanel();
-        boolean modulesAvailable=engine.hasDataItemsOfType(Module.class);
+        boolean modulesAvailable=engine.hasDataItemsOfType(ModuleCRM.class);
         boolean motifsAvailable=engine.hasDataItemsOfType(Motif.class);
         tabbedPanel=new JTabbedPane();
         if (modulesAvailable) tabbedPanel.addTab("Manual Selection", manualSelectionPanel);
@@ -266,8 +266,8 @@ public class Prompt_ModuleCollection extends Prompt {
     }            
     
     private void setupFromPropertyPanel() {
-        String[] userdefined=Module.getAllUserDefinedProperties(gui.getEngine());
-        String[] standard=Module.getAllStandardProperties(true);
+        String[] userdefined=ModuleCRM.getAllUserDefinedProperties(gui.getEngine());
+        String[] standard=ModuleCRM.getAllStandardProperties(true);
         String[] knownproperties=new String[standard.length+userdefined.length];
         System.arraycopy(standard, 0, knownproperties, 0, standard.length);
         System.arraycopy(userdefined, 0, knownproperties, standard.length, userdefined.length);
@@ -281,7 +281,7 @@ public class Prompt_ModuleCollection extends Prompt {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String propertyName=(String)fromPropertyCombobox.getSelectedItem();
-                Class type=Module.getPropertyClass(propertyName, engine);
+                Class type=ModuleCRM.getPropertyClass(propertyName, engine);
                 String[] operators=getOperatorsForPropertyClass(type);
                 fromPropertyOperatorCombobox.setModel(new DefaultComboBoxModel(operators));
             }
@@ -531,7 +531,7 @@ public class Prompt_ModuleCollection extends Prompt {
             if (showExisting) { // create a complete new map so that it can be compared with (and replace) the current data object               
                 createDataObjectInBackground(new Object[]{"interactions",data.getName(),parameters}); // this returns right away but spawns a lengthy background process which will eventually close the prompt             
                 return false; // keeps the dialog open until the background task is finished         
-            } else { // the prompt is shown in response to an "Add New Module Collection" request. Just set the basic parameters needed for a command line. A "new" operation task will be run later to create the finished data object and this avoids creating the object twice
+            } else { // the prompt is shown in response to an "Add New ModuleCRM Collection" request. Just set the basic parameters needed for a command line. A "new" operation task will be run later to create the finished data object and this avoids creating the object twice
                 data=new ModuleCollection(data.getName());
                 Parameter[] parameterDefinitions=ModuleCollection.getCreateFromInteractionsParameters();
                 StandardParametersParser parser=new StandardParametersParser();

@@ -23,7 +23,7 @@ import motiflab.engine.ParameterSettings;
 import motiflab.engine.protocol.ParseError;
 import motiflab.engine.Parameter;
 import motiflab.engine.MotifLabEngine;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.SequenceCollection;
@@ -205,8 +205,8 @@ public class DataFormat_ModuleSearcher extends DataFormat {
         // This map stores lists of motifs appearing in modules. Key is moduleID
         HashMap<String,ArrayList<String>> modulemotifs=new HashMap<String,ArrayList<String>>();
         
-        // store Module objects
-        HashMap<String,Module> modules=new HashMap<String,Module>();
+        // store ModuleCRM objects
+        HashMap<String,ModuleCRM> modules=new HashMap<String,ModuleCRM>();
         
         int count=0;
         for (String line:input) { // parsing each line in succession
@@ -221,7 +221,7 @@ public class DataFormat_ModuleSearcher extends DataFormat {
             String sequenceName=(String)singleMotifSiteMap.get("SEQUENCENAME");
             String moduleName=(String)singleMotifSiteMap.get("MODULE");
             String motifName=(String)singleMotifSiteMap.get("MOTIF");
-            if (!modules.containsKey(moduleName)) modules.put(moduleName, new Module(moduleName));
+            if (!modules.containsKey(moduleName)) modules.put(moduleName, new ModuleCRM(moduleName));
             String key=sequenceName+"\t"+moduleName;
             if (!motifsites.containsKey(key)) {
                 ArrayList<HashMap<String,Object>> list=new ArrayList<HashMap<String,Object>>();
@@ -239,22 +239,22 @@ public class DataFormat_ModuleSearcher extends DataFormat {
         // ** AS A FIRST ATTEMPT I WILL JUST USE A SIMPLE DEFINITION OF AN UNORDERED MODULE WITH NO CONSTRAINTS ***
         // (This will be called the "general" model. If will try to implement the "specific" model later if time permits...)
 
-        for (Module module:modules.values()) { // update the modules by including modulemotifs!
-            for (String motifname:modulemotifs.get(module.getName())) { // currently these appear in no particular order
+        for (ModuleCRM cisRegModule:modules.values()) { // update the modules by including modulemotifs!
+            for (String motifname:modulemotifs.get(cisRegModule.getName())) { // currently these appear in no particular order
                 Data motifdata=engine.getDataItem(motifname);
                 if (!(motifdata instanceof Motif)) motifdata=null;
                 String modulemotifname=motifname;
                 if (motifdata!=null && ((Motif)motifdata).getShortName()!=null) {
                     modulemotifname=Motif.cleanUpMotifShortName(((Motif)motifdata).getShortName(),true);
                 }
-                module.addModuleMotif(modulemotifname, (Motif)motifdata, Module.INDETERMINED);
+                cisRegModule.addModuleMotif(modulemotifname, (Motif)motifdata, ModuleCRM.INDETERMINED);
             }
         }
         //
         if (returntype.equals(MODULES)) {
            if (target==null || !(target instanceof ModuleCollection)) target=new ModuleCollection("temporary");
-           for (Module module:modules.values()) {
-               ((ModuleCollection)target).addModuleToPayload(module); // Add to payload, it will be "revived" later by the module-discovery operation
+           for (ModuleCRM cisRegModule:modules.values()) {
+               ((ModuleCollection)target).addModuleToPayload(cisRegModule); // Add to payload, it will be "revived" later by the module-discovery operation
            }
         } else { // return sites
              if (target==null || !(target instanceof RegionDataset)) target=new RegionDataset("temporary");
@@ -263,13 +263,13 @@ public class DataFormat_ModuleSearcher extends DataFormat {
             for (Data seq:sequences) {
                 if (dataset.getSequenceByName(seq.getName())==null) dataset.addSequence(new RegionSequenceData((Sequence)seq));
                 RegionSequenceData targetSequence=(RegionSequenceData)dataset.getSequenceByName(seq.getName());
-                for (Module module:modules.values()) {
-                    ArrayList<HashMap<String,Object>> singlesites=motifsites.get(seq.getName()+"\t"+module.getName());
+                for (ModuleCRM cisRegModule:modules.values()) {
+                    ArrayList<HashMap<String,Object>> singlesites=motifsites.get(seq.getName()+"\t"+cisRegModule.getName());
                     if (singlesites==null || singlesites.isEmpty()) continue;
                     int modulestart=Integer.MAX_VALUE;
                     int moduleend=Integer.MIN_VALUE;
                     double score=0;
-                    Region moduleRegion=new Region(targetSequence, modulestart, moduleend, module.getName(), 0, Module.INDETERMINED); // this is just a template for now. The values will be updated later!
+                    Region moduleRegion=new Region(targetSequence, modulestart, moduleend, cisRegModule.getName(), 0, ModuleCRM.INDETERMINED); // this is just a template for now. The values will be updated later!
                     for (HashMap<String,Object> sitemap:singlesites) {
                         Region siteRegion=createModuleMotifRegion(targetSequence,sitemap);
                         if (siteRegion==null) continue; // if outside sequence, but this should not happen
@@ -355,15 +355,15 @@ public class DataFormat_ModuleSearcher extends DataFormat {
         } catch (NumberFormatException e) {throw new ParseError("Unable to parse expected numerical value for SCORE: "+e.getMessage(), lineNumber);}
 
         result.put("STRAND",fields[6]);
-        String module="unknown";
+        String modulename="unknown";
         String motif="unknown";
         Pattern pattern=Pattern.compile("id \"(Mod\\d+)(\\S+)\";");
         Matcher matcher=pattern.matcher(fields[8]);
         if (matcher.matches()) {
-            module=matcher.group(1);
+            modulename=matcher.group(1);
             motif=matcher.group(2);
         }
-        result.put("MODULE",module);
+        result.put("MODULE",modulename);
         result.put("MOTIF",motif);
         return result;
     }

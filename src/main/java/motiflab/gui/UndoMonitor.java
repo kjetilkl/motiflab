@@ -382,11 +382,11 @@ public class UndoMonitor implements DataListener, UndoableEdit {
     
 
     private boolean shouldBeBundled(Data item) {
-        return (item instanceof Motif || item instanceof Module || item instanceof Sequence);
+        return (item instanceof Motif || item instanceof ModuleCRM || item instanceof Sequence);
     }
     
     private boolean shouldBeBundled(Class dataclass) {
-        return (dataclass==Motif.class || dataclass==Module.class || dataclass==Sequence.class);
+        return (dataclass==Motif.class || dataclass==ModuleCRM.class || dataclass==Sequence.class);
     }    
  
     @Override
@@ -502,7 +502,7 @@ public class UndoMonitor implements DataListener, UndoableEdit {
             order.put(Motif.class, new Integer(12));
             order.put(MotifCollection.class, new Integer(13));
             order.put(MotifPartition.class, new Integer(13));
-            order.put(Module.class, new Integer(14));
+            order.put(ModuleCRM.class, new Integer(14));
             order.put(ModuleCollection.class, new Integer(15));
             order.put(ModulePartition.class, new Integer(15));
             order.put(SequenceNumericMap.class, new Integer(16));

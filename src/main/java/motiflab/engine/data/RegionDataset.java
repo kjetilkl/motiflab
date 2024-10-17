@@ -341,7 +341,7 @@ public class RegionDataset extends FeatureDataset implements Cloneable {
                     if (data instanceof MotifCollection) types=((MotifCollection)data).getAllMotifNames();
                     else if (data instanceof ModuleCollection) types=((ModuleCollection)data).getAllModuleNames();
                     else if (data instanceof TextVariable) types=((TextVariable)data).getAllStrings();
-                    else if (data instanceof Motif || data instanceof Module) {
+                    else if (data instanceof Motif || data instanceof ModuleCRM) {
                        types=new ArrayList<String>(1);
                        types.add(collection); // this is the name of the motif or module
                     }

@@ -18,7 +18,7 @@ import motiflab.engine.data.*;
 public class Operation_prompt extends Operation {
     private static final String name="prompt";
     private static final String description="Asks the user to provide a value for a data object";
-    private Class[] datasourcePreferences=new Class[]{SequenceCollection.class, SequencePartition.class, ExpressionProfile.class, NumericVariable.class, SequenceTextMap.class, SequenceNumericMap.class, BackgroundModel.class, MotifTextMap.class, ModuleTextMap.class, MotifNumericMap.class, ModuleNumericMap.class, TextVariable.class, MotifCollection.class, MotifPartition.class, ModuleCollection.class, ModulePartition.class, Motif.class, Module.class, PriorsGenerator.class, RegionDataset.class, NumericDataset.class, DNASequenceDataset.class};
+    private Class[] datasourcePreferences=new Class[]{SequenceCollection.class, SequencePartition.class, ExpressionProfile.class, NumericVariable.class, SequenceTextMap.class, SequenceNumericMap.class, BackgroundModel.class, MotifTextMap.class, ModuleTextMap.class, MotifNumericMap.class, ModuleNumericMap.class, TextVariable.class, MotifCollection.class, MotifPartition.class, ModuleCollection.class, ModulePartition.class, Motif.class, ModuleCRM.class, PriorsGenerator.class, RegionDataset.class, NumericDataset.class, DNASequenceDataset.class};
     public static final String PROMPT_MESSAGE="PromptMessage";
     public static final String PROMPT_CONSTRAINTS="PromptConstraints";
     

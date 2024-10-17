@@ -31,7 +31,7 @@ public class SimpleModuleSearcher extends ModuleDiscovery {
     private ModuleCollection moduleCollection;
     private transient HashMap<String,Short> motifNumber; // a LUT that maps motifnames (all applicable ones) to short numbers
     private transient HashMap<Short,String> motifNumberToName; // a LUT that maps short numbers to motifnames (all applicable ones). This is the inverse map of the one above
-    private HashMap<MotifTupleKey,Module> modules;
+    private HashMap<MotifTupleKey,ModuleCRM> modules;
     private HashMap<String,Double> motifIC;
     private Utilities utilities;
 
@@ -89,7 +89,7 @@ public class SimpleModuleSearcher extends ModuleDiscovery {
         utilities.setMotifsToUse((motifclusters!=null)?motifclusters:motifcollection);
         motifNumber=new HashMap<String,Short>(); // a LUT that maps motifnames (or clusternames) to short numbers
         motifNumberToName=new HashMap<Short,String>(); // a LUT that maps motifnames (or clusternames) to short numbers
-        modules=new HashMap<MotifTupleKey,Module>(); // stores the final modules
+        modules=new HashMap<MotifTupleKey,ModuleCRM>(); // stores the final modules
         short i=0;
         for (String motifname:motifcollection.getAllMotifNames()) { // create LUTs to convert between motifs and short numbers representing them
             String usemotifname=utilities.getMotifType(motifname);
@@ -168,8 +168,8 @@ public class SimpleModuleSearcher extends ModuleDiscovery {
                 ArrayList<MotifTupleKey> sortedlist=new ArrayList<MotifTupleKey>(result.keySet());
                 Collections.sort(sortedlist, new SortOrderComparator(result,(motifIC!=null)));                
                 for (MotifTupleKey key:sortedlist) {
-                    Module module=createModuleForTuple(key, maxdistance); // this will create a new module and add it to the 'modules' hashtable                    
-                    moduleCollection.addModuleToPayload(module);
+                    ModuleCRM cisRegModule=createModuleForTuple(key, maxdistance); // this will create a new module and add it to the 'modules' hashtable                    
+                    moduleCollection.addModuleToPayload(cisRegModule);
                 }
             }
             Runtime.getRuntime().gc(); // this algorithm uses a lot of memory so try to clean up after each run!        
@@ -368,8 +368,8 @@ public class SimpleModuleSearcher extends ModuleDiscovery {
                        tuplevalue[0]++;
                    }
                } else if (stage==ADD_MODULE) { // add module for this tuple
-                   Module module=modules.get(key);
-                   if (module!=null) { // is this tuple corresponding to an applicable module?
+                   ModuleCRM cisRegModule=modules.get(key);
+                   if (cisRegModule!=null) { // is this tuple corresponding to an applicable module?
                        // create region for module and add it to the track
                        // note that if the module contains duplicate motifs they will have to be renamed!
                        int[] mapping=key.getMotifIndexForRegions(included);
@@ -378,14 +378,14 @@ public class SimpleModuleSearcher extends ModuleDiscovery {
                        int start=included.get(0).getRelativeStart(); // start of module
                        int end=included.get(included.size()-1).getRelativeEnd(); // end of module
                        RegionSequenceData sequence=(RegionSequenceData)moduleTrack.getSequenceByName(sequenceName);
-                       Region moduleRegion=new Region(sequence, start, end, module.getName(), score, Module.INDETERMINED);
+                       Region moduleRegion=new Region(sequence, start, end, cisRegModule.getName(), score, ModuleCRM.INDETERMINED);
                        // add motif sites to the module
                        for (int i=0;i<included.size();i++) {
                            Region singlemotif=included.get(i).clone();
                            score+=singlemotif.getScore();
                            if (singlemotif.getScore()>maxmotifscore) maxmotifscore=singlemotif.getScore();
                            singlemotif.setParent(sequence);
-                           String newsinglemotifname=module.getSingleMotifName(mapping[i]);
+                           String newsinglemotifname=cisRegModule.getSingleMotifName(mapping[i]);
                            moduleRegion.setProperty(newsinglemotifname, singlemotif);
                        }
                        //moduleRegion.setScore(score);
@@ -415,15 +415,15 @@ public class SimpleModuleSearcher extends ModuleDiscovery {
         return keep;
     }
 
-    /** Returns a canonical Module corresponding to the Motif tuple
-     *  If the tuple contains duplicate motifs these will be renamed
+    /** Returns a canonical ModuleCRM corresponding to the Motif tuple
+  If the tuple contains duplicate motifs these will be renamed
      */
     @SuppressWarnings("unchecked")
-    private Module createModuleForTuple(MotifTupleKey tuple, int maxlength) throws ExecutionError {
+    private ModuleCRM createModuleForTuple(MotifTupleKey tuple, int maxlength) throws ExecutionError {
         if (modules.containsKey(tuple)) return modules.get(tuple); // this one has already been created and stored
         else {
             int index=modules.size()+1;
-            Module newModule=new Module("M"+index);
+            ModuleCRM newModule=new ModuleCRM("M"+index);
             String[] names=tuple.getMotifNames();
             HashMap<String,String> motifnamemap=null; // maps motifmodule names to motif names
             if (tuple.hasDuplicateMotifs()) { // rename similar motifs
@@ -436,11 +436,11 @@ public class SimpleModuleSearcher extends ModuleDiscovery {
                 String motifname=(motifnamemap==null)?modulemotifname:motifnamemap.get(modulemotifname);
                 if (utilities.baseModulesOnMotifClusters()) { // ModuleMotifs based on motif clusters
                     ArrayList<String> motifnames=utilities.getMotifNamesFromCluster(motifname);
-                    newModule.addModuleMotif(modulemotifname, motifnames, Module.INDETERMINED);   
+                    newModule.addModuleMotif(modulemotifname, motifnames, ModuleCRM.INDETERMINED);   
                 } else { // ModuleMotifs based on single motifs
                     if (!engine.dataExists(motifname, Motif.class)) throw new ExecutionError("'"+motifname+"' is not a Motif");
                     Motif motif=(Motif)engine.getDataItem(motifname);
-                    newModule.addModuleMotif(modulemotifname, motif, Module.INDETERMINED);                    
+                    newModule.addModuleMotif(modulemotifname, motif, ModuleCRM.INDETERMINED);                    
                 }
             }
             newModule.setMaxLength(maxlength);

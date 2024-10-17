@@ -11,7 +11,7 @@ import motiflab.engine.data.*;
 public class Operation_set extends ArithmeticOperation {
     private static final String name="set";
     private static final String description="Assignment operator. Sets selected numeric values in a data object to the specific number";
-    private Class[] datasourcePreferences=new Class[]{NumericDataset.class, NumericVariable.class, NumericMap.class, RegionDataset.class, ExpressionProfile.class, Sequence.class, Motif.class, Module.class, SequenceCollection.class, MotifCollection.class, ModuleCollection.class, TextMap.class};
+    private Class[] datasourcePreferences=new Class[]{NumericDataset.class, NumericVariable.class, NumericMap.class, RegionDataset.class, ExpressionProfile.class, Sequence.class, Motif.class, ModuleCRM.class, SequenceCollection.class, MotifCollection.class, ModuleCollection.class, TextMap.class};
 
 
 

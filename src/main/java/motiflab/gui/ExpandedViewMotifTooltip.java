@@ -18,7 +18,7 @@ import javax.swing.JComponent;
 import javax.swing.JToolTip;
 import motiflab.engine.MotifLabEngine;
 import motiflab.engine.data.Motif;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleMotif;
 import motiflab.engine.data.Region;
 import motiflab.engine.data.Sequence;
@@ -86,9 +86,9 @@ public class ExpandedViewMotifTooltip extends JToolTip {
             builder.append(MotifLabGUI.formatNumber(region.getScore()));
             builder.append("</nobr></html>");
             return builder.toString();
-        } else if (data instanceof Module) {
-            int[] stats=getModuleMotifRegionFullCount(region, (Module)data);
-            int cardinality=((Module)data).getCardinality();
+        } else if (data instanceof ModuleCRM) {
+            int[] stats=getModuleMotifRegionFullCount(region, (ModuleCRM)data);
+            int cardinality=((ModuleCRM)data).getCardinality();
             int present=stats[1];
             int multiple=stats[3];
             String orientationString="";
@@ -178,17 +178,17 @@ public class ExpandedViewMotifTooltip extends JToolTip {
              Dimension dim=getPreferredSize();
              int yoffset=dim.height-(lineheight+6);
              if (sequence!=null && region!=null && sequence.length()==region.getLength() && region.getLength()==((Motif)data).getLength()) paintMotifLineWithCursor(g, yoffset, region, sequence, (Motif)data, Color.WHITE, false);
-       } else if (data instanceof Module) {
+       } else if (data instanceof ModuleCRM) {
              int currentGenomicPos=trackVisualizer.getCurrentGenomicMousePosition();
-             setTipText(getToolTipText((Module)data, region, currentGenomicPos));
+             setTipText(getToolTipText((ModuleCRM)data, region, currentGenomicPos));
              super.paintComponent(g);
              Dimension dim=getPreferredSize();
-             int subregcount=getModuleMotifRegionCount(region, (Module)data);
+             int subregcount=getModuleMotifRegionCount(region, (ModuleCRM)data);
              int yoffset=dim.height-(subregcount*lineheight+6+modulelogoheight);
-             paintModuleLogo((Graphics2D)g, (Module)data, xmargin, yoffset);
+             paintModuleLogo((Graphics2D)g, (ModuleCRM)data, xmargin, yoffset);
              yoffset+=modulelogoheight;
-             for (String mmname:((Module)data).getSingleMotifNames()) {
-                 Color outerboxcolor=settings.getFeatureColor(((Module)data).getName()+"."+mmname);
+             for (String mmname:((ModuleCRM)data).getSingleMotifNames()) {
+                 Color outerboxcolor=settings.getFeatureColor(((ModuleCRM)data).getName()+"."+mmname);
                  Object property=region.getProperty(mmname);
                  if (property instanceof Region) {
                      Object subdata=engine.getDataItem(((Region)property).getType());
@@ -250,9 +250,9 @@ public class ExpandedViewMotifTooltip extends JToolTip {
     }
 
     /** Returns a list of the module motif regions that might be nested within a module region */
-    private ArrayList<Region> getModuleMotifRegions(Region region, Module module) {
+    private ArrayList<Region> getModuleMotifRegions(Region region, ModuleCRM cisRegModule) {
         ArrayList<Region> list=new ArrayList<Region>();
-        for (String mmname:module.getSingleMotifNames()) {
+        for (String mmname:cisRegModule.getSingleMotifNames()) {
             Object property=region.getProperty(mmname);
             if (property instanceof Region) list.add((Region)property);
             else if (property instanceof ArrayList) {
@@ -266,9 +266,9 @@ public class ExpandedViewMotifTooltip extends JToolTip {
      /** Returns the number of module motif regions that might be nested within a module region
       *  Some single motifs could be missing and others could have multiple occurrences in a list
       */
-    private int getModuleMotifRegionCount(Region region, Module module) {
+    private int getModuleMotifRegionCount(Region region, ModuleCRM cisRegModule) {
         int count=0;
-        for (String mmname:(module).getSingleMotifNames()) {
+        for (String mmname:(cisRegModule).getSingleMotifNames()) {
             Object property=region.getProperty(mmname);
             if (property instanceof Region) {
                 count++;
@@ -286,9 +286,9 @@ public class ExpandedViewMotifTooltip extends JToolTip {
       *  [2] => number of modulemotifs that are absent ([1]+[2] should sum to module cardinality)
       *  [3] => number of modulemotifs which multiple instances
       */
-    private int[] getModuleMotifRegionFullCount(Region region, Module module) {
+    private int[] getModuleMotifRegionFullCount(Region region, ModuleCRM cisRegModule) {
         int[] count=new int[]{0,0,0,0};
-        for (String mmname:(module).getSingleMotifNames()) {
+        for (String mmname:(cisRegModule).getSingleMotifNames()) {
             Object property=region.getProperty(mmname);
             if (property==null) {count[2]++;}
             else if(property instanceof Region) {
@@ -327,13 +327,13 @@ public class ExpandedViewMotifTooltip extends JToolTip {
                logowidth+=charwidth*((Motif)data).getLength()+10; // 10 is just a margin
                height+=lineheight+6;
             }
-        } else if (data instanceof Module) {
-            description=getToolTipText((Module)data, region, trackVisualizer.getCurrentGenomicMousePosition());
+        } else if (data instanceof ModuleCRM) {
+            description=getToolTipText((ModuleCRM)data, region, trackVisualizer.getCurrentGenomicMousePosition());
             int charwidth=getFontMetrics(logofont).charWidth('G');
             FontMetrics namemetrics=getFontMetrics(getFont());
             int motifcount=0;
             int maxmotiflength=0;
-            for (String mmname:((Module)data).getSingleMotifNames()) {
+            for (String mmname:((ModuleCRM)data).getSingleMotifNames()) {
                 Object property=region.getProperty(mmname);
                 if (property instanceof Region) {
                     motifcount++;
@@ -363,7 +363,7 @@ public class ExpandedViewMotifTooltip extends JToolTip {
             }           
             logowidth+=maxmotiflength+lineheight; // 10 is just a margin
             height+=(lineheight*motifcount)+6;
-            int modulelogowidth=getModuleLogoWidth((Module)data, this)+xmargin+9;
+            int modulelogowidth=getModuleLogoWidth((ModuleCRM)data, this)+xmargin+9;
             if (modulelogowidth>logowidth) logowidth=modulelogowidth;
             height+=modulelogoheight; // modulelogoheight
         }
@@ -378,14 +378,14 @@ public class ExpandedViewMotifTooltip extends JToolTip {
     }
 
 
-   public static int getModuleLogoWidth(Module module,JComponent c) {
+   public static int getModuleLogoWidth(ModuleCRM cisRegModule,JComponent c) {
        FontMetrics metrics=SwingUtilities2.getFontMetrics(c,modulemotiffont);
        int boxspacing=19;
        int width=0;
-       int size=module.getCardinality();
+       int size=cisRegModule.getCardinality();
        for (int i=0;i<size;i++) {
            if (i>0) {width+=boxspacing;}
-           ModuleMotif mm=module.getSingleMotif(i);
+           ModuleMotif mm=cisRegModule.getSingleMotif(i);
            String mmName=mm.getRepresentativeName();
            int namewidth=metrics.stringWidth(mmName);
            width+=(namewidth+6); // 3px border on each side
@@ -393,7 +393,7 @@ public class ExpandedViewMotifTooltip extends JToolTip {
        return width;
    }
 
-   public static int getModuleLogoHeight(Module module,JComponent c) {
+   public static int getModuleLogoHeight(ModuleCRM cisRegModule,JComponent c) {
        return modulelogoheight;
    }
 
@@ -485,9 +485,9 @@ public class ExpandedViewMotifTooltip extends JToolTip {
 
 
    /** Paints a small graphical representation of the module (with motifs rendered as boxes) */
-   public void paintModuleLogo(Graphics2D graphics, Module module, int xoffset, int yoffset) {
+   public void paintModuleLogo(Graphics2D graphics, ModuleCRM cisRegModule, int xoffset, int yoffset) {
        Object alias=graphics.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-       int size=module.getCardinality();
+       int size=cisRegModule.getCardinality();
        int x=xoffset;
        int y=yoffset+6;
        int boxspacing=19; // Note duplicate in getModuleLogoWidth(). This should be 18 but must be 19 because of drawRect drawing "outside"
@@ -497,8 +497,8 @@ public class ExpandedViewMotifTooltip extends JToolTip {
        graphics.setFont(modulemotiffont);
        for (int i=0;i<size;i++) {
            if (i>0) {
-               if (module.isOrdered()) { // draw distance constraint
-                   int[] distance=module.getDistance(i-1, i);
+               if (cisRegModule.isOrdered()) { // draw distance constraint
+                   int[] distance=cisRegModule.getDistance(i-1, i);
                    //graphics.setColor((distance!=null)?Color.RED:Color.BLACK);
                    graphics.setColor(Color.BLACK);
                    // draw lines between boxes;
@@ -519,11 +519,11 @@ public class ExpandedViewMotifTooltip extends JToolTip {
                }
                x+=boxspacing;
            }
-           ModuleMotif mm=module.getSingleMotif(i);
+           ModuleMotif mm=cisRegModule.getSingleMotif(i);
            String mmName=mm.getRepresentativeName();
            int namewidth=metrics.stringWidth(mmName);
            int boxwidth=namewidth+6; // 3px border on each side
-           Color mmColor=settings.getFeatureColor(module.getName()+"."+mmName);
+           Color mmColor=settings.getFeatureColor(cisRegModule.getName()+"."+mmName);
            boolean isDark=VisualizationSettings.isDark(mmColor);
            graphics.setColor(mmColor);
            graphics.fillRect(x, y, boxwidth, boxheight);
@@ -534,12 +534,12 @@ public class ExpandedViewMotifTooltip extends JToolTip {
            graphics.drawString(mmName, x+4, y+boxheight-4);
            graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, alias);
            int orientation=mm.getOrientation();
-           if (orientation!=Module.INDETERMINED) {
-              graphics.setColor((orientation==Module.DIRECT)?darkGreen:Color.RED);
+           if (orientation!=ModuleCRM.INDETERMINED) {
+              graphics.setColor((orientation==ModuleCRM.DIRECT)?darkGreen:Color.RED);
               graphics.drawLine(x, y-3, x+boxwidth, y-3);
               graphics.drawLine(x, y-4, x+boxwidth, y-4);
-              int l1=((orientation==Module.DIRECT))?x+boxwidth-2:x+2; // larger line
-              int l2=((orientation==Module.DIRECT))?x+boxwidth-1:x+1; // smaller line
+              int l1=((orientation==ModuleCRM.DIRECT))?x+boxwidth-2:x+2; // larger line
+              int l2=((orientation==ModuleCRM.DIRECT))?x+boxwidth-1:x+1; // smaller line
               graphics.drawLine(l1, y-6, l1, y-1);
               graphics.drawLine(l2, y-5, l2, y-2);
            }

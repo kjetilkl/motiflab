@@ -1776,7 +1776,7 @@ private boolean isComplexType(Object object) {
     if (object instanceof DataCollection) return true;
     if (object instanceof DataPartition) return true;    
     if (object instanceof Motif) return true;
-    if (object instanceof Module) return true;
+    if (object instanceof ModuleCRM) return true;
     if (object instanceof TextVariable) return true;
     if (object instanceof Sequence) return true;
     if (object instanceof BackgroundModel) return true;

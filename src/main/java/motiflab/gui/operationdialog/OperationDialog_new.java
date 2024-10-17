@@ -33,7 +33,7 @@ import motiflab.engine.data.DNASequenceDataset;
 import motiflab.engine.data.Data;
 import motiflab.engine.data.BackgroundModel;
 import motiflab.engine.data.ExpressionProfile;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleNumericMap;
 import motiflab.engine.data.ModulePartition;
@@ -325,8 +325,8 @@ public class OperationDialog_new extends OperationDialog {
         else if (type.equals(Motif.getType())) {
             prompt=new Prompt_Motif(gui, null, (dataobject instanceof Motif)?(Motif)dataobject:null, gui.getVisualizationSettings());
         }
-        else if (type.equals(Module.getType())) {
-            prompt=new Prompt_Module(gui, null, (dataobject instanceof Module)?(Module)dataobject:null);
+        else if (type.equals(ModuleCRM.getType())) {
+            prompt=new Prompt_Module(gui, null, (dataobject instanceof ModuleCRM)?(ModuleCRM)dataobject:null);
         }
         else if (type.equals(ExpressionProfile.getType())) {
             prompt=new Prompt_ExpressionProfile(gui, null, (dataobject instanceof ExpressionProfile)?(ExpressionProfile)dataobject:null);

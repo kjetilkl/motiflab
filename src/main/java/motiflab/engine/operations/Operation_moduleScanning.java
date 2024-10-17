@@ -41,7 +41,7 @@ public class Operation_moduleScanning extends Operation {
 
     @Override
     public boolean canUseAsSourceProxy(Data object) {
-        return (object instanceof Module || object instanceof ModuleCollection);
+        return (object instanceof ModuleCRM || object instanceof ModuleCollection);
     }       
     @Override
     public boolean assignToProxy(Object proxysource, OperationTask operationtask) {

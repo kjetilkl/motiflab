@@ -27,7 +27,7 @@ public class Operation_output extends Operation {
     public static final String OUTPUT_FORMAT_PARAMETERS="formatParameters";  
     private static final String name="output";
     private static final String description="Outputs data items to text files in selected data formats";
-    private Class[] datasourcePreferences=new Class[]{FeatureDataset.class,FeatureSequenceData.class,Motif.class,MotifCollection.class,MotifPartition.class,Module.class,ModuleCollection.class,ModulePartition.class,BackgroundModel.class,MotifTextMap.class,MotifNumericMap.class,ModuleTextMap.class,ModuleNumericMap.class,NumericVariable.class, SequenceTextMap.class, SequenceNumericMap.class,Sequence.class,SequenceCollection.class,SequencePartition.class,ExpressionProfile.class,TextVariable.class,Analysis.class, OutputData.class};
+    private Class[] datasourcePreferences=new Class[]{FeatureDataset.class,FeatureSequenceData.class,Motif.class,MotifCollection.class,MotifPartition.class,ModuleCRM.class,ModuleCollection.class,ModulePartition.class,BackgroundModel.class,MotifTextMap.class,MotifNumericMap.class,ModuleTextMap.class,ModuleNumericMap.class,NumericVariable.class, SequenceTextMap.class, SequenceNumericMap.class,Sequence.class,SequenceCollection.class,SequencePartition.class,ExpressionProfile.class,TextVariable.class,Analysis.class, OutputData.class};
     
 
     

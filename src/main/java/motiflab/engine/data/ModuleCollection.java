@@ -43,14 +43,14 @@ import motiflab.gui.VisualizationSettings;
 public class ModuleCollection extends DataCollection {
     private static String typedescription="Module Collection";
     protected String modulecollectionName;
-    protected ArrayList<String> storage; // this is a list of Module names
+    protected ArrayList<String> storage; // this is a list of ModuleCRM names.  (The collection stores names rather than actual Module objects)
     private ArrayList<Data> payload=null; // this is used to temporarily store Modules (and maybe constituent Motifs) that should be registered with the engine
     private String fromList=null; // a configuration string used if this collection is based on a (non-resolved) list of references
     private String fromInteractions=null; // a configuration string used if this collection is created from known motif interactions
     private String fromTrack=null; // a configuration string used when this collection is based on a track. Format example: "<trackname>,support>=80%"     
     private String fromMap=null;   // a configuration string used when this collection is based on a map. Format example: "<mapname>,value>=0" or "mapname,value in [0,1]"
     /**
-     * Constructs a new initially "empty" Module collection with the given name
+     * Constructs a new initially "empty" ModuleCRM collection with the given name
      *
      * @param modulecollectionName A name for this dataset
      */
@@ -117,15 +117,15 @@ public class ModuleCollection extends DataCollection {
         } else if (variablename.startsWith("module:")) {
             String propertyName=variablename.substring("module:".length());
             if (propertyName.equals("<property>")) throw new ExecutionError("You must replace <property> with the actual name of a module property");
-            Class propclass=Module.getPropertyClass(propertyName, engine);
+            Class propclass=ModuleCRM.getPropertyClass(propertyName, engine);
             if (propclass==null) throw new ExecutionError("'"+propertyName+"' is not a recognized module property");
             DataMap map=null;
             if (Number.class.isAssignableFrom(propclass)) map=new ModuleNumericMap("map_"+propertyName, 0);
             else map=new ModuleTextMap("map_"+propertyName, "");
             for (String modulename:storage) {
-                Module module=(Module)engine.getDataItem(modulename, Module.class);
-                if (module==null) continue;
-                Object value=module.getPropertyValue(propertyName, engine);
+                ModuleCRM cisRegModule=(ModuleCRM)engine.getDataItem(modulename, ModuleCRM.class);
+                if (cisRegModule==null) continue;
+                Object value=cisRegModule.getPropertyValue(propertyName, engine);
                 if (value instanceof Number && map instanceof ModuleNumericMap) ((ModuleNumericMap)map).setValue(modulename, ((Number)value).doubleValue());
                 else if (value!=null && map instanceof ModuleTextMap) {
                     if (value instanceof List) ((ModuleTextMap)map).setValue(modulename,MotifLabEngine.splice((List)value, ","));
@@ -147,7 +147,7 @@ public class ModuleCollection extends DataCollection {
         } else if (variablename.startsWith("module:") ) {
             String propertyName=variablename.substring("module:".length());
             if (propertyName.equals("<property>")) return ModuleTextMap.class; // just in case
-            Class propclass=Module.getPropertyClass(propertyName, MotifLabEngine.getEngine());
+            Class propclass=ModuleCRM.getPropertyClass(propertyName, MotifLabEngine.getEngine());
             if (propclass==null) return ModuleTextMap.class; // just in case
             else if (Number.class.isAssignableFrom(propclass)) return ModuleNumericMap.class;
             else return ModuleTextMap.class;              
@@ -164,7 +164,7 @@ public class ModuleCollection extends DataCollection {
 
     @Override
     public Class getMembersClass() {
-        return Module.class;
+        return ModuleCRM.class;
     }    
     
     @Override
@@ -186,38 +186,38 @@ public class ModuleCollection extends DataCollection {
     /**
      * Returns the names of all the Modules in this dataset
      *
-     * @return A list of Module names
+     * @return A list of ModuleCRM names
      */
     public ArrayList<String> getAllModuleNames() {
         return storage;
     }
 
     /**
-     * Returns all the Module objects in this dataset
-     * (if they are currently registered with the engine)
+     * Returns all the ModuleCRM objects in this dataset
+ (if they are currently registered with the engine)
      *
-     * @return A list of Module objects
+     * @return A list of ModuleCRM objects
      */
-    public ArrayList<Module> getAllModules(MotifLabEngine engine) {
-        ArrayList<Module> list = new ArrayList<Module>(storage.size());
+    public ArrayList<ModuleCRM> getAllModules(MotifLabEngine engine) {
+        ArrayList<ModuleCRM> list = new ArrayList<ModuleCRM>(storage.size());
         for (String name:storage) {
             Data item=engine.getDataItem(name);
-            if (item!=null && item instanceof Module) list.add((Module)item);
+            if (item!=null && item instanceof ModuleCRM) list.add((ModuleCRM)item);
         }
         return list;
     }
 
     /**
-     * Returns the Module corresponding to the given name.
+     * Returns the ModuleCRM corresponding to the given name.
      *
-     * @param name The name of the Module
-     * @return the specified Module (if found) or null
+     * @param name The name of the ModuleCRM
+     * @return the specified ModuleCRM (if found) or null
      */
-    public Module getModuleByName(String name, MotifLabEngine engine) {
+    public ModuleCRM getModuleByName(String name, MotifLabEngine engine) {
         for (String modulename : storage) {
             if (modulename.equals(name)) {
                 Data item=engine.getDataItem(name);
-                if (item!=null && item instanceof Module) return (Module)item;
+                if (item!=null && item instanceof ModuleCRM) return (ModuleCRM)item;
             }
         }
         return null;
@@ -228,8 +228,8 @@ public class ModuleCollection extends DataCollection {
      * This method could be used if you want to iterate through all Modules
      * in a dataset.
      *
-     * @param index The index of the Module
-     * @return the name of the Module at the specified index (if exists) or null
+     * @param index The index of the ModuleCRM
+     * @return the name of the ModuleCRM at the specified index (if exists) or null
      */
     public String getModuleNameByIndex(int index) {
         return storage.get(index);
@@ -239,25 +239,25 @@ public class ModuleCollection extends DataCollection {
      * This method could be used if you want to iterate through all Modules
      * in a dataset.
      *
-     * @param index The index of the Module
-     * @return the specified Module (if exists) or null
+     * @param index The index of the ModuleCRM
+     * @return the specified ModuleCRM (if exists) or null
      */
-    public Module getModuleByIndex(int index, MotifLabEngine engine) {
+    public ModuleCRM getModuleByIndex(int index, MotifLabEngine engine) {
         String name=storage.get(index);
-        Module module=null;
+        ModuleCRM cisRegModule=null;
         if (name!=null) {
             Data item=engine.getDataItem(name);
-            if (item!=null && item instanceof Module) return (Module)item;
+            if (item!=null && item instanceof ModuleCRM) return (ModuleCRM)item;
         }
-        return module;
+        return cisRegModule;
     }
 
     /**
-     * Returns the index (order within the dataset) of the Module with the given name
-     * If no Module with the given name exists within the dataset the value -1 is returned.
+     * Returns the index (order within the dataset) of the ModuleCRM with the given name
+ If no ModuleCRM with the given name exists within the dataset the value -1 is returned.
      *
-     * @param name The name of the Module
-     * @return index of the Module (between 0 and size-1) or -1
+     * @param name The name of the ModuleCRM
+     * @return index of the ModuleCRM (between 0 and size-1) or -1
      */
     public int getIndexForModule(String name) {
         for (int i=0;i<storage.size();i++) {
@@ -268,16 +268,16 @@ public class ModuleCollection extends DataCollection {
     }
 
     /**
-     * Returns true if the specified Module is in this collection
+     * Returns true if the specified ModuleCRM is in this collection
      */
-    public boolean contains(Module module) {
-        if (module==null) return false;
-        String moduleName=module.getName();
+    public boolean contains(ModuleCRM cisRegModule) {
+        if (cisRegModule==null) return false;
+        String moduleName=cisRegModule.getName();
         return contains(moduleName);
     }
 
     /**
-     * Returns true if a Module with the given name is in this collection
+     * Returns true if a ModuleCRM with the given name is in this collection
      */
     @Override
     public boolean contains(String moduleName) {
@@ -304,14 +304,14 @@ public class ModuleCollection extends DataCollection {
     }
 
    /**
-     * Adds a new Module object to this collection (if it is not already present)
+     * Adds a new ModuleCRM object to this collection (if it is not already present)
      *
-     * @param module The Module to be added
+     * @param module The ModuleCRM to be added
      */
-    public void addModule(Module module) {
-        if (storage.contains(module.getName())) return;
-        storage.add(module.getName()); // add to local storage
-        notifyListenersOfDataAddition(module);
+    public void addModule(ModuleCRM cisRegModule) {
+        if (storage.contains(cisRegModule.getName())) return;
+        storage.add(cisRegModule.getName()); // add to local storage
+        notifyListenersOfDataAddition(cisRegModule);
     }
 
    /**
@@ -329,7 +329,7 @@ public class ModuleCollection extends DataCollection {
    /**
      * Adds the names of modules to this collection (if they are not already present)
      * Note that this method is not the preferred way of adding modules.
-     * It is requested that one uses addModule(Module module) instead since that method
+     * It is requested that one uses addModule(ModuleCR module) instead since that method
      * will also notify any listeners that the collection has been updated
      * @param names The names of the modules to be added
      */
@@ -339,13 +339,13 @@ public class ModuleCollection extends DataCollection {
         }
     }
    /**
-     * Removes a Module object from this collection (if present)
+     * Removes a ModuleCRM object from this collection (if present)
      *
-     * @param module The Module to be removed
+     * @param module The ModuleCRM to be removed
      */
-    public void removeModule(Module module) {
-        boolean hasremoved=storage.remove(module.getName()); // remove from local storage
-        if (hasremoved) notifyListenersOfDataRemoval(module);
+    public void removeModule(ModuleCRM cisRegModule) {
+        boolean hasremoved=storage.remove(cisRegModule.getName()); // remove from local storage
+        if (hasremoved) notifyListenersOfDataRemoval(cisRegModule);
     }
 
 
@@ -357,7 +357,7 @@ public class ModuleCollection extends DataCollection {
             storage.remove(name);
             Data item=null;
             if (engine!=null) item=engine.getDataItem(name);
-            if (item!=null && item instanceof Module) notifyListenersOfDataRemoval((Module)item);
+            if (item!=null && item instanceof ModuleCRM) notifyListenersOfDataRemoval((ModuleCRM)item);
         }
         this.fromList=null;
         this.fromInteractions=null;
@@ -411,8 +411,8 @@ public class ModuleCollection extends DataCollection {
             if (line.startsWith("#") || line.isEmpty()) continue;
             Data data=engine.getDataItem(line);
             if (data==null) engine.logMessage("No such module: "+line); // should this throw ParseError?
-            else if (!(data instanceof Module)) engine.logMessage("'"+line+"' is not a Module object"); // should this throw ParseError?
-            else addModule((Module)data);
+            else if (!(data instanceof ModuleCRM)) engine.logMessage("'"+line+"' is not a Module object"); // should this throw ParseError?
+            else addModule((ModuleCRM)data);
         }
     }      
 
@@ -475,9 +475,9 @@ public class ModuleCollection extends DataCollection {
      */
     public ModuleCollection complement(MotifLabEngine engine) {
         ModuleCollection complement=new ModuleCollection("complement");
-        ArrayList<Data> allmodules=engine.getAllDataItemsOfType(Module.class);
-        for (Data module:allmodules) { //
-            String modulename=module.getName();
+        ArrayList<Data> allmodules=engine.getAllDataItemsOfType(ModuleCRM.class);
+        for (Data cisRegModule:allmodules) { //
+            String modulename=cisRegModule.getName();
             if (!this.contains(modulename)) {
                 complement.storage.add(modulename);
             }
@@ -615,9 +615,9 @@ public class ModuleCollection extends DataCollection {
      * is done automatically in MotifLabEngine.storeDataItem(data) which checks if
      * the data item is a ModuleCollection and calls initializeFromPayload())
      */
-    public void addModuleToPayload(Module module) {
+    public void addModuleToPayload(ModuleCRM cisRegModule) {
         if (payload==null) payload=new ArrayList<Data>();
-        payload.add(module);
+        payload.add(cisRegModule);
     }
 
     /** This method adds a constituent single motif object to temporary storage within this collection.
@@ -638,9 +638,9 @@ public class ModuleCollection extends DataCollection {
 
     /** This method removes a module from temporary storage within this collection.
      */
-    public void removeModuleFromPayload(Module module) {
+    public void removeModuleFromPayload(ModuleCRM cisRegModule) {
         if (payload==null) return;
-        else payload.remove(module);
+        else payload.remove(cisRegModule);
     }
 
     /** This method removes a constituent single motif from temporary storage within this collection.
@@ -650,11 +650,11 @@ public class ModuleCollection extends DataCollection {
         else payload.remove(motif);
     }
 
-    /** Returns the Module with the given name if it exists in the payload, or else NULL */
-    public Module getModuleFromPayload(String modulename) {
+    /** Returns the ModuleCRM with the given name if it exists in the payload, or else NULL */
+    public ModuleCRM getModuleFromPayload(String modulename) {
         if (payload==null) return null;
         for (Data data:payload) {
-            if (data instanceof Module && data.getName().equals(modulename)) return (Module)data;
+            if (data instanceof ModuleCRM && data.getName().equals(modulename)) return (ModuleCRM)data;
         }
         return null;
     }
@@ -676,12 +676,12 @@ public class ModuleCollection extends DataCollection {
         if (payload==null || index<0 || index>=payload.size()) return null;
         int moduleindex=-1;
         for (int i=0;i<payload.size();i++) {
-            if (payload.get(i) instanceof Module) {
+            if (payload.get(i) instanceof ModuleCRM) {
                 moduleindex++;
                 if (index==moduleindex) {
-                    Module module=(Module)payload.get(i);
-                    String oldname=module.getName();
-                    module.rename(newname);
+                    ModuleCRM cisRegModule=(ModuleCRM)payload.get(i);
+                    String oldname=cisRegModule.getName();
+                    cisRegModule.rename(newname);
                     return oldname;
                 }
             }
@@ -718,8 +718,8 @@ public class ModuleCollection extends DataCollection {
     public void renameSingleMotifsInPayloadModules(HashMap<String, String> newnames) {
          if (payload==null || payload.isEmpty()) return;
          for (Data data:payload) {
-             if (data instanceof Module) {
-                 for (ModuleMotif mm:((Module)data).getModuleMotifs()) {
+             if (data instanceof ModuleCRM) {
+                 for (ModuleMotif mm:((ModuleCRM)data).getModuleMotifs()) {
                      mm.renameSingleMotifReferences(newnames);
                  }
              }
@@ -739,7 +739,7 @@ public class ModuleCollection extends DataCollection {
         else {
             int count=0;
             for (Data data:payload) {
-                if (data instanceof Module) count++;
+                if (data instanceof ModuleCRM) count++;
             }
             return count;
         }
@@ -766,9 +766,9 @@ public class ModuleCollection extends DataCollection {
         //System.err.println("Initializing ModuleCollection from payload. Payload="+(payload!=null));
         if (payload==null) return;
         for (Data moduleormotif:payload) {
-            if (!(moduleormotif instanceof Module || moduleormotif instanceof Motif)) continue;
+            if (!(moduleormotif instanceof ModuleCRM || moduleormotif instanceof Motif)) continue;
             engine.updateDataItem(moduleormotif);
-            if (moduleormotif instanceof Module) this.addModule((Module)moduleormotif);
+            if (moduleormotif instanceof ModuleCRM) this.addModule((ModuleCRM)moduleormotif);
         }
         payload=null; // clear payload after initialization!
     }
@@ -927,7 +927,7 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
                if (entry.startsWith("!") && entry.length()>1) {mode=Operation_new.COMPLEMENT;entry=entry.substring(1);}
                Data dataobject=null;
                if (entry.trim().isEmpty()) continue;
-               if (entry.contains("->")) { // entry refers to a cluster within a Module Partition
+               if (entry.contains("->")) { // entry refers to a cluster within a ModuleCRM Partition
                    String[] elements=entry.split("->");
                    if (elements.length!=2) {
                        if (silentMode) {notfound.add(entry+" : syntax error");continue;} else throw new ExecutionError("Syntax error: "+entry);
@@ -960,19 +960,19 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
                    } catch(NumberFormatException nf) {
                       if (silentMode) {notfound.add(entry+" : Problem with range specification"); continue;} else throw new ExecutionError("Problem with range specification: "+entry); 
                    }
-                   ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpressionInNumericRange(range1[0], range1[2], start, end, Module.class);
+                   ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpressionInNumericRange(range1[0], range1[2], start, end, ModuleCRM.class);
                    ModuleCollection tempCollection=new ModuleCollection("_temp");
                    for (Data object:regexmatches) {
-                       tempCollection.addModule((Module)object);
+                       tempCollection.addModule((ModuleCRM)object);
                    }
                    combineWithCollection(newDataItem,tempCollection,mode,engine);
                    continue; 
                } else if (entry.matches(".*\\W.*")) { // contains non-word characters (not letter,number or underscore)
                    if (entry.contains("*")) entry=entry.replace("*", ".*"); // convert wildcard * to proper regex
-                   ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpression(entry, Module.class);
+                   ArrayList<Data> regexmatches=engine.getAllDataItemsOfTypeMatchingExpression(entry, ModuleCRM.class);
                    ModuleCollection tempCollection=new ModuleCollection("_temp");
                    for (Data object:regexmatches) {
-                       tempCollection.addModule((Module)object);
+                       tempCollection.addModule((ModuleCRM)object);
                    }
                    combineWithCollection(newDataItem,tempCollection,mode,engine);
                    continue; 
@@ -982,7 +982,7 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
                
                     if (dataobject==null) {if (silentMode) notfound.add(entry+" : Unknown data item"); else throw new ExecutionError("Unknown data item: "+entry);}
                else if (dataobject instanceof ModulePartition) {if (silentMode) notfound.add(entry+" : Missing cluster for Module Partition"); else throw new ExecutionError("Missing specification of cluster for Module Partition '"+entry+"'. (use format: Partition.Cluster)");}
-               else if (!(dataobject instanceof Module || dataobject instanceof ModuleCollection)) {if (silentMode) notfound.add(entry+" : Not a Module or Module Collection"); else throw new ExecutionError("Data item '"+entry+"' is not a Module or Module Collection");}
+               else if (!(dataobject instanceof ModuleCRM || dataobject instanceof ModuleCollection)) {if (silentMode) notfound.add(entry+" : Not a Module or Module Collection"); else throw new ExecutionError("Data item '"+entry+"' is not a Module or Module Collection");}
                else combineWithCollection(newDataItem,dataobject,mode,engine);
            }
            if (keepConfig) newDataItem.setFromListString(text); // Store original config-string in data object
@@ -998,60 +998,60 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
        else addToModuleCollection(col,dataobject,engine);
     }
 
- /** Adds a single Module or Module collection (other) to a target collection */
+ /** Adds a single ModuleCRM or ModuleCRM collection (other) to a target collection */
     private static void addToModuleCollection(ModuleCollection target, Object other, MotifLabEngine engine) {
         if (other==null) return;
-        if (other instanceof Module) {
-            target.addModule((Module)other);
+        if (other instanceof ModuleCRM) {
+            target.addModule((ModuleCRM)other);
         } else if (other instanceof ModuleCollection) {
-            for (Module module:((ModuleCollection)other).getAllModules(engine)) {
-                target.addModule(module);
+            for (ModuleCRM cisRegModule:((ModuleCollection)other).getAllModules(engine)) {
+                target.addModule(cisRegModule);
             }
         } else {
             System.err.println("SYSTEM ERROR: In ModuleCollection.addToModuleCollection. Parameter is neither Module nor Module collection but rather: "+other.getClass().getSimpleName());
         }
     }
 
-    /** Removes all modules from the target collection which is not present in the other Module collection (or single module) */
+    /** Removes all modules from the target collection which is not present in the other ModuleCRM collection (or single module) */
     private static void intersectWithModuleCollection(ModuleCollection target, Object other, MotifLabEngine engine) {
         if (other==null) return;
-        if (other instanceof Module) {
-            if (target.contains((Module)other)) {
+        if (other instanceof ModuleCRM) {
+            if (target.contains((ModuleCRM)other)) {
                 target.clearAll(engine);
-                target.addModule((Module)other);
+                target.addModule((ModuleCRM)other);
             } else target.clearAll(engine);
         } else if (other instanceof ModuleCollection) {
-            for (Module module:target.getAllModules(engine)) {
-                if (!((ModuleCollection)other).contains(module)) target.removeModule(module);
+            for (ModuleCRM cisRegModule:target.getAllModules(engine)) {
+                if (!((ModuleCollection)other).contains(cisRegModule)) target.removeModule(cisRegModule);
             }
         } else {
             System.err.println("SYSTEM ERROR: In ModuleCollection.intersectWithModuleCollection. Parameter is neither Module nor Module collection but rather: "+other.getClass().getSimpleName());
         }
     }
-    /** Subtracts a single Module or Module collection (other) from a target collection */
+    /** Subtracts a single ModuleCRM or ModuleCRM collection (other) from a target collection */
     private static void subtractFromModuleCollection(ModuleCollection target, Object other, MotifLabEngine engine) {
          if (other==null) return;
-        if (other instanceof Module) {
-            target.removeModule((Module)other);
+        if (other instanceof ModuleCRM) {
+            target.removeModule((ModuleCRM)other);
         } else if (other instanceof ModuleCollection) {
-            for (Module module:((ModuleCollection)other).getAllModules(engine)) {
-                target.removeModule(module);
+            for (ModuleCRM cisRegModule:((ModuleCollection)other).getAllModules(engine)) {
+                target.removeModule(cisRegModule);
             }
         } else {
             System.err.println("SYSTEM ERROR: In ModuleCollection.subtractFromModuleCollection. Parameter is neither Module nor Module collection but rather: "+other.getClass().getSimpleName());
         }
     }
 
- /** Adds the complement of a single Module or Module collection (other) to a target collection */
+ /** Adds the complement of a single ModuleCRM or ModuleCRM collection (other) to a target collection */
     private static void addComplementToModuleCollection(ModuleCollection target, Object other, MotifLabEngine engine) {
         if (other==null) return;
-        if (other instanceof Module) {
-            for (Data module:engine.getAllDataItemsOfType(Module.class)) {
-                if (module!=other) target.addModule((Module)module);
+        if (other instanceof ModuleCRM) {
+            for (Data cisRegModule:engine.getAllDataItemsOfType(ModuleCRM.class)) {
+                if (cisRegModule!=other) target.addModule((ModuleCRM)cisRegModule);
             }
         } else if (other instanceof ModuleCollection) {
-            for (Data module:engine.getAllDataItemsOfType(Module.class)) {
-                if (!((ModuleCollection)other).contains((Module)module)) target.addModule((Module)module);
+            for (Data cisRegModule:engine.getAllDataItemsOfType(ModuleCRM.class)) {
+                if (!((ModuleCollection)other).contains((ModuleCRM)cisRegModule)) target.addModule((ModuleCRM)cisRegModule);
             }
         } else {
             System.err.println("SYSTEM ERROR: In ModuleCollection.addComplementToModuleCollection. Parameter is neither Module nor Module collection but rather: "+other.getClass().getSimpleName());
@@ -1275,15 +1275,15 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
         } catch (NumberFormatException e) {return null;}
     }
     
-    private static Module createModuleFromClusters(String modulename, String[] motifClusterNames, ArrayList<HashSet<String>> clusters, int width) {
-        Module module=new Module(modulename);
+    private static ModuleCRM createModuleFromClusters(String modulename, String[] motifClusterNames, ArrayList<HashSet<String>> clusters, int width) {
+        ModuleCRM cisRegModule=new ModuleCRM(modulename);
         for (int i=0;i<motifClusterNames.length;i++) {
             String motifClusterName=motifClusterNames[i]; // all these names should be unique!!
             HashSet<String> motifs=clusters.get(i);
-            module.addModuleMotif(motifClusterName, motifs, Module.INDETERMINED);
+            cisRegModule.addModuleMotif(motifClusterName, motifs, ModuleCRM.INDETERMINED);
         }
-        if (width>0) module.setMaxLength(width);
-        return module;
+        if (width>0) cisRegModule.setMaxLength(width);
+        return cisRegModule;
     }
     
     /** This method returns a set containing the names of all motifs that are known to interact with
@@ -1431,7 +1431,7 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
        }
 
        ModuleNumericMap support=new ModuleNumericMap("support",0); // the number of sequences each module appears in
-       ArrayList<Data> allModules=engine.getAllDataItemsOfType(Module.class);
+       ArrayList<Data> allModules=engine.getAllDataItemsOfType(ModuleCRM.class);
        storage.clear();
        // configure
        String fromTrackString=null;
@@ -1446,8 +1446,8 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
            engine.logMessage("Warning: Sequence Collection '"+seqCollection.getName()+"' is empty",20);
            return; 
        }
-       for (Data module:allModules) {
-           support.setValue(module.getName(), new Integer(0));
+       for (Data cisRegModule:allModules) {
+           support.setValue(cisRegModule.getName(), new Integer(0));
        }
        // count the number of sequences each module occurs in
        ArrayList<FeatureSequenceData> sequences=dataset.getSequencesFromCollection(seqCollection);
@@ -1460,7 +1460,7 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
                present.add(region.getType());
            }
            for (String moduletype:present) { // update module counts by one if present in current sequence
-               if (engine.dataExists(moduletype, Module.class)) {
+               if (engine.dataExists(moduletype, ModuleCRM.class)) {
                    support.setValue(moduletype, support.getValue(moduletype)+1);
                }
            }
@@ -1470,8 +1470,8 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
                if (Thread.interrupted() || task.isAborted()) throw new InterruptedException();
            }
        }
-       for (Data module:allModules) {
-           String moduleName=module.getName();
+       for (Data cisRegModule:allModules) {
+           String moduleName=cisRegModule.getName();
            double firstOperand=0;
            double secondOperand=0;
                 if (quorumData instanceof Integer) firstOperand=((Integer)quorumData).intValue();
@@ -1524,12 +1524,12 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
    
 
   /**
-   * Parses a configuration string for Module Collection creation from a Numeric map
-   * and returns an String[] containing parsed elements:
-   * [0] Name of ModuleNumericMap 
-   * [1] Operator
-   * [2] First operand (this could be a literal numeric constant or the name of a data object (or another string))
-   * [3] Second operand (this could be a literal numeric constant or the name of a data object (or another string))
+   * Parses a configuration string for ModuleCRM Collection creation from a Numeric map
+ and returns an String[] containing parsed elements:
+ [0] Name of ModuleNumericMap 
+ [1] Operator
+ [2] First operand (this could be a literal numeric constant or the name of a data object (or another string))
+ [3] Second operand (this could be a literal numeric constant or the name of a data object (or another string))
    * @param configString. Format example: "ModuleNumericMap >= 0.4" or "ModuleNumericMap in [0,10]" or "ModuleNumericMap <> NumericVariable1"
    * @return
    */
@@ -1582,19 +1582,19 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
           fromMapString=map.getName()+operator+firstOperand; // sets the 'config' string
        }
        setFromMapString(fromMapString);
-       ArrayList<Data> allModules=engine.getAllDataItemsOfType(Module.class);
-       for (Data module:allModules) {
-           String moduleName=module.getName();
+       ArrayList<Data> allModules=engine.getAllDataItemsOfType(ModuleCRM.class);
+       for (Data cisRegModule:allModules) {
+           String moduleName=cisRegModule.getName();
            if (moduleSatisfiesMapCondition(moduleName, map, operator, firstOperandData, secondOperandData)) storage.add(moduleName);
        }
    }   
    
 /**
- * Parses a configuration string for Module Collection creation from a Property
- * and returns an Object[] containing parsed elements:
- * [0] Name of Property 
- * [1] Operator
- * [2] List of operands, as a String[]
+ * Parses a configuration string for ModuleCRM Collection creation from a Property
+ and returns an Object[] containing parsed elements:
+ [0] Name of Property 
+ [1] Operator
+ [2] List of operands, as a String[]
  * @param configString. Format example: "Cardinality = 2"
  * @return
  */
@@ -1626,7 +1626,7 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
      * @param operands A list of possible values for the property
       */
    public void createCollectionFromProperty(String property, String operator, String[] operands, MotifLabEngine engine) throws ExecutionError {
-       Class typeclass=Module.getPropertyClass(property,engine);
+       Class typeclass=ModuleCRM.getPropertyClass(property,engine);
        if (typeclass==null) throw new ExecutionError("Unknown module property: "+property);
        if (operands==null || operands.length==0) throw new ExecutionError("Missing property value");       
        storage.clear();
@@ -1671,13 +1671,13 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
        builder.append(spliced);
        setFromPropertyString(builder.toString());// sets the 'config' string
 
-       ArrayList<Data> allModules=engine.getAllDataItemsOfType(Module.class);
-       for (Data module:allModules) {
+       ArrayList<Data> allModules=engine.getAllDataItemsOfType(ModuleCRM.class);
+       for (Data cisRegModule:allModules) {
            Object value=null;
-           String moduleName=module.getName();
+           String moduleName=cisRegModule.getName();
            try {
-              value=((Module)module).getPropertyValue(property,engine); 
-              if (value==null) continue; // do not include modules which do not have a value for the property (no matter which operator is used)
+               value=((ModuleCRM)cisRegModule).getPropertyValue(property,engine); 
+               if (value==null) continue; // do not include modules which do not have a value for the property (no matter which operator is used)
            } catch (Exception e) {continue;}
            boolean satisfies=false;
            if (Boolean.class.equals(typeclass)) satisfies=moduleSatisfiesBooleanPropertyCondition(value,operator,(Boolean)resolvedoperands[0]);

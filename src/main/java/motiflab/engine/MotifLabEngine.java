@@ -783,7 +783,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         if (olditem!=null && dataitem.getClass()!=olditem.getClass()) {
            if (olditem.getClass()==Sequence.class) throw new ExecutionError("Cannot store new data object with name '"+dataitem.getName()+"' since a Sequence with that name already exists");
            else if (olditem.getClass()==Motif.class) throw new ExecutionError("Cannot store new data object with name '"+dataitem.getName()+"' since a Motif with that name already exists");
-           else if (olditem.getClass()==Module.class) throw new ExecutionError("Cannot store new data object with name '"+dataitem.getName()+"' since a Module with that name already exists");
+           else if (olditem.getClass()==ModuleCRM.class) throw new ExecutionError("Cannot store new data object with name '"+dataitem.getName()+"' since a Module with that name already exists");
            else if (olditem.getClass()==OutputData.class) throw new ExecutionError("Cannot store new data object with name '"+dataitem.getName()+"' since an Output object with that name already exists");
         }
         if (olditem!=null) removeDataItem(olditem.getName());
@@ -800,7 +800,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
            defaultSC.addSequence((Sequence)dataitem); 
         }
         if (dataitem instanceof Motif) Motif.clearUserDefinedPropertyClassesLookupTable(); // just in case
-        if (dataitem instanceof Module) Module.clearUserDefinedPropertyClassesLookupTable(); // just in case
+        if (dataitem instanceof ModuleCRM) ModuleCRM.clearUserDefinedPropertyClassesLookupTable(); // just in case
         if (dataitem instanceof Sequence) Sequence.clearUserDefinedPropertyClassesLookupTable(); // just in case    
         if (dataitem instanceof FeatureDataset && ((FeatureDataset)dataitem).displayDirectives!=null) {
             executeDisplayDirectives(((FeatureDataset)dataitem).displayDirectives,dataitem.getName()); 
@@ -869,7 +869,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             if (dataitem.getClass()!=olditem.getClass()) { // incompatible types?
                 if (olditem.getClass()==Sequence.class || dataitem.getClass()==Sequence.class) throw new ClassCastException("Illegal type change from/to Sequence");
                 else if (olditem.getClass()==Motif.class || dataitem.getClass()==Motif.class) throw new ClassCastException("Illegal type change from/to Motif");
-                else if (olditem.getClass()==Module.class || dataitem.getClass()==Module.class) throw new ClassCastException("Illegal type change from/to Module");
+                else if (olditem.getClass()==ModuleCRM.class || dataitem.getClass()==ModuleCRM.class) throw new ClassCastException("Illegal type change from/to Module");
                 else if (olditem.getClass()==OutputData.class || dataitem.getClass()==OutputData.class) throw new ClassCastException("Illegal type change from/to Output object");
                 HashSet<DataListener> listenerList;
                 synchronized(datalisteners) {   
@@ -886,7 +886,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                 if (dataitem instanceof DataCollection) {((DataCollection)dataitem).initializeFromPayload(this);}
                 olditem.importData(dataitem);
                 if (dataitem instanceof Motif) Motif.clearUserDefinedPropertyClassesLookupTable(); // just in case
-                if (dataitem instanceof Module) Module.clearUserDefinedPropertyClassesLookupTable(); // just in case                
+                if (dataitem instanceof ModuleCRM) ModuleCRM.clearUserDefinedPropertyClassesLookupTable(); // just in case                
                 if (dataitem instanceof Sequence) Sequence.clearUserDefinedPropertyClassesLookupTable(); // just in case
                 olditem.notifyListenersOfDataUpdate();
             }
@@ -993,9 +993,9 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         ArrayList<String> names=new ArrayList<String>();
         ArrayList<Data> list=storage.getAllDataItemsOfType(Data.class);
         for (Data item:list) { // First add all non-Sequence data items
-            if (!(item instanceof Sequence || item instanceof Motif || item instanceof Module) && item!=getDefaultSequenceCollection()) names.add(item.getName());
+            if (!(item instanceof Sequence || item instanceof Motif || item instanceof ModuleCRM) && item!=getDefaultSequenceCollection()) names.add(item.getName());
         }
-        list=storage.getAllDataItemsOfType(Module.class);
+        list=storage.getAllDataItemsOfType(ModuleCRM.class);
         for (Data item:list) {
             names.add(item.getName());
         }
@@ -1011,13 +1011,13 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             try {removeDataItem(name);} catch (ExecutionError e) {}
         }     
         Motif.clearUserDefinedPropertyClassesLookupTable();
-        Module.clearUserDefinedPropertyClassesLookupTable();        
+        ModuleCRM.clearUserDefinedPropertyClassesLookupTable();        
         Sequence.clearUserDefinedPropertyClassesLookupTable();
     }
     
    /**
      * Removes every data item from storage of type Motif, MotifCollection, MotifPartition and MotifNumericMap
-    *  as well as Module, ModuleCollection, ModulePartition and ModuleNumericMap
+  as well as ModuleCRM, ModuleCollection, ModulePartition and ModuleNumericMap
      */
     public void clearMotifAndModuleDataData(boolean justModules) {
         if (!dataUpdatesIsAllowed()) return; // data is not allowed to be touched at this time        
@@ -1039,7 +1039,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         for (Data item:list) {
             names.add(item.getName());
         }
-        list=storage.getAllDataItemsOfType(Module.class);
+        list=storage.getAllDataItemsOfType(ModuleCRM.class);
         for (Data item:list) {
             names.add(item.getName()); 
         }
@@ -1066,7 +1066,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             } 
             Motif.clearUserDefinedPropertyClassesLookupTable();
         }
-        Module.clearUserDefinedPropertyClassesLookupTable();        
+        ModuleCRM.clearUserDefinedPropertyClassesLookupTable();        
         for (String name:names) {
             try {removeDataItem(name);} catch (ExecutionError e) {}
         }          
@@ -1822,7 +1822,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         else if (dataclass==Motif.class) return Motif.getType();
         else if (dataclass==MotifCollection.class) return MotifCollection.getType();
         else if (dataclass==MotifPartition.class) return MotifPartition.getType();
-        else if (dataclass==Module.class) return Module.getType();
+        else if (dataclass==ModuleCRM.class) return ModuleCRM.getType();
         else if (dataclass==ModuleCollection.class) return ModuleCollection.getType();
         else if (dataclass==ModulePartition.class) return ModulePartition.getType();
         else if (dataclass==NumericConstant.class) return NumericConstant.getType();
@@ -1877,7 +1877,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         else if (typeName.equalsIgnoreCase(NumericSequenceData.getType())) return NumericSequenceData.class;
         else if (typeName.equalsIgnoreCase(RegionSequenceData.getType())) return RegionSequenceData.class;
         else if (typeName.equalsIgnoreCase(Motif.getType())) return Motif.class;
-        else if (typeName.equalsIgnoreCase(Module.getType())) return Module.class;
+        else if (typeName.equalsIgnoreCase(ModuleCRM.getType())) return ModuleCRM.class;
         else if (typeName.equalsIgnoreCase(ModuleCollection.getType())) return ModuleCollection.class;
         else if (typeName.equalsIgnoreCase(MotifCollection.getType())) return MotifCollection.class;
         else if (typeName.equalsIgnoreCase(MotifPartition.getType())) return MotifPartition.class;
@@ -2303,8 +2303,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
               for (Region region:sequence.getOriginalRegions()) {
                   count++;
                   String type=region.getType();
-                  Module module=(Module)getDataItem(type, Module.class);     
-                  if (module!=null ) modules++; // we have a potential module region!    
+                  ModuleCRM cisregModule=(ModuleCRM)getDataItem(type, ModuleCRM.class);     
+                  if (cisregModule!=null ) modules++; // we have a potential module region!    
                   if (count==check) break outer;
               } // end for each region
           }
@@ -2317,7 +2317,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
           if (dna!=null) dnasequence=(DNASequenceData) dna.getSequenceByName(sequence.getName());
           for (Region region:sequence.getOriginalRegions()) {
               String type=region.getType();
-              if (!dataExists(type, Module.class)) continue; // not a recognized module
+              if (!dataExists(type, ModuleCRM.class)) continue; // not a recognized module
               ArrayList<Region> modulemotifs=region.getNestedRegions(false);
               for (Region motifsite:modulemotifs) {
                   String motiftype=motifsite.getType();
@@ -2506,7 +2506,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         registerDataFormat(DataFormat_ModuleProperties.class, null);        
         registerDataFormat(DataFormat_TAMO.class, null);        
         registerDataFormat(DataFormat_MotifLabMotif.class, new Class[]{MotifCollection.class,Motif.class});
-        registerDataFormat(DataFormat_MotifLabModule.class, new Class[]{ModuleCollection.class,Module.class});
+        registerDataFormat(DataFormat_MotifLabModule.class, new Class[]{ModuleCollection.class,ModuleCRM.class});
         registerDataFormat(DataFormat_Properties.class, null);         
 
         // Analysis formats
@@ -3631,7 +3631,7 @@ public Data createDataObject(Class type, String tempName) throws ExecutionError 
     else if (type==ModuleCollection.class) return new ModuleCollection(tempName);
     else if (type==ModulePartition.class) return new ModulePartition(tempName);
     else if (type==Motif.class) return new Motif(tempName);
-    else if (type==Module.class) return new Module(tempName);
+    else if (type==ModuleCRM.class) return new ModuleCRM(tempName);
     else if (type==TextVariable.class) return new TextVariable(tempName);
     else if (type==NumericVariable.class) return new NumericVariable(tempName,0);
     else if (type==GeneralNumericMap.class) return new GeneralNumericMap(tempName,0);    
@@ -3668,7 +3668,7 @@ public static Class getClassForName(String classname) throws ClassNotFoundExcept
     else if (classname.equalsIgnoreCase("ModuleCollection") || classname.equalsIgnoreCase(ModuleCollection.getType())) return ModuleCollection.class;
     else if (classname.equalsIgnoreCase("ModulePartition") || classname.equalsIgnoreCase(ModulePartition.getType())) return ModulePartition.class;
     else if (classname.equalsIgnoreCase("Motif")) return Motif.class;
-    else if (classname.equalsIgnoreCase("Module")) return Module.class;
+    else if (classname.equalsIgnoreCase("Module")) return ModuleCRM.class;
     else if (classname.equalsIgnoreCase("TextVariable") || classname.equalsIgnoreCase(TextVariable.getType())) return TextVariable.class;
     else if (classname.equalsIgnoreCase("NumericVariable") || classname.equalsIgnoreCase(NumericVariable.getType())) return NumericVariable.class;
     else if (classname.equalsIgnoreCase("NumericMap") || classname.equalsIgnoreCase("Numeric Map")) return GeneralNumericMap.class;

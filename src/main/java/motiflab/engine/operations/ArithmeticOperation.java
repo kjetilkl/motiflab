@@ -24,7 +24,7 @@ import motiflab.engine.data.ExpressionProfile;
 import motiflab.engine.data.Sequence;
 import motiflab.engine.data.FeatureDataset;
 import motiflab.engine.data.FeatureSequenceData;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.ModuleCollection;
 import motiflab.engine.data.ModuleNumericMap;
 import motiflab.engine.data.ModuleTextMap;
@@ -96,7 +96,7 @@ public abstract class ArithmeticOperation extends FeatureTransformOperation {
         }
         if (sourceData instanceof RegionDataset) { // allow numeric types or Text Variable
              if (!(operandData instanceof Object[] || operandData instanceof NumericVariable || operandData instanceof DataMap || operandData instanceof NumericDataset || operandData instanceof String || operandData instanceof TextVariable || operandData instanceof Boolean || operandData instanceof ArrayList)) throw new ExecutionError("'"+operandDataString+"' is not a valid numeric, text or boolean value",task.getLineNumber());
-        } else if (sourceData instanceof DataCollection || sourceData instanceof Motif || sourceData instanceof Module || sourceData instanceof Sequence) { //`
+        } else if (sourceData instanceof DataCollection || sourceData instanceof Motif || sourceData instanceof ModuleCRM || sourceData instanceof Sequence) { //`
              if (!(operandData instanceof NumericVariable || operandData instanceof DataMap || operandData instanceof String || operandData instanceof TextVariable || operandData instanceof Boolean || operandData instanceof ArrayList)) throw new ExecutionError("'"+operandDataString+"' is not a valid numeric, text or boolean value",task.getLineNumber());
         } else if (sourceData instanceof NumericMap) { //`
              if (!(operandData instanceof NumericVariable || operandData instanceof NumericMap)) throw new ExecutionError("'"+operandDataString+"' is not a valid numeric value",task.getLineNumber());
@@ -316,7 +316,7 @@ public abstract class ArithmeticOperation extends FeatureTransformOperation {
                   engine.logMessage("WARNING: While performing operation '"+task.getOperationName()+"', "+skipped+((skipped==1)?" map entry was skipped":" map entries were skipped")+" in "+sourceDatasetName+" because of : "+exceptionMsg);
             }
             try {engine.updateDataItem(targetData);} catch (ClassCastException ce) {throw new ExecutionError("Incompatible assignment:"+ce.getMessage(),task.getLineNumber());}
-        } else if (sourceData instanceof BasicDataType) { // apply arithmetic operation to a property of Motif, Module or Sequence
+        } else if (sourceData instanceof BasicDataType) { // apply arithmetic operation to a property of Motif, ModuleCRM or Sequence
             Data targetData=(Data)sourceData.clone();
             targetData.rename(targetDatasetName);
             task.setParameter(OperationTask.SOURCE, sourceData);
@@ -338,7 +338,7 @@ public abstract class ArithmeticOperation extends FeatureTransformOperation {
             boolean ok=((BasicDataType)targetData).setPropertyValue(property, newvalue);
             if (!ok) engine.logMessage("WARNING: While performing operation '"+task.getOperationName()+"'. Unable to change value of property '"+property+"' for '"+targetDatasetName+"'");
             try {engine.updateDataItem(targetData);} catch (ClassCastException ce) {throw new ExecutionError("Incompatible assignment:"+ce.getMessage(),task.getLineNumber());}            
-        } else if (sourceData instanceof DataCollection) { // apply arithmetic operation to a property of Motif, Module or Sequence for every entry in collection (this does not update the collection itself, only its members)
+        } else if (sourceData instanceof DataCollection) { // apply arithmetic operation to a property of Motif, ModuleCRM or Sequence for every entry in collection (this does not update the collection itself, only its members)
             task.setParameter(OperationTask.SOURCE, sourceData);
             //task.setParameter(OperationTask.TARGET, targetData);
             resolveParameters(task);

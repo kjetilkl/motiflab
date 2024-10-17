@@ -48,7 +48,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.MotifCollection;
 import motiflab.engine.data.Region;
@@ -65,7 +65,7 @@ import motiflab.gui.VisualizationSettings;
  * @author Kjetil
  */
 public class Prompt_Module extends Prompt {
-    private Module data;
+    private ModuleCRM data;
     
     private JTabbedPane tabbedpane;    
     private JPanel mainPanel;    
@@ -108,11 +108,11 @@ public class Prompt_Module extends Prompt {
     
     
     
-    public Prompt_Module(MotifLabGUI gui, String prompt, Module dataitem) {
+    public Prompt_Module(MotifLabGUI gui, String prompt, ModuleCRM dataitem) {
         this(gui,prompt,dataitem,true);
     }
 
-    public Prompt_Module(MotifLabGUI gui, String prompt, Module dataitem, boolean modal) {
+    public Prompt_Module(MotifLabGUI gui, String prompt, ModuleCRM dataitem, boolean modal) {
         super(gui,prompt, modal);
         this.settings=gui.getVisualizationSettings();
         if (dataitem!=null)  {
@@ -120,7 +120,7 @@ public class Prompt_Module extends Prompt {
             setExistingDataItem(dataitem);
         }
         else {
-            data=new Module(gui.getGenericDataitemName(Module.class, null));
+            data=new ModuleCRM(gui.getGenericDataitemName(ModuleCRM.class, null));
             data.setOrdered(true);
         }
         setDataItemName(data.getName());
@@ -249,9 +249,9 @@ public class Prompt_Module extends Prompt {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (selectedPanel instanceof MotifRepresentationPanel) {
-                         if (e.getSource()==directOrientationButton) ((MotifRepresentationPanel)selectedPanel).setMotifOrientation(Module.DIRECT);
-                    else if (e.getSource()==reverseOrientationButton) ((MotifRepresentationPanel)selectedPanel).setMotifOrientation(Module.REVERSE);
-                    else if (e.getSource()==anyOrientationButton) ((MotifRepresentationPanel)selectedPanel).setMotifOrientation(Module.INDETERMINED);
+                         if (e.getSource()==directOrientationButton) ((MotifRepresentationPanel)selectedPanel).setMotifOrientation(ModuleCRM.DIRECT);
+                    else if (e.getSource()==reverseOrientationButton) ((MotifRepresentationPanel)selectedPanel).setMotifOrientation(ModuleCRM.REVERSE);
+                    else if (e.getSource()==anyOrientationButton) ((MotifRepresentationPanel)selectedPanel).setMotifOrientation(ModuleCRM.INDETERMINED);
                     motifsPanel.repaint();                            
                 }
             }
@@ -374,11 +374,11 @@ public class Prompt_Module extends Prompt {
     
     private void setupUserDefinedPropertiesPanel() {
         userPropertiesPanel=new JPanel(new FlowLayout(FlowLayout.CENTER));
-        String[] allProperties=Module.getAllUserDefinedProperties(engine);
+        String[] allProperties=ModuleCRM.getAllUserDefinedProperties(engine);
         Object[][] propdata=new Object[allProperties.length][3]; // 3 columns: key and value and classtype
         for (int i=0;i<allProperties.length;i++) {
             //Object value=data.getUserDefinedPropertyValue(allProperties[i]);
-            Class propclass=Module.getClassForUserDefinedProperty(allProperties[i],engine);
+            Class propclass=ModuleCRM.getClassForUserDefinedProperty(allProperties[i],engine);
             propdata[i][0]=allProperties[i]; // key
             propdata[i][1]=data.getUserDefinedPropertyValueAsType(allProperties[i],String.class); // convert to string for display purposes
             propdata[i][2]=propclass;          
@@ -401,7 +401,7 @@ public class Prompt_Module extends Prompt {
                 if (e.getType()==TableModelEvent.UPDATE && e.getColumn()==1) { // update value column
                     Object stringvalue=userproptablemodel.getValueAt(e.getFirstRow(), 1);
                     Object value=null;
-                    if (stringvalue!=null && !stringvalue.toString().trim().isEmpty()) value=Module.getObjectForPropertyValueString(stringvalue.toString());
+                    if (stringvalue!=null && !stringvalue.toString().trim().isEmpty()) value=ModuleCRM.getObjectForPropertyValueString(stringvalue.toString());
                     if (value!=null) userproptablemodel.setValueAt(value.getClass(),e.getFirstRow(),2);
                     else userproptablemodel.setValueAt(null, e.getFirstRow(), 2);
                     userproptable.repaint();
@@ -522,7 +522,7 @@ public class Prompt_Module extends Prompt {
     
     @Override
     public void setData(Data newdata) {
-       if (newdata instanceof Module) data=(Module)newdata; 
+       if (newdata instanceof ModuleCRM) data=(ModuleCRM)newdata; 
     }     
 
     private void commitDistanceConstraints() {
@@ -594,7 +594,7 @@ public class Prompt_Module extends Prompt {
             count++;
             newmotifname="Motif"+count;
         }
-        MotifRepresentationPanel newmotifpanel=new MotifRepresentationPanel(newmotifname, Module.INDETERMINED, new MotifCollection(newmotifname+"Col"));
+        MotifRepresentationPanel newmotifpanel=new MotifRepresentationPanel(newmotifname, ModuleCRM.INDETERMINED, new MotifCollection(newmotifname+"Col"));
         if (motifsPanel.getComponentCount()>0) {
             DistancePanel distancepanel=new DistancePanel(0,0,false);
             motifsPanel.add(distancepanel);
@@ -678,7 +678,7 @@ public class Prompt_Module extends Prompt {
         for (int i=0;i<rows;i++) {
            Object key=userproptable.getValueAt(i, 0);
            if (key==null || (key instanceof String && ((String)key).trim().isEmpty())) continue;
-           if (!Module.isValidUserDefinedPropertyKey(key.toString())) {
+           if (!ModuleCRM.isValidUserDefinedPropertyKey(key.toString())) {
                tabbedpane.setSelectedComponent(userPropertiesPanel);
                userproptable.setRowSelectionInterval(i, i);
                userproptable.scrollRectToVisible(userproptable.getCellRect(i,0,true));
@@ -694,7 +694,7 @@ public class Prompt_Module extends Prompt {
                reportError("Value for property '"+key+"' contains illegal character ';'");
                return false;               
            }
-           value=Module.getObjectForPropertyValueString(value.toString());
+           value=ModuleCRM.getObjectForPropertyValueString(value.toString());
            data.setUserDefinedPropertyValue(key.toString(), value);
         }
         // parse GO terms
@@ -768,8 +768,8 @@ public class Prompt_Module extends Prompt {
            String motifname=((MotifRepresentationPanel)panel).getMotifName();
            motifnamefield.setText(motifname);
            int orientation=((MotifRepresentationPanel)panel).getMotifOrientation();
-           if (orientation==Module.DIRECT) directOrientationButton.setSelected(true);
-           else if (orientation==Module.REVERSE) reverseOrientationButton.setSelected(true);
+           if (orientation==ModuleCRM.DIRECT) directOrientationButton.setSelected(true);
+           else if (orientation==ModuleCRM.REVERSE) reverseOrientationButton.setSelected(true);
            else anyOrientationButton.setSelected(true);
            Color moduleColor=settings.getFeatureColor(data.getName()+"."+motifname);  
            motifColorButton.setBackground(moduleColor);
@@ -973,14 +973,14 @@ public class Prompt_Module extends Prompt {
             g.drawRect(0, yoffset, width-1, 20);
             // draw arrow
             g.setColor(Color.BLACK);
-            if (orientation!=Module.INDETERMINED) { // remove this condition to paint <-> arrows for INDETERMINED orientations
+            if (orientation!=ModuleCRM.INDETERMINED) { // remove this condition to paint <-> arrows for INDETERMINED orientations
                 g.fillRect(2, yoffset-10, width-4, 5);
-                if (orientation==Module.DIRECT) g.setColor(Color.GREEN);
-                else if (orientation==Module.REVERSE) g.setColor(Color.RED);
+                if (orientation==ModuleCRM.DIRECT) g.setColor(Color.GREEN);
+                else if (orientation==ModuleCRM.REVERSE) g.setColor(Color.RED);
                 else g.setColor(Color.YELLOW);
                 g.fillRect(3, yoffset-9, width-6, 3);
             }
-            if (orientation==Module.DIRECT) { // if (orientation==Module.DIRECT || orientation==Module.INDETERMINED)
+            if (orientation==ModuleCRM.DIRECT) { // if (orientation==ModuleCRM.DIRECT || orientation==ModuleCRM.INDETERMINED)
                 g.setColor(Color.BLACK);
                 g.drawLine(width-1, yoffset-8, width-1, yoffset-8);
                 g.drawLine(width-2, yoffset-9, width-2, yoffset-7);
@@ -988,14 +988,14 @@ public class Prompt_Module extends Prompt {
                 g.drawLine(width-4, yoffset-11, width-4, yoffset-5);
                 g.drawLine(width-5, yoffset-12, width-5, yoffset-4);
                 g.drawLine(width-6, yoffset-13, width-6, yoffset-3);
-                if (orientation==Module.DIRECT) g.setColor(Color.GREEN); else g.setColor(Color.YELLOW);
+                if (orientation==ModuleCRM.DIRECT) g.setColor(Color.GREEN); else g.setColor(Color.YELLOW);
                 g.drawLine(width-2, yoffset-8, width-2, yoffset-8);
                 g.drawLine(width-3, yoffset-9, width-3, yoffset-7);
                 g.drawLine(width-4, yoffset-10, width-4, yoffset-6);
                 g.drawLine(width-5, yoffset-11, width-5, yoffset-5);
                 g.drawLine(width-6, yoffset-9, width-6, yoffset-7);
             }
-            if (orientation==Module.REVERSE) { // if (orientation==Module.REVERSE || orientation==Module.INDETERMINED)
+            if (orientation==ModuleCRM.REVERSE) { // if (orientation==ModuleCRM.REVERSE || orientation==ModuleCRM.INDETERMINED)
                 g.setColor(Color.BLACK);
                 g.drawLine(0, yoffset-8, 0, yoffset-8);
                 g.drawLine(1, yoffset-9, 1, yoffset-7);
@@ -1003,7 +1003,7 @@ public class Prompt_Module extends Prompt {
                 g.drawLine(3, yoffset-11, 3, yoffset-5);
                 g.drawLine(4, yoffset-12, 4, yoffset-4);
                 g.drawLine(5, yoffset-13, 5, yoffset-3);
-                if (orientation==Module.REVERSE) g.setColor(Color.RED); else g.setColor(Color.YELLOW);
+                if (orientation==ModuleCRM.REVERSE) g.setColor(Color.RED); else g.setColor(Color.YELLOW);
                 g.drawLine(1, yoffset-8, 1, yoffset-8);
                 g.drawLine(2, yoffset-9, 2, yoffset-7);
                 g.drawLine(3, yoffset-10, 3, yoffset-6);
@@ -1222,11 +1222,11 @@ public class Prompt_Module extends Prompt {
                 } else ok=false;
                 if (!ok) JOptionPane.showMessageDialog(panel, "The name is illegal or already in use", "Error", JOptionPane.ERROR_MESSAGE);
             } else if (cmd.equals("Direct")) {
-                panel.setMotifOrientation(Module.DIRECT);
+                panel.setMotifOrientation(ModuleCRM.DIRECT);
             } else if (cmd.equals("Reverse")) {
-                panel.setMotifOrientation(Module.REVERSE);
+                panel.setMotifOrientation(ModuleCRM.REVERSE);
             } else if (cmd.equals("Any")) {
-                panel.setMotifOrientation(Module.INDETERMINED);
+                panel.setMotifOrientation(ModuleCRM.INDETERMINED);
             }
             updateSelectedPanel();
         }

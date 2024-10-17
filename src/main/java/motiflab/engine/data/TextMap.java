@@ -292,7 +292,7 @@ public abstract class TextMap extends DataMap {
      */
     public static TextMap createMapForType(String name, Class targetType, String defaultValue) {
              if (targetType == Motif.class) return new MotifTextMap(name,defaultValue); 
-        else if (targetType == Module.class) return new ModuleTextMap(name, defaultValue);
+        else if (targetType == ModuleCRM.class) return new ModuleTextMap(name, defaultValue);
         else if (targetType == Sequence.class) return new SequenceTextMap(name, defaultValue); 
         else return null;
     }
@@ -303,7 +303,7 @@ public abstract class TextMap extends DataMap {
      */
     public static Class getMapTypeForDataType(Class targetType) {
              if (targetType == Motif.class) return MotifTextMap.class;
-        else if (targetType == Module.class) return ModuleTextMap.class;
+        else if (targetType == ModuleCRM.class) return ModuleTextMap.class;
         else if (targetType == Sequence.class) return SequenceTextMap.class;
         else return null;
     }
@@ -314,7 +314,7 @@ public abstract class TextMap extends DataMap {
      */
     public static Class getDataTypeForMapType(Class mapType) {
              if (mapType == MotifTextMap.class) return Motif.class;
-        else if (mapType == ModuleTextMap.class) return Module.class;
+        else if (mapType == ModuleTextMap.class) return ModuleCRM.class;
         else if (mapType == SequenceTextMap.class) return Sequence.class;
         else return null;
     }

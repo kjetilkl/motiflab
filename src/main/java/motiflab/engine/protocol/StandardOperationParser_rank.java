@@ -13,7 +13,7 @@ import motiflab.engine.MotifLabEngine;
 import motiflab.engine.operations.Operation;
 import motiflab.engine.task.OperationTask;
 import motiflab.engine.data.Data;
-import motiflab.engine.data.Module;
+import motiflab.engine.data.ModuleCRM;
 import motiflab.engine.data.Motif;
 import motiflab.engine.data.NumericMap;
 import motiflab.engine.data.NumericVariable;
@@ -134,9 +134,9 @@ public class StandardOperationParser_rank extends StandardOperationParser {
            if (sourceName.equals(engine.getTypeNameForDataClass(Motif.class))) {
                 if (rankType==null) rankType=Motif.class;
                 else if (rankType!=Motif.class) throw new ParseError("Motif properties can not be compared to previous properties ("+engine.getTypeNameForDataClass(rankType)+")");
-           } else if (sourceName.equals(engine.getTypeNameForDataClass(Module.class))) {
-                if (rankType==null) rankType=Module.class;
-                else if (rankType!=Module.class) throw new ParseError("Module properties can not be compared to previous properties ("+engine.getTypeNameForDataClass(rankType)+")");
+           } else if (sourceName.equals(engine.getTypeNameForDataClass(ModuleCRM.class))) {
+                if (rankType==null) rankType=ModuleCRM.class;
+                else if (rankType!=ModuleCRM.class) throw new ParseError("Module properties can not be compared to previous properties ("+engine.getTypeNameForDataClass(rankType)+")");
            } else if (sourceName.equals(engine.getTypeNameForDataClass(Sequence.class))) {
                 if (rankType==null) rankType=Sequence.class;
                 else if (rankType!=Sequence.class) throw new ParseError("Sequence properties can not be compared to previous properties ("+engine.getTypeNameForDataClass(rankType)+")");
