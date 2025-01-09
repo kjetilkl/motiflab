@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.io.StreamCorruptedException;
-import java.lang.reflect.Proxy;
 
 /**
  * A special ObjectInputStream that loads a class based on a specified
@@ -63,8 +62,7 @@ public class DynamicClassLoaderObjectInputStream extends ObjectInputStream {
     @Override
     protected Class<?> resolveClass(ObjectStreamClass objectStreamClass) throws IOException, ClassNotFoundException {  
         String className=objectStreamClass.getName();     
-        Class<?> clazz = null; 
-        
+        Class<?> clazz = null;         
         try { clazz = Class.forName(className, false, engine.getClass().getClassLoader());} catch (ClassNotFoundException e) {}
         if (clazz==null) clazz=engine.getPluginClassForName(className); // the class was not known by the regular class loader. Attempt to load the class with one of the registered plugin class loaders instead 
 
@@ -72,11 +70,22 @@ public class DynamicClassLoaderObjectInputStream extends ObjectInputStream {
             // the classloader knows of the class
             return clazz;
         } else {
-            // classloader knows not of class, let the super classloader do it
+            // classloader knows not of the class, let the super classloader do it
             return super.resolveClass(objectStreamClass);
         }
     }
 
+    @Override
+    protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
+    ObjectStreamClass descriptor = super.readClassDescriptor();
+    String oldClassName = descriptor.getName();
+    if (oldClassName.equals("motiflab.engine.data.Module")) {
+        return ObjectStreamClass.lookup(motiflab.engine.data.ModuleCRM.class);
+    } 
+    return descriptor;
+}
+
+    
     /**
      * Create a proxy class that implements the specified interfaces using
      * the specified ClassLoader or the super ClassLoader.
