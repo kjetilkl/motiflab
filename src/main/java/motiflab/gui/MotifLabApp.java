@@ -41,7 +41,7 @@ public class MotifLabApp extends SingleFrameApplication implements MessageListen
             graphics = (Graphics2D)splash.createGraphics();
         } 
         try {
-             UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
         }
         catch (Exception e) {}       
         MotifLabEngine engine=MotifLabEngine.getEngine();       
