@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<program name="SimpleEnsemble" class="EnsemblePrediction">
+    <properties>
+      <author>Kjetil Klepper</author>
+      <contact>Kjetil Klepper (kjetil.klepper@ntnu.no)</contact>
+      <homepage>http://www.motiflab.org</homepage>
+
+      <description>SimpleEnsemble is a very basic ensemble method that compares predicted sites obtained from several motif discovery algorithms and returns only those sites (and motifs) where at least &lt;i&gt;N&lt;/i&gt; bases in that site (or &lt;i&gt;N&lt;/i&gt;% of the site) is predicted by at least &lt;i&gt;M&lt;/i&gt; different methods.</description>
+    </properties>
+
+    <service type="bundled" location="org.motiflab.external.SimpleEnsemble"/>
+
+</program>

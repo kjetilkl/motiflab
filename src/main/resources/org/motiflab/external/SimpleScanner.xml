@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<program name="SimpleScanner" class="MotifScanning">
+    <properties>
+      <author>Kjetil Klepper</author>
+      <contact>Kjetil Klepper (kjetil.klepper@ntnu.no)</contact>
+      <homepage>http://www.motiflab.org</homepage>
+      <description>A primitive motif scanning program based on simple PWM matching using log-odds ratios and a zero-order background model</description>
+    </properties>
+
+    <service type="bundled" location="org.motiflab.external.SimpleScanner"/>
+
+</program>
+
