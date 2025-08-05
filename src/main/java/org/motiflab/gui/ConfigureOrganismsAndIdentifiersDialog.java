@@ -657,7 +657,7 @@ public class ConfigureOrganismsAndIdentifiersDialog extends javax.swing.JDialog 
            }
         }
         try {
-            Organism.replaceandSave(newconfiguration, null); // check first for errors
+            Organism.replaceAndSave(newconfiguration, null); // check first for errors
             gui.getEngine().getGeneIDResolver().replaceAndSave(biomartDBlist,geneIDlist,otherIDlist,buildList, null); // check first for errors
         } catch (ParseError e) {
             JOptionPane.showMessageDialog(ConfigureOrganismsAndIdentifiersDialog.this, e.getMessage(),"Configuration Error",JOptionPane.ERROR_MESSAGE);
@@ -668,9 +668,9 @@ public class ConfigureOrganismsAndIdentifiersDialog extends javax.swing.JDialog 
         }
         // no errors in the configuration. Try again and save the configurations this time
          try {
-          File organismFile=new File(gui.getEngine().getMotifLabDirectory()+java.io.File.separator+"Organisms.config");
-          Organism.replaceandSave(newconfiguration, organismFile); // check first for errors
-          File geneIDresolverFile=new File(gui.getEngine().getMotifLabDirectory()+java.io.File.separator+"GeneIDResolver.config");
+          File organismFile=new File(gui.getEngine().getMotifLabDirectory(),"Organisms.config");
+          Organism.replaceAndSave(newconfiguration, organismFile); // check first for errors
+          File geneIDresolverFile=new File(gui.getEngine().getMotifLabDirectory(),"GeneIDResolver.config");
           gui.getEngine().getGeneIDResolver().replaceAndSave(biomartDBlist,geneIDlist,otherIDlist,buildList, geneIDresolverFile); // check first for errors
         } catch (Exception e) {
              JOptionPane.showMessageDialog(ConfigureOrganismsAndIdentifiersDialog.this, e.getMessage(),e.getClass().getSimpleName(),JOptionPane.ERROR_MESSAGE);

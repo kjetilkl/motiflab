@@ -23,6 +23,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
@@ -54,6 +55,7 @@ import java.io.StreamCorruptedException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -83,6 +85,7 @@ import javax.swing.JLabel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -94,6 +97,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
@@ -146,6 +151,7 @@ import org.motiflab.engine.task.ClearDataTask;
 import org.motiflab.engine.task.ExecutableTask;
 import org.motiflab.engine.task.OperationTask;
 import org.motiflab.engine.task.ProtocolTask;
+import org.motiflab.engine.util.UpgradeManager;
 import org.motiflab.gui.operationdialog.OperationDialog;
 import org.motiflab.gui.prompt.*;
 
@@ -512,19 +518,19 @@ public final class MotifLabGUI extends FrameView implements MotifLabClient, Data
 
     private void registerDataTrackVisualizers() {
         Class[] allDTVs= new Class[]{
-                DataTrackVisualizer_Numeric_BarGraph.class,
-                DataTrackVisualizer_Numeric_LineGraph.class,
-                DataTrackVisualizer_Numeric_OutlinedGraph.class,
-                DataTrackVisualizer_Numeric_GradientBarGraph.class,
-                DataTrackVisualizer_Numeric_HeatMap1Color.class,
-                DataTrackVisualizer_Numeric_HeatMap2Colors.class,
-                DataTrackVisualizer_Numeric_HeatMapRainbow.class,
-                DataTrackVisualizer_Numeric_DNA_Graph.class,
-                DataTrackVisualizer_Sequence_DNA.class,
-                DataTrackVisualizer_Sequence_DNA_Colored.class,
-                DataTrackVisualizer_Sequence_DNA_Monochrome.class,
-                DataTrackVisualizer_Sequence_DNA_Big.class,
-                DataTrackVisualizer_Region_Default.class
+            DataTrackVisualizer_Numeric_BarGraph.class,
+            DataTrackVisualizer_Numeric_LineGraph.class,
+            DataTrackVisualizer_Numeric_OutlinedGraph.class,
+            DataTrackVisualizer_Numeric_GradientBarGraph.class,
+            DataTrackVisualizer_Numeric_HeatMap1Color.class,
+            DataTrackVisualizer_Numeric_HeatMap2Colors.class,
+            DataTrackVisualizer_Numeric_HeatMapRainbow.class,
+            DataTrackVisualizer_Numeric_DNA_Graph.class,
+            DataTrackVisualizer_Sequence_DNA.class,
+            DataTrackVisualizer_Sequence_DNA_Colored.class,
+            DataTrackVisualizer_Sequence_DNA_Monochrome.class,
+            DataTrackVisualizer_Sequence_DNA_Big.class,
+            DataTrackVisualizer_Region_Default.class
         };
 
         for (Class type:allDTVs) {
@@ -3178,7 +3184,117 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         infodialog.dispose();
     }
 
-    /** Displays a message in a popup dialog */
+    @Override
+    public void displayMessage(String message, int type) {     
+        if (SwingUtilities.isEventDispatchThread()) displayMessageInternal(message, type);
+        else try {
+            SwingUtilities.invokeAndWait(() -> { // block background workers calling this method until the dialog is closed
+                displayMessageInternal(message, type);
+            });
+        } catch (InterruptedException | InvocationTargetException e) { }
+    }
+    
+    private void displayMessageInternal(String message, int type) {      
+        String header=""; 
+        int paneltype=JOptionPane.INFORMATION_MESSAGE;
+        if (type==ERROR_MESSAGE) {header="ERROR"; paneltype=JOptionPane.ERROR_MESSAGE;}
+        else if (type==WARNING_MESSAGE) {header="Warning";paneltype=JOptionPane.WARNING_MESSAGE;}                    
+        if (message.length()<200) JOptionPane.showMessageDialog(getFrame(), message, header, paneltype);
+        else  {
+            if (message.contains("\n")) message=message.replaceAll("\n", "<br>"); // InfoDialog uses HTML formatting
+            InfoDialog infodialog=new InfoDialog(this, header, message, 700, 450);
+            infodialog.setVisible(true);
+            infodialog.dispose();           
+        }
+    }    
+    
+    @Override
+    public int[] selectOption(String message, String[] options, final boolean allowMultipleChoice) {
+        if (SwingUtilities.isEventDispatchThread()) return selectOptionInternal(message, options, allowMultipleChoice);
+        final Object[] selection = new Object[]{new int[0]};
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                int[] result = selectOptionInternal(message, options, allowMultipleChoice);
+                selection[0]=result;
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            // Handle exceptions
+        } 
+        return (int[])selection[0];
+    }
+    
+    private int[] selectOptionInternal(String message, String[] options, boolean allowMultipleChoice) {
+        if (message.contains("\n")) {
+            message=message.replaceAll("\n\n\\s+\\* ", "<br><br>&nbsp;&nbsp;&nbsp;&bull; "); // bullet point                
+            message=message.replaceAll("\n", "<br>");
+            message="<html>"+message+"</html>";
+        }          
+        if (options.length==2 && "YES".equalsIgnoreCase(options[0]) && "NO".equalsIgnoreCase(options[1])) {
+            int choice = JOptionPane.showConfirmDialog(getFrame(), message, "", JOptionPane.YES_NO_OPTION);
+            return new int[]{(choice==JOptionPane.YES_OPTION)?0:1};
+        } else if (!allowMultipleChoice) {
+            int optionTextLength=0;
+            for (String option:options) {if (option.length()>optionTextLength) optionTextLength=option.length();}
+            if (options.length<6 && optionTextLength<20) {
+               int choice = JOptionPane.showOptionDialog(getFrame(),message, "", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+               return new int[]{choice};               
+            } else { // options are many or verbose, so it is better to display them as a list of radio-buttons
+                JPanel outer = new JPanel(new BorderLayout(0, 10));
+                outer.add(new JLabel(message),BorderLayout.NORTH);                
+                JPanel boxpanel = new JPanel(new GridLayout(0,1));             
+                ButtonGroup group = new ButtonGroup();
+                JRadioButton[] boxes = new JRadioButton[options.length];               
+                for (int i=0;i<options.length;i++) {
+                    boxes[i]=new JRadioButton(options[i]);
+                    boxpanel.add(boxes[i]);
+                    group.add(boxes[i]);
+                    if (i==0) boxes[i].setSelected(true);
+                }
+                if (options.length>5) {
+                    JScrollPane scrollpane = new JScrollPane(boxpanel);
+                    outer.add(scrollpane,BorderLayout.CENTER);
+                } else outer.add(boxpanel,BorderLayout.CENTER);
+                int result = JOptionPane.showConfirmDialog(getFrame(),outer,"",JOptionPane.OK_CANCEL_OPTION); 
+                if (result==JOptionPane.CANCEL_OPTION) return new int[]{};
+                else {
+                    for (int i=0;i<boxes.length;i++) {
+                        if (boxes[i].isSelected()) return new int[]{i};
+                    }
+                    return new int[]{};
+                }                
+            }           
+        } else { // custom implementation to allow multiple choice         
+            JPanel outer = new JPanel(new BorderLayout(0, 10));
+            outer.add(new JLabel(message),BorderLayout.NORTH);                
+            JPanel boxpanel = new JPanel(new GridLayout(0,1)); 
+            JCheckBox[] boxes = new JCheckBox[options.length];               
+            for (int i=0;i<options.length;i++) {
+                boxes[i]=new JCheckBox(options[i]);
+                boxpanel.add(boxes[i]);
+                if (i==0) boxes[i].setSelected(true);                
+            }
+            if (options.length>5) {
+                JScrollPane scrollpane = new JScrollPane(boxpanel);
+                outer.add(scrollpane,BorderLayout.CENTER);
+            } else outer.add(boxpanel,BorderLayout.CENTER);
+            int result = JOptionPane.showConfirmDialog(getFrame(),outer,"",JOptionPane.OK_CANCEL_OPTION); 
+            if (result==JOptionPane.CANCEL_OPTION) return new int[]{};
+            else {
+                ArrayList<Integer> chosen = new ArrayList<>();
+                for (int i=0;i<boxes.length;i++) {
+                    if (boxes[i].isSelected()) chosen.add(i);
+                }
+                int[] selected = new int[chosen.size()];
+                for (int i=0;i<chosen.size();i++) selected[i]=chosen.get(i);
+                return selected;
+            }                       
+        }
+    }    
+    
+    /** Displays a message in a popup dialog
+     * @param message The message to display
+     * @param type The type of message (based on types in JOptionPane)
+     */
     public void alert(String message, int type) {
         String header="";
         if (type==JOptionPane.ERROR_MESSAGE) header="Error";
@@ -5127,8 +5243,8 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                         StringBuilder message=new StringBuilder();
                         if (ex.getMessage().equals("Newer version")) message.append("The saved session requires a newer version of MotifLab.");
                         else message.append("The saved session is not compatible with the current version/setup of MotifLab.");
-                        System.err.println(ex);
-                        ex.printStackTrace(System.err);                                        
+                        // System.err.println(ex);
+                        // ex.printStackTrace(System.err);                                        
                         if (requirements!=null && requirements.length>0) {
                             ArrayList<String> missingPlugins=new ArrayList<String>();
                             ArrayList<String> additionRequirements=new ArrayList<String>();
@@ -5187,7 +5303,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                             engine.storeDataItem(element);
                         }
                       } catch (ExecutionError e) {
-                          e.printStackTrace(System.err);
+                          // e.printStackTrace(System.err);
                           JOptionPane.showMessageDialog(getFrame(), "An error occurred during session restore:\n\n"+e.getMessage(),"Restore Session Error" ,JOptionPane.ERROR_MESSAGE);
                       }
                     }
@@ -5205,7 +5321,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                         try {
                             engine.storeDataItem(element); // this will show the tab
                         } catch (Exception e) {
-                            e.printStackTrace(System.err);
+                            // e.printStackTrace(System.err);
                             JOptionPane.showMessageDialog(getFrame(), "An error occurred during session restore:\n\n"+e.getMessage(),"Restore Session Error" ,JOptionPane.ERROR_MESSAGE);
                         }
                     }
@@ -5215,7 +5331,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                             try {
                                 engine.storeDataItem(element);
                             } catch (ExecutionError e) {
-                                e.printStackTrace(System.err);
+                                // e.printStackTrace(System.err);
                                 JOptionPane.showMessageDialog(getFrame(), "An error occurred during session restore:\n"+e.getMessage(),"Restore Session Error" ,JOptionPane.ERROR_MESSAGE);
                             }
                         }
@@ -6877,17 +6993,18 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
 
 
     /**
-     * This method checks to see if this is the first time the is user
-     * starts MotifLab (signaled by the absence of a special flag-file in
-     * the work directory). On startup the first time there might be some
-     * installations needed and license acceptance and registrations that must
-     * be performed. If the method detects that the user has previously started
-     * MotifLab it just returns prematurely
+     * This method checks with the UpgradeManager to see if an upgrade 
+     * of some configuration files or other installed resources are needed
+     * because they were created by an older version of MotifLab than the one
+     * which is currently running
      */
-    public void firstTimeStartup() {
-        if (!engine.isFirstTimeStartup()) return; // is this the first time the user runs MotifLab?
-        setProgress(10); // just to have some start value
-        String document="<html><body>" +
+    public void checkIfUpgradeIsNeeded() {
+        final UpgradeManager upgradeManager = new UpgradeManager(engine);
+        if (!upgradeManager.isUpgradeNeeded()) return; // no need to upgrade at this point      
+        setProgress(10); // just to have some starting value for the upgrade process
+        final boolean isFirstTime = upgradeManager.isFirstTime();
+        if (isFirstTime) {
+            String document="<html><body>" +
                 "<h1>Welcome to MotifLab</h1>" +
                 "<br>" +
                 "MotifLab is a workbench for motif discovery and regulatory sequence analysis that can integrate various tools and data sources." +
@@ -6895,10 +7012,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                 "The software was developed by Kjetil Klepper (kjetil.klepper@ntnu.no) under the supervision of professor Finn Drabløs (finn.drablos@ntnu.no)<br><br>" +
                 "The project was supported by the National Programme for Research in Functional Genomics in Norway (FUGE) " +
                 "in the Research Council of Norway." +
-                "<br><br>MotifLab is open source and free to use \"as is\" for academic and commercial purposes. " +
-                "However, no parts of the source code may be reused in its original or modified form as part of other commercial software projects without the consent of the authors. " +
-                "Also, it is not permitted to sell or otherwise redistribute MotifLab for profit (directly or indirectly) without the authors' consent.<br>"+
-                "Note that MotifLab can link to other external programs whose use might be subject to other license restrictions." +
+                "<br><br>MotifLab is distributed under the MIT license"+
                 "<br><br>" +
                 "<center>"+
                 "Bioinformatics and Gene Regulation Group (BiGR)<br>"+
@@ -6906,9 +7020,10 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                 "Norwegian University of Science and Technology (NTNU)" +
                 "<br></center><br>"+
                 "</body></html>";
-        InfoDialog dialog=new InfoDialog(MotifLabGUI.this, "MotifLab installation", document, 500,400);
-        dialog.setVisible(true);
-        dialog.dispose();
+            InfoDialog dialog=new InfoDialog(MotifLabGUI.this, "MotifLab installation", document, 500,400);
+            dialog.setVisible(true);
+            dialog.dispose();
+        } 
         MotifLabGUI.this.getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
         // Perform installation in the background
@@ -6917,7 +7032,8 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             @Override
             public Boolean doInBackground() {
                 try {
-                    engine.installResourcesFirstTime(); // this will install resources and import them.
+                    upgradeManager.performUpgrade();
+                    engine.importResources(); // this will install resources and import them.
                 } catch (Exception e) {
                     ex=e;
                 }
@@ -6926,15 +7042,21 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             @Override
             public void done() { // this method is invoked on the EDT!
                 MotifLabGUI.this.getFrame().setCursor(Cursor.getDefaultCursor());
-                //MotifLabGUI.this.setProgress(-1); // hides progressbar
-                if (ex!=null) { // this should return FALSE now if everything is registered OK
-                    JOptionPane.showMessageDialog(MotifLabGUI.this.getFrame(), "It seems that something went wrong during installation\nPlease try to restart MotifLab","Install error",JOptionPane.ERROR_MESSAGE);
+                if (ex!=null) {
+                    logMessage(ex.getMessage());
+                    if (isFirstTime) JOptionPane.showMessageDialog(MotifLabGUI.this.getFrame(), "It seems that something went wrong during installation.\nPlease try to restart MotifLab","Install error",JOptionPane.ERROR_MESSAGE);
+                    else JOptionPane.showMessageDialog(MotifLabGUI.this.getFrame(), "It seems that something went wrong during the upgrade.\nPlease try to restart MotifLab","Upgrade error",JOptionPane.ERROR_MESSAGE);
                 } else {
                     setupOperationsMenu(); // the engine.importResources() method that sets up the operations may have been called after setupOperationsMenu() was called the first time. So we need to do it again, just to be sure
                     engine.executeStartupConfigurationProtocol();
-                    setDefaultExternalProgram("motifscanning", "SimpleScanner");
-                    showWelcomeScreen(); // show welcome screen after installation is completed
-                    JOptionPane.showMessageDialog(MotifLabGUI.this.getFrame(), "Installation completed successfully.","Installation completed",JOptionPane.INFORMATION_MESSAGE);
+                    if (isFirstTime) {
+                        setDefaultExternalProgram("motifscanning", "SimpleScanner");
+                        showWelcomeScreen(); // show welcome screen the first time MotifLab is started
+                        JOptionPane.showMessageDialog(MotifLabGUI.this.getFrame(), "Installation completed successfully.","Installation completed",JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(MotifLabGUI.this.getFrame(), "Upgrade completed successfully.","Upgrade completed",JOptionPane.INFORMATION_MESSAGE);
+                    }
+
                 }
             }
         }; // end of SwingWorker class
@@ -6994,36 +7116,12 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             Exception ex=null;
             @Override
             public Boolean doInBackground() {
-                OutputStream outputStream = null;
-                ZipOutputStream zout=null;
-                FileInputStream fin=null;
                 try {
-                     outputStream=MotifLabEngine.getOutputStreamForFile(file);
-                     byte[] buffer = new byte[1024];
-                     zout = new ZipOutputStream(outputStream);
-                     for (File configFile:configfiles) {
-                        fin = new FileInputStream(configFile);
-                        zout.putNextEntry(new ZipEntry(configFile.getName()));
-                        int length;
-                        while((length = fin.read(buffer)) > 0) {
-                           zout.write(buffer, 0, length);
-                        }
-                        zout.closeEntry();
-                        fin.close();
-                     }
-                     zout.flush();
-                     zout.close();
-                     outputStream.close();
+                     engine.backupConfigurationFiles(file, configfiles);
                 } catch (Exception e) {
                     ex=e;
                     return Boolean.FALSE;
-                } finally {
-                    try {
-                        if (zout!=null) zout.close();
-                        if (outputStream!=null) outputStream.close();
-                        if (fin!=null) fin.close();
-                    } catch (Exception x) {}
-                }
+                } 
                 return Boolean.TRUE;
             } // end doInBackground
             @Override

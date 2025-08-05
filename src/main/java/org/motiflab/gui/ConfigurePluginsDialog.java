@@ -490,6 +490,7 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
                 closeButton.setEnabled(true);
                 if (ex!=null) {
                     JOptionPane.showMessageDialog(ConfigurePluginsDialog.this, ex.getMessage(), "Plugin Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace(System.err);
                 } else { // install went OK
                     JOptionPane.showMessageDialog(ConfigurePluginsDialog.this, "The plugin was installed successfully", "Install Plugin", JOptionPane.INFORMATION_MESSAGE);
                 }

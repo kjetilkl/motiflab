@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.IOUtils;
 
 import org.motiflab.engine.data.*;
@@ -59,6 +60,7 @@ import org.motiflab.engine.task.ExecutableTask;
 import org.motiflab.engine.util.ImportantNotificationParser;
 import org.motiflab.engine.util.MotifComparator;
 import org.motiflab.engine.util.NaturalOrderComparator;
+import org.motiflab.engine.util.UpgradeManager;
 import org.motiflab.external.ExternalProgram;
 import org.motiflab.gui.PreferencesDialog;
 import org.motiflab.gui.VisualizationSettings;
@@ -79,8 +81,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     public static final String CONCURRENT_THREADS="concurrentThreadCount"; 
     public static final String PREFERENCES_AUTO_CORRECT_SEQUENCE_NAMES="autocorrectSequenceNames";  
 
-    private static String version="2.0.0.-7"; // 
-    private static Date releaseDate=getCorrectDate(2024, 7, 30); // Note: Official release date for v2.0.0 has not been determined yet...
+    private static String version="2.0.0.-6"; // 
+    private static Date releaseDate=getCorrectDate(2025, 7, 24); // Note: Official release date for v2.0.0 has not been determined yet...
     
     private DataStorage storage;
     private HashSet<MessageListener> messagelisteners=new HashSet<MessageListener>();
@@ -160,7 +162,9 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         setDataCacheDirectory(getMotifLabDirectory()+java.io.File.separator+"cache");
         setGeneIDCacheDirectory(getMotifLabDirectory());
         if (!setupTempDirectory()) System.exit(1); // if this fails there is nothing more we can do...
-        if (!isFirstTimeStartup()) importResources(); // if this is the first time, we will install first and then import the resources later on
+        importResources();
+//        UpgradeManager upgradeManager = new UpgradeManager(this);
+//        if (!upgradeManager.isUpgradeNeeded())  // if an upgrade is needed, the client will trigger that later on and then trigger a nwe import of the resources
 
         // Register reserved words that can not be used as names for data objects (some of these words are reserved to avoid problems in the GUI and protocols)
         String[] reservedWords=new String[]{"Visualization","Protocol","within","Collection","Partition","Region","equals","matches","matching","is","in","NOT","OR","AND","TRUE","FALSE","True","False","YES","NO","Yes","No","_DEFAULT_"};
@@ -213,7 +217,10 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         geneOntologyEngine=new GOengine(this);
     }
     
-    private void importResources() {
+    /**
+    * Sets up many different types of resources and configurations that are needed by MotifLab
+    */
+    public void importResources() {
         importOrganisms();
         importGeneIDResolverConfig();
         importMotifClassifications();           
@@ -273,7 +280,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             }
         }
     }      
-    
+        
     /**
      * Returns the version number MotifLab as a string
      * @return
@@ -2359,7 +2366,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     public void importGeneIDResolverConfig() {
         if (geneIDResolver==null) {errorMessage("System Error: No Gene ID Resolver created",0);return;}
         logMessage("Importing Gene ID configurations");
-        File configFile=new File(getMotifLabDirectory()+java.io.File.separator+"GeneIDResolver.config");
+        File configFile=new File(getMotifLabDirectory(),"GeneIDResolver.config");
         if (configFile.exists()) {
             try {
                 geneIDResolver.initializeFromFile(configFile,true);
@@ -2373,7 +2380,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
 
     public void importOrganisms() {
         logMessage("Importing Organisms");
-        File organismFile=new File(getMotifLabDirectory()+java.io.File.separator+"Organisms.config");
+        File organismFile=new File(getMotifLabDirectory(),"Organisms.config");
         if (organismFile.exists()) {
             try {
                 Organism.initializeFromFile(organismFile);
@@ -2388,7 +2395,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     public void importMotifClassifications() {
         logMessage("Importing Motif classifications");       
         try {
-            File tfclassFile=new File(getMotifLabDirectory()+java.io.File.separator+"TFclass.config");
+            File tfclassFile=new File(getMotifLabDirectory(),"TFclass.config");
             if (tfclassFile.exists()) {
                 MotifClassification.initializeFromFile(tfclassFile);
             } else {
@@ -2461,7 +2468,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     /** Imports known data formats and registers them with the engine
      * (For now, this is hard-coded, but I guess it should not be...)
      */
-    private void importDataFormats() {
+    public void importDataFormats() {
         logMessage("Importing Data formats");
         // the second parameter in registerDataFormat() specifies which data types the format should be used as defaults for
         registerDataFormat(DataFormat_Plain.class, null);
@@ -2546,16 +2553,14 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         // registerDataFormat(DataFormat_DRIMust.class, null);   
         //registerDataFormat(DataFormat_ConsensusResults.class, null);        
         registerDataFormat(DataFormat_VOID.class, null); 
-        registerDataFormat(DataFormat_Graph.class, null);
-        
-          
+        registerDataFormat(DataFormat_Graph.class, null);                 
      }
 
 
     /** Returns the base-URL for the Web Site (including forward slash at the end) */
     public String getWebSiteURL() {
-        // this should be a configurable property!!!
-        return "http://tare.medisin.ntnu.no/motiflab/";
+        // this should perhaps be a configurable property?
+        return "https://www.motiflab.org/";  // previously "https://tare.medisin.ntnu.no/motiflab/";
     }
 
     /** Returns the base-URL for the External Programs Repository (including forward slash at the end) */
@@ -2699,7 +2704,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                 continue; // the directory did not contain correct metadata
             }  catch (Throwable tr) {
                 logMessage("  -> Plugin \""+dir.getAbsolutePath()+"\" : CRITICAL ERROR => "+tr.toString()+". The plugin will not be activated!");  
-                tr.printStackTrace(System.err);
+                // tr.printStackTrace(System.err);
                 continue; // the directory did not contain correct metadata
             }        
             // The plugin object could be instantiated. Now try to initialize it and register it with the engine. Initialization from client will be performed later
@@ -2714,7 +2719,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                 logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : CRITICAL ERROR => "+se.getMessage()+". The plugin will not be activated!");
             } catch (Throwable tr) {
                 logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : CRITICAL ERROR => "+tr.toString()+". The plugin will not be activated!");
-                tr.printStackTrace(System.err);
+                // tr.printStackTrace(System.err);
             }                                         
         }  
         if (!pluginsOK.isEmpty()) { // show which plugins have been loaded to the log
@@ -2884,8 +2889,10 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                plugin=(Plugin)pluginclass.newInstance();
                return plugin;
             } catch (SystemError e) {
+                e.printStackTrace(System.err);
                 throw e;
             } catch (Exception e) {
+                e.printStackTrace(System.err);                
                 throw new SystemError(e.getMessage());
             } 
         }
@@ -3211,13 +3218,17 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                predefinedMotifCollections=loadPredefinedMotifCollectionsConfiguration();
             } catch (Exception e) {errorMessage("Unable to load predefined motif collections: "+e.toString(),0);}
         } else {
-            File motifcollectiondir=new File(getMotifLabDirectory()+java.io.File.separator+MotifCollectionDirectory);
+            File motifcollectiondir=getPredefinedMotifCollectionDirectory();
             if (!motifcollectiondir.exists()) {
                boolean ok=motifcollectiondir.mkdirs();
                if (!ok) errorMessage("Unable to create directory for predefined motif collections", 0);  
             }
         }        
 
+    }
+    
+    public File getPredefinedMotifCollectionDirectory() {
+       return new File(getMotifLabDirectory()+java.io.File.separator+MotifCollectionDirectory); 
     }
     
     /** 
@@ -3249,7 +3260,6 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
      * This will save the collection in the working directory (replacing any previous collections
      * with the same name) and also update the 'registry' of predefined collections
      * @param collection The MotifCollection to be registered
-     * @return TRUE if registration was succesful
      */
     public void registerPredefinedMotifCollection(MotifCollection collection) throws Exception {
         String name=collection.getPredefinedCollectionName();
@@ -3320,25 +3330,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         } 
     }
    
-    /** Returns TRUE if this is the first time the user starts MotifLab.
-     *  The first time MotifLab is started, it must create a system directory for MotifLab and install several configuration files into that directory.
-     *  If a user has run MotifLab before, it is indicated by the existence of a file called "installed.txt" inside this MotifLab system directory (the file itself is empty)
-     * 
-     */
-    public boolean isFirstTimeStartup() {
-        File test=new File(getMotifLabDirectory()+File.separator+"installed.txt");
-        return !test.exists(); // the file above is created on first startup. If it does not exists yet it means this is the first time
-    }     
 
-    /** Creates an indicator file in the workdir which signals that installation has been completed
-     *  This method should only be called as a final step during installation procedure
-     */
-    public boolean raiseInstalledFlag() {
-        File test=new File(getMotifLabDirectory()+File.separator+"installed.txt");
-        try {
-            return test.createNewFile();
-        } catch (Exception e) {return false;}
-    }
 
     /**
      * Saves the current configuration of predefined motif collections back to the standard config file
@@ -4131,7 +4123,7 @@ public static Class getClassForName(String classname) throws ClassNotFoundExcept
         HashMap<String,Object> restored=new HashMap<String,Object>();
         ArrayList<Data> datalist=null;
         VisualizationSettings settings=null;
-        Object restoredProtocols=null; // this can be a SerializedProtocolManager or StandardProtocol
+        Object restoredProtocols=null; // this can be a SerializedProtocolManager or a single SerializedStandardProtocol
         SequenceCollection defaultCollectionCopy=null;
         String[] tabNames;
         String selectedTabName=null;  
@@ -4202,153 +4194,7 @@ public static Class getClassForName(String classname) throws ClassNotFoundExcept
     }   
    
 // ================  The methods below are for configuring MotifLab the first time it is used by installing some bundled configuration files into a local directory  ====================
-     
-
-    public void installResourcesFirstTime() throws SystemError {
-        if (!isFirstTimeStartup()) return; // is this really the first time the user runs MotifLab?        
         
-        if (client==null) System.err.println("WARNING: No client installed (yet)");
-        // --- install general configuration files ---
-        ArrayList<String> configfiles=locateBundledFiles("/org/motiflab/engine/resources",".config");
-        if (!configfiles.isEmpty()) logMessage("Installing configuration files");
-        int count=0;
-        int size=configfiles.size();
-        for (String filename:configfiles) {
-            try {
-                InputStream stream=this.getClass().getResourceAsStream("/org/motiflab/engine/resources/"+filename);
-                installConfigFileFromStream(filename,stream);
-                if (client!=null) client.progressReportMessage((int)(10+(10f/(float)size)*count));
-                count++;
-            } catch (SystemError e) {
-               logMessage("Unable to install configuration file '"+filename+"' => "+e.getMessage());
-            }
-        }      
-        if (client!=null) client.progressReportMessage(20);   
-        
-        // --- install external program configuration files ---
-        ArrayList<String> bundled=locateBundledFiles("/org/motiflab/external",".xml");
-        if (!bundled.isEmpty()) logMessage("Installing bundled programs");
-        count=0;
-        size=bundled.size();
-        for (String filename:bundled) {
-            try {
-                InputStream stream=this.getClass().getResourceAsStream("/org/motiflab/external/"+filename);
-                installBundledProgram(filename,stream);
-                if (client!=null) client.progressReportMessage((int)(20+(30f/(float)size)*count));
-                count++;
-            } catch (SystemError e) {
-               if (client!=null) client.logMessage("Unable to install bundled program '"+filename+"' => "+e.getMessage());
-            }
-        }
-        if (client!=null) client.progressReportMessage(50); //  
-        
-        // --- install predefined Motif Collections ---
-        ArrayList<String> bundledMotifs=locateBundledFiles("/org/motiflab/engine/resources",".mlx");
-        if (client!=null) client.logMessage("Installing bundled motif collections");
-        installBundledMotifCollections(bundledMotifs,50,100);   
-        if (client!=null) client.progressReportMessage(-1); // Tells graphical clients to hide the progressbar
-        engine.raiseInstalledFlag(); // installation should now be completed
-        if (engine.isFirstTimeStartup()) { // this should now return FALSE if everything was registered OK
-            throw new SystemError("It seems that something went wrong during installation. Please try to restart MotifLab");
-        }      
-        if (client!=null) client.logMessage("Installation completed successfully");  
-        importResources();
-    }
-   
-   
-    /** Installs the program with XML-config file provided in the given stream
-     *  @param filename The name of the XML-config file (including XML-suffix)
-     *  @param stream An InputStream providing access to the file
-     */
-    private void installBundledProgram(String filename,InputStream stream) throws SystemError {
-        ExternalProgram program=null;
-        program = ExternalProgram.initializeExternalProgramFromStream(stream,filename,true);
-        // the following line should not happen (but just in case...)
-        if (program==null) throw new SystemError("Unable to read program definition file");
-        File externalfile=new File(engine.getMotifLabDirectory()+File.separator+"external"+File.separator+filename);           
-        try {
-            File parentDir=externalfile.getParentFile();
-            if (parentDir!=null && !parentDir.exists()) parentDir.mkdirs();
-            program.saveConfigurationToFile(externalfile);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            if (e instanceof SystemError) throw (SystemError)e;
-            else throw new SystemError(e.getClass().getSimpleName()+":"+e.getMessage());
-        }
-        program.clearProperties();
-        // a call will later be made to engine.importExternalPrograms() to initialize the programs properly
-    }
-
-    
-   
-   
-     private void installBundledMotifCollections(final ArrayList<String> bundledMotifs, final int progressStart, final int progressEnd)  {
-        final float range=progressEnd-progressStart;
-        int count=0;
-        File dir=new File(getMotifLabDirectory()+File.separator+MotifCollectionDirectory);
-        if (!dir.exists()) dir.mkdirs();            
-        int size=bundledMotifs.size();
-        for (String filename:bundledMotifs) {
-            try {
-                InputStream stream=this.getClass().getResourceAsStream("/org/motiflab/engine/resources/"+filename);
-                if (client!=null) client.progressReportMessage((int)(progressStart+(range/(float)size)*count));
-                if (client!=null) client.logMessage("Installing motif collection: "+filename);
-                engine.registerPredefinedMotifCollectionFromStream(stream, filename, null);
-                count++;
-            } catch (Exception e) {
-               if (client!=null) client.logMessage("Unable to install bundled motif collection '"+filename+"' => "+e.getClass().getSimpleName()+":"+e.getMessage());
-               e.printStackTrace(System.err);
-            }
-        }
-    }    
-   
-   
-   /**
- * This method returns a list of files (with the given suffix) that are bundled
- * with MotifLab. I would really have liked this list to be determined dynamically
- * based on the files that are actually present in the given directories in the
- * packaged JAR file, however, since I (after tedious struggle) still have been unable to
- * find ways to accomplish this, I must simply hardcode the names of the files in the list :-(
- */
-private ArrayList<String> locateBundledFiles(String packagedir, String suffix) {
-        ArrayList<String> list=new ArrayList<String>();
-        if (packagedir.equals("/org/motiflab/engine/resources") && suffix.endsWith("mlx")) {
-            list.add("Transfac_public.mlx");
-            list.add("Jaspar_core.mlx");
-            list.add("Jaspar_FAM.mlx");
-            list.add("Jaspar_phylofacts.mlx");
-            list.add("Jaspar_splice.mlx");
-            list.add("Jaspar_cne.mlx");
-            list.add("Jaspar_polII.mlx");
-            list.add("Jaspar_PBM.mlx");
-            list.add("Jaspar_PBM_HLH.mlx");
-            list.add("Jaspar_PBM_HOMEO.mlx");
-            list.add("ScerTF.mlx");   
-            list.add("PLACE.mlx");            
-        } else if (packagedir.equals("/org/motiflab/engine/resources") && suffix.endsWith("config")) {
-            list.add("Organisms.config");
-            list.add("GeneIDResolver.config");
-            list.add("startup.config");
-            list.add("TFclass.config");                 
-             // include these too as config-files
-            list.add("motiflab.js");
-            list.add("default.css");
-            list.add("green.css");  
-        } else if (packagedir.equals("/org/motiflab/external") && suffix.endsWith("xml")) {
-            // list.add("Priority.xml");
-            list.add("AffinityScanner.xml");
-            list.add("SimpleScanner.xml");    
-            list.add("StringScanner.xml");             
-            list.add("ConsensusScanner.xml");            
-            list.add("SimpleModuleScanner.xml");
-            list.add("SimpleEnsemble.xml");
-            list.add("SimpleModuleSearcher.xml");
-            list.add("EMD.xml");
-            //list.add("MotifVoter.xml");
-        }
-        return list;
-  }
-   
    
     /**
      * Installs the given file in the MotifLab directory and updates
@@ -4397,7 +4243,46 @@ private ArrayList<String> locateBundledFiles(String packagedir, String suffix) {
                 getDataLoader().setup();
             }
         }
-    }     
+    }    
+    
+    /**
+     * Makes a backup archive ZIP file of selected configuration files
+     * @param targetfile The archive ZIP file that will be created
+     * @param configfiles The list of files that should be included in the archive
+     * @throws IOException if something goes wrong
+     */
+    public void backupConfigurationFiles(File targetfile, final ArrayList<File> configfiles) throws IOException {                
+        OutputStream outputStream = null;
+        ZipOutputStream zout=null;
+        FileInputStream fin=null;
+        try {
+             outputStream=MotifLabEngine.getOutputStreamForFile(targetfile);
+             byte[] buffer = new byte[1024];
+             zout = new ZipOutputStream(outputStream);
+             for (File configFile:configfiles) {
+                if (!configFile.exists()) continue;
+                fin = new FileInputStream(configFile);
+                zout.putNextEntry(new ZipEntry(configFile.getName()));
+                int length;
+                while((length = fin.read(buffer)) > 0) {
+                   zout.write(buffer, 0, length);
+                }
+                zout.closeEntry();
+                fin.close();
+             }
+             zout.flush();
+             zout.close();
+             outputStream.close();
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            try {
+                if (zout!=null) zout.close();
+                if (outputStream!=null) outputStream.close();
+                if (fin!=null) fin.close();
+            } catch (Exception x) {}
+        }
+    }    
     
 // **************************************
 // **                                  **    
@@ -4655,6 +4540,9 @@ public void removeAllResources() {
             if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
                     ((HttpURLConnection)connection).disconnect();
                     return getPage(new URL(location));
+            } else if (status>300 && status<400 && location!=null) {
+                    ((HttpURLConnection)connection).disconnect();
+                    return getPage(new URL(location));
             } 
         }
         inputStream=connection.getInputStream();
@@ -4684,7 +4572,11 @@ public void removeAllResources() {
 		((HttpURLConnection)connection).disconnect();
 	        getPage(new URL(location), document);
                 return;
-	}        
+	} else if (status>300 && status<400 && location!=null) {
+		((HttpURLConnection)connection).disconnect();
+	        getPage(new URL(location), document);
+                return;
+	}       
         inputStream=connection.getInputStream();
         dataReader = new BufferedReader(new InputStreamReader(inputStream));
         String line=null;
@@ -4709,6 +4601,9 @@ public void removeAllResources() {
             int status = ((HttpURLConnection)connection).getResponseCode();
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
             if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+                    ((HttpURLConnection)connection).disconnect();
+                    return getPageAsList(new URL(location));
+            } else if (status>300 && status<400 && location!=null) {
                     ((HttpURLConnection)connection).disconnect();
                     return getPageAsList(new URL(location));
             }        
@@ -4837,29 +4732,18 @@ public void removeAllResources() {
     }    
     
    /** 
-     * @return a File, DataRepositoryFile or URL that corresponds to the given filename (or URL)
-     * @throws ExecutionError if the filename does not correspond to a potential DataRepositoryFile, an existing local file or a valid URL
+    * @return a File, DataRepositoryFile or URL that corresponds to the given filename (or URL)
+    * @throws ExecutionError if the filename does not correspond to a potential DataRepositoryFile, an existing local file or a valid URL
     */
-   public Object getDataSourceForString(String filenameOrURL) throws ExecutionError {
-       DataRepositoryFile repFile=DataRepositoryFile.getRepositoryFileFromString(filenameOrURL, this);
-       if (repFile!=null) return repFile;
-//       File file=new File(filenameOrURL);
-//       if (file.exists()) return file;
-//       else {
-//            try {
-//                URL url=new URL(filenameOrURL);
-//                return url;
-//            } catch (MalformedURLException e) {
-//                throw new ExecutionError("The filename '"+filenameOrURL+"' does not point to a recognized file or URL");
-//            }
-//       }        
+    public Object getDataSourceForString(String filenameOrURL) throws ExecutionError {
+        DataRepositoryFile repFile=DataRepositoryFile.getRepositoryFileFromString(filenameOrURL, this);
+        if (repFile!=null) return repFile;     
         try {
             URL url=new URL(filenameOrURL);
             return url;
         } catch (MalformedURLException e) {
             return new File(filenameOrURL); // this is not an URL, so just return a local file
-        }
-              
+        }            
    } 
    
    /** Returns a File object corresponding to the given filename (path).
@@ -4915,7 +4799,12 @@ public void removeAllResources() {
                 if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
                     ((HttpURLConnection)connection).disconnect();
                     return getInputStreamForDataSource(new URL(location));
-                } else return connection.getInputStream();
+                } else if (status>300 && status<400 && location!=null) { // other redirect
+                    ((HttpURLConnection)connection).disconnect();
+                    return getInputStreamForDataSource(new URL(location));
+                } else {
+                    return connection.getInputStream();
+                }
             } 
             else if (connection!=null) return connection.getInputStream();
             else throw new IOException("Unable to open stream: "+source);
@@ -5626,7 +5515,8 @@ public void removeAllResources() {
         java.io.InputStream inputStream=null;
         try {
             if (input instanceof File) inputStream = new FileInputStream((File)input);
-            else inputStream = ((URL)input).openStream();
+            //else inputStream = ((URL)input).openStream();
+            else inputStream = getInputStreamForDataSource(input);
             return readTextFile(inputStream);
         } catch (IOException e) {
             throw e;

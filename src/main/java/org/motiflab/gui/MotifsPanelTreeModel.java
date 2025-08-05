@@ -9,7 +9,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeModel;
 import org.motiflab.engine.DataListener;
 import org.motiflab.engine.data.Data;
-import org.motiflab.engine.data.Motif;
 
 /**
  *

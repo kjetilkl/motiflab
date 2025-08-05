@@ -53,7 +53,7 @@ public class MotifLabApp extends SingleFrameApplication implements MessageListen
         engine.removeMessageListener(this);
         if (splash!=null) splash.close();
         show((View)client);
-        if (client instanceof MotifLabGUI) ((MotifLabGUI)client).firstTimeStartup(); // if this is the first time MotifLab is started up, this call will install some resources (and then import them). If not, it will return right away
+        if (client instanceof MotifLabGUI) ((MotifLabGUI)client).checkIfUpgradeIsNeeded(); // Checks if configuration files need to be installed or some configuration files created by older versions of MotifLab need an upgrade
         if (errors!=null) { // display errors in the GUI log-panel also (in case the user did not see them when they flew by)
             client.logMessage("WARNING: The following errors occurred during initialization:");
             for (String error:errors) client.logMessage("   "+error);

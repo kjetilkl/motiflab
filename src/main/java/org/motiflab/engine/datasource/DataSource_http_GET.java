@@ -255,7 +255,7 @@ public class DataSource_http_GET extends DataSource {
         // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
         int status = ((HttpURLConnection)connection).getResponseCode();
         String location = ((HttpURLConnection)connection).getHeaderField("Location");
-        if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+        if (status>300 && status<400 && location!=null) {
                 ((HttpURLConnection)connection).disconnect();
                 return getPage(new URL(location), timeout, task);
         }        
@@ -299,9 +299,11 @@ public class DataSource_http_GET extends DataSource {
         protocol.appendChild(parameter);
         element.appendChild(protocol);
         resolveDataFormat(); // try to locate data format based on name just in case
-        if (dataformat!=null) {
+        if (dataformat!=null) {            
             org.w3c.dom.Element dataformatelement=dataformat.getXMLrepresentation(document,dataformatSettings);
             element.appendChild(dataformatelement);
+        } else if (getDataFormat()!=null) {
+            System.err.println("ERROR: Data Format '"+getDataFormat()+"' is specified but cannot be linked for datasource "+name);
         }
         return element;
     }   

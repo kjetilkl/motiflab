@@ -1677,7 +1677,7 @@ private class ProtocolEditorPane extends JEditorPane {
             }
         };
         getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0, true), OVERTYPEMODE);
-        getActionMap().put(OVERTYPEMODE, changeOvertypeModeAction);                
+        getActionMap().put(OVERTYPEMODE, changeOvertypeModeAction);     
     }
     
     @Override

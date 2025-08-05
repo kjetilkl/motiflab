@@ -326,7 +326,7 @@ private void addProgramFromRepository(java.awt.event.ActionEvent evt) {//GEN-FIR
     try {
         if (!urlString.startsWith("http")) urlString=gui.getEngine().getRepositoryURL()+urlString; // URL is relative to repository
         URL url=new URL(urlString);
-        InputStream stream=url.openStream();
+        InputStream stream = MotifLabEngine.getInputStreamForDataSource(url);
         program = ExternalProgram.initializeExternalProgramFromStream(stream,programName+".xml", true);
     } catch (Exception ex) {
         JOptionPane.showMessageDialog(rootPane, ex.getClass().getSimpleName()+":\n"+ex.getMessage(), "Import Error", JOptionPane.ERROR_MESSAGE);

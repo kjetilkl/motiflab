@@ -10,7 +10,9 @@ import org.motiflab.engine.data.TextVariable;
 import org.motiflab.engine.protocol.ParseError;
 
 /**
- *
+ * This class represents constraints that can be applied to the "prompt" operation to control
+ * which values are allowed to be selected (e.g. numeric range or specific options) 
+ * and how the selections are presented to the user (suggested widget to use)
  * @author kjetikl
  */
 public class PromptConstraints {
@@ -313,6 +315,7 @@ public class PromptConstraints {
         }                  
     }     
     
+    /** Output all the contraints to STDERR (for debugging) */
     private void dump() {
         System.err.println("PromptConstraints: "+type);
         if (map!=null) {

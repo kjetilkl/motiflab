@@ -43,6 +43,7 @@ import org.motiflab.engine.protocol.ParseError;
 import org.motiflab.engine.protocol.SerializedStandardProtocol;
 import org.motiflab.engine.protocol.StandardDisplaySettingsParser;
 import org.motiflab.engine.protocol.StandardProtocol;
+import org.motiflab.engine.util.UpgradeManager;
 import org.motiflab.gui.MotifLabApp;
 import org.motiflab.gui.VisualizationSettings;
 
@@ -2467,7 +2468,7 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
         
         if (protocolFilename==null && configsettings==null && pluginsettings==null) reportErrorShowUsageAndAbort("No protocol file specified"); 
         MotifLabEngine mEngine=MotifLabEngine.getEngine();        
-        MotifLab motiflab=new MotifLab(mEngine); // motiflab is the client       
+        MotifLab motiflab=new MotifLab(mEngine); // this is the client (the constructor will also set the client reference for the engine)   
         // set MotifLab directory
         if (mEngine.getMotifLabDirectory()==null || mEngine.getMotifLabDirectory().isEmpty()) {   
             try {
@@ -2478,9 +2479,11 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
                 
             }             
         }               
-        mEngine.initialize();           
-        if (mEngine.isFirstTimeStartup()) {
-            String document="\n\n" +
+        mEngine.initialize();  
+        UpgradeManager upgradeManager = new UpgradeManager(mEngine);
+        if (upgradeManager.isUpgradeNeeded()) {
+            if (upgradeManager.isFirstTime()) {
+                String document="\n\n" +
                     "###################################\n" +
                     "###################################\n" +
                     "###                             ###\n" +
@@ -2506,10 +2509,12 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
                     "Norwegian University of Science and Technology (NTNU)\n" +
                     "\n-----------------------------------------------------------------------------------\n\n"+
                     "";    
-            System.out.print(document);
+                System.out.print(document);
+            }
             try {             
-                if (mEngine.getClient()==null) mEngine.setClient(motiflab); 
-                mEngine.installResourcesFirstTime();
+                // if (mEngine.getClient()==null) mEngine.setClient(motiflab); 
+                upgradeManager.performUpgrade();
+                mEngine.importResources();
             } catch (SystemError e) {
                 System.err.println(e.getMessage());
                 System.exit(1); 
@@ -3184,8 +3189,79 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
         return new ArrayList<String>();
     }
     
+   
     
+    @Override
+    public void displayMessage(String message, int type) {
+        clientConsole.println(""); // create some space so that the message stands out
+        if (type==ERROR_MESSAGE) clientConsole.print("ERROR: ");
+        else if (type==WARNING_MESSAGE) clientConsole.print("WARNING: ");
+        clientConsole.println(message);        
+        clientConsole.print("[Press ENTER to continue]");
+        clientConsole.readLine();
+    }
+    
+    @Override
+    public int[] selectOption(String message, String[] options, boolean allowMultipleChoice) {
+        if (options.length==2 && "YES".equalsIgnoreCase(options[0]) && "NO".equalsIgnoreCase(options[1])) {
+            clientConsole.print("\n"+message+" [Y/n]: ");
+            String userInput=clientConsole.readLine();
+            if (userInput==null || userInput.trim().isEmpty() || userInput.startsWith("y") || userInput.startsWith("Y")) return new int[]{0};
+            else return new int[]{1};
 
+        } else {   
+            boolean ok=false;
+            int[] finalChoice=null;
+            clientConsole.println(""); // create some space so that the message stands out
+            clientConsole.println(message);           
+            for (int i=0;i<options.length;i++) {
+                clientConsole.println((i+1)+") "+options[i]); 
+            }
+            while(!ok) {                
+                if (allowMultipleChoice) clientConsole.println("Choose a single option or enter multiple options separated by commas:"); 
+                else clientConsole.println("Choose an option:");
+                String userInput=clientConsole.readLine();
+                if (!allowMultipleChoice) {
+                    try {
+                        int value=Integer.parseInt(userInput);
+                        if (value<1 || value>options.length) clientConsole.print("Not a valid selection! ");
+                        else {
+                            finalChoice=new int[]{value-1}; // the user's selection is 1-based but return value is 0-based
+                            ok=true;
+                        }
+                    } catch (NumberFormatException ex) {
+                        clientConsole.print("Not a valid selection! ");
+                    }
+                } else { // multiple choice
+                    String[] selected=userInput.split(",");
+                    finalChoice = new int[selected.length];
+                    Arrays.fill(finalChoice, -1); // initialize to invalid selection
+                    for (int i=0;i<selected.length;i++) {
+                        try {
+                            int value=Integer.parseInt(selected[i]);
+                            if (value<1 || value>options.length) {clientConsole.print("Not a valid selection: "+selected[i]+"! "); break;}
+                            else if (selectionContains(finalChoice,value-1)) {clientConsole.print("Please select each option only once!\n"); break;}                            
+                            else {
+                                finalChoice[i]=value-1; // the user's selection is 1-based but return value is 0-based
+                                if (i==selected.length-1) ok=true;
+                            }
+                        } catch (NumberFormatException ex) {
+                            clientConsole.print("Not a valid selection! ");
+                            break;
+                        }                         
+                    }                   
+                }
+            } // repeat until OK
+            return finalChoice;
+        }
+    }     
+    
+    private boolean selectionContains(int[] list, int i) {
+        for (int j:list) {
+            if (i==j) return true;
+        }
+        return false;
+    }
     
    
     /** Prints usage information */

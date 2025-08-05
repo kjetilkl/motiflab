@@ -24,6 +24,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.motiflab.engine.MotifLabEngine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -245,8 +246,8 @@ public class ExternalProgramAddFromRepositoryDialog extends javax.swing.JDialog 
         ExternalProgram program=null;
         try {
             if (!urlString.startsWith("http")) urlString=gui.getEngine().getRepositoryURL()+urlString; // URL is relative to repository
-            URL url=new URL(urlString);
-            InputStream stream=url.openStream();
+            URL url=new URL(urlString);           
+            InputStream stream = MotifLabEngine.getInputStreamForDataSource(url);
             program = ExternalProgram.initializeExternalProgramFromStream(stream,programName+".xml", true);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(rootPane, ex.getClass().getSimpleName()+":\n"+ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -313,7 +314,7 @@ public class ExternalProgramAddFromRepositoryDialog extends javax.swing.JDialog 
          URLs.clear();
          descriptions.clear();
          if (repositoryURL==null) throw new SystemError("No address for repository");
-         InputStream repositoryStream=repositoryURL.openStream();
+         InputStream repositoryStream = MotifLabEngine.getInputStreamForDataSource(repositoryURL);
          DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
          Document doc = builder.parse(repositoryStream);
          NodeList programnodes = doc.getElementsByTagName("program");

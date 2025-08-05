@@ -129,8 +129,8 @@ public class DataConfiguration implements Cloneable {
      * Initializes this DataConfiguration object based on descriptions in the given XML settings read from a stream
      */
     public void loadConfigurationFromStream(InputStream inputstream) throws SystemError {
-        HashMap<String, DataTrack> newTracks=new HashMap<String, DataTrack>();
-        HashMap<String, Server> newServers=new HashMap<String, Server>();
+        HashMap<String, DataTrack> newTracks=new HashMap<>();
+        HashMap<String, Server> newServers=new HashMap<>();
         try {
          DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
          Document doc = builder.parse(inputstream);
@@ -226,7 +226,6 @@ public class DataConfiguration implements Cloneable {
                     }
                 }
                 DataSource datasource=null;
-
                      if (protocoltype.equals(DataSource_http_GET.PROTOCOL_NAME))  datasource=new DataSource_http_GET(track, organism, build, dataformatName);
                 else if (protocoltype.equals(DataSource_DAS.PROTOCOL_NAME)) datasource=new DataSource_DAS(track, organism, build, dataformatName);
                 else if (protocoltype.equals(DataSource_FileServer.PROTOCOL_NAME)) datasource=new DataSource_FileServer(track, organism, build, dataformatName);

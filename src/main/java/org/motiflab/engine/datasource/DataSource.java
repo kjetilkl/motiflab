@@ -240,7 +240,7 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
          if (maxSequenceLength!=other.maxSequenceLength) return false;
          return true;
      }
-     
+             
      public String reportFirstDifference(DataSource other) {
          if (!this.getClass().equals(other.getClass())) return "Class: "+this.getClass()+" vs "+other.getClass();
          String thisname=(name!=null)?name:((dataTrack!=null)?dataTrack.getName():null);

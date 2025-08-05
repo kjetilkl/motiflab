@@ -42,7 +42,7 @@ public class DASParser_DNA {
         // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
         int status = ((HttpURLConnection)connection).getResponseCode();
         String location = ((HttpURLConnection)connection).getHeaderField("Location");
-        if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+        if (status>300 && status<400 && location!=null) {
                 ((HttpURLConnection)connection).disconnect();
                 return parse(location, timeout);
         }          

@@ -78,12 +78,9 @@ public class DNASequenceData extends FeatureSequenceData {
      * Constructs a new DNASequenceData with an initial sequence consisting of only the given default base
      * 
      * @param sequenceName
-     * @param geneName
      * @param chromosome
      * @param startPosition
      * @param endPosition
-     * @param TSS
-     * @param orientation
      * @param defaultbase 
      */
     public DNASequenceData(String sequenceName, String chromosome, int startPosition, int endPosition, char defaultbase){
@@ -101,12 +98,9 @@ public class DNASequenceData extends FeatureSequenceData {
      * Constructs a new DNASequenceData with an initial sequence constructed from the given Background Model
      * 
      * @param sequenceName
-     * @param geneName
      * @param chromosome
      * @param startPosition
      * @param endPosition
-     * @param TSS
-     * @param orientation
      * @param randomgenerator 
      */
     public DNASequenceData(String sequenceName, String chromosome, int startPosition, int endPosition, BackgroundModel randomgenerator){

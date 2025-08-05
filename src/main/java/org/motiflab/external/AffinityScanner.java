@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import org.motiflab.engine.task.ExecutableTask;
 import org.motiflab.engine.ExecutionError;
-import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.task.OperationTask;
 import org.motiflab.engine.data.BackgroundModel;
 import org.motiflab.engine.data.DNASequenceData;

@@ -649,6 +649,10 @@ private class DASRegistryParser {
                 ((HttpURLConnection)connection).disconnect();
                 parse(location);
                 return;
+        } else if (status>300 && status<400 && location!=null) {
+                ((HttpURLConnection)connection).disconnect();
+                parse(location);
+                return;
         }
         InputStream inputStream = connection.getInputStream();
         saxParser.parse(inputStream, handler);

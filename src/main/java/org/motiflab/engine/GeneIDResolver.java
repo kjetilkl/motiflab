@@ -58,7 +58,7 @@ public class GeneIDResolver {
     private String cacheDirectory=null;
     private boolean useCache=true;    
     private boolean cacheUpdated=false;
-    private String biomartCurrent="http://www.biomart.org/biomart/martservice";
+    private String biomartCurrent="https://www.biomart.org/biomart/martservice";
     private String defaultVirtualSchemaName="default";
     private String defaultDatasetConfigVersion ="0.6";
     private String[] defaultBioMartAttributes_new=new String[]{"external_gene_name","chromosome_name","start_position/transcript_start","end_position/transcript_end","strand","go_id"};
@@ -94,68 +94,31 @@ public class GeneIDResolver {
         idFormatPresentationNameMap.put("unigene id", "UniGene ID");
         idFormatPresentationNameMap.put("ccds id", "CCDS ID");
         idFormatPresentationNameMap.put("refseq dna", "RefSeq DNA");              
-        buildMap.put("hg18",new String[]{"http://mar2009.archive.ensembl.org/biomart/martservice",null,null});        
-        buildMap.put("mm8",new String[]{"http://aug2007.archive.ensembl.org/biomart/martservice",null,null});        
-        buildMap.put("mm7",new String[]{"http://apr2006.archive.ensembl.org/biomart/martservice",null,null});        
-        buildMap.put("danRer5",new String[]{"http://mar2009.archive.ensembl.org/biomart/martservice",null,null});        
+        buildMap.put("hg18",new String[]{"https://mar2009.archive.ensembl.org/biomart/martservice",null,null});        
+        buildMap.put("mm8",new String[]{"https://aug2007.archive.ensembl.org/biomart/martservice",null,null});        
+        buildMap.put("mm7",new String[]{"https://apr2006.archive.ensembl.org/biomart/martservice",null,null});        
+        buildMap.put("danRer5",new String[]{"https://mar2009.archive.ensembl.org/biomart/martservice",null,null});        
         this.engine=engine;  
     }       
 
     /** This method can be used to initialize the configuration of GeneIDResolver
      *  with settings read from the given file
+     * @param file The file to read the configuration from
+     * @param clearOldSettings if TRUE, the current settings in this object will be wiped before the new ones are added
+     *                         if FALSE, the current settings will be kept unless they are overwritten by the new configuration (replaced with new value for same key)
+     * @throws IOException if an error occurs while reading from the file
+     * @throws SystemError if a line is badly formatted and cannot be processed correctly     * 
      */
     public void initializeFromFile(File file, boolean clearOldSettings) throws IOException, SystemError {
         if (clearOldSettings) {
-           databaseMap.clear();
-           idFormatMap.clear();
-           idFormatPresentationNameMap.clear();      
-           otherIdentifiers.clear();
-           buildMap.clear();
+           clearSettings();
         }
         BufferedReader inputStream=null;
         try {
             inputStream=new BufferedReader(new FileReader(file));
             String line;
             while((line=inputStream.readLine())!=null) {
-                if (line.startsWith("#") || line.trim().isEmpty()) continue; // comments and empty lines
-                String[] fields=line.split("\\t");
-                if (fields[0].equalsIgnoreCase("IDFormat")) {
-                   if (fields.length<3) throw new SystemError("Expected at least 3 fields for IDFormat-line in geneID-configuration file, but got "+fields.length+":\n"+line);                  
-                   idFormatMap.put(fields[1].toLowerCase(),fields[2]);
-                   idFormatPresentationNameMap.put(fields[1].toLowerCase(),fields[1]);
-                   if (fields.length>=4 && !fields[3].isEmpty()) {
-                       idFormatDatabaseMap.put(fields[1].toLowerCase(),fields[3]);
-                   } else {
-                       String dbname=fields[1].trim();
-                       if (dbname.contains(" ")) dbname=dbname.substring(0,dbname.indexOf(' ')); // use first word
-                       idFormatDatabaseMap.put(fields[1].toLowerCase(),dbname);
-                   }
-                   if (fields.length>=5 && !fields[4].isEmpty()) { 
-                      webLinkTemplate.put(fields[1].toLowerCase(),fields[4]);
-                   }                   
-                } else if (fields[0].equalsIgnoreCase("otherID")) {
-                   if (fields.length<2) throw new SystemError("Expected at least 2 fields for otherID-line in geneID-configuration file, but got "+fields.length+":\n"+line);                  
-                   otherIdentifiers.add(fields[1]);
-                   if (fields.length>=3 && !fields[2].isEmpty()) { 
-                      webLinkTemplate.put(fields[1].toLowerCase(),fields[2]);
-                   }                   
-                } else if (fields[0].equalsIgnoreCase("BuildDB")) {
-                   if (fields.length<3) throw new SystemError("Expected at least 3 fields for BuildDB-line in geneID-configuration file, but got "+fields.length+":\n"+line);                 
-                   buildMap.put(fields[1],Arrays.copyOfRange(fields, 2, fields.length));
-                } else if (fields[0].equalsIgnoreCase("OrganismDB")) {
-                   if (fields.length<3) throw new SystemError("Expected 3 fields for OrganismDB-line in geneID-configuration file, but got "+fields.length+":\n"+line);
-                   try {
-                      int organism=Integer.parseInt(fields[1]);
-                      databaseMap.put(new Integer(organism), fields[2]);
-                   } catch (NumberFormatException nfe) {
-                      throw new SystemError("Unable to parse expected integer taxonomy ID in second column for OrganismDB-line in geneID-configuration file:\n"+line);
-                   }
-                } else if (fields[0].equalsIgnoreCase("BaseURL")) {
-                   if (fields.length<2) throw new SystemError("Expected 2 fields for BaseURL-line in geneID-configuration file, but got "+fields.length+":\n"+line);
-                   biomartCurrent=fields[1];
-                   if (fields.length>=3 && fields[2]!=null && !fields[2].isEmpty()) defaultVirtualSchemaName=fields[2];
-                   if (fields.length>=4 && fields[3]!=null && !fields[3].isEmpty()) defaultDatasetConfigVersion=fields[3];
-                } else throw new SystemError("Unrecognized entry in geneID-configuration file:\n"+line);
+                processConfigurationLine(line);
             }
             inputStream.close();
         } catch (IOException e) {
@@ -163,6 +126,94 @@ public class GeneIDResolver {
         } finally {
             try {if (inputStream!=null) inputStream.close();} catch (IOException ioe) {}
         }
+    }
+    
+    /** This method can be used to initialize the configuration of GeneIDResolver
+     *  with settings read from the given input stream
+     * @param stream The input stream to read the configuration from
+     * @param clearOldSettings if TRUE, the current settings in this object will be wiped before the new ones are added
+     *                         if FALSE, the current settings will be kept unless they are overwritten by the new configuration (replaced with new value for same key)
+     * @throws IOException if an error occurs while reading from the stream
+     * @throws SystemError if a line is badly formatted and cannot be processed correctly
+     */
+    public void initializeFromStream(InputStream stream, boolean clearOldSettings) throws IOException, SystemError {
+        if (clearOldSettings) {
+           clearSettings();
+        }
+        BufferedReader inputStream=null;
+        try {
+            inputStream=new BufferedReader(new InputStreamReader(stream));
+            String line;
+            while((line=inputStream.readLine())!=null) {
+                processConfigurationLine(line);
+            }
+            inputStream.close();
+        } catch (IOException e) {
+            throw e;
+        } finally {
+            try {
+                if (inputStream!=null) inputStream.close();
+                if (stream!=null) stream.close(); 
+            } catch (IOException ioe) {}
+        }
+    }    
+    
+    
+    /**
+     * Processes one line from a configuration file and adds the setting
+     * to the correct data structure
+     * @param line The input line
+     * @throws SystemError if the line could not be parsed correctly
+     */
+    private void processConfigurationLine(String line) throws SystemError {
+        if (line.startsWith("#") || line.trim().isEmpty()) return; // comments and empty lines
+        String[] fields=line.split("\\t");
+        if (fields[0].equalsIgnoreCase("IDFormat")) {
+           if (fields.length<3) throw new SystemError("Expected at least 3 fields for IDFormat-line in geneID-configuration file, but got "+fields.length+":\n"+line);                  
+           idFormatMap.put(fields[1].toLowerCase(),fields[2]);
+           idFormatPresentationNameMap.put(fields[1].toLowerCase(),fields[1]);
+           if (fields.length>=4 && !fields[3].isEmpty()) {
+               idFormatDatabaseMap.put(fields[1].toLowerCase(),fields[3]);
+           } else {
+               String dbname=fields[1].trim();
+               if (dbname.contains(" ")) dbname=dbname.substring(0,dbname.indexOf(' ')); // use first word
+               idFormatDatabaseMap.put(fields[1].toLowerCase(),dbname);
+           }
+           if (fields.length>=5 && !fields[4].isEmpty()) { 
+              webLinkTemplate.put(fields[1].toLowerCase(),fields[4]);
+           }                   
+        } else if (fields[0].equalsIgnoreCase("otherID")) {
+           if (fields.length<2) throw new SystemError("Expected at least 2 fields for otherID-line in geneID-configuration file, but got "+fields.length+":\n"+line);                  
+           otherIdentifiers.add(fields[1]);
+           if (fields.length>=3 && !fields[2].isEmpty()) { 
+              webLinkTemplate.put(fields[1].toLowerCase(),fields[2]);
+           }                   
+        } else if (fields[0].equalsIgnoreCase("BuildDB")) {
+           if (fields.length<3) throw new SystemError("Expected at least 3 fields for BuildDB-line in geneID-configuration file, but got "+fields.length+":\n"+line);                 
+           buildMap.put(fields[1],Arrays.copyOfRange(fields, 2, fields.length));
+        } else if (fields[0].equalsIgnoreCase("OrganismDB")) {
+           if (fields.length<3) throw new SystemError("Expected 3 fields for OrganismDB-line in geneID-configuration file, but got "+fields.length+":\n"+line);
+           try {
+              int organism=Integer.parseInt(fields[1]);
+              databaseMap.put(new Integer(organism), fields[2]);
+           } catch (NumberFormatException nfe) {
+              throw new SystemError("Unable to parse expected integer taxonomy ID in second column for OrganismDB-line in geneID-configuration file:\n"+line);
+           }
+        } else if (fields[0].equalsIgnoreCase("BaseURL")) {
+           if (fields.length<2) throw new SystemError("Expected 2 fields for BaseURL-line in geneID-configuration file, but got "+fields.length+":\n"+line);
+           biomartCurrent=fields[1];
+           if (fields.length>=3 && fields[2]!=null && !fields[2].isEmpty()) defaultVirtualSchemaName=fields[2];
+           if (fields.length>=4 && fields[3]!=null && !fields[3].isEmpty()) defaultDatasetConfigVersion=fields[3];
+        } else throw new SystemError("Unrecognized entry in geneID-configuration file:\n"+line);        
+    }
+    
+    /** Clears the current settings, except the BioMart baseURL */
+    private void clearSettings() {
+        databaseMap.clear();
+        idFormatMap.clear();
+        idFormatPresentationNameMap.clear();      
+        otherIdentifiers.clear();
+        buildMap.clear();        
     }
     
     /**
@@ -877,7 +928,7 @@ public class GeneIDResolver {
         connection.setConnectTimeout(timeout);
         int status = ((HttpURLConnection)connection).getResponseCode();
         String location = ((HttpURLConnection)connection).getHeaderField("Location");
-        if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+        if (status>300 && status<400 && location!=null) {//
                 ((HttpURLConnection)connection).disconnect();
                 return getPageUsingHttpGET(new URL(location), timeout);
         }                   

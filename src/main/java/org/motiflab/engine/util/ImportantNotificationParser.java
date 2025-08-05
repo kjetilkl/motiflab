@@ -51,10 +51,10 @@ public class ImportantNotificationParser {
         connection.setConnectTimeout(10000); // 10 seconds
         int status = ((HttpURLConnection)connection).getResponseCode();
         String location = ((HttpURLConnection)connection).getHeaderField("Location");
-        if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
+        if (status>300 && status<400 && location!=null) { // && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")
                 ((HttpURLConnection)connection).disconnect();
                 return parseNotifications(location, minLevel, minIndex);
-        }        
+        }       
         InputStream inputStream = connection.getInputStream();
         try {
             saxParser.parse(inputStream, handler);

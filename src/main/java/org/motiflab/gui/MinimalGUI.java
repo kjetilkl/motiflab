@@ -11,6 +11,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
@@ -34,6 +35,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.StreamCorruptedException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +46,8 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Timer;
 import javax.swing.Icon;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -70,6 +74,8 @@ import org.motiflab.engine.GeneIDResolver;
 import org.motiflab.engine.GeneIDmapping;
 import org.motiflab.engine.MotifLab;
 import org.motiflab.engine.MotifLabClient;
+import static org.motiflab.engine.MotifLabClient.ERROR_MESSAGE;
+import static org.motiflab.engine.MotifLabClient.WARNING_MESSAGE;
 import org.motiflab.engine.Parameter;
 import org.motiflab.engine.ParameterSettings;
 import org.motiflab.engine.Plugin;
@@ -1458,6 +1464,78 @@ public final class MinimalGUI extends FrameView implements MotifLabClient, java.
         return new DefaultTableModel(new String[]{"Data Object","New filename"}, 0);
     }
 
+    @Override
+    public void displayMessage(final String message, int type) {     
+        if (SwingUtilities.isEventDispatchThread()) displayMessageInternal(message, type);
+        else try {
+            SwingUtilities.invokeAndWait(() -> { // block background workers calling this method until the dialog is closed
+                displayMessageInternal(message, type);
+            });
+        } catch (InterruptedException | InvocationTargetException e) { }
+    }
+    
+    private void displayMessageInternal(final String message, int type) {      
+        String header=""; 
+        int paneltype=JOptionPane.INFORMATION_MESSAGE;
+        if (type==ERROR_MESSAGE) {header="ERROR"; paneltype=JOptionPane.ERROR_MESSAGE;}
+        else if (type==WARNING_MESSAGE) {header="Warning";paneltype=JOptionPane.WARNING_MESSAGE;}                    
+        if (message.length()<200) JOptionPane.showMessageDialog(getFrame(), message, header, paneltype);
+        else  {
+            InfoDialog infodialog=new InfoDialog(null, header, message, 700, 450);
+            infodialog.setVisible(true);
+            infodialog.dispose();           
+        }
+    }    
+    
+    @Override
+    public int[] selectOption(final String message, final String[] options, final boolean allowMultipleChoice) {
+        if (SwingUtilities.isEventDispatchThread()) return selectOptionInternal(message, options, allowMultipleChoice);
+        final Object[] selection = new Object[]{new int[0]};
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                int[] result = selectOptionInternal(message, options, allowMultipleChoice);
+                selection[0]=result;
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            // Handle exceptions
+        } 
+        return (int[])selection[0];
+    }
+    
+    private int[] selectOptionInternal(String message, String[] options, boolean allowMultipleChoice) {
+        if (options.length==2 && "YES".equalsIgnoreCase(options[0]) && "NO".equalsIgnoreCase(options[1])) {
+            int choice = JOptionPane.showConfirmDialog(getFrame(), message, "", JOptionPane.YES_NO_OPTION);
+            return new int[]{(choice==JOptionPane.YES_OPTION)?0:1};
+        } else if (!allowMultipleChoice) {
+            int choice = JOptionPane.showOptionDialog(getFrame(),message, "", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            return new int[]{choice};
+        } else {         
+            JPanel panel = new JPanel(new GridLayout(0,1));
+            panel.add(new JLabel(message));
+            JCheckBox[] boxes = new JCheckBox[options.length];               
+            for (int i=0;i<options.length;i++) {
+                boxes[i]=new JCheckBox(options[i]);
+                panel.add(boxes[i]);
+            }
+            JComponent comp = panel;
+            if (options.length>5) {
+                comp = new JScrollPane(panel);
+            }
+            int result = JOptionPane.showConfirmDialog(getFrame(),comp,"",JOptionPane.OK_CANCEL_OPTION); 
+            if (result==JOptionPane.CANCEL_OPTION) return new int[]{};
+            else {
+                ArrayList<Integer> chosen = new ArrayList<>();
+                for (int i=0;i<boxes.length;i++) {
+                    if (boxes[i].isSelected()) chosen.add(i);
+                }
+                int[] selected = new int[chosen.size()];
+                for (int i=0;i<chosen.size();i++) selected[i]=chosen.get(i);
+                return selected;
+            }                       
+        }
+    }    
+    
+    
     // Implementation of MessageListener interface method */
     @Override
     public void errorMessage(final String msg, final int errortype) {

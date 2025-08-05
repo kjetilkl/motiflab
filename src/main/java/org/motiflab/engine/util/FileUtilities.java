@@ -73,11 +73,11 @@ public class FileUtilities {
         if (connection instanceof HttpURLConnection) {
             int status = ((HttpURLConnection)connection).getResponseCode();
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
-            if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")) {
+            if (status>300 && status<400 && location!=null) { //  && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")
                     ((HttpURLConnection)connection).disconnect();
                     copyLargeURLToFile(new URL(location), destination, listener, cancelFlag);
                     return;
-            }
+            } 
         }             
         InputStream input = connection.getInputStream();
         copyLargeInputStreamToFile(input, destination, listener, cancelFlag);
@@ -90,7 +90,7 @@ public class FileUtilities {
         if (connection instanceof HttpURLConnection) {
             int status = ((HttpURLConnection)connection).getResponseCode();
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
-            if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")) {
+            if (status>300 && status<400 && location!=null) { //  && "http".equalsIgnoreCase(source.getProtocol()) && location.startsWith("https")
                     ((HttpURLConnection)connection).disconnect();
                     copyLargeURLToFile(new URL(location), destination, connectionTimeout, readTimeout, listener, cancelFlag);
                     return;

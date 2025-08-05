@@ -131,15 +131,7 @@ public class BindingSequenceOccurrences extends Analysis {
         if (dataformat.equals(RAWDATA)) return new Parameter[] {sortByPar,logos};
         return new Parameter[0];
     }
-    
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Legend")) return new String[]{EXCEL};
-//        if (parameter.equals("Sort by") ) return new String[]{HTML,RAWDATA,EXCEL};        
-//        if (parameter.equals("Logos HTML") ) return new String[]{HTML};
-//        if (parameter.equals("Logos Excel") ) return new String[]{EXCEL};      
-//        return null;
-//    }      
+       
 
     @Override
     public String[] getResultVariables() {

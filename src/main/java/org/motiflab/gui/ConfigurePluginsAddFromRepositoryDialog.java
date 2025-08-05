@@ -25,6 +25,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.Plugin;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -325,7 +326,7 @@ public class ConfigurePluginsAddFromRepositoryDialog extends javax.swing.JDialog
          URLs.clear();
          descriptions.clear();
          if (repositoryURL==null) throw new SystemError("No address for plugins repository");
-         InputStream repositoryStream=repositoryURL.openStream();
+         InputStream repositoryStream = MotifLabEngine.getInputStreamForDataSource(repositoryURL);
          DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
          Document doc = builder.parse(repositoryStream);
          NodeList pluginnodes = doc.getElementsByTagName("plugin");

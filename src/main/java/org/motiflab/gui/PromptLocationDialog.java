@@ -373,6 +373,9 @@ private void downloadFile(URL url, File localfile, boolean isZIPfile) throws IOE
             String redirectURL = url.toString().replace("http","https");
             downloadFile(new URL(redirectURL), localfile, isZIPfile);
             return;
+    } else if (status>300 && status<400 && redirect!=null) {
+            downloadFile(new URL(redirect), localfile, isZIPfile);
+            return;       
     }
     final int filesize=connection.getContentLength();
     final int[] bytesread=new int[1];

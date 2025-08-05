@@ -1808,8 +1808,6 @@ private void configureServersSettingsButtonClicked(java.awt.event.MouseEvent evt
 }
 
 private void importSettings(java.awt.event.MouseEvent evt) {
-        File file=null;
-
       DataTrackConfigurationDialog_importDialog dialog=new DataTrackConfigurationDialog_importDialog(this, gui);
       dialog.setLocation(gui.getFrame().getWidth()/2-dialog.getWidth()/2, gui.getFrame().getHeight()/2-dialog.getHeight()/2);
       dialog.setVisible(true);
@@ -1817,8 +1815,6 @@ private void importSettings(java.awt.event.MouseEvent evt) {
 }
 
 private void exportSettings(java.awt.event.MouseEvent evt) {
-        File file=null;
-
       DataTrackConfigurationDialog_exportDialog dialog=new DataTrackConfigurationDialog_exportDialog(this, gui);
       dialog.setLocation(gui.getFrame().getWidth()/2-dialog.getWidth()/2, gui.getFrame().getHeight()/2-dialog.getHeight()/2);
       dialog.setVisible(true);
@@ -2677,6 +2673,20 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
                                 boolean preferred=(preferredSetting instanceof Boolean && ((Boolean)preferredSetting));
                                 if (preferred) existingTrack.addPreferredDataSources(((DataTrack)newtrack).getDatasources());
                                 else existingTrack.addDataSources(((DataTrack)newtrack).getDatasources());
+                                // copy over other properties if they are set in the new track but not the old
+                                if (!existingTrack.hasDisplayDirectivesProtocol() && ((DataTrack)newtrack).hasDisplayDirectivesProtocol()) { // copy over display directives from new track
+                                    existingTrack.setDisplayDirectivesProtocol(((DataTrack)newtrack).getDisplayDirectivesProtocol());
+                                }
+                                String oldDescription=existingTrack.getDescription();
+                                String newDescription=((DataTrack)newtrack).getDescription();
+                                if ((oldDescription==null || oldDescription.isEmpty()) && (newDescription!=null && !newDescription.isEmpty())) {
+                                    existingTrack.setDescription(newDescription);
+                                }
+                                String oldSourceSite=existingTrack.getSourceSite();
+                                String newSourceSite=((DataTrack)newtrack).getSourceSite();
+                                if ((oldSourceSite==null || oldSourceSite.isEmpty()) && (newSourceSite!=null && !newSourceSite.isEmpty())) {
+                                    existingTrack.setSourceSite(newSourceSite);
+                                }                                
                             } else if (choice==1) { // replace existing dataset
                                 availableTracks.put(((DataTrack)newtrack).getName(), (DataTrack)newtrack); // replace existing track with same name
                             } else {

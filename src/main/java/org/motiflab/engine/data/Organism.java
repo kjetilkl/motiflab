@@ -6,12 +6,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
+import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.SystemError;
 import org.motiflab.engine.protocol.ParseError;
 
 /**
- * This class basically just provides a predefined lookup-table and associated methods
+ * This class basically just provides a lookup-table and associated methods
  * to convert between taxonomy identifier numbers and names (common and latin) for different
  * organisms. If references to organisms are stored as integer (taxonomy IDs) this class can
  * be used to lookup corresponding names
@@ -33,6 +37,12 @@ public class Organism {
     public final static int RABBIT=9986;
     public final static int UNKNOWN=0;    
     
+    private static final int TAXONOMY_ID=0;
+    private static final int COMMON_NAME=1;
+    private static final int LATIN_NAME=2;
+    private static final int GENOME_BUILDS=3;
+    private static final int CLADE=4;    
+    
     /*
      * the predefined Object array contains info on all organisms currently "supported"
      * Each row in the array contains the following information about a single organism:
@@ -43,6 +53,8 @@ public class Organism {
      *        Each entry (first dimension) represents one genome build with the entries within
      *        this dimension representing alternative names for the same build (default should be first)
      * [4] => A String a string specifying the 'clade': mammal, vertebrate, insect or other) 
+     * 
+     * Note that this default table will usually be replaced by one read from a configuration file. 
      */
     private static Object[][] predefined={
         {new Integer(HUMAN),"Human","Homo sapiens",new String[][]{{"hg18","NCBI36","NCBI_36"},{"hg19","GRCh37","GRCh_37"}},"mammal"},
@@ -62,40 +74,33 @@ public class Organism {
    
     /** This method can be called to initialize the Organism table with other 
      * organisms than the default settings
+     * @param file The configuration file to read the organisms information from
+     * @throws IOException if the file cannot be read
+     * @throws SystemError if the contents is not structured as expected
      */
     public static void initializeFromFile(File file) throws IOException, SystemError {
-        ArrayList<Object[]> entries=new ArrayList<Object[]>();
+        ArrayList<Object[]> entries=readOrganismsFromFile(file);        
+        predefined=new Object[entries.size()][5];
+        for (int i=0;i<entries.size();i++) {
+            predefined[i]=entries.get(i);
+        }
+    }
+
+    /** 
+     * Reads information about organisms from a configuration file and returns this information as a table
+     * @return a table of organisms 
+     * @throws IOException if the file cannot be read
+     * @throws SystemError if the contents is not structured as expected
+     */
+    public static ArrayList<Object[]> readOrganismsFromFile(File file) throws IOException, SystemError {
+        ArrayList<Object[]> entries=new ArrayList<>();
         BufferedReader inputStream=null;
         try {
             inputStream=new BufferedReader(new FileReader(file));
             String line;
             while((line=inputStream.readLine())!=null) {
-                if (line.startsWith("#") || line.trim().isEmpty()) continue; // comments and empty lines
-                String[] fields=line.split("\\t");
-                if (fields.length<5) throw new SystemError("Expected 5 fields per line in Organisms definition file, but got "+fields.length+":\n"+line);
-                int taxonomyID=0;
-                if (fields[0].trim().isEmpty()) throw new SystemError("Missing taxonomy ID for organism in Organisms definition file");
-                try {
-                  taxonomyID=Integer.parseInt(fields[0]);
-                } catch (NumberFormatException nfe) {throw new SystemError("Expected integer taxonomy ID in first column in Organisms definition file, but got '"+fields[0]+"'");}
-                String commonname=fields[1].trim();
-                String latinname=fields[2].trim();
-                String cladename=fields[4].trim();
-                if (commonname.isEmpty()) throw new SystemError("Missing common name for organism with taxonomy ID: "+taxonomyID);
-                if (latinname.isEmpty()) throw new SystemError("Missing latin name for organism with taxonomy ID: "+taxonomyID);
-                if (cladename.isEmpty()) throw new SystemError("Missing clade for organism with taxonomy ID: "+taxonomyID);
-                // if (!cladename.equals("mammal") && !cladename.equals("insect") && !cladename.equals("vertebrate") && !cladename.equals("other")) throw new SystemError("Unknown clade '"+cladename+"' for organism with taxonomy ID "+taxonomyID);
-                String[] builds=fields[3].trim().split("\\s*,\\s*");
-                String[][] buildsStructure=null;
-                if (!fields[3].trim().isEmpty()) {
-                    buildsStructure=new String[builds.length][];
-                    for (int i=0;i<builds.length;i++) {
-                       String[] alternatives=builds[i].trim().split("\\s*\\|\\s*");  
-                       buildsStructure[i]=alternatives;
-                    }
-                }
-                Object[] organism=new Object[]{new Integer(taxonomyID),commonname,latinname,buildsStructure,cladename};
-                entries.add(organism);
+                Object[] organism=processLine(line);
+                if (organism!=null) entries.add(organism);
             }
             inputStream.close();
         } catch (IOException e) {
@@ -106,11 +111,67 @@ public class Organism {
         } finally {
             try {if (inputStream!=null) inputStream.close();} catch (IOException ioe) {}
         }
-        predefined=new Object[entries.size()][5];
-        for (int i=0;i<entries.size();i++) {
-            predefined[i]=entries.get(i);
+        return entries;
+    }  
+    
+    /** 
+     * Reads information about organisms from a bundled resource file and returns this information as a table
+     * @return a table of organisms 
+     * @throws IOException if the file cannot be read
+     * @throws SystemError if the contents is not structured as expected
+     */
+    public static ArrayList<Object[]> readOrganismsFromResource(String resource) throws IOException, SystemError {
+        ArrayList<Object[]> entries=new ArrayList<>();
+        BufferedReader inputStream=null;
+        try {
+            InputStream stream=MotifLabEngine.class.getResourceAsStream("/org/motiflab/engine/resources/"+resource);
+            inputStream=new BufferedReader(new InputStreamReader(stream));
+            String line;
+            while((line=inputStream.readLine())!=null) {
+                Object[] organism=processLine(line);
+                if (organism!=null) entries.add(organism);
+            }
+            inputStream.close();
+        } catch (IOException e) {
+            throw e;
+        } catch (Exception ee) {
+            if (ee instanceof SystemError) throw ee;
+            else throw new SystemError(ee.getClass()+":"+ee.getMessage());
+        } finally {
+            try {if (inputStream!=null) inputStream.close();} catch (IOException ioe) {}
         }
-    }    
+        return entries;
+    }      
+    
+    
+    private static Object[] processLine(String line) throws SystemError {
+        if (line.startsWith("#") || line.trim().isEmpty()) return null; // comments and empty lines
+        String[] fields=line.split("\\t");
+        if (fields.length<5) throw new SystemError("Expected 5 fields per line in Organisms definition file, but got "+fields.length+":\n"+line);
+        int taxonomyID=0;
+        if (fields[0].trim().isEmpty()) throw new SystemError("Missing taxonomy ID for organism in Organisms definition file");
+        try {
+          taxonomyID=Integer.parseInt(fields[0]);
+        } catch (NumberFormatException nfe) {throw new SystemError("Expected integer taxonomy ID in first column in Organisms definition file, but got '"+fields[0]+"'");}
+        String commonname=fields[COMMON_NAME].trim();
+        String latinname=fields[LATIN_NAME].trim();
+        String cladename=fields[CLADE].trim();
+        if (commonname.isEmpty()) throw new SystemError("Missing common name for organism with taxonomy ID: "+taxonomyID);
+        if (latinname.isEmpty()) throw new SystemError("Missing latin name for organism with taxonomy ID: "+taxonomyID);
+        if (cladename.isEmpty()) throw new SystemError("Missing clade for organism with taxonomy ID: "+taxonomyID);
+        // if (!cladename.equals("mammal") && !cladename.equals("insect") && !cladename.equals("vertebrate") && !cladename.equals("other")) throw new SystemError("Unknown clade '"+cladename+"' for organism with taxonomy ID "+taxonomyID);
+        String[] builds=fields[GENOME_BUILDS].trim().split("\\s*,\\s*");
+        String[][] buildsStructure=null;
+        if (!fields[GENOME_BUILDS].trim().isEmpty()) {
+            buildsStructure=new String[builds.length][];
+            for (int i=0;i<builds.length;i++) {
+               String[] alternatives=builds[i].trim().split("\\s*\\|\\s*");  
+               buildsStructure[i]=alternatives;
+            }
+        }
+        Object[] organism=new Object[]{new Integer(taxonomyID),commonname,latinname,buildsStructure,cladename};     
+        return organism;
+    }
     
     /** 
      * This method will replace the current configuration with a new one.
@@ -120,8 +181,10 @@ public class Organism {
      * saved to the provided file. Note that if a file is not specified,
      * only the error checking is performed but the configuration will 
      * not be replaced
+     * @param newconfiguration A list of String arrays with 5 fields each containing informations about organisms
+     * @param file The file to save the configuration to
      */
-    public static void replaceandSave(ArrayList<String[]> newconfiguration, File file) throws ParseError, IOException {
+    public static void replaceAndSave(ArrayList<String[]> newconfiguration, File file) throws ParseError, IOException {
         ArrayList<Object[]> entries=new ArrayList<Object[]>();
         for (int i=0;i<newconfiguration.size();i++) {
         String[] fields=newconfiguration.get(i);
@@ -131,16 +194,16 @@ public class Organism {
             try {
               taxonomyID=Integer.parseInt(fields[0]);
             } catch (NumberFormatException nfe) {throw new ParseError("Expected integer taxonomy ID in first column, found '"+fields[0]+"'");}
-            String commonname=fields[1].trim();
-            String latinname=fields[2].trim();
-            String cladename=fields[4].trim();
+            String commonname=fields[COMMON_NAME].trim();
+            String latinname=fields[LATIN_NAME].trim();
+            String cladename=fields[CLADE].trim();
             if (commonname.isEmpty()) throw new ParseError("Missing common name for organism with taxonomy ID: "+taxonomyID);
             if (latinname.isEmpty()) throw new ParseError("Missing latin name for organism with taxonomy ID: "+taxonomyID);
             if (cladename.isEmpty()) throw new ParseError("Missing clade for organism with taxonomy ID: "+taxonomyID);
             // if (!cladename.equals("mammal") && !cladename.equals("insect") && !cladename.equals("vertebrate") && !cladename.equals("other")) throw new ParseError("Unknown clade '"+cladename+"' for organism with taxonomy ID "+taxonomyID);
-            String[] builds=fields[3].trim().split("\\s*,\\s*");
+            String[] builds=fields[GENOME_BUILDS].trim().split("\\s*,\\s*");
             String[][] buildsStructure=null;
-            if (!fields[3].trim().isEmpty()) {
+            if (!fields[GENOME_BUILDS].trim().isEmpty()) {
                 buildsStructure=new String[builds.length][];
                 for (int j=0;j<builds.length;j++) {
                    String[] alternatives=builds[j].trim().split("\\s*\\|\\s*");  
@@ -156,17 +219,17 @@ public class Organism {
             for (int i=0;i<entries.size();i++) {
                 predefined[i]=entries.get(i);
             }           
-            writeToFile(file);
+            writeToFile(entries, file);
         }
     }
 
     
     /**
-     * Outputs the current configuration to the given file
+     * Outputs the provided organism configuration to the given file
      * @param file
      * @throws IOException
      */
-    public static void writeToFile(File file) throws IOException {
+    public static void writeToFile(ArrayList<Object[]> entries, File file) throws IOException {
         BufferedWriter outputStream=null;
         try {
             outputStream=new BufferedWriter(new FileWriter(file));
@@ -185,14 +248,14 @@ public class Organism {
             outputStream.write("# 5) A string specifying the clade: 'mammal', 'vertebrate', 'insect' or 'other' (corresponding to UCSC usage)");
             outputStream.newLine();
             outputStream.newLine();
-            for (Object[] entry:predefined) {
-                outputStream.write(""+entry[0]);
+            for (Object[] entry:entries) {
+                outputStream.write(""+entry[TAXONOMY_ID]);
                 outputStream.write("\t");
-                outputStream.write(""+entry[1]);
+                outputStream.write(""+entry[COMMON_NAME]);
                 outputStream.write("\t");
-                outputStream.write(""+entry[2]);
+                outputStream.write(""+entry[LATIN_NAME]);
                 outputStream.write("\t");
-                String[][] builds=(String[][])entry[3];
+                String[][] builds=(String[][])entry[GENOME_BUILDS];
                 if (builds!=null && builds.length>0) {
                     for (int i=0;i<builds.length;i++) {
                         for (int j=0;j<builds[i].length;j++) {
@@ -203,7 +266,7 @@ public class Organism {
                     }
                 }
                 outputStream.write("\t");
-                outputStream.write(""+entry[4]);
+                outputStream.write(""+entry[CLADE]);
                 outputStream.newLine();
             }
             outputStream.close();
@@ -221,8 +284,8 @@ public class Organism {
     public static int getTaxonomyID(String name) {
         if (name==null) return 0;
         for (Object[] values:predefined) { // first try exact matches
-            if (((String)values[1]).equalsIgnoreCase(name)) return ((Integer)values[0]).intValue();
-            if (((String)values[2]).equalsIgnoreCase(name)) return ((Integer)values[0]).intValue();
+            if (((String)values[COMMON_NAME]).equalsIgnoreCase(name)) return ((Integer)values[TAXONOMY_ID]).intValue();
+            if (((String)values[LATIN_NAME]).equalsIgnoreCase(name)) return ((Integer)values[TAXONOMY_ID]).intValue();
         }
         // ... Previous versions also allowed for partial matches to the name, but that turned out to be to risky (e.g. "pig" would match "Guinea pig")             
         return 0;
@@ -238,7 +301,7 @@ public class Organism {
     public static String getCommonName(int id) {
         if (id==0) return "UNKNOWN";
         for (Object[] values:predefined) {
-            if (((Integer)values[0]).intValue()==id) return (String)values[1];
+            if (((Integer)values[TAXONOMY_ID]).intValue()==id) return (String)values[COMMON_NAME];
         }
         return "NCBI:"+id; 
     }
@@ -251,7 +314,7 @@ public class Organism {
      */
     public static String getLatinName(int id) {
         for (Object[] values:predefined) {
-            if (((Integer)values[0]).intValue()==id) return (String)values[2];
+            if (((Integer)values[TAXONOMY_ID]).intValue()==id) return (String)values[LATIN_NAME];
         }
         return "NCBI:"+id;  
     }
@@ -266,7 +329,7 @@ public class Organism {
      */
     public static String getCombinedName(int id) {
         for (Object[] values:predefined) {
-            if (((Integer)values[0]).intValue()==id) return (String)values[1]+" ("+(String)values[2]+")";
+            if (((Integer)values[TAXONOMY_ID]).intValue()==id) return (String)values[COMMON_NAME]+" ("+(String)values[LATIN_NAME]+")";
         }
         return "NCBI:"+id; 
     }
@@ -278,7 +341,7 @@ public class Organism {
     public static String[] getSupportedOrganisms() {
         String[] results=new String[predefined.length];
         for (int i=0;i<predefined.length;i++) {
-            results[i]=(String)predefined[i][1];   
+            results[i]=(String)predefined[i][COMMON_NAME];   
         }
         return results;
     }
@@ -290,14 +353,14 @@ public class Organism {
     public static Integer[] getSupportedOrganismIDs() {
         Integer[] results=new Integer[predefined.length];
         for (int i=0;i<predefined.length;i++) {
-            results[i]=(Integer)predefined[i][0];   
+            results[i]=(Integer)predefined[i][TAXONOMY_ID];   
         }
         return results;
     }
     
     public static boolean isSupportedOrganismID(int id) {
         for (int i=0;i<predefined.length;i++) {
-            if (id==(int)(predefined[i][0])) return true;   
+            if (id==(int)(predefined[i][TAXONOMY_ID])) return true;   
         }       
         return false;
     }
@@ -308,8 +371,8 @@ public class Organism {
      */    
     public static boolean hasSupportedGenomeBuilds(int organism) {
         for (Object[] values:predefined) { 
-            if (((Integer)values[0])==organism) {
-                String[][] builds=(String[][])values[3];
+            if (((Integer)values[TAXONOMY_ID])==organism) {
+                String[][] builds=(String[][])values[GENOME_BUILDS];
                 return (builds!=null && builds.length>0);
             }
         } 
@@ -323,8 +386,8 @@ public class Organism {
      */    
     public static String[] getSupportedGenomeBuilds(int organism) {
         for (Object[] values:predefined) { 
-            if (((Integer)values[0])==organism) {
-                String[][] builds=(String[][])values[3];
+            if (((Integer)values[TAXONOMY_ID])==organism) {
+                String[][] builds=(String[][])values[GENOME_BUILDS];
                 if (builds==null) return null;
                 String[] defaults=new String[builds.length];
                 for (int i=0;i<builds.length;i++) defaults[i]=builds[i][0];
@@ -336,8 +399,8 @@ public class Organism {
        
     public static String getSupportedGenomeBuildsAsString(int organism) {
         for (Object[] values:predefined) { 
-            if (((Integer)values[0])==organism) {
-                String[][] builds=(String[][])values[3];
+            if (((Integer)values[TAXONOMY_ID])==organism) {
+                String[][] builds=(String[][])values[GENOME_BUILDS];
                 if (builds==null || builds.length==0) return "";
                 else {
                     StringBuilder builder=new StringBuilder();
@@ -353,7 +416,30 @@ public class Organism {
             }
         } 
         return "";
-    }    
+    }
+
+    
+    /**
+     * Returns the supported builds for the organism entry
+     * @param organism represented as a full entry in the organism table
+     * @return a 2D structure with builds for the organism
+     *         each element in the first dimension is one build and each build can have several synonyms in the second dimension
+     */
+    public static String[][] getBuildsForEntry(Object[] organism) {
+        return (String[][])organism[GENOME_BUILDS];
+    }
+ 
+    /**
+     * Sets the supported builds for an organism entry
+     * Note this only updates the return value, not the current configuration
+     * @param organism represented as a full organism entry
+     * @param builds a 2D structure with builds for the organism
+     *         each element in the first dimension is one build and each build can have several synonyms in the second dimension
+     */
+    public static Object[] setBuildsForEntry(Object[] organism, String[][] builds) {
+        organism[GENOME_BUILDS]=builds;
+        return organism;
+    }      
 
 
     /**
@@ -362,9 +448,9 @@ public class Organism {
      */    
     public static boolean isGenomeBuildSupported(String genomebuild) {
         for (Object[] values:predefined) { 
-            if (values[3]==null) continue;
+            if (values[GENOME_BUILDS]==null) continue;
             else {
-                String[][] builds=(String[][])values[3];
+                String[][] builds=(String[][])values[GENOME_BUILDS];
                 for (int i=0;i<builds.length;i++) {
                    if (builds[i][0].equals(genomebuild)) return true; 
                 }
@@ -380,8 +466,8 @@ public class Organism {
     public static boolean isGenomeBuildSupported(int organism, String genomebuild) {
         if (genomebuild==null) return false;
         for (Object[] values:predefined) { 
-            if (((Integer)values[0])==organism) {
-                String[][] builds=(String[][])values[3];
+            if (((Integer)values[TAXONOMY_ID])==organism) {
+                String[][] builds=(String[][])values[GENOME_BUILDS];
                 if (builds==null) return false;
                 for (int i=0;i<builds.length;i++) {
                     if (builds[i][0].equals(genomebuild)) return true;
@@ -399,12 +485,12 @@ public class Organism {
     public static int getOrganismForGenomeBuild(String genomebuild) {
         if (genomebuild==null) return 0;
         for (Object[] values:predefined) { 
-            if (values[3]==null) continue;
+            if (values[GENOME_BUILDS]==null) continue;
             else {
-                String[][] builds=(String[][])values[3];
+                String[][] builds=(String[][])values[GENOME_BUILDS];
                 for (int i=0;i<builds.length;i++) {
                     for (int j=0;j<builds[i].length;j++) {
-                       if (builds[i][j].equals(genomebuild)) return (Integer)values[0]; 
+                       if (builds[i][j].equals(genomebuild)) return (Integer)values[TAXONOMY_ID]; 
                     }                    
                 }
             }
@@ -422,10 +508,10 @@ public class Organism {
     public static String getDefaultBuildName(String genomebuild, int organism) {
         if (genomebuild==null) return null;
         for (Object[] values:predefined) { 
-            if (organism!=0 && ((Integer)values[0]).intValue()!=organism) continue;
-            if (values[3]==null) continue;
+            if (organism!=0 && ((Integer)values[TAXONOMY_ID]).intValue()!=organism) continue;
+            if (values[GENOME_BUILDS]==null) continue;
             else {
-                String[][] builds=(String[][])values[3];
+                String[][] builds=(String[][])values[GENOME_BUILDS];
                 for (int i=0;i<builds.length;i++) {
                     for (int j=0;j<builds[i].length;j++) {
                        if (builds[i][j].equals(genomebuild)) return builds[i][0]; // return first in list 
@@ -444,7 +530,7 @@ public class Organism {
     public static String getCladeForOrganism(int organism) {
         for (Object[] values:predefined) { 
             if ((Integer)values[0]==organism) {
-                 String clade=(String)values[4];
+                 String clade=(String)values[CLADE];
                  if (clade==null) return "Unknown";
                  else return clade;
             }
@@ -457,8 +543,8 @@ public class Organism {
     /** Lists information about all registered organisms to STDERR */
     public static void debug() {
         for (Object[] organism:predefined) {
-            System.err.println(organism[1]+" ("+organism[2]+") => "+organism[0]+" ["+organism[4]+"]");
-            String[][] builds=(String[][])organism[3];
+            System.err.println(organism[COMMON_NAME]+" ("+organism[LATIN_NAME]+") => "+organism[TAXONOMY_ID]+" ["+organism[CLADE]+"]");
+            String[][] builds=(String[][])organism[GENOME_BUILDS];
             if (builds!=null) {
                 for (int i=0;i<builds.length;i++) {
                     System.err.print("  >");

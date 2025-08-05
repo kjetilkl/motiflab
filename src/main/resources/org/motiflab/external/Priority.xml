@@ -4,7 +4,7 @@
     <properties>
       <author>Raluca Gordân, Lee Narlikar, Uwe Ohler and Alexander J. Hartemink</author>
       <contact>Alexander J. Hartemink (amink@cs.duke.edu) and Raluca Gordân (raluca@cs.duke.edu)</contact>
-      <homepage>http://www.cs.duke.edu/~amink/software/priority</homepage>
+      <homepage>https://www.cs.duke.edu/~amink/software/priority</homepage>
       <citation>Narlikar, L., Gordân, R., Ohler, U., and Hartemink, A. (2006) "Informative priors based on transcription factor structural class improve de novo motif discovery" Intelligent Systems in Molecular Biology 2006 (ISMB06) &lt;i&gt;Bioinformatics&lt;/i&gt; &lt;b&gt;22&lt;/b&gt;:e384-392</citation>
       <description>
           PRIORITY is a software package for de novo motif discovery. Its goal is to incorporate informative position-based priors into a collapsed Gibbs sampling algorithm.

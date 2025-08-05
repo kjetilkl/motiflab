@@ -1,12 +1,7 @@
-/*
- 
- 
- */
-
 package org.motiflab.engine;
 
 /**
- * All message passing eminating from the engine goes through this interface
+ * All message passing emanating from the engine goes through this interface
  * 
  * @author kjetikl
  */

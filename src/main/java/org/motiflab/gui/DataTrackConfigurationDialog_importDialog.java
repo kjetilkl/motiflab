@@ -412,6 +412,20 @@ public class DataTrackConfigurationDialog_importDialog extends javax.swing.JDial
                 } else if (mode==DataTrackConfiguration_AddFromConfigFileDialog.DUPLICATE_SOURCES_REPLACE_ALL_SOURCES) {
                     oldTrack.replaceAllDataSources(newsources);
                 }
+                // copy over other properties if they are set in the new track but not the old
+                if (!oldTrack.hasDisplayDirectivesProtocol() && newtrack.hasDisplayDirectivesProtocol()) { // copy over display directives from new track
+                    oldTrack.setDisplayDirectivesProtocol(newtrack.getDisplayDirectivesProtocol());
+                }
+                String oldDescription=oldTrack.getDescription();
+                String newDescription=newtrack.getDescription();
+                if ((oldDescription==null || oldDescription.isEmpty()) && (newDescription!=null && !newDescription.isEmpty())) {
+                    oldTrack.setDescription(newDescription);
+                }
+                String oldSourceSite=oldTrack.getSourceSite();
+                String newSourceSite=newtrack.getSourceSite();
+                if ((oldSourceSite==null || oldSourceSite.isEmpty()) && (newSourceSite!=null && !newSourceSite.isEmpty())) {
+                    oldTrack.setSourceSite(newSourceSite);
+                } 
             }
         }
         // now do the servers. These will just replace current settings!

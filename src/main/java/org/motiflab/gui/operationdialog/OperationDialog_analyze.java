@@ -191,8 +191,8 @@ public class OperationDialog_analyze extends OperationDialog {
             help=analysis.getHelp(engine);
             error="<h1>"+analysis.getAnalysisName()+"</h1><br>"+analysis.getDescription()+"<br><br>Detailed documentation for this analysis is currently unavailable.";                
         } else help="Unable to determine which analysis you refer to...";       
-        InfoDialog infodialog=null;        
-        if (help instanceof String) infodialog=new InfoDialog(gui, "Help for analysis: "+analysisName, (String)help, 700, 450);
+        InfoDialog infodialog=null;     
+        if (help instanceof String || help == null) infodialog=new InfoDialog(gui, "Help for analysis: "+analysisName, (String)help, 700, 450);
         else if (help instanceof URL) infodialog=new InfoDialog(gui, "Help for analysis: "+analysisName, (URL)help, 700, 450, false);
         infodialog.setErrorMessage(error);
         if (infodialog!=null) infodialog.setVisible(true);

@@ -7,6 +7,7 @@
 package org.motiflab.gui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -22,6 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import org.apache.commons.lang.math.Fraction;
 
 /**
  * This class represents a general information dialog that can be
@@ -34,7 +36,6 @@ import javax.swing.event.HyperlinkListener;
  * @author  kjetikl
  */
 public class InfoDialog extends javax.swing.JDialog implements HyperlinkListener {
-    private MotifLabGUI gui;
     private boolean openLinksInExternalBrowser=true;
     private ArrayList<URL> history=null;
     private JButton backButton=null;
@@ -46,14 +47,17 @@ public class InfoDialog extends javax.swing.JDialog implements HyperlinkListener
     /** Creates new form InfoDialog with standard size 750x600*/
     public InfoDialog(MotifLabGUI gui, String title, String document) {
         this(gui,title,document,750,600);
-        this.gui=gui;
     }
 
+    /** Creates new form InfoDialog with given displaying the given Web page */
+    public InfoDialog(MotifLabGUI gui, String title, URL url, int width, int height) {
+       this(gui, title, url, width, height, true);
+    }    
+    
     /** Creates new form InfoDialog with given size displaying the given string document (HTML-formatted) */
     public InfoDialog(MotifLabGUI gui, String title, String document, int width, int height) {
-        super(gui.getFrame(), title, true);
-        JFrame parent=gui.getFrame();
-        this.gui=gui;
+        super((gui!=null)?gui.getFrame():null, title, true);  
+        Component parent=(gui!=null)?gui.getFrame():getOwner();
         initComponents();
         progressbar.setIndeterminate(true);
         progressbar.setVisible(false);
@@ -72,10 +76,9 @@ public class InfoDialog extends javax.swing.JDialog implements HyperlinkListener
 
     /** Creates new form InfoDialog with given displaying the given Web page */
     public InfoDialog(MotifLabGUI gui, String title, URL url, int width, int height, boolean openLinksInExternalBrowser) {
-        super(gui.getFrame(), title, true);
+        super((gui!=null)?gui.getFrame():null, title, true);       
         this.openLinksInExternalBrowser=openLinksInExternalBrowser;
-        JFrame parent=gui.getFrame();
-        this.gui=gui;
+        Component parent=(gui!=null)?gui.getFrame():getOwner();
         initComponents();
         progressbar.setIndeterminate(true);
         progressbar.setVisible(false);
@@ -121,10 +124,6 @@ public class InfoDialog extends javax.swing.JDialog implements HyperlinkListener
         pack();
     }
 
-    /** Creates new form InfoDialog with given displaying the given Web page */
-    public InfoDialog(MotifLabGUI gui, String title, URL url, int width, int height) {
-       this(gui, title, url, width, height, true);
-    }
 
     public void setMonospacedFont(int size) {
         documentPane.setFont(new Font(Font.MONOSPACED,Font.PLAIN,size));
@@ -152,8 +151,10 @@ public class InfoDialog extends javax.swing.JDialog implements HyperlinkListener
         else if (openLinksInExternalBrowser) {
             try {
                 java.awt.Desktop.getDesktop().browse(url.toURI());
-            } catch(Exception e) {
-                JOptionPane.showMessageDialog(this, "Unable to launch external web browser to show page: "+event.getURL().toString(), "ERROR", JOptionPane.ERROR_MESSAGE);
+            } catch(java.lang.UnsupportedOperationException e) { 
+                JOptionPane.showMessageDialog(this, "Unable to launch external web browser", "ERROR", JOptionPane.ERROR_MESSAGE);
+            } catch(Exception error) {
+                JOptionPane.showMessageDialog(this, "Unable to show page: "+event.getURL().toString(), "ERROR", JOptionPane.ERROR_MESSAGE);
             }
         } else { // open new page in this window
             historyIndex++;

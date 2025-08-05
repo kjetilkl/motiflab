@@ -132,6 +132,10 @@ public class DataTrack implements Cloneable {
         return directivesProtocol;
     }
     
+    public boolean hasDisplayDirectivesProtocol() {
+        return (directivesProtocol!=null && !directivesProtocol.isEmpty());
+    }    
+    
     /**
      * Returns a list of available DataSource objects for the specified organism and genomebuild
      * or null if the organism/build is not supported
