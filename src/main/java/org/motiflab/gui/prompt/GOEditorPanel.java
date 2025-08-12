@@ -23,10 +23,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import org.motiflab.engine.GOengine;
 import org.motiflab.engine.MotifLabEngine;
+import org.motiflab.gui.JSearchTextField;
 import org.motiflab.gui.MotifLabGUI;
 
 /**
- * This class is a small panel containing with 3-column table for showing and editing Gene Ontology terms.
+ * This class is a small panel containing a 3-column table for showing and editing Gene Ontology terms.
  * 
  * @author kjetikl
  */
@@ -95,7 +96,13 @@ public class GOEditorPanel extends JPanel {
             }
         });
         JPanel internalpanel=new JPanel(new BorderLayout());
-        JPanel controlspanel=new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel bottomPanel=new JPanel(new BorderLayout());
+        JPanel controlspanel=new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel searchPanel=new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JSearchTextField searchField = new JSearchTextField();
+        searchField.enableRowFiltering(GOtable);
+        searchField.enableSimpleTableSearch(GOtable);
+        searchPanel.add(searchField);
         addGOtermButton=new JButton("Add GO term");
         addGOtermButton.addActionListener(new ActionListener() {
             @Override
@@ -115,8 +122,10 @@ public class GOEditorPanel extends JPanel {
             }
         });
         if (editable) controlspanel.add(addGOtermButton);
+        bottomPanel.add(searchPanel,BorderLayout.WEST);
+        bottomPanel.add(controlspanel,BorderLayout.CENTER);
         internalpanel.add(new JScrollPane(GOtable),BorderLayout.CENTER);
-        internalpanel.add(controlspanel,BorderLayout.SOUTH);
+        internalpanel.add(bottomPanel,BorderLayout.SOUTH);
         internalpanel.setBorder(BorderFactory.createEmptyBorder(8,0,0,0));
         Dimension dim=new Dimension(500,290);
         internalpanel.setMinimumSize(dim);

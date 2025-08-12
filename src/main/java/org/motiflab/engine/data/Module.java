@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 /**
  * @deprecated Legacy stub for deserialization only. Use ModuleCRM instead.
- *             This class was renamed to avoid confusion with modules in Java 9+
+ *             The original Module class was renamed to avoid confusion with modules in Java 9+
  */
 @Deprecated
 public class Module implements Serializable {

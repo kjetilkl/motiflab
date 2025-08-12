@@ -257,7 +257,7 @@ public final class Sequence extends Data implements BasicDataType {
         if (sequenceName!=null) {
             return sequenceName;
         } else {
-          return chromosome+":"+startPosition+"-"+endPosition;   
+            return chromosome+":"+startPosition+"-"+endPosition;   
         }
     }
     
@@ -281,6 +281,14 @@ public final class Sequence extends Data implements BasicDataType {
      */
     public String getGeneName() {
         return associatedGeneName;      
+    }
+ 
+    /**
+     * Returns both the sequence name and the name of the gene associated with the sequence separated by a space
+     * @return 
+     */
+    public String getSequenceAndGeneName() {
+        return ((sequenceName!=null)?sequenceName:"")+" "+((associatedGeneName!=null)?associatedGeneName:"");
     }
 
     /**

@@ -44,8 +44,10 @@ import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.data.ModuleCRM;
 import org.motiflab.engine.data.Motif;
+import org.motiflab.engine.data.Sequence;
 import org.motiflab.engine.data.analysis.GroupRowSorter;
 import org.motiflab.gui.prompt.MyDefaultRowSorter;
 
@@ -64,6 +66,7 @@ public class JSearchTextField extends JTextField implements FocusListener, Mouse
     private String textWhenNotFocused = "Search...";
     private boolean hideNonMatching=false;
     private SearchFilter filter=null;
+    private TableSearcher tableSearcher=null;    
     private boolean inProgress=false;
     private Polygon hourglass=null;
     private String[][] structuredStringFilter=null;
@@ -147,15 +150,28 @@ public class JSearchTextField extends JTextField implements FocusListener, Mouse
     }
 
     /**
-     * Enables this search field to be used to filter rows on the given table.
+     * Enables this search field to be used to filter rows in the given table.
      * This functionality can be toggled by the user by clicking on 
      * the magnifying glass icon in the search field
-     * @param flag 
+     * @param table The table to filter 
      */
     public void enableRowFiltering(JTable table) {
         filter=new SearchFilter(table); // this will also install the filter on the table!
         this.addMouseListener(this);
         this.setToolTipText("Click on the magnifying glass to enable (orange icon) or disable (gray icon) filtering of non-matching rows");
+    }
+
+    /**
+     * Enables this search field to be used to search for rows in the given table.
+     * Each time the ENTER key is pressed in the search box, the next matching
+     * line in the table will be selected
+     * This function enables a simple default search option that just matches
+     * against the text values in the cells of the table.
+     * For more advanced searches, you should add your own listener 
+     * @param table The table to filter  
+     */    
+    public void enableSimpleTableSearch(JTable table) {
+         tableSearcher=new TableSearcher(table);
     }
     
     /**
@@ -212,7 +228,8 @@ public class JSearchTextField extends JTextField implements FocusListener, Mouse
      * @return 
      */
     public boolean isSearchMatch(String value) {
-       String filterString=filter.filterString;           
+       String filterString=filter.filterString;         
+       boolean match = (filterString==null)?true:value.contains(filterString);
        if (structuredStringFilter==null) return (filterString==null)?true:value.contains(filterString);
        for (int i=0;i<structuredStringFilter.length;i++) { // for each OR-level
            String[] ands=structuredStringFilter[i]; // must match all entries in this         
@@ -261,7 +278,7 @@ public class JSearchTextField extends JTextField implements FocusListener, Mouse
            if (filterString==null || !hideNonMatching) return true; // do not filter any rows      
            for (int i = entry.getValueCount() - 1; i >= 0; i--) {
                Object cellvalue=entry.getValue(i);
-               if (cellvalue instanceof Color) continue; // ignore this
+               if (cellvalue==null || cellvalue instanceof Color) continue; // ignore this column
                String valueString=null;
                if (cellvalue == doNotFilter) return true;
                if (cellvalue instanceof Motif) valueString=((Motif)cellvalue).getPresentationName().toLowerCase();               
@@ -325,6 +342,65 @@ public class JSearchTextField extends JTextField implements FocusListener, Mouse
         public void keyTyped(KeyEvent e) {}
                         
   } // end class SearchFilter    
+    
+    
+    private class TableSearcher implements ActionListener {
+        String filterString;      
+        JTable table;
+        
+        public TableSearcher(JTable table) {
+            this.table=table;
+            JSearchTextField.this.addActionListener(this);
+        }
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            searchForText();
+        }
+        
+        private void searchForText() {
+            String searchfieldText=getText();         
+            if (searchfieldText==null || searchfieldText.isEmpty()) return; // no need to search        
+            int currentRow=table.getSelectedRow();
+            int startRow=currentRow+1;
+            int rowsCount=table.getRowCount();      
+            int matchAt=-1;
+            for (int i=0;i<rowsCount;i++) {
+                int nextRow=(startRow+i)%rowsCount; // this will search all rows starting at the current and wrapping around
+                if (isRowMatching(table,nextRow)) {
+                    matchAt=nextRow;
+                    break;
+                }
+                if (nextRow==currentRow) break;  // search wrapped around without any matches
+            }
+            if (matchAt>=0) {
+                table.setRowSelectionInterval(matchAt, matchAt);
+                if (table.getColumnSelectionAllowed()) table.setColumnSelectionInterval(0, table.getColumnCount()-1);
+                table.scrollRectToVisible(table.getCellRect(matchAt,0,true));
+            } else {
+                MotifLabEngine.getEngine().statusMessage("No match found for '"+searchfieldText+"'");
+                table.clearSelection();
+            }
+        }
+
+        private boolean isRowMatching(JTable table, int row) {
+            int colCount=table.getColumnCount();        
+            for (int j=0;j<colCount;j++) {
+                Object value=table.getValueAt(row, j);
+                if (value!=null && !(value instanceof Color)) {
+                    String valueString;
+                         if (value instanceof Motif) valueString=((Motif)value).getPresentationName();
+                    else if (value instanceof ModuleCRM) valueString=((ModuleCRM)value).getNamePlusSingleMotifNames();
+                    else if (value instanceof Sequence) valueString=((Sequence)value).getSequenceAndGeneName();
+                    else valueString=value.toString();
+                    valueString=valueString.toLowerCase();                
+                    if (isSearchMatch(valueString)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }  
+    }
     
 }
 

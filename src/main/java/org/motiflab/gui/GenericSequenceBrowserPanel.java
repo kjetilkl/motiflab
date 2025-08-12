@@ -316,35 +316,42 @@ public class GenericSequenceBrowserPanel extends GenericBrowserPanel {
      */
     private void searchForText() {
         String searchfieldText=searchfield.getText();
-        if (searchfieldText==null || searchfieldText.isEmpty()) return; // no need to search   
+        if (searchfieldText==null || searchfieldText.isEmpty()) return; // no need to search        
         int currentRow=table.getSelectedRow();
         int startRow=currentRow+1;
-        int rowsCount=table.getRowCount();
-        int colCount=table.getColumnCount();
+        int rowsCount=table.getRowCount();      
         int matchAt=-1;
         for (int i=0;i<rowsCount;i++) {
             int nextRow=(startRow+i)%rowsCount; // this will search all rows starting at the current and wrapping around
-            if (nextRow==currentRow) {
-                gui.statusMessage("No match found for '"+searchfieldText+"'");
+            if (isRowMatching(table,nextRow)) {
+                matchAt=nextRow;
                 break;
             }
-            for (int j=0;j<colCount;j++) {
-                Object value=table.getValueAt(nextRow, j);
-                if (value!=null && !(value instanceof java.awt.Color)) {
-                    String valueString=value.toString().toLowerCase();
-                    if (searchfield.isSearchMatch(valueString)) { // previously:  if (valueString.indexOf(text)>=0) { 
-                        matchAt=nextRow;
-                        break;
-                    }
-                }
-            }
-            if (matchAt>=0) break;
+            if (nextRow==currentRow) break;  // search wrapped around without any matches
         }
         if (matchAt>=0) {
             table.setRowSelectionInterval(matchAt, matchAt);
             table.scrollRectToVisible(table.getCellRect(matchAt,0,true));
+        } else {
+            gui.statusMessage("No match found for '"+searchfieldText+"'");
+            table.clearSelection();
         }
     }
+    
+    private boolean isRowMatching(JTable table, int row) {
+        int colCount=table.getColumnCount();        
+        for (int j=0;j<colCount;j++) {
+            Object value=table.getValueAt(row, j);
+            if (value!=null && !(value instanceof Color)) {
+                String valueString=(value instanceof Sequence)?(((Sequence)value).getSequenceAndGeneName()):value.toString();
+                valueString=valueString.toLowerCase();
+                if (searchfield.isSearchMatch(valueString)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }      
 
    protected void setVisibilityOnAllSequences(boolean show) {
        ArrayList<Data> allSequences=gui.getEngine().getAllDataItemsOfType(Sequence.class);
