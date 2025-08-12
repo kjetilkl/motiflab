@@ -1,8 +1,3 @@
-/*
- 
- 
- */
-
 package org.motiflab.engine.data.analysis;
 
 import java.awt.Graphics;
@@ -23,8 +18,6 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -75,6 +67,7 @@ import org.motiflab.engine.data.SequenceCollection;
 import org.motiflab.engine.data.SequenceGroup;
 import org.motiflab.engine.data.SequenceNumericMap;
 import org.motiflab.engine.data.SequencePartition;
+import org.motiflab.engine.util.HTMLUtilities;
 
 /**
  *
@@ -129,18 +122,12 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
         Parameter groupPar = new Parameter("Group by clusters",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Group sequences in partition-clusters together (affects sorting order)",false,false);
         Parameter summaryPar = new Parameter("Show only groups summary",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Show only the summary statistics for each group and not coverage for individual sequences",false,false);
         Parameter boxplotPar = new Parameter("Box plot",String.class, BOTH,new String[]{MEDIAN_QUARTILES,MEAN_STD,BOTH},"Which statistics to show using box plots",false,false);
+        Parameter imageformat=new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false);                                      
         Parameter scalePar = new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-        if (dataformat.equals(HTML)) return new Parameter[]{sortPar,groupPar,summaryPar,boxplotPar,scalePar};
+        if (dataformat.equals(HTML)) return new Parameter[]{sortPar,groupPar,summaryPar,boxplotPar,imageformat,scalePar};
         else if (dataformat.equals(EXCEL) || dataformat.equals(RAWDATA)) return new Parameter[]{sortPar,groupPar,summaryPar};
         else return new Parameter[0];
     }
-    
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Box plot") || parameter.equals("Graph scale")) return new String[]{"HTML"};
-//        if (parameter.equals("Group by clusters") || parameter.equals("Sort by") || parameter.equals("Show only groups summary")) return new String[]{"HTML","RawData","Excel"};        
-//        return null;
-//    }     
     
     
     @Override
@@ -245,6 +232,7 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
         int scalepercent=100;
         int plots=PLOT_BOTH;
         String sortOrderString="Sequence name";
+        String imageFormat="png";         
         if (settings!=null) {
           try {
              Parameter[] defaults=getOutputParameters(format);
@@ -257,6 +245,7 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
              else if (plotString.equals(MEAN_STD)) plots=PLOT_MEAN_STD;
              else if (plotString.equals(BOTH)) plots=PLOT_BOTH;
              scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
+             imageFormat=(String)settings.getResolvedParameter("Image format",defaults,engine);                
           }
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
@@ -272,11 +261,11 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
         outputobject.append("<h1 class=\"headline\">"+regionDatasetName+" Coverage Analysis</h1>\n<br>\n",HTML);
         if (showOnlySummary && sequenceGroups==null) {
             outputobject.append("<br /><br />No sequence groups selected<br />", HTML);
-        } else {
-            formatCoverageGraph(outputobject, engine, vizSettings, sortBy, groupByCluster, showOnlySummary, plots, scale);
+        } else {            
+            formatCoverageGraph(outputobject, imageFormat, engine, vizSettings, sortBy, groupByCluster, showOnlySummary, plots, scale);
             outputobject.append("<br /><br />", HTML);
         }
-        if (sequenceGroups!=null) formatGroupsTable(outputobject, engine, vizSettings);
+        if (sequenceGroups!=null) formatGroupsTableHTML(outputobject, engine, vizSettings);
         outputobject.append("<br /><br />", HTML);
         if (sequenceNames.size()<=60) outputobject.append("</center>",HTML); //        
         boolean ascending=true;
@@ -302,18 +291,14 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
     }
 
     /** Formats graph and table with min/max/average of groups */
-    private void formatCoverageGraph(OutputData outputobject, MotifLabEngine engine, VisualizationSettings vizSettings, int sortBy, boolean grouping, boolean showOnlySummary, int plots, double scale) {
-        File imagefile=outputobject.createDependentFile(engine,"png");
-        try {
-            createGraphImage(imagefile,engine, vizSettings, sortBy, grouping, showOnlySummary, plots, scale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
-        outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\" />",HTML);
+    private void formatCoverageGraph(OutputData outputobject, String imageFormat, MotifLabEngine engine, VisualizationSettings vizSettings, int sortBy, boolean grouping, boolean showOnlySummary, int plots, double scale) {
+        File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+        String imageTag = getImageTag(imagefile, imageFormat, engine, vizSettings, sortBy, grouping, showOnlySummary, plots, scale);
+        outputobject.append(imageTag,HTML);
     }
 
 
-    private void formatGroupsTable(OutputData outputobject, MotifLabEngine engine, VisualizationSettings vizSettings) {
+    private void formatGroupsTableHTML(OutputData outputobject, MotifLabEngine engine, VisualizationSettings vizSettings) {
             outputobject.append("<table class=\"sortable\">\n", HTML);
             outputobject.append("<tr><th width=\"90\">Group</th><th width=\"90\">Size</th><th width=\"90\">Min</th><th width=\"90\">Max</th><th width=\"90\">Average</th><th width=\"90\">Std.&nbsp;dev.</th><th width=\"90\">Median</th><th width=\"90\">1st&nbsp;Quartile</th><th width=\"90\">3rd&nbsp;Quartile</th></tr>\n",HTML);
             if (sequenceGroups instanceof SequenceCollection) {
@@ -648,17 +633,7 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
         
     }
        
- 
-    /** Returns the coverage of the sequence */
-//    private double findCoverage_old(RegionSequenceData sequencedata) {
-//        int coveredbases=0;
-//        int length=sequencedata.getSize();
-//        for (int i=0;i<length;i++) {
-//            if (sequencedata.getNumberOfRegionsAtRelativePosition(i)>0) coveredbases++;
-//        }        
-//        return (double)coveredbases/(double)length;
-//    } 
-    
+
     /** Returns the coverage of the sequence */
     private double findCoverage(RegionSequenceData sequencedata) { 
         // this implementation is much faster than the one above since the repeated use of the slow method "sequencedata.getNumberOfRegionsAtRelativePosition(i)" does not scale well for sequences with many regions
@@ -717,10 +692,31 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
     }
    
     
-    
+    private String getImageTag(File file, String imageformat, MotifLabEngine engine, VisualizationSettings settings, int sortOrder, boolean grouping, boolean showOnlySummary, int boxplot, double scale) {
+        final int graphheight=200; // height of graph in pixels (just the histogram);
+        final int translateX=50; // the X coordinate for the top of the graph
+        final int translateY=30; // the Y coordinate for the top of the graph 
+        final int columnWidth=15;
+        int columns=(showOnlySummary)?0:results.size();
+        if (sequenceGroups!=null) {
+            if (sequenceGroups instanceof SequenceCollection) columns++;
+            else if (sequenceGroups instanceof SequencePartition) {
+                columns+=((SequencePartition)sequenceGroups).getNumberOfClusters();
+            }
+        }
+        final int graphwidth=columns*columnWidth;
+        final int width=graphwidth+translateX+10; //
+        int largestNameSize=findLargestNameSize(showOnlySummary);
+        final int height=translateY+graphheight+largestNameSize+30; 
+        final int finalColumns = columns; 
+        
+        // Create the image, write it to file and return an HTML img tag for it
+        HTMLUtilities.ImagePainter painter = (g) -> paintGraphImage(g, engine, settings, graphwidth, width, graphheight, height, translateX, translateY, finalColumns, columnWidth, sortOrder, grouping, showOnlySummary, boxplot, scale);
+        return HTMLUtilities.getImageTag(painter, file, imageformat, height, width, scale);         
+    }      
     
   /** Creates a graph based on the current data and saves it to file (if file is not null)*/
-    private BufferedImage createGraphImage(File file, MotifLabEngine engine, VisualizationSettings settings, int sortOrder, boolean grouping, boolean showOnlySummary, int boxplot, double scale) throws IOException {
+    private BufferedImage createGraphImage(MotifLabEngine engine, VisualizationSettings settings, int sortOrder, boolean grouping, boolean showOnlySummary, int boxplot, double scale) {
         int graphheight=200; // height of graph in pixels (just the histogram);
         int translateX=50; // the X coordinate for the top of the graph
         int translateY=30; // the Y coordinate for the top of the graph 
@@ -735,10 +731,19 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
         int graphwidth=columns*columnWidth;
         int width=graphwidth+translateX+10; //
         int largestNameSize=findLargestNameSize(showOnlySummary);
-        int height=translateY+graphheight+largestNameSize+30;
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
-        g.scale(scale, scale);
+        int height=translateY+graphheight+largestNameSize+30;       
+        BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g=image.createGraphics();             
+        paintGraphImage(g, engine, settings, graphwidth, width, graphheight, height, translateX, translateY, columns, columnWidth, sortOrder, grouping, showOnlySummary, boxplot, scale);
+        g.dispose();
+        return image;                                      
+    }  
+        
+  /** Creates a graph based on the current data and saves it to file (if file is not null)*/
+    private void paintGraphImage(Graphics2D g, MotifLabEngine engine, VisualizationSettings settings, int graphwidth, int width, int graphheight, int height, 
+                                 int translateX, int translateY, 
+                                 int columns, int columnWidth, int sortOrder, boolean grouping, boolean showOnlySummary, int boxplot, double scale) {
+        g.scale(scale, scale);          
         Stroke defaultStroke=g.getStroke();
         BasicStroke fatStroke = new BasicStroke(3f,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);       
         BasicStroke dashed = new BasicStroke(1f,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, new float[]{2f,3f}, 0f);
@@ -839,14 +844,6 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
                 offset+=columnWidth;
             }
         }
-        // write the image to file
-        if (file!=null) {
-            OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-            ImageIO.write(image, "png", output);
-            output.close(); 
-        }
-        g.dispose();
-        return image;
     }
 
     private HashMap<String,Color> assignedClusterColors;
@@ -1140,14 +1137,15 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
                 BorderFactory.createBevelBorder(BevelBorder.RAISED)
         ));        
         displayPanel.add(splitPane);
-        displayPanel.setPreferredSize(new Dimension(800,600));
+        displayPanel.setPreferredSize(new Dimension(900,600));
         return displayPanel;
     }
 
     private class HeaderPanel extends JPanel {
         private Font headerFont;
         private JCheckBox groupCheckBox;
-        private JComboBox orderCombobox;
+        private JCheckBox summaryCheckBox;           
+        private JComboBox orderCombobox;     
         private JComboBox boxandwhiskersCombobox;
         private GraphPanel graphpanel;
         
@@ -1160,24 +1158,29 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
             this.setLayout(new BorderLayout());
             headerFont=new Font(Font.SANS_SERIF, Font.BOLD, 18);
             this.setMinimumSize(null);
-            javax.swing.JLabel headerlabel=new javax.swing.JLabel("  "+regionDatasetName+" coverage");
+            // javax.swing.JLabel headerlabel=new javax.swing.JLabel("  "+regionDatasetName+" coverage");
+            javax.swing.JLabel headerlabel=new javax.swing.JLabel("  Region coverage");
             headerlabel.setFont(headerFont);
             this.add(headerlabel,BorderLayout.WEST);
             JPanel controlsPanel=new JPanel(new FlowLayout(FlowLayout.RIGHT));
             groupCheckBox=new JCheckBox("    Group by cluster");
             groupCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
+            summaryCheckBox=new JCheckBox("    Show only summary");
+            summaryCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);             
             orderCombobox=new JComboBox(new String[]{"Sequence name","Coverage ascending", "Coverage descending"});
             boxandwhiskersCombobox=new JComboBox(new String[]{MEDIAN_QUARTILES,MEAN_STD,BOTH});
             boxandwhiskersCombobox.setSelectedItem(MEAN_STD);
-            controlsPanel.add(new javax.swing.JLabel("Order by  "));
-            controlsPanel.add(orderCombobox);
-            if (sequenceGroups!=null) {
-                controlsPanel.add(new javax.swing.JLabel("  Box plot "));
-                controlsPanel.add(boxandwhiskersCombobox);
-            }
             if (sequenceGroups instanceof SequencePartition) {
                 controlsPanel.add(groupCheckBox);
                 groupCheckBox.setSelected(true);
+            }              
+            controlsPanel.add(new javax.swing.JLabel("Order by  "));
+            controlsPanel.add(orderCombobox);
+            if (sequenceGroups!=null) {
+                controlsPanel.add(summaryCheckBox);     
+                summaryCheckBox.setSelected(true);
+                controlsPanel.add(new javax.swing.JLabel("  Box plot "));
+                controlsPanel.add(boxandwhiskersCombobox);
             }
             this.add(controlsPanel,BorderLayout.EAST);
             updateGraphImage();
@@ -1188,14 +1191,16 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
                 }
             };
             groupCheckBox.addActionListener(listener);
+            summaryCheckBox.addActionListener(listener);            
             orderCombobox.addActionListener(listener);
             boxandwhiskersCombobox.addActionListener(listener);                            
         }
         private void updateGraphImage() {
             String order=(String)orderCombobox.getSelectedItem();
             String boxAndWhiskers=(String)boxandwhiskersCombobox.getSelectedItem();
-            boolean grouping=groupCheckBox.isSelected();  
-            graphpanel.updateGraphImage(order, boxAndWhiskers, grouping);
+            boolean grouping=groupCheckBox.isSelected(); 
+            boolean onlySummary=summaryCheckBox.isSelected();              
+            graphpanel.updateGraphImage(order, boxAndWhiskers, grouping, onlySummary);
         }
     }
     
@@ -1210,23 +1215,23 @@ public final class RegionDatasetCoverageAnalysis extends Analysis {
             this.setOpaque(true);
         }
 
-        public final void updateGraphImage(String order, String boxAndWhiskers, boolean grouping) {
+        public final void updateGraphImage(String order, String boxAndWhiskers, boolean grouping, boolean showOnlySummary) {
             int sortOrder=SORT_BY_NAME;
             int boxplot=PLOT_MEAN_STD;
-            // showOnlySummary below could be based on a checkbox!
-            boolean showOnlySummary=(sequenceGroups!=null && results.size()>70); // if there are more than 70 sequences and groups have been specified. Show only the summary
+            // showOnlySummary=(sequenceGroups!=null && results.size()>70); // if there are more than 70 sequences and groups have been specified. Show only the summary
                  if (order.equals("Coverage ascending")) sortOrder=SORT_BY_COVERAGE_ASCENDING;
             else if (order.equals("Coverage descending")) sortOrder=SORT_BY_COVERAGE_DESCENDING;
                  if (boxAndWhiskers.equals(MEAN_STD)) boxplot=PLOT_MEAN_STD;
             else if (boxAndWhiskers.equals(MEDIAN_QUARTILES)) boxplot=PLOT_MEDIAN_QUARTILES;
             else if (boxAndWhiskers.equals(BOTH)) boxplot=PLOT_BOTH;
-            try {image=createGraphImage(null, gui.getEngine(), gui.getVisualizationSettings(),sortOrder,grouping, showOnlySummary, boxplot, 1.0);} catch (Exception e) {}
+            try {image=createGraphImage(gui.getEngine(), gui.getVisualizationSettings(),sortOrder,grouping, showOnlySummary, boxplot, 1.0);} catch (Exception e) {}
             if (image!=null) {
                 int width=image.getWidth()+30;    if (width<550) width=550;
                 int height=image.getHeight()+22;  if (height<300) height=300;
                 this.setPreferredSize(new Dimension(width,height));
             }
             repaint();
+            revalidate();             
         }
 
         @Override

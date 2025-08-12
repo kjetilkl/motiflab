@@ -25,6 +25,7 @@ import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.data.OutputData;
 import org.motiflab.engine.dataformat.DataFormat_HTML;
 import org.motiflab.engine.dataformat.DataFormat_RawData;
+import org.motiflab.engine.util.HTMLUtilities;
 import org.motiflab.gui.VisualizationSettings;
 
 /**
@@ -121,10 +122,7 @@ public class AnnotatedValueRenderer extends DefaultTableCellRenderer implements 
         return numberString;
     }
 
-//    private void outputValue(OutputData output, Object value) throws ExecutionError {
-//        
-//    }
-
+    @Deprecated
     public void outputHistogramToHTML(OutputData output, double[] histogram, MotifLabEngine engine) throws ExecutionError {
         if (histogram==null || histogram.length==0) return;
         File imagefile=output.createDependentFile(engine,"gif");
@@ -135,6 +133,16 @@ public class AnnotatedValueRenderer extends DefaultTableCellRenderer implements 
         }
         output.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\"/>", DataFormat_HTML.HTML);
     }
+    
+    public void outputHistogramToHTML(OutputData output, String imageFormat, double[] histogram, MotifLabEngine engine) throws ExecutionError {
+        int width=100;
+        int height=19;        
+        if (histogram==null || histogram.length==0 || imageFormat==null) return;
+        File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():output.createDependentFile(engine,imageFormat);       
+        HTMLUtilities.ImagePainter painter = (g) -> paintHistogram(g, histogram, width, height, histogramcolor,Color.WHITE);
+        String imageTag=HTMLUtilities.getImageTag(painter, imagefile, imageFormat, height, width, 1.0);  
+        output.append(imageTag, DataFormat_HTML.HTML);
+    }    
 
     private void saveHistogramImage(File file, double[] histogram) throws IOException {
         int width=100;

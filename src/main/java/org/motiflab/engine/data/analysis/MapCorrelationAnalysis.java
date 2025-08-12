@@ -1,11 +1,5 @@
-
-
 package org.motiflab.engine.data.analysis;
 
-import de.erichseifert.vectorgraphics2d.EPSGraphics2D;
-import de.erichseifert.vectorgraphics2d.PDFGraphics2D;
-import de.erichseifert.vectorgraphics2d.SVGGraphics2D;
-import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -23,11 +17,9 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JEditorPane;
@@ -63,6 +55,7 @@ import org.motiflab.engine.data.NumericVariable;
 import org.motiflab.engine.data.OutputData;
 import org.motiflab.engine.data.SequenceCollection;
 import org.motiflab.engine.data.SequenceNumericMap;
+import org.motiflab.engine.util.HTMLUtilities;
 
 /**
  *
@@ -99,7 +92,7 @@ public class MapCorrelationAnalysis extends Analysis {
     
     @Override
     public Parameter[] getOutputParameters(String dataformat) {        
-         Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","svg","pdf","eps"},"The image format to use for the graph",false,false);                       
+         Parameter imageformat=new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false);                       
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
          Parameter sortBy=new Parameter("Sort by",String.class,"First",new String[]{"First","Second"},"Which of the two maps should be sorted in ascending order in the graph",false,false);
          if (dataformat.equals(HTML))  return new Parameter[]{sortBy, imageformat, scalepar};
@@ -107,12 +100,6 @@ public class MapCorrelationAnalysis extends Analysis {
          return new Parameter[0];
     }  
 
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Sort by")) return new String[]{HTML,EXCEL};
-//        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{HTML};
-//        return null;
-//    }    
     
     @Override
     public String[] getResultVariables() {
@@ -202,14 +189,11 @@ public class MapCorrelationAnalysis extends Analysis {
         } 
         double scale=(scalepercent==100)?1.0:(((double)scalepercent)/100.0);
         int showAscending=(showAscendingString.equals("Second"))?1:0;
-        File imagefile=outputobject.createDependentFile(engine,imageFormat); 
-        Object dimension=null;
-        VisualizationSettings vz=engine.getClient().getVisualizationSettings();        
-        try {
-            dimension=createGraphImage(imagefile,showAscending, scale, vz.getSystemColor("color1"), vz.getSystemColor("color2"), vz.getSystemFont("graph.legendFont"), vz.getSystemFont("graph.tickFont"));
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
+        VisualizationSettings vz=engine.getClient().getVisualizationSettings();
+        
+        File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+        String imageTag = getImageTag(imagefile, imageFormat, showAscending, scale, vz.getSystemColor("color1"), vz.getSystemColor("color2"), vz.getSystemFont("graph.legendFont"), vz.getSystemFont("graph.tickFont"));
+
         if (format!=null) format.setProgress(50);
         engine.createHTMLheader("Map Correlation Analysis", null, null, true, true, true, outputobject);
         outputobject.append("<div align=\"center\">\n",HTML);
@@ -223,18 +207,9 @@ public class MapCorrelationAnalysis extends Analysis {
             outputobject.append("</span>\n",HTML);
         }
         outputobject.append("<br><br>\n",HTML);
-        
-        if (imageFormat.equals("pdf")) outputobject.append("<object type=\"application/pdf\" data=\"file:///"+imagefile.getAbsolutePath()+"\"></object>",HTML);
-        else {
-            outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\"",HTML);
-            if (dimension instanceof Dimension) {
-                int width=((Dimension)dimension).width;
-                int height=((Dimension)dimension).height;
-                outputobject.append(" width="+(int)Math.ceil(width*scale)+" height="+(int)Math.ceil(height*scale),HTML);
-            }                    
-            outputobject.append(" />\n",HTML);  
-        }
-        
+       
+        outputobject.append(imageTag,HTML);
+
         outputobject.append("<br /><br /><table>\n",HTML);
         outputobject.append("<tr><th>Pearson's Correlation</th><th>Spearman's Correlation</th></tr>\n",HTML);
         outputobject.append("<tr><td style=\"text-align:center\">",HTML);
@@ -271,9 +246,20 @@ public class MapCorrelationAnalysis extends Analysis {
         }
         return new double[]{min,max};
     }
+       
     
-    
-    private Object createGraphImage(File file, int sortBy, double scale, Color firstColor, Color secondColor, Font legendFont, Font tickFont) throws IOException {
+    /**
+     * Create an image of the graph to display in a dialog
+     * @param sortBy
+     * @param scale
+     * @param firstColor
+     * @param secondColor
+     * @param legendFont
+     * @param tickFont
+     * @return
+     * @throws IOException 
+     */
+    private BufferedImage createGraphImage(int sortBy, double scale, Color firstColor, Color secondColor, Font legendFont, Font tickFont) throws IOException {
         int graphheight=200; // height of graph in pixels (just the graph);
         int graphwidth=500; // width of graph in pixels (just the graph);
         int translateX=6; // the X coordinate for the left edge of the graph
@@ -282,45 +268,46 @@ public class MapCorrelationAnalysis extends Analysis {
         int legendEntriesSpacing=20;
         Dimension d=Graph.getHorizontalLegendDimension(new String[]{firstMapName,secondMapName}, legendEntriesSpacing, legendFont);
         if (width<(d.width+translateX+translateX)) width=(d.width+translateX+translateX); // just to make sure there is enough room for the legend box
-        int height=graphheight+translateY+d.height;// +translateY;
-        
-        if (file!=null) {
-            if (file.getName().endsWith(".png")) { // bitmap PNG format   
-                BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
-                Graphics2D g=image.createGraphics();   
-                paintGraphImage(g, sortBy, scale, width, height, graphwidth, graphheight, translateX, translateY, legendEntriesSpacing, firstColor, secondColor, legendFont, tickFont);         
-                OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-                ImageIO.write(image, "png", output);
-                output.close(); 
-                g.dispose();
-                return new Dimension(width,height);                                
-            } else { // vector format      
-                VectorGraphics2D g=null;
-                String filename=file.getName();
-                     if (filename.endsWith(".svg")) g = new SVGGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                else if (filename.endsWith(".pdf")) g = new PDFGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                else if (filename.endsWith(".eps")) g = new EPSGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                g.setClip(0, 0, (int)Math.ceil(width*scale),(int)Math.ceil(height*scale));
-                paintGraphImage(g, sortBy, scale, width, height, graphwidth, graphheight, translateX, translateY, legendEntriesSpacing, firstColor, secondColor, legendFont, tickFont);                                   
-                FileOutputStream fileStream = new FileOutputStream(file);
-                try {
-                    fileStream.write(g.getBytes());
-                } finally {
-                    fileStream.close();
-                } 
-                return new Dimension(width,height); 
-            }
-        } else { // No output file. Create the image as a byte[] array for inclusion in Excel
-            BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
-            Graphics2D g=image.createGraphics();   
-            paintGraphImage(g, sortBy, scale, width, height, graphwidth, graphheight, translateX, translateY, legendEntriesSpacing, firstColor, secondColor, legendFont, tickFont);
-            g.dispose();
-            return image;                        
-        }        
-    }     
+        int height=graphheight+translateY+d.height;// +translateY;      
+        BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g=image.createGraphics();   
+        paintGraphImage(g, sortBy, scale, width, height, graphwidth, graphheight, translateX, translateY, legendEntriesSpacing, firstColor, secondColor, legendFont, tickFont);
+        g.dispose();
+        return image;                                      
+    }      
     
-  /** Creates a graph based on the current data and saves it to file (if file is not null)*/
-    private void paintGraphImage(Graphics2D g, int sortBy, double scale, int width, int height, int graphwidth, int graphheight, int translateX, int translateY, int legendEntriesSpacing, Color firstColor, Color secondColor, Font legendFont, Font tickFont) throws IOException {
+    /**
+     * Draw the graph into an image file and return an image tag that can reference it in HTML documents
+     * @param file
+     * @param imageformat
+     * @param sortBy
+     * @param scale
+     * @param firstColor
+     * @param secondColor
+     * @param legendFont
+     * @param tickFont
+     * @return 
+     */
+    private String getImageTag(File file, String imageformat, int sortBy, double scale, Color firstColor, Color secondColor, Font legendFont, Font tickFont) {
+        final int graphheight=200; // height of graph in pixels (just the graph);
+        final int graphwidth=500; // width of graph in pixels (just the graph);
+        final int translateX=6; // the X coordinate for the left edge of the graph
+        final int translateY=6; // the Y coordinate for the top of the graph 
+        int width=graphwidth+2*translateX;
+        final int legendEntriesSpacing=20;
+        Dimension d=Graph.getHorizontalLegendDimension(new String[]{firstMapName,secondMapName}, legendEntriesSpacing, legendFont);
+        if (width<(d.width+translateX+translateX)) width=(d.width+translateX+translateX); // just to make sure there is enough room for the legend box
+        final int height=graphheight+translateY+d.height;// +translateY;
+        int finalWidth=width;
+        
+        // Create the image, write it to file and return an HTML img tag for it
+        HTMLUtilities.ImagePainter painter = (g) -> paintGraphImage(g, sortBy, scale, finalWidth, height, graphwidth, graphheight, translateX, translateY, legendEntriesSpacing, firstColor, secondColor, legendFont, tickFont);        
+        return HTMLUtilities.getImageTag(painter, file, imageformat, height, width, scale);         
+    }    
+    
+    
+  /** Creates a graph based on the current data */
+    private void paintGraphImage(Graphics2D g, int sortBy, double scale, int width, int height, int graphwidth, int graphheight, int translateX, int translateY, int legendEntriesSpacing, Color firstColor, Color secondColor, Font legendFont, Font tickFont) {
         g.scale(scale, scale);
         g.setColor(java.awt.Color.WHITE);
         g.fillRect(0, 0, width+20, height+20);        
@@ -618,10 +605,10 @@ public class MapCorrelationAnalysis extends Analysis {
             int showAscending=0;
             if (order.equals(secondMapName)) showAscending=1;
             try {
-                Object imageObject=createGraphImage(null, showAscending, 1.0, settings.getSystemColor("color1"), settings.getSystemColor("color2"), settings.getSystemFont("graph.legendFont"), settings.getSystemFont("graph.tickFont"));
-                if (imageObject instanceof BufferedImage) image=(BufferedImage)imageObject;
-                else image=null;
-            } catch (Exception e) {}
+                image=createGraphImage(showAscending, 1.0, settings.getSystemColor("color1"), settings.getSystemColor("color2"), settings.getSystemFont("graph.legendFont"), settings.getSystemFont("graph.tickFont"));
+            } catch (Exception e) {
+                image=null;
+            }
             if (image!=null) {
                 int width=image.getWidth()+20;    if (width<540) width=540;
                 int height=image.getHeight()+30;  if (height<280) height=280;

@@ -2,24 +2,16 @@
 
 package org.motiflab.engine.data.analysis;
 
-import de.erichseifert.vectorgraphics2d.EPSGraphics2D;
-import de.erichseifert.vectorgraphics2d.PDFGraphics2D;
-import de.erichseifert.vectorgraphics2d.SVGGraphics2D;
-import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
-import javax.imageio.ImageIO;
 import org.motiflab.engine.task.ExecutableTask;
 import org.motiflab.engine.ExecutionError;
 import org.motiflab.engine.task.OperationTask;
@@ -43,6 +35,7 @@ import org.apache.poi.xssf.usermodel.XSSFShape;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFSimpleShape;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.motiflab.engine.util.HTMLUtilities;
 
 /**
  *
@@ -86,17 +79,12 @@ public class CompareCollectionsAnalysis extends Analysis {
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
     public Parameter[] getOutputParameters(String dataformat) {
-         Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","svg","pdf","eps"},"The image format to use for the graph",false,false);                       
+         Parameter imageformat=new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false);                       
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
          if (dataformat.equals(HTML)) return new Parameter[]{imageformat,scalepar};
          else return new Parameter[0];
     }
-    
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{HTML};       
-//        return null;
-//    }       
+         
 
     @Override
     public String[] getResultVariables() {
@@ -190,13 +178,10 @@ public class CompareCollectionsAnalysis extends Analysis {
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         } 
         double scale=(scalepercent==100)?1.0:(((double)scalepercent)/100.0);
-        File imagefile=outputobject.createDependentFile(engine,imageFormat); 
-        int width=300, height=200;
-        try {
-            saveVennDiagramAsImage(imagefile, scale, width, height);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
+        
+        File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+        String imageTag = getImageTag(imagefile, imageFormat, scale);
+        
         if (format!=null) format.setProgress(50);
         DecimalFormat decimalformatter=new DecimalFormat("0.0");
         engine.createHTMLheader("Compare Collections Analysis", null, null, false, true, true, outputobject);
@@ -213,12 +198,8 @@ public class CompareCollectionsAnalysis extends Analysis {
         }
          outputobject.append("\n</div>\n",HTML);
         outputobject.append("<br>\n",HTML);
-        if (imageFormat.equals("pdf")) outputobject.append("<object type=\"application/pdf\" data=\"file:///"+imagefile.getAbsolutePath()+"\"></object>",HTML);
-        else {
-            outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\"",HTML);
-            outputobject.append(" width="+(int)Math.ceil(width*scale)+" height="+(int)Math.ceil(height*scale),HTML);                    
-            outputobject.append(" />\n",HTML);  
-        }
+
+        outputobject.append(imageTag,HTML);
         
         outputobject.append("<br>\n<br>\n<table width=300>\n",HTML);
         outputobject.append("<tr><td style=\"background-color:#CCCCCC\"> </td><td style=\"background-color:#CCCCCC;text-align:center\"> <b>"+secondCollectionName+"</b> </td><td style=\"background-color:#CCCCCC;text-align:center\"> <b>&not;&nbsp;"+secondCollectionName+"</b> </td><td style=\"background-color:#CCCCCC;text-align:center\"> Total </td></tr>\n",HTML);
@@ -236,49 +217,16 @@ public class CompareCollectionsAnalysis extends Analysis {
         return outputobject;
     }
     
-    private byte[] saveVennDiagramAsImage(File file, double scale, int width, int height) throws IOException {
-        // write the image to file
-        if (file!=null) {
-            if (file.getName().endsWith(".png")) { // bitmap PNG format   
-                BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
-                Graphics2D g=image.createGraphics();   
-                paintVennDiagram(scale, width, height, g);            
-                OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-                ImageIO.write(image, "png", output);
-                output.close(); 
-                g.dispose();
-                return null;                                
-            } else { // vector format      
-                VectorGraphics2D g=null;
-                String filename=file.getName();
-                     if (filename.endsWith(".svg")) g = new SVGGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                else if (filename.endsWith(".pdf")) g = new PDFGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                else if (filename.endsWith(".eps")) g = new EPSGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                g.setClip(0, 0, (int)Math.ceil(width*scale),(int)Math.ceil(height*scale));
-                paintVennDiagram(scale, width, height, g);                           
-                FileOutputStream fileStream = new FileOutputStream(file);
-                try {
-                    fileStream.write(g.getBytes());
-                } finally {
-                    fileStream.close();
-                } 
-                return null;
-            }
-        } else { // No output file. Create the image as a byte[] array for inclusion in Excel
-            BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
-            Graphics2D g=image.createGraphics();   
-            paintVennDiagram(scale, width, height, g);
-            org.apache.commons.io.output.ByteArrayOutputStream outputStream=new org.apache.commons.io.output.ByteArrayOutputStream();
-            ImageIO.write(image, "png", outputStream);
-            g.dispose();     
-            byte[] array=outputStream.toByteArray();
-            outputStream.close();
-            return array;            
-        }        
-    }    
     
-
-    private void paintVennDiagram(double scale, int width, int height, Graphics2D g) throws IOException {
+    private String getImageTag(File file, String imageformat, double scale) {
+        final int width=300;
+        final int height=200;
+        // Create the image, write it to file and return an HTML img tag for it
+        HTMLUtilities.ImagePainter painter = (g) -> paintVennDiagram(g, scale, width, height);        
+        return HTMLUtilities.getImageTag(painter, file, imageformat, height, width, scale);         
+    }        
+    
+    private void paintVennDiagram(Graphics2D g, double scale, int width, int height) {
         g.scale(scale, scale);
         g.setColor(java.awt.Color.WHITE);
         g.fillRect(0, 0, width+10, height+10);
@@ -353,115 +301,6 @@ public class CompareCollectionsAnalysis extends Analysis {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
     
-//    // @Override
-//    public OutputData formatExcel(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
-//        if (format!=null) format.setProgress(5);
-//        int totalA=contingencyTable[FIRST_SIZE];
-//        int totalB=contingencyTable[SECOND_SIZE];
-//        int total=contingencyTable[BACKGROUND_SIZE];
-//        int A_B=contingencyTable[FIRST_INTERSECTION_SECOND];
-//        int A_notB=totalA-A_B;
-//        int notA_B=totalB-A_B;
-//        int notA_notB=total-contingencyTable[FIRST_UNION_SECOND];
-//
-//        XSSFWorkbook workbook = new XSSFWorkbook();
-//        XSSFSheet sheet = workbook.createSheet("Compare Collections");
-//        CreationHelper helper = workbook.getCreationHelper();
-//        Drawing drawing = sheet.createDrawingPatriarch();       
-//        
-//        CellStyle title=getExcelTitleStyle(workbook);
-//                
-//        CellStyle table_GRAY=createExcelStyle(workbook, BorderStyle.THIN, new Color(204,204,204), HorizontalAlignment.RIGHT, false);      
-//        CellStyle table_RED=createExcelStyle(workbook, BorderStyle.THIN, new Color(255,160,160), HorizontalAlignment.RIGHT, false);      
-//        CellStyle table_YELLOW=createExcelStyle(workbook, BorderStyle.THIN, new Color(255,255,160), HorizontalAlignment.RIGHT, false);      
-//        CellStyle table_BLUE=createExcelStyle(workbook, BorderStyle.THIN, new Color(160,160,255), HorizontalAlignment.RIGHT, false);      
-//        CellStyle table_VIOLET=createExcelStyle(workbook, BorderStyle.THIN, new Color(240,160,255), HorizontalAlignment.RIGHT, false);      
-//        CellStyle table_SUMMARY=createExcelStyle(workbook, BorderStyle.THIN, new Color(238,238,204), HorizontalAlignment.RIGHT, false);      
-//            
-//        int tablestartrow=15;
-//        int tablestartcol=1;
-//        try {
-//            Row row=sheet.createRow(4);
-//            byte[] image=saveVennDiagramAsImage(null, 1.0, 300, 200);
-//            int imageIndex=workbook.addPicture(image, XSSFWorkbook.PICTURE_TYPE_PNG);
-//            ClientAnchor anchor = helper.createClientAnchor();
-//            anchor.setCol1(1);
-//            anchor.setRow1(4);
-//            anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_AND_RESIZE);
-//            Picture pict=drawing.createPicture(anchor, imageIndex);	            
-//            pict.resize(); 
-//        } catch (Exception e) {
-//            outputStringValueInCell(sheet.createRow(4), 1, "Error when creating image!", null); 
-//            e.printStackTrace(System.err);
-//        }
-//        if (format!=null) format.setProgress(50);       
-//        Row row=sheet.createRow(tablestartrow); 
-//        outputStringValuesInCells(row, new String[]{" "," "+firstCollectionName+" "," \u00AC"+firstCollectionName+" "," Total "}, tablestartcol, table_GRAY);  
-//        row=sheet.createRow(tablestartrow+1); 
-//        outputStringValueInCell(row, tablestartcol, " "+secondCollectionName+" ", table_GRAY);  
-//        outputNumericValueInCell(row, tablestartcol+1, A_B, table_VIOLET);
-//        outputNumericValueInCell(row, tablestartcol+2, A_notB, table_RED);
-//        outputNumericValueInCell(row, tablestartcol+3, totalA, table_SUMMARY);
-//        row=sheet.createRow(tablestartrow+2); 
-//        outputStringValueInCell(row, tablestartcol, " \u00AC"+secondCollectionName+" ", table_GRAY);
-//        outputNumericValueInCell(row, tablestartcol+1, notA_B, table_BLUE);
-//        outputNumericValueInCell(row, tablestartcol+2, notA_notB, table_YELLOW);
-//        outputNumericValueInCell(row, tablestartcol+3, (total-totalA), table_SUMMARY);        
-//        row=sheet.createRow(tablestartrow+3); 
-//        outputStringValueInCell(row, tablestartcol, " Total ", table_GRAY); 
-//        outputNumericValueInCell(row, tablestartcol+1, totalB, table_SUMMARY);
-//        outputNumericValueInCell(row, tablestartcol+2, (total-totalB), table_SUMMARY);
-//        outputNumericValueInCell(row, tablestartcol+3, total, table_SUMMARY);         
-//        
-//        autoSizeExcelColumns(sheet, 0, 4, 800);
-//        
-//        row=sheet.createRow(tablestartrow+5);
-//        outputNumericValueInCell(row, tablestartcol, (((double)A_B/(double)totalA)*100.0), null);
-//        outputStringValueInCell(row, tablestartcol+1, "% of \""+firstCollectionName+"\" overlaps with \""+secondCollectionName+"\"", null);
-//        row=sheet.createRow(tablestartrow+6);
-//        outputNumericValueInCell(row, tablestartcol, (((double)A_B/(double)totalB)*100.0), null);        
-//        outputStringValueInCell(row, tablestartcol+1, "% of \""+secondCollectionName+"\" overlaps with \""+firstCollectionName+"\"", null);
-//        
-//        row=sheet.createRow(tablestartrow+8);
-//        outputStringValueInCell(row, tablestartcol, "p-value (overlap>=observed) = ", null);
-//        outputNumericValueInCell(row, tablestartcol+3, pvalueAtLeastObservedOverlap, null);
-//        row=sheet.createRow(tablestartrow+9);
-//        outputStringValueInCell(row, tablestartcol, "p-value (overlap<=observed) = ", null);
-//        outputNumericValueInCell(row, tablestartcol+3, pvalueAtMostObservedOverlap, null);
-//         
-//        outputStringValueInCell(sheet.createRow(0), 0, "Compare collections analysis", title);
-//        StringBuilder firstLine=new StringBuilder();
-//        firstLine.append("Comparison between ");
-//        firstLine.append(collectionType.toLowerCase());
-//        firstLine.append(" collections \"");
-//        firstLine.append(firstCollectionName);
-//        firstLine.append("\" and \"");
-//        firstLine.append(secondCollectionName);
-//        firstLine.append("\" with respect to a total of ");
-//        firstLine.append(total);
-//        firstLine.append(" entries");
-//        if (backgroundCollectionName!=null) {            
-//            firstLine.append(" from collection \"");
-//            firstLine.append(backgroundCollectionName);
-//            firstLine.append("\"");
-//        }
-//        outputStringValueInCell(sheet.createRow(2), 0, firstLine.toString(), null);
-//        
-//        // now write to the outputobject. The binary Excel file is included as a dependency in the otherwise empty OutputData object.
-//        File excelFile=outputobject.createDependentBinaryFile(engine,"xlsx");        
-//        try {
-//            BufferedOutputStream stream=new BufferedOutputStream(new FileOutputStream(excelFile));
-//            workbook.write(stream);
-//            stream.close();
-//        } catch (Exception e) {
-//            throw new ExecutionError("An error occurred when creating the Excel file: "+e.toString(),0);
-//        }
-//        if (format!=null) format.setProgress(100);        
-//        outputobject.setBinary(true);        
-//        outputobject.setDirty(true); // this is not set automatically since I don't append to the document
-//        outputobject.setDataFormat(EXCEL); // this is not set automatically since I don't append to the document       
-//        return outputobject;
-//    }    
     
     @Override
     public OutputData formatRaw(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {

@@ -1,33 +1,15 @@
-/*
- 
- 
- */
-
 package org.motiflab.engine.dataformat;
 
-import de.erichseifert.vectorgraphics2d.EPSGraphics2D;
-import de.erichseifert.vectorgraphics2d.PDFGraphics2D;
-import de.erichseifert.vectorgraphics2d.SVGGraphics2D;
-import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.imageio.ImageIO;
 import org.motiflab.engine.task.ExecutableTask;
 import org.motiflab.engine.data.Data;
 import org.motiflab.engine.data.OutputData;
 import org.motiflab.engine.ExecutionError;
-import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.ParameterSettings;
 import org.motiflab.engine.Parameter;
 import org.motiflab.engine.data.DataMap;
@@ -36,7 +18,7 @@ import org.motiflab.engine.data.Motif;
 import org.motiflab.engine.data.MotifCollection;
 import org.motiflab.engine.data.MotifNumericMap;
 import org.motiflab.engine.data.MotifTextMap;
-import org.motiflab.engine.data.OutputDataDependency;
+import org.motiflab.engine.util.HTMLUtilities;
 import org.motiflab.gui.MotifLogo;
 import org.motiflab.gui.VisualizationSettings;
 
@@ -69,10 +51,14 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
         builder.append("<br>The first column will be the Motif ID and the second the motif's short name.");
         builder.append("<br>If the user points the mouse at the short name of a motif, its long name will be displayed in a tooltip.");
         builder.append("</html>");
+        
         addParameter("Format", "ID,Short Name(Long Name),Classification(Class Name),Logo", null,builder.toString(),true,false);
         addOptionalParameter("Sequence logo height",24, new Integer[]{0,200},"<html>Height of sequence logos (if included in the table)</html>");
         addOptionalParameter("Sequence logo max width",0, new Integer[]{0,10000},"<html>Maximum width of sequence logos<br>If this is set, logos will be scaled to fit within the limit.<br>A value of 0 means no limit</html>");
-        addOptionalParameter("Sequence logos","Shared images", new String[]{"Shared images","New images"},"Should the image files create for logos have standard names (motifID.gif) or be unique to each output");           
+        
+        addOptionalParameter("Logos", HTMLUtilities.getMotifLogoDefaultOptionForHTML(), HTMLUtilities.getMotifLogoOptionsForHTML(),"Include sequence logos");  
+        
+        // addOptionalParameter("Sequence logos","Shared images", new String[]{"Shared images","New images"},"Should the image files create for logos have standard names (motifID.gif) or be unique to each output");           
         //addOptionalParameter("Image format","png", new String[]{"png","svg"},"Format ");           
         addOptionalParameter("Multiline",Boolean.TRUE, new Boolean[]{true,false},"If selected, list-properties will be split over several lines");        
         addOptionalParameter("Headline", "", null,"Add an optional headline which will be displayed at the top of the page");
@@ -144,7 +130,7 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
              //imageformat=(String)settings.getResolvedParameter("Image format",defaults,engine);
              multiline=(Boolean)settings.getResolvedParameter("Multiline",defaults,engine); 
              headline=(String)settings.getResolvedParameter("Headline",defaults,engine);
-             showSequenceLogosString=(String)settings.getResolvedParameter("Sequence logos",defaults,engine);             
+             showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);             
           } catch (ExecutionError e) {
              throw e;
           } catch (Exception ex) {
@@ -154,11 +140,12 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
              format=(String)getDefaultValueForParameter("Format");
              sequenceLogoHeight=(Integer)getDefaultValueForParameter("Sequence logo height");
              sequenceLogoMaxWidth=(Integer)getDefaultValueForParameter("Sequence logo max width");
+             showSequenceLogosString=(String)getDefaultValueForParameter("Logos");
              // imageformat=(String)getDefaultValueForParameter("Image format");
              multiline=(Boolean)getDefaultValueForParameter("multiline");         
              headline=(String)getDefaultValueForParameter("Header");
         }
-        headline=escapeHTML(headline.trim());
+        headline=HTMLUtilities.escapeHTML(headline.trim());
         engine.createHTMLheader((!headline.isEmpty())?headline:"Motifs", null, null, true, true, true, outputobject);
         if (!headline.isEmpty()) {
             outputobject.append("<h1 class=\"headline\">"+headline+"</h1>\n",HTML);
@@ -166,8 +153,8 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
         outputobject.append("<table class=\"sortable\">\n<tr>",HTML);        
         // process format
         boolean includeLogo=false;
-        boolean sharedLogos=true;
-        if (showSequenceLogosString.equalsIgnoreCase("New images")) sharedLogos=false;
+//        boolean sharedLogos=true;
+//        if (showSequenceLogosString.equalsIgnoreCase("New images")) sharedLogos=false;
         Pattern pattern=Pattern.compile("(.+)?\\((.+)?\\)");
        
         String[] parts=format.trim().split("\\s*,\\s*");
@@ -183,12 +170,13 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
             if (properties[i][1]!=null && properties[i][1].equalsIgnoreCase("Logo")) properties[i][1]="Consensus"; // I don't think graphical tooltips are allowed in standard HTML            
             if (properties[i][0].equalsIgnoreCase("Class")||properties[i][0].equalsIgnoreCase("Classification")) outputobject.append("<th class=\"sorttable_ip\">\n",HTML);
             else outputobject.append("<th>\n",HTML);
-            outputobject.append(escapeHTML(properties[i][0]),HTML);
+            outputobject.append(HTMLUtilities.escapeHTML(properties[i][0]),HTML);
             outputobject.append("</th>\n",HTML);
         }        
         outputobject.append("</tr>\n",HTML);        
         MotifLogo sequencelogo=null;   
-        if (includeLogo) {
+         
+        if (includeLogo && HTMLUtilities.includeLogosInOutputAsImages(showSequenceLogosString)) {
             if (sequenceLogoHeight<=0 || sequenceLogoHeight>200) throw new ExecutionError("Sequence logo height should be within [0,100]");
             VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
             Color [] basecolors=vizSettings.getBaseColors();//new Color[]{Color.GREEN,Color.BLUE,new Color(220,220,0),Color.RED};   
@@ -205,14 +193,14 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
             for (Motif motif:motiflist) {
                 if (task!=null) task.checkExecutionLock(); // checks to see if this task should suspend execution
                 if (Thread.interrupted() || (task!=null && task.getStatus().equals(ExecutableTask.ABORTED))) throw new InterruptedException();
-                outputMotif(motif, outputobject, properties, multiline, sequencelogo, sequenceLogoHeight,sharedLogos);
+                outputMotif(motif, outputobject, properties, multiline, sequencelogo, sequenceLogoHeight, showSequenceLogosString);
                 // task.setStatusMessage("Motif "+(i+1)+" of "+size);
                 setProgress(i+1, size);
                 i++;
                 if (i%100==0) Thread.yield();
             }
         } else if (dataobject instanceof Motif){
-                outputMotif((Motif)dataobject, outputobject, properties, multiline, sequencelogo, sequenceLogoHeight,sharedLogos);
+                outputMotif((Motif)dataobject, outputobject, properties, multiline, sequencelogo, sequenceLogoHeight, showSequenceLogosString);
         } else throw new ExecutionError("Unable to format object '"+dataobject+"' in "+name+" format");
         outputobject.append("</table>\n",HTML);
         outputobject.append("</body>\n",HTML);
@@ -223,7 +211,7 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
 
 
     /** output-formats a single motif */
-    protected void outputMotif(Motif motif, OutputData outputobject, String[][] properties, boolean multiline, MotifLogo sequencelogo, int logoheight, boolean sharedLogos) throws ExecutionError {
+    protected void outputMotif(Motif motif, OutputData outputobject, String[][] properties, boolean multiline, MotifLogo sequencelogo, int logoheight, String showSequenceLogosString) throws ExecutionError {
         outputobject.append("<tr>", HTML);
         for (String[] propertyPair:properties) {
             String property=propertyPair[0];
@@ -247,7 +235,8 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
             // append td-class here if necessary
             outputobject.append(">", HTML);
             if (property.equalsIgnoreCase("Logo")) {
-                String link=getSequenceLogoTag(motif, outputobject, sequencelogo, logoheight, sharedLogos);
+                // logoheight is not used...
+                String link=HTMLUtilities.getMotifLogoTag(motif, outputobject, sequencelogo, showSequenceLogosString, engine);
                 outputobject.append(link, HTML);    
             } else {
                 Object value=null;
@@ -270,7 +259,7 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
         if (value==null) {}
         else if (value instanceof ArrayList) outputArrayList((ArrayList)value, output, multiline, tooltip);
         else {
-	    String string=escapeHTML((value!=null)?value.toString():"");
+	    String string=HTMLUtilities.escapeHTML((value!=null)?value.toString():"");
             if (string.indexOf(' ')>0 && !tooltip) output.append("<nobr>"+string+"</nobr>",HTML); // try to  avoid linebreaks in normal table cells	     
             else output.append(string,HTML);            
         }
@@ -284,7 +273,7 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
 	while (i.hasNext()) {
 	    if (first) first=false; else output.append((multiline)?"<br>":", ",HTML);
             Object e = i.next();
-	    String string=escapeHTML((e!=null)?e.toString():"");
+	    String string=HTMLUtilities.escapeHTML((e!=null)?e.toString():"");
             if (string.indexOf(' ')>0 && !tooltip) output.append("<nobr>"+string+"</nobr>",HTML);	     
             else output.append(string,HTML);	    
 	}
@@ -292,107 +281,13 @@ public class DataFormat_HTML_MotifTable extends DataFormat {
     }    
     
     
-    /** Creates a sequence logo image for the given motif, saves it to a temp-file and return an IMG-tag that can 
-     *  be inserted in HTML-documents to display the image
-     */
-    protected String getSequenceLogoTag(Motif motif, OutputData outputobject, MotifLogo sequencelogo, int sequenceLogoHeight, boolean useSharedLogos) {
-        File imagefile=null;
-        VisualizationSettings settings=engine.getClient().getVisualizationSettings();
-        String imageFormat=(String)settings.getSettingAsType("motif.imageFormat","gif");
-        if (imageFormat==null) imageFormat="gif";
-        imageFormat=imageFormat.toLowerCase();
-        if (!(imageFormat.equals("gif") || imageFormat.equals("png") || imageFormat.equals("svg"))) imageFormat="gif";     
-        if (imageFormat.equals("svg")) imageFormat="gif"; // I have disabled this for now because SVG does not work properly
-        boolean border=(Boolean)settings.getSettingAsType("motif.border",Boolean.TRUE);          
-        if (useSharedLogos) {
-            String logofileID=motif.getName();
-            boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
-            OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, imageFormat,true); // returns new or existing shared dependency
-            if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file
-                imagefile=dependency.getFile();
-                sequencelogo.setMotif(motif);
-                try {
-                    saveSequenceLogoImage(imagefile,sequencelogo, sequenceLogoHeight, imageFormat, border); // an image height of 19 corresponds with a logo height of 22 which is "hardcoded" above (but probably should not be) 
-                } catch (IOException e) {
-                    engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-                }
-            } else {
-                imagefile=new File(dependency.getInternalPathName());
-            }            
-        } else { // always save any logo to a new file
-            imagefile=outputobject.createDependentFile(engine,imageFormat);
-            sequencelogo.setMotif(motif);
-            try {              
-                saveSequenceLogoImage(imagefile,sequencelogo, sequenceLogoHeight, imageFormat, border); // an image height of 19 corresponds with a logo height of 22 which is "hardcoded" above (but probably should not be) 
-            } catch (IOException e) {
-                engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-            }           
-        }
-        return "<img src=\"file:///"+imagefile.getAbsolutePath()+"\" />";
-    }
-
-    private void saveSequenceLogoImage(File file, MotifLogo sequencelogo, int motifheight, String imageFormat, boolean border) throws IOException {
-        int width=sequencelogo.getDefaultMotifWidth();
-        if (imageFormat==null) imageFormat="gif";
-        imageFormat=imageFormat.toLowerCase();
-        if (imageFormat.equals("gif") || imageFormat.equals("png")) {
-            BufferedImage image=new BufferedImage(width, motifheight, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g=image.createGraphics();
-            g.setColor(Color.WHITE);
-            g.fillRect(0, 0, width, motifheight);
-            sequencelogo.paintLogo(g);
-            if (border) {
-                g.setColor(Color.BLACK);
-                g.drawRect(0, 0, width-1, motifheight-1);     
-            }
-            OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-            ImageIO.write(image, imageFormat, output);
-            output.close(); 
-            g.dispose();            
-        } else {                     
-            VectorGraphics2D g=null;
-                 if (imageFormat.equals("svg")) g = new SVGGraphics2D(0, 0, width, motifheight);
-            else if (imageFormat.equals("pdf")) g = new PDFGraphics2D(0, 0, width, motifheight);
-            else if (imageFormat.equals("eps")) g = new EPSGraphics2D(0, 0, width, motifheight);
-            else throw new IOException("Unknown image format: "+imageFormat);
-            g.setClip(0, 0, width,motifheight);
-            g.setColor(Color.WHITE);
-            g.fillRect(0, 0, width, motifheight);
-            sequencelogo.paintLogo(g);
-            if (border) {
-                g.setColor(Color.BLACK);
-                g.drawRect(0, 0, width-1, motifheight-1);     
-            }                                 
-            FileOutputStream fileStream = new FileOutputStream(file);
-            try {
-                fileStream.write(g.getBytes());
-            } finally {
-                fileStream.close();
-            } 
-            g.dispose();            
-        }        
-        
-        
-        
-        
-        
-        
-        
-    } 
     
     @Override
     public Data parseInput(ArrayList<String> input, Data target, ParameterSettings settings, ExecutableTask task) throws ParseError, InterruptedException  {
        throw new ParseError("Unable to parse Motif input with data format HTML_MotifTable");
     }
     
-    protected String escapeHTML(String string) {
-        if (string==null) return "";
-        if (string.contains("&")) string=string.replace("&", "&amp;"); // this must be first
-        if (string.contains("<")) string=string.replace("<", "&lt;");
-        if (string.contains(">")) string=string.replace(">", "&gt;");
-        if (string.contains("\"")) string=string.replace("\"", "&#34;");    
-        return string;
-    }     
+   
     
 }
 

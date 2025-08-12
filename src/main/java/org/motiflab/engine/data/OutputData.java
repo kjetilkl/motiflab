@@ -494,6 +494,14 @@ public class OutputData extends Data {
        return dependency;
     }
     
+    public void removeDependency(String filename) {
+       OutputDataDependency target=null;
+       for (OutputDataDependency dependency : dependencies) {
+           if (dependency.getInternalPathName().equals(filename)) {target=dependency;break;}
+       }
+       if (target!=null) dependencies.remove(target);
+    }
+    
     /** Makes a separate copy of an existing dependency and adds it as a new dependency to this OutputData object 
      *  The copy will not be "shared" even if the original was
      *  @return A copy of the dependency, complete with its contents in a separate file

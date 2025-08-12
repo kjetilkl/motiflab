@@ -6871,6 +6871,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                     JOptionPane.showMessageDialog(getFrame(),"A problem of type 2904 has occurred!\n\nThis is not necessarily a serious error, but you might want to try that last thing you did one more time.", "Oops :-|", JOptionPane.ERROR_MESSAGE);
                 } else if (e instanceof NullPointerException) { // aka: Bad Programming Error
                     engine.reportError(e);
+                    e.printStackTrace(System.err);
                 } else {
                     int option=JOptionPane.showOptionDialog(getFrame(), e.getClass().getSimpleName()+":\n"+e.getMessage(), "ERROR: Uncaught Exception", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE,null, new String[]{"OK","Send Error Report"},"OK");
                     if (option==1) {
@@ -7012,7 +7013,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                 "The software was developed by Kjetil Klepper (kjetil.klepper@ntnu.no) under the supervision of professor Finn Drabløs (finn.drablos@ntnu.no)<br><br>" +
                 "The project was supported by the National Programme for Research in Functional Genomics in Norway (FUGE) " +
                 "in the Research Council of Norway." +
-                "<br><br>MotifLab is distributed under the MIT license"+
+                "<br><br>MotifLab is distributed under the MIT license."+
                 "<br><br>" +
                 "<center>"+
                 "Bioinformatics and Gene Regulation Group (BiGR)<br>"+

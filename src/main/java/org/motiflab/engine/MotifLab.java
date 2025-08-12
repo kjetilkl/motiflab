@@ -2499,10 +2499,7 @@ public class MotifLab implements MotifLabClient, PropertyChangeListener {
                     "The software was developed by Kjetil Klepper (kjetil.klepper@ntnu.no) under the supervision of professor Finn Drabløs (finn.drablos@ntnu.no)\n" +
                     "The project was supported by the National Programme for Research in Functional Genomics in Norway (FUGE) " +
                     "in the Research Council of Norway." +
-                    "\n\nMotifLab is open source and free to use \"as is\" for academic and commercial purposes.\n" +
-                    "However, no parts of the source code may be reused in its original or modified form as part of other commercial software projects without the consent of the authors.\n" +
-                    "Also, it is not permitted to sell or otherwise redistribute MotifLab for profit (directly or indirectly) without the authors' consent.\n"+
-                    "Note that MotifLab can link to other external programs whose use may be subject to other license restrictions." +
+                    "\n\nMotifLab is distributed under the MIT license." +
                     "\n\n" +
                     "Bioinformatics and Gene Regulation Group (BiGR)\n"+
                     "Department of Clinical and Molecular Medicine\n"+

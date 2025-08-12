@@ -148,11 +148,14 @@ public abstract class Analysis extends Data implements ParameterExporter {
     
     /** 
      * Returns the name of one or more Parameters which can be used as a proxys for a source
-     * parameter. Note that if several parameters are returned they should be of different types
+     * parameter. If several parameters are returned they should be of different types
      */    
     public String[] getSourceProxyParameters() {return new String[0];}
   
-    /** Returns TRUE if the given data object can be used as a source proxy for this analysis */
+    /** Returns TRUE if the given data object can be used as a source proxy for this analysis.
+     *  A source proxy is a dataset that can be used as the input value for one of the parameters
+     *  of the analysis
+     */
     @SuppressWarnings("unchecked")
     public boolean canUseAsSourceProxy(Data object) {
         String[] proxys=getSourceProxyParameters();
@@ -167,7 +170,10 @@ public abstract class Analysis extends Data implements ParameterExporter {
         return false;
     }
     
-    /** Returns TRUE if a data object of the given class can be used as a source proxy for this analysis */
+    /** Returns TRUE if a data object of the given class can be used as a source proxy for this analysis
+     *  A source proxy is a dataset that can be used as the input value for one of the parameters
+     *  of the analysis 
+     */
     @SuppressWarnings("unchecked")    
     public boolean canUseAsSourceProxy(Class typeclass) {
         String[] proxys=getSourceProxyParameters();
@@ -619,6 +625,16 @@ public abstract class Analysis extends Data implements ParameterExporter {
     public static boolean includeLogosInOutputAsSharedImages(String option) {
         return (option.equalsIgnoreCase(MOTIF_LOGO_SHARED));
     }     
+    
+    /**
+     * Returns true if the selection option means that a motif/module logo should be included in the output 
+     * as an embedded image rather than a separately saved image file
+     * @param option
+     * @return 
+     */
+    public static boolean includeLogosInOutputAsEmbeddedmages(String option) {
+        return (option.equalsIgnoreCase(MOTIF_LOGO_EMBEDDED));
+    }      
 
     /** Creates a motif logo image for the given motif, saves it to a temp-file if necessary and return a String 
      *  or IMG-tag that can be inserted in HTML-documents to display the image or a textual representation thereof
@@ -654,8 +670,9 @@ public abstract class Analysis extends Data implements ParameterExporter {
                 String logofileID=motif.getName();
                 boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
                 OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, imageFormat, true); // returns new or existing shared dependency
-                if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file
+                if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file                    
                     try {
+                        imagefile=new File(dependency.getInternalPathName());
                         saveMotifLogoImage(imagefile,sequencelogo, height, border, imageFormat); // an image height of 19 corresponds with a logo height of 22 which is "hardcoded" above (but probably should not be)
                     } catch (IOException e) {
                         engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);

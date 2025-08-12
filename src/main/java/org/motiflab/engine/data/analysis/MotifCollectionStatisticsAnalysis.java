@@ -1,8 +1,3 @@
-/*
- 
- 
- */
-
 package org.motiflab.engine.data.analysis;
 
 import java.awt.Color;
@@ -58,6 +53,7 @@ import org.motiflab.engine.data.Motif;
 import org.motiflab.engine.data.MotifCollection;
 import org.motiflab.engine.data.NumericVariable;
 import org.motiflab.engine.data.OutputData;
+import org.motiflab.engine.util.HTMLUtilities;
 
 /**
  *
@@ -100,15 +96,11 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
     public Parameter[] getOutputParameters(String dataformat) {        
          Parameter boxplotpar=new Parameter("Box plot",String.class, BOTH,new String[]{NONE,MEDIAN_QUARTILES,MEAN_STD,BOTH},"Which statistics to show using box plots",false,false);        
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-         if (dataformat.equals(HTML)) return new Parameter[]{boxplotpar,scalepar};
+         Parameter imageformat=new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false);                               
+         if (dataformat.equals(HTML)) return new Parameter[]{boxplotpar,imageformat,scalepar};
          return new Parameter[0];
     }
-    
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Box plot") || parameter.equals("Graph scale")) return new String[]{"HTML"};
-//        return null;
-//    }     
+       
 
     @Override
     public String getAnalysisName() {
@@ -177,6 +169,7 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
     public OutputData formatHTML(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         int plots=PLOT_BOTH;
         int scalepercent=100;
+        String imageFormat="png";
         if (settings!=null) {
           try {
                  Parameter[] defaults=getOutputParameters(format);
@@ -186,6 +179,7 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
                  else if (plotString.equals(MEAN_STD)) plots=PLOT_MEAN_STD;
                  else if (plotString.equals(BOTH)) plots=PLOT_BOTH;
                  scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
+                 imageFormat=(String)settings.getResolvedParameter("Image format",defaults,engine);                 
           } 
           catch (ExecutionError e) {throw e;} 
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
@@ -194,37 +188,43 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
         engine.createHTMLheader("Motif Collection Statistics", null, null, false, true, true, outputobject);
         outputobject.append("<h1 class=\"headline\">Statistics for motifs in '"+motifCollectionName+"' ("+collectionsize+" motif"+((collectionsize==1)?"":"s")+")\n",HTML);
         outputobject.append("<br />\n<h2>Motif size (bp)</h2>\n",HTML);
-        formatStatisticInHTML("length", Color.red, plots, scale, outputobject, engine);
+        formatStatisticInHTML("length", Color.red, plots, scale, outputobject, imageFormat, engine);
         if (format!=null) format.setProgress(33);
         outputobject.append("<br />\n<h2>IC-content</h2>\n",HTML);
-        formatStatisticInHTML("IC", Color.blue, plots, scale,  outputobject, engine);
+        formatStatisticInHTML("IC", Color.blue, plots, scale,  outputobject, imageFormat, engine);
         if (format!=null) format.setProgress(66);
         outputobject.append("<br />\n<h2>GC-content</h2>\n",HTML);
-        formatStatisticInHTML("GC", Color.green, plots, scale,  outputobject, engine);
+        formatStatisticInHTML("GC", Color.green, plots, scale,  outputobject, imageFormat, engine);
         outputobject.append("</body>\n</html>\n",HTML);
         if (format!=null) format.setProgress(100);
         return outputobject;
     }
 
 
-    private void formatStatisticInHTML(String name, Color color, int plots, double scale, OutputData outputobject,  MotifLabEngine engine) {
+    private void formatStatisticInHTML(String name, Color color, int plots, double scale, OutputData outputobject,  String imageFormat, MotifLabEngine engine) {
         Statistic statistic = statistics.get(name);
         DecimalFormat decimalFormat=new DecimalFormat("#.###");
         DecimalFormat percentageFormat=new DecimalFormat("#%");
         DecimalFormat useFormat=("GC".equals(name))?percentageFormat:decimalFormat;
-        File imagefile=outputobject.createDependentFile(engine,"png");
-        try {
-            saveGraphAsImage(imagefile,statistic,color, plots, scale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
         int newred=Math.min(color.getRed()+160, 255);
         int newgreen=Math.min(color.getGreen()+160, 255);
         int newblue=Math.min(color.getBlue()+160, 255);
 
         Color brightercolor=new Color(newred,newgreen,newblue);
         String colorstring=VisualizationSettings.convertColorToHTMLrepresentation(brightercolor);
-        outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\" />\n",HTML);
+        
+//        File imagefile=outputobject.createDependentFile(engine,"png");
+//        try {
+//            saveGraphAsImage(imagefile,statistic,color, plots, scale);
+//        } catch (IOException e) {
+//            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
+//        }        
+//        outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\" />\n",HTML);
+        
+        File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+        String imageTag = getImageTag(imagefile,imageFormat, statistic, color, plots, scale);
+        outputobject.append(imageTag,HTML);        
+        
         outputobject.append("<table>\n",HTML);
         outputobject.append("<tr><th width=\"90\" style=\"background-color:"+colorstring+"\">Min</th><th width=\"90\" style=\"background-color:"+colorstring+"\">Max</th><th width=\"90\" style=\"background-color:"+colorstring+"\">Median</th><th width=\"90\" style=\"background-color:"+colorstring+"\">1st Quartile</th><th width=\"90\" style=\"background-color:"+colorstring+"\">3rd Quartile</th><th width=\"90\" style=\"background-color:"+colorstring+"\">Average</th><th width=\"90\" style=\"background-color:"+colorstring+"\">Std. dev.</th></tr>\n",HTML);
         outputobject.append("<tr><td class=\"num\">"+useFormat.format(statistic.min)+"</td><td class=\"num\">"+useFormat.format(statistic.max)+"</td><td class=\"num\">"+useFormat.format(statistic.median)+"</td><td class=\"num\">"+useFormat.format(statistic.firstQuartile)+"</td><td class=\"num\">"+useFormat.format(statistic.thirdQuartile)+"</td><td class=\"num\">"+useFormat.format(statistic.average)+"</td><td class=\"num\">"+useFormat.format(statistic.std)+"</td></tr>\n",HTML);
@@ -452,20 +452,23 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
     }
 
 
-
-
-   /**
-    * Creates a histogram chart based on a Statistics object and saves it to file (if file is given)
-    * @param file A file to save the image to
-    */
-    private BufferedImage saveGraphAsImage(File file, Statistic statistic, Color color, int plots, double scale) throws IOException {
+    private String getImageTag(File file, String imageformat, Statistic statistic, Color color, int plots, double scale) {
         int width=500;
         int height=(plots==PLOT_NONE)?250:300; // image height
         int graphheight=200; // height of graph in pixels (just the histogram);
         int numbins=statistic.bins.length;
         double binwidth=400/numbins; // width of histogram bins in pixels
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
+        
+        // Create the image, write it to file and return an HTML img tag for it
+        HTMLUtilities.ImagePainter painter = (g) -> paintGraphImage(g, statistic, color, plots, numbins, binwidth, width, height, graphheight, scale);
+        return HTMLUtilities.getImageTag(painter, file, imageformat, height, width, scale);         
+    } 
+
+   /**
+    * Creates a histogram chart based on a Statistics object and saves it to file (if file is given)
+    * @param file A file to save the image to
+    */
+    private void paintGraphImage(Graphics2D g, Statistic statistic, Color color, int plots, int numbins, double binwidth, int width, int height, int graphheight, double scale) {        
         g.scale(scale, scale);
         Stroke defaultStroke=g.getStroke();
         //BasicStroke dashed = new BasicStroke(1f,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, new float[]{3f}, 0f);
@@ -509,14 +512,14 @@ public class MotifCollectionStatisticsAnalysis extends Analysis {
             g.setStroke(defaultStroke);
         }
         if (plots==PLOT_BOTH || plots==PLOT_MEDIAN_QUARTILES) g.drawLine(medianinsideXcoordinate, 0, medianinsideXcoordinate, graphheight+translateY+6);
-        // write the image to file
-        if (file!=null) {
-            OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-            ImageIO.write(image, "png", output);
-            output.close(); 
-        }
-        g.dispose();
-        return image;
+//        // write the image to file
+//        if (file!=null) {
+//            OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
+//            ImageIO.write(image, "png", output);
+//            output.close(); 
+//        }
+//        g.dispose();
+//        return image;
     }
 
 

@@ -203,13 +203,7 @@ public class CollatedAnalysis extends Analysis {
         else if (dataformat.equals(RAWDATA)) return new Parameter[]{incPar,logos,markPar};
         else return new Parameter[0];
     }
-    
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Only markup") || parameter.equals("Color boxes")) return new String[]{"HTML"};
-//        if (parameter.equals("Include") || parameter.equals("Logos")) return new String[]{"HTML","RawData"};        
-//        return null;
-//    }    
+     
 
     @Override
     public String[] getResultVariables() {
@@ -460,6 +454,7 @@ public class CollatedAnalysis extends Analysis {
         String showSequenceLogosString="";
         boolean showOnlyMarkup=false;
         boolean showColorBoxes=false;
+        String histogramFormat=null;
         DataCollection include=null;
         if (settings!=null) {
             try {
@@ -467,7 +462,7 @@ public class CollatedAnalysis extends Analysis {
                 showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
                 showOnlyMarkup=(Boolean)settings.getResolvedParameter("Only markup",defaults,engine);
                 showColorBoxes=(Boolean)settings.getResolvedParameter("Color boxes",defaults,engine);
-                include=(DataCollection)settings.getResolvedParameter("Include",defaults,engine);             
+                include=(DataCollection)settings.getResolvedParameter("Include",defaults,engine);                    
             }
             catch (ExecutionError e) {throw e;}
             catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
@@ -475,7 +470,10 @@ public class CollatedAnalysis extends Analysis {
         if (include!=null && include.getMembersClass()!=collateType) include=null; // ignore non-compatible collection
         boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
         showSequenceLogos = (showSequenceLogos && (collateType==Motif.class || collateType==ModuleCRM.class));
-        
+        if (includeLogosInOutputAsImages(showSequenceLogosString)) {
+            if (includeLogosInOutputAsEmbeddedmages(showSequenceLogosString)) histogramFormat="embed";
+            else histogramFormat="png";
+        }        
         engine.createHTMLheader((headline!=null)?headline:"Collated Analysis", null, null, true, true, true, outputobject);
         outputobject.append("<h1 class=\"headline\">",HTML);
         outputobject.append((headline!=null)?headline:"Collated Analysis",HTML);
@@ -537,7 +535,7 @@ public class CollatedAnalysis extends Analysis {
                     outputobject.append("></td>",HTML);
                 } else if (value instanceof double[]) { // render as a histogram
                     outputobject.append(">",HTML);
-                    if (!showOnlyMarkup) histogramrenderer.outputHistogramToHTML(outputobject, (double[])value, engine);
+                    if (!showOnlyMarkup) histogramrenderer.outputHistogramToHTML(outputobject, histogramFormat, (double[])value, engine);
                     outputobject.append("</td>",HTML);
                 } else {
                     String valueAsString=null;

@@ -34,8 +34,10 @@ import org.motiflab.engine.data.ModuleTextMap;
 import org.motiflab.engine.protocol.ParseError;
 import org.motiflab.engine.data.OutputDataDependency;
 import org.motiflab.engine.data.analysis.Analysis;
+import org.motiflab.engine.util.HTMLUtilities;
 import org.motiflab.gui.ModuleLogo;
 import org.motiflab.gui.VisualizationSettings;
+import org.w3c.dom.html.HTMLUListElement;
 
 /**
  *
@@ -64,9 +66,8 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
 //        builder.append("<br>If the user points the mouse at the short name of a motif, its long name will be displayed in a tooltip.");
 //        builder.append("</html>");
         addParameter("Format", "ID,Size,Logo", null,builder.toString(),true,false);
-        //addOptionalParameter("Logo height",24, new Integer[]{0,200},"<html>Height of sequence logos (if included in the table)</html>");
         addOptionalParameter("Logo max width",0, new Integer[]{0,10000},"<html>Maximum width of sequence logos<br>If this is set, logos will be scaled to fit within the limit.<br>A value of 0 means no limit</html>");
-        addOptionalParameter("Logos",Analysis.getMotifLogoDefaultOption(HTML), Analysis.getMotifLogoOptions(HTML),"Should the image files create for logos have standard names (moduleID.gif) or be unique to each output");           
+        addOptionalParameter("Logos",HTMLUtilities.getMotifLogoDefaultOptionForHTML(), HTMLUtilities.getMotifLogoOptionsForHTML(),"Include module logos in the table");           
         addOptionalParameter("Multiline",Boolean.TRUE, new Boolean[]{true,false},"If selected, list-properties will be split over several lines");        
         addOptionalParameter("Headline", "", null,"Add an optional headline which will be displayed at the top of the page");
         //addOptionalParameter("Sort by","Motif ID", new String[]{"Motif ID","Short name","Long name","Size","Information content","Classification"},null);        
@@ -147,8 +148,9 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
              sequenceLogoMaxWidth=(Integer)getDefaultValueForParameter("Logo max width");
              multiline=(Boolean)getDefaultValueForParameter("multiline");         
              headline=(String)getDefaultValueForParameter("Header");
+             showSequenceLogosString=(String)getDefaultValueForParameter("Logos");  
         }
-        headline=escapeHTML(headline.trim());
+        headline=HTMLUtilities.escapeHTML(headline.trim());
         engine.createHTMLheader((!headline.isEmpty())?headline:"Modules", null, null, true, true, true, outputobject);
         if (!headline.isEmpty()) {
             outputobject.append("<h1 class=\"headline\">"+headline+"</h1>\n",HTML);
@@ -168,11 +170,11 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
             } else properties[i][0]=parts[i];  
             if (properties[i][1]!=null && properties[i][1].equalsIgnoreCase("Logo")) properties[i][1]="Consensus"; // I don't think graphical tooltips are allowed in standard HTML            
             else outputobject.append("<th>\n",HTML);
-            outputobject.append(escapeHTML(properties[i][0]),HTML);
+            outputobject.append(HTMLUtilities.escapeHTML(properties[i][0]),HTML);
             outputobject.append("</th>\n",HTML);
         }        
         outputobject.append("</tr>\n",HTML);        
-        ModuleLogo sequencelogo=null;   
+        ModuleLogo sequencelogo=new ModuleLogo(engine.getClient().getVisualizationSettings());   
 
         if (dataobject instanceof ModuleCollection) {
             ArrayList<ModuleCRM> modulelist=((ModuleCollection)dataobject).getAllModules(engine);
@@ -223,7 +225,7 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
             // append td-class here if necessary
             outputobject.append(">", HTML);
             if (property.equalsIgnoreCase("Logo")) {
-                String link=getModuleLogoTag(cisRegModule, outputobject, logoFormat, sequenceLogoMaxWidth, engine);
+                String link=HTMLUtilities.getModuleLogoTag(cisRegModule, outputobject, sequencelogo, logoFormat, engine);
                 outputobject.append(link, HTML);    
             } else {
                 Object value=null;
@@ -246,7 +248,7 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
         if (value==null) {}
         else if (value instanceof ArrayList) outputArrayList((ArrayList)value, output, multiline, tooltip);
         else {
-	    String string=escapeHTML((value!=null)?value.toString():"");
+	    String string=HTMLUtilities.escapeHTML((value!=null)?value.toString():"");
             if (string.indexOf(' ')>0 && !tooltip) output.append("<nobr>"+string+"</nobr>",HTML); // try to  avoid linebreaks in normal table cells	     
             else output.append(string,HTML);            
         }
@@ -260,7 +262,7 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
 	while (i.hasNext()) {
 	    if (first) first=false; else output.append((multiline)?"<br>":", ",HTML);
             Object e = i.next();
-	    String string=escapeHTML((e!=null)?e.toString():"");
+	    String string=HTMLUtilities.escapeHTML((e!=null)?e.toString():"");
             if (string.indexOf(' ')>0 && !tooltip) output.append("<nobr>"+string+"</nobr>",HTML);	     
             else output.append(string,HTML);	    
 	}
@@ -268,72 +270,64 @@ public class DataFormat_HTML_ModuleTable extends DataFormat {
     }    
     
     
-    /** Creates a sequence logo image for the given module, saves it to a temp-file and return an IMG-tag that can 
-     *  be inserted in HTML-documents to display the image
-     */
-    protected String getModuleLogoTag(ModuleCRM cisRegModule, OutputData outputobject, String logoFormat, int maxwidth, MotifLabEngine engine) {
-        if (!Analysis.includeLogosInOutput(logoFormat)) return "";
-        else if (cisRegModule==null) return "?";        
-        else if (Analysis.includeLogosInOutputAsText(logoFormat)) return escapeHTML(cisRegModule.getModuleLogo());
-        else { 
-            File imagefile=null;
-            if (Analysis.includeLogosInOutputAsSharedImages(logoFormat)) {
-                String logofileID=cisRegModule.getName();
-                boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
-                OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, "gif",true); // returns new or existing shared dependency
-                if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file
-                    imagefile=dependency.getFile();
-                    try {
-                        savModuleLogoImage(imagefile,cisRegModule,engine.getClient().getVisualizationSettings(),maxwidth); //
-                    } catch (IOException e) {
-                        engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-                    }
-                } else {
-                    imagefile=new File(dependency.getInternalPathName());
-                }
-            } else { // always save any logo to a new file
-                imagefile=outputobject.createDependentFile(engine,"gif");
-                try {
-                    savModuleLogoImage(imagefile,cisRegModule,engine.getClient().getVisualizationSettings(),maxwidth); //
-                } catch (IOException e) {
-                    engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-                }
-            }        
-            return "<img src=\"file:///"+imagefile.getAbsolutePath()+"\" />";
-        }
-    }
-
-
-    private void savModuleLogoImage(File file, ModuleCRM cisRegModule, VisualizationSettings settings,int maxwidth) throws IOException {
-        Font modulemotiffont=ModuleLogo.getModuleMotifFont();
-        BufferedImage test=new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        FontMetrics modulelogometrics=test.getGraphics().getFontMetrics(modulemotiffont);
-        int width=ModuleLogo.getLogoWidth(modulelogometrics,cisRegModule)+2;
-        int height=28; // I think this will be OK...
-        BufferedImage image=new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g=image.createGraphics();
-        g.setBackground(new Color(255, 255, 255, 0)); // make the image translucent white       
-        g.clearRect(0,0, width+2, height+2); // bleed a little just in case
-        ModuleLogo.paintModuleLogo(g, cisRegModule, 5, 7, settings, null, maxwidth); //
-        OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-        ImageIO.write(image, "png", output);
-        output.close(); 
-        g.dispose();
-    }
+//    /** Creates a sequence logo image for the given module, saves it to a temp-file and return an IMG-tag that can 
+//     *  be inserted in HTML-documents to display the image
+//     */
+//    protected String getModuleLogoTag(ModuleCRM cisRegModule, OutputData outputobject, String logoFormat, int maxwidth, MotifLabEngine engine) {
+//        if (!Analysis.includeLogosInOutput(logoFormat)) return "";
+//        else if (cisRegModule==null) return "?";        
+//        else if (Analysis.includeLogosInOutputAsText(logoFormat)) return escapeHTML(cisRegModule.getModuleLogo());
+//        else { 
+//            File imagefile=null;
+//            if (Analysis.includeLogosInOutputAsSharedImages(logoFormat)) {
+//                String logofileID=cisRegModule.getName();
+//                boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
+//                OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, "gif",true); // returns new or existing shared dependency
+//                if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file
+//                    imagefile=dependency.getFile();
+//                    try {
+//                        savModuleLogoImage(imagefile,cisRegModule,engine.getClient().getVisualizationSettings(),maxwidth); //
+//                    } catch (IOException e) {
+//                        engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
+//                    }
+//                } else {
+//                    imagefile=new File(dependency.getInternalPathName());
+//                }
+//            } else { // always save any logo to a new file
+//                imagefile=outputobject.createDependentFile(engine,"gif");
+//                try {
+//                    savModuleLogoImage(imagefile,cisRegModule,engine.getClient().getVisualizationSettings(),maxwidth); //
+//                } catch (IOException e) {
+//                    engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
+//                }
+//            }        
+//            return "<img src=\"file:///"+imagefile.getAbsolutePath()+"\" />";
+//        }
+//    }
+//
+//
+//    private void savModuleLogoImage(File file, ModuleCRM cisRegModule, VisualizationSettings settings,int maxwidth) throws IOException {
+//        Font modulemotiffont=ModuleLogo.getModuleMotifFont();
+//        BufferedImage test=new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+//        FontMetrics modulelogometrics=test.getGraphics().getFontMetrics(modulemotiffont);
+//        int width=ModuleLogo.getLogoWidth(modulelogometrics,cisRegModule)+2;
+//        int height=28; // I think this will be OK...
+//        BufferedImage image=new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+//        Graphics2D g=image.createGraphics();
+//        g.setBackground(new Color(255, 255, 255, 0)); // make the image translucent white       
+//        g.clearRect(0,0, width+2, height+2); // bleed a little just in case
+//        ModuleLogo.paintModuleLogo(g, cisRegModule, 5, 7, settings, null, maxwidth); //
+//        OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
+//        ImageIO.write(image, "png", output);
+//        output.close(); 
+//        g.dispose();
+//    }
    
     @Override
     public Data parseInput(ArrayList<String> input, Data target, ParameterSettings settings, ExecutableTask task) throws ParseError, InterruptedException  {
        throw new ParseError("Unable to parse Module input with data format HTML_ModuleTable");
     }
-    
-    protected String escapeHTML(String string) {
-        if (string==null) return "";
-        if (string.contains("&")) string=string.replace("&", "&amp;"); // this must be first
-        if (string.contains("<")) string=string.replace("<", "&lt;");
-        if (string.contains(">")) string=string.replace(">", "&gt;");
-        if (string.contains("\"")) string=string.replace("\"", "&#34;");    
-        return string;
-    }     
+        
     
 }
 

@@ -60,7 +60,6 @@ import org.motiflab.engine.task.ExecutableTask;
 import org.motiflab.engine.util.ImportantNotificationParser;
 import org.motiflab.engine.util.MotifComparator;
 import org.motiflab.engine.util.NaturalOrderComparator;
-import org.motiflab.engine.util.UpgradeManager;
 import org.motiflab.external.ExternalProgram;
 import org.motiflab.gui.PreferencesDialog;
 import org.motiflab.gui.VisualizationSettings;
@@ -81,8 +80,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     public static final String CONCURRENT_THREADS="concurrentThreadCount"; 
     public static final String PREFERENCES_AUTO_CORRECT_SEQUENCE_NAMES="autocorrectSequenceNames";  
 
-    private static String version="2.0.0.-6"; // 
-    private static Date releaseDate=getCorrectDate(2025, 7, 24); // Note: Official release date for v2.0.0 has not been determined yet...
+    private static String version="2.0"; // 
+    private static Date releaseDate=getCorrectDate(2025, 7, 24); // Note: Official release date for v2.0 has not been determined yet...
     
     private DataStorage storage;
     private HashSet<MessageListener> messagelisteners=new HashSet<MessageListener>();
@@ -180,7 +179,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             public void run() {
                shutdown();
             }
-        });         
+        });   
     }
     
     /**
@@ -2700,10 +2699,10 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                 if (metadata.containsKey("requires")) checkPluginRequirements((String)metadata.get("requires")); // check if the plugin requires dependencies that do not exist          
                 plugin=instantiatePluginFromDirectory(dir);
             } catch (SystemError e) {
-                logMessage("  -> Plugin \""+dir.getAbsolutePath()+"\" : CRITICAL ERROR => "+e.getMessage()+". The plugin will not be activated!");  
+                logMessage("  -> Plugin found in directory \""+dir.getAbsolutePath()+"\" : CRITICAL SYSTEM ERROR => "+e.getMessage()+". The plugin will not be activated!");  
                 continue; // the directory did not contain correct metadata
             }  catch (Throwable tr) {
-                logMessage("  -> Plugin \""+dir.getAbsolutePath()+"\" : CRITICAL ERROR => "+tr.toString()+". The plugin will not be activated!");  
+                logMessage("  -> Plugin found in directory \""+dir.getAbsolutePath()+"\" : CRITICAL ERROR => "+tr.toString()+". The plugin will not be activated!");  
                 // tr.printStackTrace(System.err);
                 continue; // the directory did not contain correct metadata
             }        
@@ -2716,7 +2715,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                 logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : ERROR => "+e.getMessage());                
                 registerPlugin(plugin,metadata);                    
             } catch (SystemError se) {
-                logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : CRITICAL ERROR => "+se.getMessage()+". The plugin will not be activated!");
+                logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : CRITICAL SYSTEM ERROR => "+se.getMessage()+". The plugin will not be activated!");
             } catch (Throwable tr) {
                 logMessage("  -> Plugin \""+plugin.getPluginName()+"\" : CRITICAL ERROR => "+tr.toString()+". The plugin will not be activated!");
                 // tr.printStackTrace(System.err);
@@ -2781,32 +2780,52 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         Class pluginclass = null;
         // NOTE: The ! sign has special meaning in JAR paths as the separator between the path of the JAR file itself and the path to a file inside the JAR
         // jar:<URL for JAR file>!/<path within the JAR file>
-        ArrayList<URL> allJars=new ArrayList<>(); // My first line of code written in Java 7 :-)
-        allJars.add(new URL("jar:file:" + jarfile.getAbsolutePath()+"!/"));
-        File libdir=new File(jarfile.getParentFile().getAbsolutePath()+"/lib/");
+        ArrayList<URL> allJars = new ArrayList<>(); // My first line of code written in Java 7 :-)
+        allJars.add(new URL("jar:file:" + jarfile.getAbsolutePath() + "!/"));        
+        File libdir = new File(jarfile.getParentFile().getAbsolutePath() + "/lib/");       
         if (libdir.exists() && libdir.isDirectory()) {
-            File[] libJarFiles=libdir.listFiles(new FilenameFilter() {public boolean accept(File dir, String name) { return name.endsWith(".jar");}});
-            for (File libJar:libJarFiles) {
-                allJars.add(new URL("jar:file:" + libJar.getAbsolutePath()+"!/"));
+            File[] libJarFiles = libdir.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.endsWith(".jar");
+                }
+            });
+            if (libJarFiles != null) {
+                for (File libJar : libJarFiles) {
+                    allJars.add(new URL("jar:file:" + libJar.getAbsolutePath() + "!/"));
+                }
             }
         }
+
         URL[] urls = new URL[allJars.size()];
         urls = allJars.toArray(urls);
-        URLClassLoader loader = URLClassLoader.newInstance(urls, this.getClass().getClassLoader()); // Note: the second argument is necessary in order to work when MotifLab is run via Web Start
-        if (pluginClassLoaders==null) pluginClassLoaders=new WeakHashMap<URLClassLoader,Boolean>();
-        pluginClassLoaders.put(loader,Boolean.TRUE);
-        JarFile jarFile = new JarFile(jarfile.getAbsolutePath());
-        Enumeration e = jarFile.entries();        
-        while (e.hasMoreElements()) {
-            JarEntry je = (JarEntry) e.nextElement();
-            if(je.isDirectory() || !je.getName().endsWith(".class")) continue;                     
-            String className = je.getName().substring(0,je.getName().length()-".class".length());//
-            className = className.replace('/', '.');
-            Class newclass = loader.loadClass(className);
-            if (Plugin.class.isAssignableFrom(newclass)) {
-                if (!Modifier.isAbstract(newclass.getModifiers())) pluginclass = newclass;
+
+        // Use try-with-resources to ensure JarFile is closed afterwards (necessary if we need to delete the JAR file)
+        try (JarFile jarFile = new JarFile(jarfile.getAbsolutePath())) {
+            URLClassLoader loader = URLClassLoader.newInstance(urls, this.getClass().getClassLoader());
+            // Note: The classloaders are usually kept "open" so that plugins can use them to load resources later on.
+            //       But if something goes wrong, we may have to close the classloader in order to remove the JAR-file
+            if (pluginClassLoaders == null) pluginClassLoaders = new WeakHashMap<>();
+            pluginClassLoaders.put(loader, Boolean.TRUE);
+
+            Enumeration e = jarFile.entries();
+            while (e.hasMoreElements()) {
+                JarEntry je = (JarEntry) e.nextElement();
+                if (je.isDirectory() || !je.getName().endsWith(".class")) continue;
+                String className = je.getName().substring(0, je.getName().length() - ".class".length());
+                className = className.replace('/', '.');
+                try {
+                    Class newclass = loader.loadClass(className);
+                    if (Plugin.class.isAssignableFrom(newclass)) {
+                        if (!Modifier.isAbstract(newclass.getModifiers())) pluginclass = newclass;
+                    }
+                } catch (ClassNotFoundException | NoClassDefFoundError ex) {
+                    try {loader.close();} catch (IOException iox) {}; // close ClassLoader so we can delete the JAR, if necessary
+                    pluginClassLoaders.remove(loader);
+                    throw ex;
+                }
             }
-        }   
+        }
+
         return pluginclass;
     }
     
@@ -2889,10 +2908,10 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                plugin=(Plugin)pluginclass.newInstance();
                return plugin;
             } catch (SystemError e) {
-                e.printStackTrace(System.err);
+                // e.printStackTrace(System.err);
                 throw e;
             } catch (Exception e) {
-                e.printStackTrace(System.err);                
+                // e.printStackTrace(System.err);                
                 throw new SystemError(e.getMessage());
             } 
         }
@@ -2916,6 +2935,20 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             }
         }
         return pluginloader;
+    }
+    
+    public void removeClassLoader(File pluginDir) {
+        ClassLoader loader = getPluginClassLoader(pluginDir);
+        if (loader instanceof URLClassLoader) {
+            try {
+                ((URLClassLoader)loader).close(); // necessary to release the file lock on the JAR-files
+                 pluginClassLoaders.remove((URLClassLoader)loader);
+                loader=null;
+                System.gc(); // this is necessary in order to garbage collect the ClassLoader (which is necessary in order to delete the JAR-file). However, it is not guaranteed to work...                    
+            } catch (IOException io) {
+                logMessage("WARNING: unable to close classloader for: "+pluginDir.getAbsolutePath());
+            }
+        }  
     }
     
     /** Returns the plugin classloader associated with the given plugin class (or associated class) */
@@ -2957,10 +2990,12 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     /** 
      * Uninstalls the plugin and removes its files from the system so that it will not be loaded the next time.
      * @returns TRUE if the plugin's ClassLoader was successfully discarded and all the plugin files were deleted, or FALSE if some of the files could not be deleted right away (they will hopefully be deleted when the VM exits).
+     * @param plugin The plugin to remove
      */
     public boolean uninstallPlugin(Plugin plugin) throws SystemError {
         ClassLoader classLoader=plugin.getClass().getClassLoader();
-        Object dir=getPluginProperty(plugin.getPluginName(), "pluginDirectory");
+        String pluginName=plugin.getPluginName();
+        Object dir=getPluginProperty(pluginName, "pluginDirectory");
         if (dir==null) throw new SystemError("Unable to determine location of installed plugin");
         String pluginDir=dir.toString();
         plugins.remove(plugin.getPluginName()); // unregister the plugin with the engine
@@ -2970,7 +3005,9 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             try {
                 ((URLClassLoader)classLoader).close(); // necessary to release the file lock on the JAR-files
                 classLoader=null;
-            } catch (IOException io) {} 
+            } catch (IOException io) {
+                throw new SystemError("ERROR: Unable to release class loader for plugin: "+pluginName);
+            } 
         }
         System.gc(); // this is necessary in order to garbage collect the ClassLoader (which is necessary in order to delete the JAR-file). However, it is not guaranteed to work...     
         File directory=new File(pluginDir);
@@ -3461,16 +3498,21 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     * future releases of MotifLab 
     * @param e The Error or Exception that caused the problem
     */     
-   public void reportError(Throwable e) {
-       logMessage("Sending bug report!");
-       String message=getErrorReport(e);
-       //logMessage(message);// write error message to log
-       try {
-            URL url;
-            HttpURLConnection urlConnection;
-            DataOutputStream printout;
-            BufferedReader reader;
-            url = new URL (getWebSiteURL()+"reportbug.php");
+    public void reportError(Throwable e) {
+        logMessage("Sending bug report!");
+        String message=getErrorReport(e);
+        //logMessage(message);// write error message to log
+        try {
+           URL url = new URL (getWebSiteURL()+"bugreport"); 
+           reportError(message, url);
+        } catch (Exception ex){}     
+    } 
+   
+    private void reportError(String message, URL url) {
+        HttpURLConnection urlConnection=null;
+        DataOutputStream printout=null;
+        BufferedReader reader=null;        
+        try {
             urlConnection = (HttpURLConnection)url.openConnection();
             urlConnection.setDoInput(true);
             urlConnection.setDoOutput(true);
@@ -3482,17 +3524,30 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             printout.writeBytes(content);
             printout.flush();
             printout.close();
+            int status = ((HttpURLConnection)urlConnection).getResponseCode();
+            String location = ((HttpURLConnection)urlConnection).getHeaderField("Location");
+            if (status>300 && status<400 && location!=null) {
+                urlConnection.disconnect();
+                reportError(message,new URL(location)); 
+                return;
+            }                       
             reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream ()));
             String line;
             while ((line = reader.readLine()) != null) {
                 logMessage(line);
             }
             reader.close();
-        // logMessage("Bug report successful");
-     } catch (Exception ex) {
+            // logMessage("Bug report successful");
+        } catch (Exception ex) {
            logMessage("An error occurred while sending bug report: "+ex.getClass().getCanonicalName()+" : "+ex.getMessage());
-     } // nothing to do really   
-   }     
+        } finally {
+            try {
+                if (urlConnection!=null)  urlConnection.disconnect();
+                if (reader!=null) reader.close();
+                if (printout!=null) printout.close();
+            } catch (Exception ex) {}
+        }             
+   }   
         
    protected String getErrorReport(Throwable e) {
        StringBuilder builder=new StringBuilder();       
@@ -3543,10 +3598,12 @@ public boolean deleteTempFile(File tempdir) {
         if (files==null) return true;
         for (File file:files) {
             if (file.isDirectory()) ok = ok && deleteTempFile(file);
-            else ok = ok && file.delete();
+            else {
+                ok = ok && file.delete();
+            }            
             Thread.yield();
         }
-        ok = ok && tempdir.delete();
+        ok = ok && tempdir.delete();   
         return ok;
     } else return tempdir.delete();
 }
@@ -4538,11 +4595,11 @@ public void removeAllResources() {
             int status = ((HttpURLConnection)connection).getResponseCode();
             String location = ((HttpURLConnection)connection).getHeaderField("Location");
             if (status>300 && status<400 && location!=null && "http".equalsIgnoreCase(url.getProtocol()) && location.startsWith("https")) {
-                    ((HttpURLConnection)connection).disconnect();
-                    return getPage(new URL(location));
-            } else if (status>300 && status<400 && location!=null) {
-                    ((HttpURLConnection)connection).disconnect();
-                    return getPage(new URL(location));
+                ((HttpURLConnection)connection).disconnect();
+                return getPage(new URL(location));
+            } else if (status>300 && status<400 && location!=null) {              
+                ((HttpURLConnection)connection).disconnect();
+                return getPage(new URL(location));
             } 
         }
         inputStream=connection.getInputStream();

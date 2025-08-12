@@ -1,8 +1,3 @@
-/*
- 
- 
- */
-
 package org.motiflab.engine.dataformat;
 
 import java.awt.Color;
@@ -16,7 +11,6 @@ import org.motiflab.engine.Parameter;
 import org.motiflab.engine.protocol.ParseError;
 import org.motiflab.engine.data.Motif;
 import org.motiflab.engine.data.MotifCollection;
-import org.motiflab.engine.data.analysis.Analysis;
 import org.motiflab.engine.util.HTMLUtilities;
 import org.motiflab.gui.MotifLogo;
 import org.motiflab.gui.VisualizationSettings;
@@ -121,8 +115,8 @@ public class DataFormat_HTML_Matrix extends DataFormat {
         int logoheight=24;
         VisualizationSettings vizSettings=engine.getClient().getVisualizationSettings();
         Color [] basecolors=vizSettings.getBaseColors();//new Color[]{Color.GREEN,Color.BLUE,new Color(220,220,0),Color.RED};           
-        if (Analysis.includeLogosInOutputAsImages(showSequenceLogosString)) {
-            sequenceLogo=new MotifLogo(basecolors,(int)(logoheight*1.25));
+        if (HTMLUtilities.includeLogosInOutputAsImages(showSequenceLogosString)) {
+            sequenceLogo=new MotifLogo(basecolors,logoheight);
             sequenceLogo.setDrawBorder(false); // The border does not always fit the the image size, so I will draw it myself later on
         }  
               
@@ -172,7 +166,7 @@ public class DataFormat_HTML_Matrix extends DataFormat {
         
         outputobject.append("<table bgcolor=\"#FFF0D1\" style=\"table-layout: fixed;\">", HTML);
         outputobject.append("<tr><td bgcolor=\"#F0FFD1\" colspan="+tableColumns+"><b>"+headerstring+"</b></td></tr>", HTML);
-        if (Analysis.includeLogosInOutput(logoFormat)) {
+        if (HTMLUtilities.includeLogosInOutput(logoFormat)) {
              String logotag=HTMLUtilities.getMotifLogoTag(motif, outputobject, sequencelogo, logoFormat, engine);
              outputobject.append("<tr><td bgcolor=\"#F0FFD1\" colspan="+tableColumns+">"+logotag+"</td></tr>", HTML);
         }
@@ -220,90 +214,6 @@ public class DataFormat_HTML_Matrix extends DataFormat {
         else return ""+value;
     }
 
-    
-//    /** Creates a sequence logo image for the given motif, saves it to a temp-file and return an IMG-tag that can 
-//     *  be inserted in HTML-documents to display the image
-//     */
-//    protected String getSequenceLogoTag(Motif motif, OutputData outputobject, MotifLogo sequencelogo, int sequenceLogoHeight, String logoFormat) {
-//        if (!Analysis.includeLogosInOutput(logoFormat)) return "";
-//        else if (Analysis.includeLogosInOutputAsText(logoFormat)) return motif.getConsensusMotif();
-//        File imagefile=null;
-//        VisualizationSettings settings=engine.getClient().getVisualizationSettings();
-//        String imageFormat=(String)settings.getSettingAsType("motif.imageFormat","gif");
-//        if (imageFormat==null) imageFormat="gif";
-//        imageFormat=imageFormat.toLowerCase();
-//        if (!(imageFormat.equals("gif") || imageFormat.equals("png") || imageFormat.equals("svg"))) imageFormat="gif";     
-//        if (imageFormat.equals("svg")) imageFormat="gif"; // because SVG does not work properly
-//        boolean border=(Boolean)settings.getSettingAsType("motif.border",Boolean.TRUE);          
-//        if (Analysis.includeLogosInOutputAsSharedImages(logoFormat)) {
-//            String logofileID=motif.getName();
-//            boolean sharedDependencyExists=(engine.getSharedOutputDependency(logofileID)!=null);
-//            OutputDataDependency dependency=outputobject.createSharedDependency(engine,logofileID, imageFormat,true); // returns new or existing shared dependency
-//            if (!sharedDependencyExists) { // the dependency has not been created before so we must save the image to file
-//                imagefile=dependency.getFile();
-//                sequencelogo.setMotif(motif);
-//                try {
-//                    saveSequenceLogoImage(imagefile,sequencelogo, sequenceLogoHeight, imageFormat, border); // an image height of 19 corresponds with a logo height of 22 which is "hardcoded" above (but probably should not be) 
-//                } catch (IOException e) {
-//                    engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-//                }
-//            } else {
-//                imagefile=new File(dependency.getInternalPathName());
-//            }            
-//        } else { // always save any logo to a new file
-//            imagefile=outputobject.createDependentFile(engine,imageFormat);
-//            sequencelogo.setMotif(motif);
-//            try {              
-//                saveSequenceLogoImage(imagefile,sequencelogo, sequenceLogoHeight, imageFormat, border); // an image height of 19 corresponds with a logo height of 22 which is "hardcoded" above (but probably should not be) 
-//            } catch (IOException e) {
-//                engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-//            }           
-//        }
-//        return "<img src=\"file:///"+imagefile.getAbsolutePath()+"\" />";
-//    }
-//
-//    private void saveSequenceLogoImage(File file, MotifLogo sequencelogo, int motifheight, String imageFormat, boolean border) throws IOException {
-//        int width=sequencelogo.getDefaultMotifWidth();
-//        if (imageFormat==null) imageFormat="gif";
-//        imageFormat=imageFormat.toLowerCase();
-//        if (imageFormat.equals("gif") || imageFormat.equals("png")) {
-//            BufferedImage image=new BufferedImage(width, motifheight, BufferedImage.TYPE_INT_RGB);
-//            Graphics2D g=image.createGraphics();
-//            g.setColor(Color.WHITE);
-//            g.fillRect(0, 0, width, motifheight);
-//            sequencelogo.paintLogo(g);
-//            if (border) {
-//                g.setColor(Color.BLACK);
-//                g.drawRect(0, 0, width-1, motifheight-1);     
-//            }
-//            OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-//            ImageIO.write(image, imageFormat, output);
-//            output.close(); 
-//            g.dispose();            
-//        } else {                     
-//            VectorGraphics2D g=null;
-//                 if (imageFormat.equals("svg")) g = new SVGGraphics2D(0, 0, width, motifheight);
-//            else if (imageFormat.equals("pdf")) g = new PDFGraphics2D(0, 0, width, motifheight);
-//            else if (imageFormat.equals("eps")) g = new EPSGraphics2D(0, 0, width, motifheight);
-//            else throw new IOException("Unknown image format: "+imageFormat);
-//            g.setClip(0, 0, width,motifheight);
-//            g.setColor(Color.WHITE);
-//            g.fillRect(0, 0, width, motifheight);
-//            sequencelogo.paintLogo(g);
-//            if (border) {
-//                g.setColor(Color.BLACK);
-//                g.drawRect(0, 0, width-1, motifheight-1);     
-//            }                                 
-//            FileOutputStream fileStream = new FileOutputStream(file);
-//            try {
-//                fileStream.write(g.getBytes());
-//            } finally {
-//                fileStream.close();
-//            } 
-//            g.dispose();            
-//        }        
-//   
-//    } 
     
     @Override
     public Data parseInput(ArrayList<String> input, Data target, ParameterSettings settings, ExecutableTask task) throws ParseError, InterruptedException  {

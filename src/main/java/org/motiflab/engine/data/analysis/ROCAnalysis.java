@@ -1,8 +1,3 @@
-/*
- 
- 
- */
-
 package org.motiflab.engine.data.analysis;
 
 import org.motiflab.engine.Graph;
@@ -13,13 +8,10 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
-import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import javax.imageio.ImageIO;
 import org.motiflab.engine.task.ExecutableTask;
 import org.motiflab.engine.ExecutionError;
 import org.motiflab.engine.task.OperationTask;
@@ -70,6 +61,7 @@ import org.motiflab.engine.data.RegionDataset;
 import org.motiflab.engine.data.RegionSequenceData;
 import org.motiflab.engine.data.Sequence;
 import org.motiflab.engine.data.SequenceCollection;
+import org.motiflab.engine.util.HTMLUtilities;
 
 /**
  *
@@ -122,23 +114,19 @@ public class ROCAnalysis extends Analysis {
     }
 
     @Override
-    public String[] getSourceProxyParameters() {return new String[]{"Target track","Priors track"};} 
+    public String[] getSourceProxyParameters() {return new String[]{"Target track","Score property"};} 
     
 
     @Override
     public Parameter[] getOutputParameters(String dataformat) {
         if (dataformat.equals(HTML)) return new Parameter[] {
+              new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false),                                                                                  
               new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false),
               new Parameter("Include legend",String.class,"",null,"<html>This argument can be used to include a legend box as part of the figure itself.<br>If used, this argument should be either a single positive value or three values separated by comma.<br>The first value will be the %-scale the legend box should be displayed at.<br>The optional second and third values are interpreted as a coordinate at which to display the legend box.<br>Positive coordinates are offset down and to the right relative to an origin in the upper left corner.<br>Negative values are offset left and upwards relative to an origin in the lower right corner.</html>",false,false)
         };
         else return new Parameter[0];
     }
-
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Graph scale") || parameter.equals("Include legend")) return new String[]{"HTML"};
-//        return null;
-//    }     
+     
     
     @Override
     public String getAnalysisName() {
@@ -318,73 +306,96 @@ public class ROCAnalysis extends Analysis {
     public OutputData formatHTML(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format) throws ExecutionError, InterruptedException {
         int scalepercent=100;        
         String legendScaleString="";
-        double[] includeLegend=null;             
+        Object legend;    
+        String imageFormat="png"; 
         if (settings!=null) {
           try {
              Parameter[] defaults=getOutputParameters(format);
              scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
-             legendScaleString=(String)settings.getResolvedParameter("Include legend",defaults,engine);             
+             legendScaleString=(String)settings.getResolvedParameter("Include legend",defaults,engine);    
+             imageFormat=(String)settings.getResolvedParameter("Image format",defaults,engine); 
           }
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        if (legendScaleString==null) legendScaleString=""; else legendScaleString=legendScaleString.trim();
-        if (!legendScaleString.isEmpty()) {
-            String[] parts=legendScaleString.split("\\s*,\\s*");
-            if (!(parts.length==1 || parts.length==3)) throw new ExecutionError("The \"Include legend\" parameter should consist of either 1 single value or 3 comma-separated values");
-            includeLegend=new double[3];
+        if (legendScaleString==null) legendScaleString="";
+        legendScaleString=legendScaleString.trim();     
+        if (legendScaleString.isEmpty() || legendScaleString.equalsIgnoreCase("none")) legend=null;
+        else if (legendScaleString.equalsIgnoreCase("normal")) legend=legendScaleString;
+        else if (legendScaleString.equalsIgnoreCase("right"))  legend="normal";
+        else if (legendScaleString.equalsIgnoreCase("left"))   legend=new double[]{1.0,-1,0};     
+        else {
+            String[] parts=legendScaleString.replace("%", "").split("\\s*,\\s*");
+            if (!(parts.length==1 || parts.length==3)) throw new ExecutionError("The \"Legend\" parameter should be either \"normal\" or \"none\" or consist of either 1 single value or 3 comma-separated values");
+            double[] includeLegend=new double[parts.length];
             for (int i=0;i<parts.length;i++) {
                 try {
                     includeLegend[i]=Double.parseDouble(parts[i]);
-                } catch (Exception e) {throw new ExecutionError("Unable to parse expected numerical value for \"Include legend\" parameter: "+parts[i]);}
+                } catch (Exception e) {throw new ExecutionError("Unable to parse expected numerical value for \"Legend\" parameter: "+parts[i]);}
             }
-            includeLegend[0]=includeLegend[0]/100.0; // this was a percentage number
-        }
+            includeLegend[0]=includeLegend[0]/100.0; // this was a percentage number. Convert to scale factor
+            legend=includeLegend;
+        }  
         double scale=(scalepercent==100)?1.0:(((double)scalepercent)/100.0);     
-        if (ROCmap==null) return formatHTMLsingleFeature(outputobject, engine, settings, task, format, scale);
-        else return formatHTMLmultipleFeatures(outputobject, engine, settings, task, format, scale, includeLegend);
+        if (ROCmap==null) return formatHTMLsingleFeature(outputobject, imageFormat, engine, format, scale);
+        else return formatHTMLmultipleFeatures(outputobject, imageFormat, engine, format, scale, legend);        
     }
 
-
-
-    private OutputData formatHTMLsingleFeature(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format, double scale) throws ExecutionError, InterruptedException {
+  private String getGraphImageTag(String graph, String imageFormat, OutputData outputobject, double scale, MotifLabEngine engine) {
+        File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+        HTMLUtilities.ImagePainter painter=null;
+        int height=0;
+        int width=0;
+        switch (graph) {
+            case "ROC":
+                painter = (g) -> paintROCGraph(g, scale);
+                height=310; width=310; // size is hardcoded but should not be
+                break;
+            case "P-R":
+                painter = (g) -> paintPrecisionRecallGraph(g, scale);
+                height=310; width=310; // size is hardcoded but should not be
+                break;
+            case "Sensitivity":
+                painter = (g) -> paintSensitivityGraph(g, scale);
+                height=290; width=440; // size is hardcoded but should not be
+                break;
+            case "normalizedHistogram":
+                painter = (g) -> paintHistogramGraph(g, true, true, false, scale);
+                height=190; width=440; // size is hardcoded but should not be
+                break; 
+            case "histogram":
+                painter = (g) -> paintHistogramGraph(g, false, false, true, scale);
+                height=190; width=440; // size is hardcoded but should not be
+                break;
+            case "otherStats":  
+                painter = (g) -> paintOtherStatsGraph(g, scale);
+                height=290; width=440; // size is hardcoded but should not be
+                break;                  
+            default:
+                break;
+        }
+        return HTMLUtilities.getImageTag(painter, imagefile, imageFormat, height, width, scale);         
+    }  
+  
+   private String getMultiplROCImageTag(String imageFormat, OutputData outputobject, Object legend, double scale, MotifLabEngine engine) {
+        File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat);        
+        HashMap<String,Object> properties = getSettingsforMultipleROCGraph(legend, scale, engine);
+        int height=(int)properties.get("height");
+        int width=(int)properties.get("width");
+        HTMLUtilities.ImagePainter painter = (g) -> paintMultipleROCGraph(g, properties, engine);
+        return HTMLUtilities.getImageTag(painter, imagefile, imageFormat, height, width, scale);         
+    }   
+   
+    private OutputData formatHTMLsingleFeature(OutputData outputobject, String imageFormat, MotifLabEngine engine, DataFormat format, double scale) throws ExecutionError, InterruptedException {
         DecimalFormat decimalformatter=new DecimalFormat("0.00000");
-        File rocImageFile=outputobject.createDependentFile(engine,"png");
-        try {
-            saveROCGraphAsImage(rocImageFile, scale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
-        File precisionRecallImageFile=outputobject.createDependentFile(engine,"png");
-        try {
-            savePrecisionRecallGraphAsImage(precisionRecallImageFile, scale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
-        File sensitivityImageFile=outputobject.createDependentFile(engine,"png");
-        try {
-            saveSensitivityGraphAsImage(sensitivityImageFile, scale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
-        File normalizedHistogramImageFile=outputobject.createDependentFile(engine,"png");
-        try {
-            saveHistogramGraphAsImage(normalizedHistogramImageFile, true, true, false, scale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
-        File histogramImageFile=outputobject.createDependentFile(engine,"png");
-        try {
-            saveHistogramGraphAsImage(histogramImageFile, false, false, true, scale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
-        File otherStatsImageFile=outputobject.createDependentFile(engine,"png");
-        try {
-            saveOtherStatsGraphAsImage(otherStatsImageFile, scale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
+
+        String rocImageTag=getGraphImageTag("ROC",imageFormat,outputobject,scale,engine);
+        String precisionRecallImageTag=getGraphImageTag("P-R",imageFormat,outputobject,scale,engine);
+        String sensitivityImageTag=getGraphImageTag("Sensitivity",imageFormat,outputobject,scale,engine);     
+        String normalizedHistogramImageTag=getGraphImageTag("normalizedHistogram",imageFormat,outputobject,scale,engine);  
+        String histogramImageTag=getGraphImageTag("histogram",imageFormat,outputobject,scale,engine);         
+        String otherStatsImageTag=getGraphImageTag("otherStats",imageFormat,outputobject,scale,engine);            
+        
         long truePositive=positiveCount.get(null);
         long trueNegative=negativeCount.get(null);
         engine.createHTMLheader("ROC Analysis", null, null, false, true, true, outputobject);
@@ -396,8 +407,8 @@ public class ROCAnalysis extends Analysis {
         outputobject.append("<tr><td valign=\"top\" style=\"border-width: 0px;\">\n",HTML);
         outputobject.append("<table style=\"border-width: 0px;\"></tr>\n",HTML); // nested table
         outputobject.append("<tr>",HTML);
-        outputobject.append("<td style=\"border-width: 0px;\" valign=\"top\" align=\"center\"><img src=\"file:///"+rocImageFile.getAbsolutePath()+"\" /></td>\n",HTML);
-        outputobject.append("<td style=\"border-width: 0px;\" valign=\"top\" align=\"center\"><img src=\"file:///"+precisionRecallImageFile.getAbsolutePath()+"\" /></td>\n",HTML);
+        outputobject.append("<td style=\"border-width: 0px;\" valign=\"top\" align=\"center\">"+rocImageTag+"</td>\n",HTML);
+        outputobject.append("<td style=\"border-width: 0px;\" valign=\"top\" align=\"center\">"+precisionRecallImageTag+"</td>\n",HTML);
         outputobject.append("</tr>\n</table>\n",HTML);
         outputobject.append("These graphs summarize the ability of the region property \"<span class=\"dataitem\">"+scoreProperty+"</span>\" to discriminate between <font color=\"#FF0000\">"+truePositive+" positive</font> and <font color=\"#0000FF\">"+trueNegative+" negative</font> regions in <span class=\"dataitem\">"+regionDatasetName+"</span>.\n",HTML);
         outputobject.append("True positive regions are those whose value of the \"<span class=\"dataitem\">"+classProperty+"</span>\" property equals \""+positiveClassValue+"\". All other regions are considered to be true negatives.<br><br>",HTML);
@@ -443,22 +454,22 @@ public class ROCAnalysis extends Analysis {
         outputobject.append("<br>",HTML);
         outputobject.append("</td>",HTML);
         outputobject.append("<td style=\"border-width: 0px;\" valign=\"top\" align=\"center\">",HTML);
-        outputobject.append("<img src=\"file:///"+sensitivityImageFile.getAbsolutePath()+"\" /><br>",HTML);
+        outputobject.append(sensitivityImageTag,HTML); outputobject.append("<br>",HTML);
         outputobject.append("<font color=\"#00FF00\">Sensitivity</font>&nbsp;&nbsp;&nbsp;",HTML);
         outputobject.append("<font color=\"#FF0000\">Specificity</font>&nbsp;&nbsp;&nbsp;",HTML);
         outputobject.append("<font color=\"#E0E000\">False Positive Rate (1-Sp)</font><br>",HTML);
         outputobject.append("<font color=\"#0000FF\">Average Sn+Sp</font>&nbsp;&nbsp;&nbsp;",HTML);
         outputobject.append("<font color=\"#A0A0A0\">Distance between Sn and FPR</font>&nbsp;&nbsp;&nbsp;",HTML);
         outputobject.append("<font color=\"#FF00FF\">F-measure</font><br><br>",HTML);
-        outputobject.append("<img src=\"file:///"+normalizedHistogramImageFile.getAbsolutePath()+"\" /><br>",HTML);
+        outputobject.append(normalizedHistogramImageTag,HTML); outputobject.append("<br>",HTML);
         outputobject.append("Normalized distributions of \""+scoreProperty+"\" values for ",HTML);
         outputobject.append("<font color=\"#FF0000\">positive</font> versus ",HTML);
         outputobject.append("<font color=\"#0000FF\">negative</font> regions<br><br>",HTML);
-        outputobject.append("<img src=\"file:///"+histogramImageFile.getAbsolutePath()+"\" /><br>",HTML);
+        outputobject.append(histogramImageTag,HTML); outputobject.append("<br>",HTML);
         outputobject.append("Raw distributions of \""+scoreProperty+"\" values for ",HTML);
         outputobject.append("<font color=\"#FF0000\">positive</font> versus ",HTML);
         outputobject.append("<font color=\"#0000FF\">negative</font> regions<br><br>",HTML);
-        outputobject.append("<img src=\"file:///"+otherStatsImageFile.getAbsolutePath()+"\" /><br>",HTML);
+        outputobject.append(otherStatsImageTag,HTML); outputobject.append("<br>",HTML);
         outputobject.append("<font color=\"#0000FF\">Positive Predictive Value</font>&nbsp;&nbsp;&nbsp;",HTML);
         outputobject.append("<font color=\"#FF00FF\">Negative Predictive Value</font><br>",HTML);
         outputobject.append("<font color=\"#FF9900\">False Discovery Rate</font>&nbsp;&nbsp;&nbsp;",HTML);
@@ -476,7 +487,7 @@ public class ROCAnalysis extends Analysis {
 
 
 
-    private OutputData formatHTMLmultipleFeatures(OutputData outputobject, MotifLabEngine engine, ParameterSettings settings, ExecutableTask task, DataFormat format, double scale, double[] legendscale) throws ExecutionError, InterruptedException {
+    private OutputData formatHTMLmultipleFeatures(OutputData outputobject, String imageFormat, MotifLabEngine engine, DataFormat format, double scale, Object legend) throws ExecutionError, InterruptedException {
         DecimalFormat decimalformatter=new DecimalFormat("0.#####");
         ArrayList<String> names=new ArrayList<String>(ROCmap.size());
         for (String s:ROCmap.keySet()) names.add(s);
@@ -488,12 +499,7 @@ public class ROCAnalysis extends Analysis {
                 if (!vizSettings.isRegionTypeVisible(type)) iterator.remove();
             }            
         }        
-        File rocImageFile=outputobject.createDependentFile(engine,"png");
-        try {
-            saveMultipleROCGraphAsImage(rocImageFile, engine, scale, legendscale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
+        String multipleROCimageTag=getMultiplROCImageTag(imageFormat, outputobject, legend, scale, engine);       
         engine.createHTMLheader("ROC Analysis", null, null, true, true, true, outputobject);
         outputobject.append("<div align=\"center\">\n",HTML);       
         outputobject.append("<h2 class=\"headline\">ROC curves showing the ability of property \""+scoreProperty+"\" to discriminate between positive and negative regions in "+regionDatasetName+"</h2>",HTML);
@@ -510,7 +516,9 @@ public class ROCAnalysis extends Analysis {
         if (sequenceCollectionName!=null) outputobject.append(" from collection <span class=\"dataitem\">"+sequenceCollectionName+"</span>",HTML);
         outputobject.append("<br>",HTML);
         outputobject.append("<table>",HTML);
-        outputobject.append("<tr><td style=\"border-width: 0px;\" align=\"center\"><img src=\"file:///"+rocImageFile.getAbsolutePath()+"\" /><br><h2>ROC<h2></td><td style=\"border-width: 0px;\" width=\"30\"></td>",HTML);
+        outputobject.append("<tr><td style=\"border-width: 0px;\" align=\"center\">",HTML);
+        outputobject.append(multipleROCimageTag,HTML);
+        outputobject.append("<br><h2>ROC<h2></td><td style=\"border-width: 0px;\" width=\"30\"></td>",HTML);
         outputobject.append("<td style=\"border-width: 0px;\">\n<table class=\"sortable\">\n",HTML);
         outputobject.append("<tr><th colspan=2>"+featureProperty+"</th><th class=\"sorttable_numeric\">AUC</th></tr>\n",HTML);
         for (int i=0;i<names.size();i++) {
@@ -1473,18 +1481,16 @@ public class ROCAnalysis extends Analysis {
     }
 
    /** Creates the ROC graph for a single feature */
-    private void saveROCGraphAsImage(File file, double scale) throws IOException {
+    private void paintROCGraph(Graphics2D g, double scale)  {
         int graphheight=250; // height of graph in pixels (just the actual axis-system)
         int graphwidth=250;  // height of graph in pixels (just the actual axis-system)
         int translateX=50;   // the X coordinate for the top of the graph
         int translateY=10;   // the Y coordinate for the top of the graph
         int width=graphwidth+translateX+10; //
         int height=translateY+graphheight+50;
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
         g.scale(scale, scale);
         g.setColor(java.awt.Color.WHITE);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(0, 0, width+10, height+10);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Graph graph=new Graph(g, 0f, 1f, 0f, 1f, graphwidth, graphheight, translateX, translateY);
         graph.labelpaddingX=0;
@@ -1511,26 +1517,19 @@ public class ROCAnalysis extends Analysis {
         graph.drawAlignedString("ROC", translateX+graphwidth/2, translateY+graphheight+36, 0.5f, 0);
         g.setFont(standard);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        // write the image to file
-        OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-        ImageIO.write(image, "png", output);
-        output.close(); 
-        g.dispose();
     }
 
    /** Creates the Precision-Recall graph for a single feature */
-    private void savePrecisionRecallGraphAsImage(File file, double scale) throws IOException {
+    private void paintPrecisionRecallGraph(Graphics2D g, double scale) {
         int graphheight=250; // height of graph in pixels (just the actual axis-system)
         int graphwidth=250;  // height of graph in pixels (just the actual axis-system)
         int translateX=50;   // the X coordinate for the top of the graph
         int translateY=10;   // the Y coordinate for the top of the graph
         int width=graphwidth+translateX+10; //
         int height=translateY+graphheight+50;
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
         g.scale(scale, scale);
         g.setColor(java.awt.Color.WHITE);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(0, 0, width+10, height+10);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Graph graph=new Graph(g, 0f, 1f, 0f, 1f, graphwidth, graphheight, translateX, translateY);
         graph.labelpaddingX=0;
@@ -1561,32 +1560,119 @@ public class ROCAnalysis extends Analysis {
         graph.drawVerticalString("Precision", 14, translateY+graphheight-100, true);
         g.setFont(standard);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        // write the image to file
-        OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-        ImageIO.write(image, "png", output);
-        output.close(); 
-        g.dispose();
+
     }
 
 
-
-
-
-
    /** Creates the ROC graph for multiple features */
-    private void saveMultipleROCGraphAsImage(File file, MotifLabEngine engine, double scale, double[] legendscale) throws IOException {
+    private HashMap<String,Object> getSettingsforMultipleROCGraph(Object legend, double scale, MotifLabEngine engine) {
         DecimalFormat decimalformatter=new DecimalFormat("0.000");
         int graphheight=400; // height of graph in pixels (just the actual axis-system)
         int graphwidth=400;  // height of graph in pixels (just the actual axis-system)
-        int translateX=55;   // the X coordinate for the top of the graph
+        int translateX=55;   // the X coordinate for the top of the graph (makes room for tickmarks and label on Y-axis)
         int translateY=10;   // the Y coordinate for the top of the graph
-        int width=graphwidth+translateX+10; //
-        int height=translateY+graphheight+50;
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
+        int marginX=10;
+        int marginY=10;        
+        int bottomPadding=50; // room below the graph X-axis for tickmarks and label
+        int width=graphwidth+translateX+marginX; //
+        int height=translateY+graphheight+bottomPadding;
+        
+        HashMap<String,Object> properties = new HashMap<>();
+        
+        if (legend!=null) {
+            int legendPadding=20; // distance between graph and legend placed in normal position
+            ArrayList<String> names=new ArrayList<String>(ROCmap.size());
+            for (String s:ROCmap.keySet()) names.add(s);
+            Collections.sort(names, new AUCSortComparator());
+            VisualizationSettings settings=engine.getClient().getVisualizationSettings();        
+            if (featureProperty.equals("type")) { // filter based on visibility if the featureProperty is type
+                for (Iterator<String> iterator = names.iterator(); iterator.hasNext();) {
+                    String type = iterator.next();
+                    if (!settings.isRegionTypeVisible(type)) iterator.remove();
+                }            
+            }            
+            String[] sortedNames=new String[names.size()];
+            int index=0;
+            for (int i=0;i<names.size();i++) {
+                String featurename=names.get(i);
+                sortedNames[index]=featurename+" = "+decimalformatter.format(AUCmap.get(featurename));
+                index++;
+            }                      
+            Dimension legendDimension=Graph.getLegendDimension(sortedNames, null);
+            int legendwidth=legendDimension.width;
+            if (legendwidth<50) legendwidth=50; // this is only used to set image-width not to draw the actual legend box
+            int legendheight=legendDimension.height;
+            double legendScale=1.0;
+            if (legend instanceof double[]) legendScale=((double[])legend)[0];  
+            legendwidth=(int)Math.ceil(legendwidth*legendScale);
+            legendheight=(int)Math.ceil(legendheight*legendScale); 
+
+            // determine total width of graph and legend, based on placement
+            if (legend instanceof String || (legend instanceof double[] && ((double[])legend).length==1)) { // normal placement of legend to the right of the graph
+               width += (legendPadding+legendwidth+marginX); 
+            } else if (legend instanceof double[] && ((double[])legend).length==3) { // alternative coordinate for legend placement relative to Y-axis
+                int legendX=(int)Math.round(((double[])legend)[1]); // placement relative to Y-axis
+                if (legendX>=0) {
+                    if (translateX+legendX+legendwidth+marginX>=width) width=translateX+legendX+legendwidth+marginX;
+                } else { // legend is placed to the left. The graph must be shifted accordingly
+                   legendX=-legendX; // transform to positive value. Note that this is the anchor for the bottom-right corner of the legend box!
+                   translateX+=(legendwidth+legendX+marginX); // add extra margin to the left of the legend box
+                   width=translateX+graphwidth+marginX; //
+                }
+            }
+            // determine total height of graph and legend, based on placement
+            if (legend instanceof String || (legend instanceof double[] && ((double[])legend).length==1)) { // normal placement of legend to the right of the graph
+                // add more room for legend box extending past the bottom of the graph, if necessary
+                if (height<translateY+legendheight+marginY) height=(translateY+legendheight+marginY);
+            } else if (legend instanceof double[] && ((double[])legend).length==3) { // alternative coordinate for legend placement
+                int legendY=(int)Math.round(((double[])legend)[2]);
+                if (legendY>=0) { // top of legend is below top of graph
+                    if (translateY+legendY+legendheight+marginY>height) height=translateY+legendY+legendheight+marginY;
+                } else { // bottom of legend is placed relative to bottom of graph
+                    int legendTop = translateY+graphheight + legendY - legendheight; // note that legendY will be subtracted since it is negative
+                    if (legendTop<marginY) { // legend is so big that it extends above the top of the image (or margin)
+                        translateY+=(marginY-legendTop);
+                        height=translateY+graphheight+bottomPadding;                   
+                    }
+                }
+            } 
+            properties.put("legendwidth",legendwidth);
+            properties.put("legendheight",legendheight);
+            properties.put("legendScale",legendScale);
+            properties.put("legendPadding",legendPadding);           
+        }        
+        properties.put("graphheight", graphheight);
+        properties.put("graphwidth", graphwidth);
+        properties.put("translateX", translateX);
+        properties.put("translateY", translateY);
+        properties.put("marginX", marginX);
+        properties.put("marginY", marginY);    
+        properties.put("bottomPadding",bottomPadding);
+        properties.put("width", width);
+        properties.put("height", height);   
+        properties.put("legend", legend);   
+        properties.put("scale", scale);          
+        return properties;
+    }
+
+   /** Creates the ROC graph for multiple features */
+    private void paintMultipleROCGraph(Graphics2D g, HashMap<String,Object> properties, MotifLabEngine engine){
+        DecimalFormat decimalformatter=new DecimalFormat("0.000");
+        int graphheight=(int)properties.get("graphheight");
+        int graphwidth=(int)properties.get("graphwidth");
+        int translateX=(int)properties.get("translateX");
+        int translateY=(int)properties.get("translateY");
+        int width=(int)properties.get("width");
+        int height=(int)properties.get("height");
+        int marginX=(int)properties.get("marginX");
+        int marginY=(int)properties.get("marginY");        
+        int bottomPadding=(int)properties.get("bottomPadding"); 
+        Object legend=properties.get("legend");   
+        double scale=(double)properties.get("scale");  
+        
         g.scale(scale, scale);
         g.setColor(java.awt.Color.WHITE);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(0, 0, width+10, height+10);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Graph graph=new Graph(g, 0f, 1f, 0f, 1f, graphwidth, graphheight, translateX, translateY);
         graph.drawAxes(Graph.BOX, Graph.DOTTED, true);
@@ -1637,41 +1723,41 @@ public class ROCAnalysis extends Analysis {
         Font usefont=new Font(Font.SANS_SERIF, Font.PLAIN, 12);
         g.setFont(usefont);
         graph.drawAlignedString("1 - Specificity    ( FP-rate )", translateX+graphwidth/2, translateY+graphheight+42, 0.5f, 0);
-        graph.drawVerticalString("Sensitivity    ( TP-rate )", 8, translateY+graphheight-144,true);
-        if (legendscale!=null && legendscale[0]>0) {
-            Dimension legendDim=Graph.getLegendDimension(sortedNames, usefont);
-            legendDim.width=(int)Math.round(legendDim.width*legendscale[0]);
-            legendDim.height=(int)Math.round(legendDim.height*legendscale[0]);
-            int legendX=(legendscale[1]>=0)?(int)(graph.getXforValue(0)+legendscale[1]):(int)(graph.getXforValue(1.0)+legendscale[1]-legendDim.width);
-            int legendY=(legendscale[2]>=0)?(int)(graph.getYforValue(1.0)+legendscale[2]):(int)(graph.getYforValue(0.0)+legendscale[2]-legendDim.height);  
-            g.translate(legendX, legendY);         
-            g.scale(legendscale[0], legendscale[0]);
+        graph.drawVerticalString("Sensitivity    ( TP-rate )", translateX-40, translateY+graphheight-144,true);        
+        if (legend!=null) {
+            double legendScale=(double)properties.get("legendScale");
+            int legendPadding=(int)properties.get("legendPadding");   
+            int legendheight=(int)properties.get("legendheight");             
+            int legendXpos=translateX+graphwidth+legendPadding; // default position
+            int legendYpos=translateY;
+            if (legend instanceof double[] && ((double[])legend).length==3) {            
+                double offsetX=((double[])legend)[1];
+                double offsetY=((double[])legend)[2];
+                legendXpos=(offsetX>=0)?(int)(graph.getXforValue(0)+offsetX):marginX; 
+                // legendYpos=(offsetY>=0)?(int)(graph.getYforValue(1.0)+offsetY):marginY; // bottom of legend is placed relative to top of graph
+                legendYpos=(offsetY>=0)?(int)(graph.getYforValue(1.0)+offsetY):(int)(translateY+graphheight+offsetY-legendheight); // bottom of legend is placed relative to bottom of graph            
+            }              
+            g.translate(legendXpos, legendYpos);         
+            g.scale(legendScale,legendScale);
             graph.drawLegendBox(sortedNames, sortedColors, 0, 0, true);
         }        
         g.setFont(d);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        // write the image to file
-        OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-        ImageIO.write(image, "png", output);
-        output.close(); 
-        g.dispose();
     }
 
 
-    private void saveSensitivityGraphAsImage(File file, double scale) throws IOException {
+    private void paintSensitivityGraph(Graphics2D g, double scale) {
         int graphheight=250; // height of graph in pixels (just the actual axis-system)
         int graphwidth=380; // height of graph in pixels (just the actual axis-system)
         int translateX=50; // the X coordinate for the top of the graph
         int translateY=10; // the Y coordinate for the top of the graph
         int width=graphwidth+translateX+10; //
         int height=translateY+graphheight+30;
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
         g.scale(scale, scale);
         Stroke defaultStroke=g.getStroke();
         BasicStroke fatStroke = new BasicStroke(2f,BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
         g.setColor(java.awt.Color.WHITE);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(0, 0, width+10, height+10);
         // draw axes and ticks
         g.setColor(Color.BLACK);
         Graph graph=new Graph(g, minScoreValue, maxScoreValue, 0f, 1f, graphwidth, graphheight, translateX, translateY);
@@ -1712,30 +1798,22 @@ public class ROCAnalysis extends Analysis {
             int bheight=y2-y1+1;
             int bwidth=x2-x1+1;
             g.fillRect(x1, y1, bwidth, bheight);
-        }
-    
+        }   
         g.setColor(Color.BLACK);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        // write the image to file
-        OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-        ImageIO.write(image, "png", output);
-        output.close(); 
-        g.dispose();
     }
 
 
-    private void saveHistogramGraphAsImage(File file, boolean normalize, boolean drawSnSpThreshold, boolean drawAccuracyThreshold, double scale) throws IOException {
+    private void paintHistogramGraph(Graphics2D g, boolean normalize, boolean drawSnSpThreshold, boolean drawAccuracyThreshold, double scale) {
         int graphheight=150; // height of graph in pixels (just the actual axis-system)
         int graphwidth=380; // height of graph in pixels (just the actual axis-system)
         int translateX=50; // the X coordinate for the top of the graph
         int translateY=10; // the Y coordinate for the top of the graph
         int width=graphwidth+translateX+10; //
         int height=translateY+graphheight+30;
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
         g.scale(scale, scale);
         g.setColor(java.awt.Color.WHITE);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(0, 0, width+10, height+10);
         double[] usepositiveBins=positiveBins;
         double[] usenegativeBins=negativeBins;
         long positivecount=1;
@@ -1800,28 +1878,21 @@ public class ROCAnalysis extends Analysis {
         }
         g.setColor(Color.BLACK);
         //g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        // write the image to file
-        OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-        ImageIO.write(image, "png", output);
-        output.close(); 
-        g.dispose();
 
     }
 
-    private void saveOtherStatsGraphAsImage(File file, double scale) throws IOException {
+    private void paintOtherStatsGraph(Graphics2D g, double scale) {
         int graphheight=250; // height of graph in pixels (just the actual axis-system)
         int graphwidth=380; // height of graph in pixels (just the actual axis-system)
         int translateX=50; // the X coordinate for the top of the graph
         int translateY=10; // the Y coordinate for the top of the graph
         int width=graphwidth+translateX+10; //
         int height=translateY+graphheight+30;
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
         g.scale(scale, scale);
         Stroke defaultStroke=g.getStroke();
         BasicStroke fatStroke = new BasicStroke(2f,BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
         g.setColor(java.awt.Color.WHITE);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(0, 0, width+10, height+10);
         // draw axes and ticks
         g.setColor(Color.BLACK);
         Graph graph=new Graph(g, minScoreValue, maxScoreValue, 0f, 1f, graphwidth, graphheight, translateX, translateY);
@@ -1867,11 +1938,6 @@ public class ROCAnalysis extends Analysis {
         g.setColor(Color.BLACK);
         //graph.drawAlignedString("Threshold", (int)(translateX+graphwidth/2), translateY+graphheight+30, 0.5, 0.5);
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        // write the image to file
-        OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-        ImageIO.write(image, "png", output);
-        output.close(); 
-        g.dispose();
     }
 
 

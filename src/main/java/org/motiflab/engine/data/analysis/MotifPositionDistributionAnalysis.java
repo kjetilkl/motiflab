@@ -122,6 +122,11 @@ public class MotifPositionDistributionAnalysis extends Analysis {
     private static final int SORTED_INDEX_MOTIF_SEQUENCE_COUNT=2;
     private static final int SORTED_INDEX_STDDEV=3;
     private static final int SORTED_INDEX_KURTOSIS=4;
+    
+    private static final String HISTORGRAMS_IMAGES_NEW="New images";
+    private static final String HISTOGRAMS_EMBED="Embedded images"; 
+    private static final String HISTOGRAMS_NONE="No";     
+    
 
 
     public MotifPositionDistributionAnalysis() {
@@ -151,22 +156,15 @@ public class MotifPositionDistributionAnalysis extends Analysis {
         Parameter sortPar = new Parameter("Sort by",String.class,SORT_BY_KURTOSIS, new String[]{SORT_BY_MOTIF,SORT_BY_STDDEV,SORT_BY_KURTOSIS},"Sorting order for the results table",false,false);
         Parameter logos   = new Parameter("Logos",String.class,getMotifLogoDefaultOption(dataformat), getMotifLogoOptions(dataformat),"Include motif sequence logos in the output",false,false);
         Parameter histPar = new Parameter("Histograms",Boolean.class,Boolean.TRUE, new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Include histograms in the output. Note that the histograms must have been computed when the analysis was executed in order for them to be output.",false,false);
+        Parameter histImg = new Parameter("Histogram images",String.class,HISTOGRAMS_NONE, new String[]{HISTORGRAMS_IMAGES_NEW, HISTOGRAMS_EMBED, HISTOGRAMS_NONE},"Include histograms in the output. Note that the histograms must have been computed when the analysis was executed in order for them to be output.",false,false);        
         Parameter colPar  = new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the motif will be output as the first column",false,false);
         Parameter legend  = new Parameter("Legend",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a header with a title and analysis details will be included at the top of the Excel sheet.",false,false);       
-        if (dataformat.equals(HTML)) return new Parameter[]{incPar,sortPar,logos,histPar,colPar};
+        if (dataformat.equals(HTML)) return new Parameter[]{incPar,sortPar,logos,histImg,colPar};
         if (dataformat.equals(EXCEL)) return new Parameter[]{incPar,sortPar,logos,histPar,legend};
         if (dataformat.equals(RAWDATA)) return new Parameter[]{incPar,sortPar,logos};       
         return new Parameter[0];
     }
-    
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Color boxes")) return new String[]{HTML};
-//        if (parameter.equals("Histograms")) return new String[]{HTML,EXCEL};
-//        if (parameter.equals("Legend")) return new String[]{EXCEL};
-//        if (parameter.equals("Include") || parameter.equals("Sort by") || parameter.equals("Logos")) return new String[]{HTML,RAWDATA,EXCEL};        
-//        return null;
-//    }      
+        
 
     @Override
     public String[] getResultVariables() {
@@ -315,22 +313,26 @@ public class MotifPositionDistributionAnalysis extends Analysis {
         Color [] basecolors=vizSettings.getBaseColors();
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
         String showSequenceLogosString="";
-        boolean showHistograms=true;
+        String histogramFormat=null;
         boolean showColorBoxes=false;
         MotifCollection include=null;
         if (settings!=null) {
-          try {
-             Parameter[] defaults=getOutputParameters(format);
-             sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
-             showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
-             showHistograms=(Boolean)settings.getResolvedParameter("Histograms",defaults,engine);
-             showColorBoxes=(Boolean)settings.getResolvedParameter("Color boxes",defaults,engine); 
-             include=(MotifCollection)settings.getResolvedParameter("Include",defaults,engine);             
+            try {
+                Parameter[] defaults=getOutputParameters(format);
+                sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
+                showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
+                showColorBoxes=(Boolean)settings.getResolvedParameter("Color boxes",defaults,engine); 
+                include=(MotifCollection)settings.getResolvedParameter("Include",defaults,engine);  
+                histogramFormat=(String)settings.getResolvedParameter("Histogram images",defaults,engine);  
+                engine.logMessage("Histogram images="+histogramFormat);
+                if (histogramFormat==null || histogramFormat.equalsIgnoreCase("No")) histogramFormat=null;
+                else if (histogramFormat.toLowerCase().startsWith("embed")) histogramFormat="embed";
+                else histogramFormat="png";                             
           }
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         }
-        if (histograms==null) showHistograms=false; // we can't output histograms if they are not computed
+        if (histograms==null) histogramFormat=null; // we can't output histograms if they are not computed
         boolean showSequenceLogos = includeLogosInOutput(showSequenceLogosString);
 
         ArrayList<Object[]> resultList=assembleList(sortorder, include);
@@ -351,7 +353,7 @@ public class MotifPositionDistributionAnalysis extends Analysis {
         outputobject.append("\n</div>\n<br>\n",HTML);
         outputobject.append("<table class=\"sortable\">\n",HTML);
         String logoheader=(showSequenceLogos)?"<th class=\"sorttable_nosort\">Logo</th>":"";
-        String histogramheader=(showHistograms)?"<th class=\"sorttable_nosort\">Histogram</th>":"";
+        String histogramheader=(histogramFormat!=null)?"<th class=\"sorttable_nosort\">Histogram</th>":"";
         outputobject.append("<tr>",HTML);
         if (showColorBoxes) outputobject.append("<th>&nbsp;</th>",HTML);               
         outputobject.append("<th>ID</th><th>Name</th><th class=\"sorttable_ip\">Class</th><th>Total</th><th>Sequences</th><th class=\"sorttable_numeric\">%</th><th>Std.dev.</th><th>Kurtosis</th>"+histogramheader+logoheader+"</tr>",HTML);
@@ -385,10 +387,10 @@ public class MotifPositionDistributionAnalysis extends Analysis {
             outputobject.append("<td>"+escapeHTML(motifpresentationname)+"</td>",HTML);
             outputobject.append("<td"+((motifclassname!=null)?(" title=\""+motifclassname+"\""):"")+">"+escapeHTML(motifclass)+"</td>",HTML);
             outputobject.append("<td class=\"num\">"+totalcount+"</td><td class=\"num\">"+seqcount+"</td><td class=\"num\">"+(int)((double)seqcount*100.0/(double)numberOfSequences)+"%</td><td class=\"num\">"+Graph.formatNumber(stddev,false)+"</td><td class=\"num\">"+Graph.formatNumber(kurtosis,false)+"</td>",HTML);
-            if (showHistograms) {
+            if (histogramFormat!=null) {
                outputobject.append("<td>",HTML);
                double[] histogram=histograms.get(motifname);
-               histogramrenderer.outputHistogramToHTML(outputobject, histogram, engine);
+               histogramrenderer.outputHistogramToHTML(outputobject, histogramFormat, histogram, engine);
                outputobject.append("</td>",HTML);
             }
             if (showSequenceLogos) {
@@ -425,17 +427,17 @@ public class MotifPositionDistributionAnalysis extends Analysis {
         MotifLogo sequencelogo=new MotifLogo(basecolors,sequencelogoSize);
         String showSequenceLogosString="";
         boolean includeLegend=false;
-        boolean showHistograms=false;
+        Boolean showHistograms=false;
         int logoheight=19;
         MotifCollection include=null;
         if (settings!=null) {
-          try {
-             Parameter[] defaults=getOutputParameters(format);
-             sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
-             showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
-             includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine); 
-             showHistograms=(Boolean)settings.getResolvedParameter("Histograms",defaults,engine);             
-             include=(MotifCollection)settings.getResolvedParameter("Include",defaults,engine);             
+            try {
+                Parameter[] defaults=getOutputParameters(format);
+                sortorder=(String)settings.getResolvedParameter("Sort by",defaults,engine);
+                showSequenceLogosString=(String)settings.getResolvedParameter("Logos",defaults,engine);
+                includeLegend=(Boolean)settings.getResolvedParameter("Legend",defaults,engine); 
+                include=(MotifCollection)settings.getResolvedParameter("Include",defaults,engine);               
+                showHistograms=(Boolean)settings.getResolvedParameter("Histograms",defaults,engine); 
           }
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}

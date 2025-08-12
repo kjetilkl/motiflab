@@ -1,14 +1,5 @@
-/*
- 
- 
- */
-
 package org.motiflab.engine.data.analysis;
 
-import de.erichseifert.vectorgraphics2d.EPSGraphics2D;
-import de.erichseifert.vectorgraphics2d.PDFGraphics2D;
-import de.erichseifert.vectorgraphics2d.SVGGraphics2D;
-import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -20,12 +11,9 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
 import org.motiflab.engine.task.ExecutableTask;
 import org.motiflab.engine.ExecutionError;
 import org.motiflab.engine.Graph;
@@ -59,6 +47,7 @@ import org.motiflab.engine.data.RegionDataset;
 import org.motiflab.engine.data.RegionSequenceData;
 import org.motiflab.engine.data.SequenceCollection;
 import org.motiflab.engine.data.SequenceNumericMap;
+import org.motiflab.engine.util.HTMLUtilities;
 
 /**
  *
@@ -114,17 +103,12 @@ public class SingleMotifRegressionAnalysis extends Analysis {
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
     public Parameter[] getOutputParameters(String dataformat) {   
-         Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","gif","svg","pdf","eps"},"The image format to use for the graph",false,false);            
+         Parameter imageformat=new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false);            
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
          if (dataformat.equals(HTML)) return new Parameter[]{imageformat,scalepar};
          return new Parameter[0];
     } 
-    
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Graph scale") || parameter.equals("Image format")) return new String[]{HTML};
-//        return null;
-//    }      
+      
 
     @Override
     public String[] getResultVariables() {
@@ -225,14 +209,7 @@ public class SingleMotifRegressionAnalysis extends Analysis {
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         } 
         double scale=(scalepercent==100)?1.0:(((double)scalepercent)/100.0);
-        File imagefile=outputobject.createDependentFile(engine,imageformat);      
-        Dimension dim=null;
-        try {
-            dim=saveGraphAsImage(imagefile, scale, imageformat, engine.getClient().getVisualizationSettings());
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
-        if (format!=null) format.setProgress(50);
+        if (format!=null) format.setProgress(20);
         engine.createHTMLheader("Single Motif Regression Analysis", null, null, false, true, true, outputobject);
         outputobject.append("<div align=\"center\">\n",HTML);
         outputobject.append("<h2 class=\"headline\">Single Motif Regression Analysis</h2>\n",HTML);
@@ -244,16 +221,12 @@ public class SingleMotifRegressionAnalysis extends Analysis {
         outputobject.append("<br />\n",HTML);
         if (ignoreMissing) outputobject.append("Only sequences containing hits for the motif were included in the regression analysis<br />\n",HTML);
         outputobject.append("</div>\n",HTML);
+             
+        File imagefile=(imageformat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageformat); 
+        String imageTag = getImageTag(imagefile,imageformat,scale, engine.getClient().getVisualizationSettings());
+        outputobject.append(imageTag,HTML);
         
-        if (imageformat.equals("pdf")) outputobject.append("<object type=\"application/pdf\" data=\"file:///"+imagefile.getAbsolutePath()+"\"></object>",HTML);
-        else {
-            outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\"",HTML);
-            if (dim!=null) {
-                outputobject.append(" width="+(int)Math.ceil(dim.width*scale)+" height="+(int)Math.ceil(dim.height*scale),HTML);
-            }                    
-            outputobject.append(" />\n",HTML);  
-        }        
-        
+        if (format!=null) format.setProgress(70);        
         outputobject.append("<br />\n<br />\n<table>\n<tr>",HTML);
             outputobject.append("<th><i>&alpha;</i></th>",HTML);
             outputobject.append("<th><i>&beta;</i></th>",HTML);
@@ -326,7 +299,7 @@ public class SingleMotifRegressionAnalysis extends Analysis {
         return Graph.formatNumber(number, false);
     }    
     
-    private Dimension saveGraphAsImage(File file, double scale, String imageformat, VisualizationSettings settings) throws IOException {
+    private String getImageTag(File file, String imageformat, double scale, VisualizationSettings settings) {
         double[] ranges = getAxisRanges();
         double minX = ranges[0];
         double maxX = ranges[1];
@@ -355,38 +328,12 @@ public class SingleMotifRegressionAnalysis extends Analysis {
         }
         int translateX=tickswidth+fontheight+16; // make room for ticks and vertical label
         int width=graphwidth+translateX+20;
-        int height=graphheight+translateY+(2*fontheight)+10; // image height
-        if (imageformat.equals("png") || imageformat.equals("gif")) {
-            BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
-            Graphics2D g=image.createGraphics();
-            paintGraphImage(g, scale, width, height, minX, maxX, minY, maxY, graphwidth, graphheight, translateX, translateY, settings);  
-            // write the image to file
-            if (file!=null) {
-                OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-                ImageIO.write(image, imageformat, output);
-                output.close(); 
-            }
-            g.dispose();
-            return new Dimension(width,height); 
-        } else {// vector format   
-            VectorGraphics2D g=null;
-            String filename=file.getName();
-                 if (filename.endsWith(".svg")) g = new SVGGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-            else if (filename.endsWith(".pdf")) g = new PDFGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-            else if (filename.endsWith(".eps")) g = new EPSGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-            g.setClip(0, 0, (int)Math.ceil(width*scale),(int)Math.ceil(height*scale));
-            paintGraphImage(g, scale, width, height, minX, maxX, minY, maxY, graphwidth, graphheight, translateX, translateY, settings);                                 
-            FileOutputStream fileStream = new FileOutputStream(file);
-            try {
-                fileStream.write(g.getBytes());
-            } finally {
-                fileStream.close();
-            } 
-            g.dispose();
-            return new Dimension(width,height); 
-        }            
-        
-    } 
+        int height=graphheight+translateY+(2*fontheight)+10; // image height;
+        // Create the image, write it to file and return an HTML img tag for it
+        HTMLUtilities.ImagePainter painter = (g) -> paintGraphImage(g, scale, width, height, minX, maxX, minY, maxY, graphwidth, graphheight, translateX, translateY, settings);
+        return HTMLUtilities.getImageTag(painter, file, imageformat, height, width, scale);         
+    }       
+    
     
     private double[] getAxisRanges() {
         double maxX=-Double.MAX_VALUE;

@@ -1717,6 +1717,20 @@
       </DataSource>
    </DataTrack>
    <DataTrack description="Annotated CpG-islands" name="CpG-islands" source="UCSC Genome Browser" type="region">
+      <DataSource build="hg38" organism="9606">
+         <Protocol type="GET">
+            <URL>https://genome.ucsc.edu/cgi-bin/hgTables</URL>
+            <Parameter>clade=mammal&amp;org=Human&amp;db=hg38&amp;hgta_group=regulation&amp;hgta_track=cpgIslandExt&amp;hgta_table=cpgIslandExt&amp;hgta_regionType=range&amp;hgta_outputType=gff&amp;hgta_doTopSubmit=1&amp;position=chr$CHROMOSOME:$START-$END</Parameter>
+         </Protocol>
+         <dataformat name="GTF"/>
+      </DataSource>       
+      <DataSource build="hg19" organism="9606">
+         <Protocol type="GET">
+            <URL>https://genome.ucsc.edu/cgi-bin/hgTables</URL>
+            <Parameter>clade=mammal&amp;org=Human&amp;db=hg19&amp;hgta_group=regulation&amp;hgta_track=cpgIslandExt&amp;hgta_table=cpgIslandExt&amp;hgta_regionType=range&amp;hgta_outputType=gff&amp;hgta_doTopSubmit=1&amp;position=chr$CHROMOSOME:$START-$END</Parameter>
+         </Protocol>
+         <dataformat name="GTF"/>
+      </DataSource>       
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
             <URL>http://tare.medisin.ntnu.no/motiflab/getData.cgi</URL>
@@ -1730,6 +1744,20 @@
             <Feature>cpgIslandExt</Feature>
          </Protocol>
       </DataSource>
+      <DataSource build="mm39" organism="10090">
+         <Protocol type="GET">
+            <URL>https://genome.ucsc.edu/cgi-bin/hgTables</URL>
+            <Parameter>clade=mammal&amp;org=Mouse&amp;db=mm39&amp;hgta_group=regulation&amp;hgta_track=cpgIslandExt&amp;hgta_table=cpgIslandExt&amp;hgta_regionType=range&amp;hgta_outputType=gff&amp;hgta_doTopSubmit=1&amp;position=chr$CHROMOSOME:$START-$END</Parameter>
+         </Protocol>
+         <dataformat name="GTF"/>
+      </DataSource>      
+      <DataSource build="mm10" organism="10090">
+         <Protocol type="GET">
+            <URL>https://genome.ucsc.edu/cgi-bin/hgTables</URL>
+            <Parameter>clade=mammal&amp;org=Mouse&amp;db=mm10&amp;hgta_group=regulation&amp;hgta_track=cpgIslandExt&amp;hgta_table=cpgIslandExt&amp;hgta_regionType=range&amp;hgta_outputType=gff&amp;hgta_doTopSubmit=1&amp;position=chr$CHROMOSOME:$START-$END</Parameter>
+         </Protocol>
+         <dataformat name="GTF"/>
+      </DataSource>      
       <DataSource build="mm9" organism="10090">
          <Protocol type="GET">
             <URL>https://genome.ucsc.edu/cgi-bin/hgTables</URL>
@@ -1776,13 +1804,6 @@
          <Protocol type="GET">
             <URL>https://genome.ucsc.edu/cgi-bin/hgTables</URL>
             <Parameter>clade=vertebrate&amp;org=Chicken&amp;db=galGal3&amp;hgta_group=regulation&amp;hgta_track=cpgIslandExt&amp;hgta_table=cpgIslandExt&amp;hgta_regionType=range&amp;hgta_outputType=gff&amp;hgta_doTopSubmit=1&amp;position=chr$CHROMOSOME:$START-$END</Parameter>
-         </Protocol>
-         <dataformat name="GTF"/>
-      </DataSource>
-      <DataSource build="hg19" organism="9606">
-         <Protocol type="GET">
-            <URL>https://genome.ucsc.edu/cgi-bin/hgTables</URL>
-            <Parameter>clade=mammal&amp;org=Human&amp;db=hg19&amp;hgta_group=regulation&amp;hgta_track=cpgIslandExt&amp;hgta_table=cpgIslandExt&amp;hgta_regionType=range&amp;hgta_outputType=gff&amp;hgta_doTopSubmit=1&amp;position=chr$CHROMOSOME:$START-$END</Parameter>
          </Protocol>
          <dataformat name="GTF"/>
       </DataSource>

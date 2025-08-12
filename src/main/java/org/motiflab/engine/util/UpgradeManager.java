@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
@@ -14,6 +15,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -21,9 +23,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import org.motiflab.engine.ExecutionError;
 import org.motiflab.engine.GeneIDResolver;
 import org.motiflab.engine.MotifLabClient;
 import org.motiflab.engine.MotifLabEngine;
+import org.motiflab.engine.Plugin;
 import org.motiflab.engine.SystemError;
 import org.motiflab.engine.data.Organism;
 import org.motiflab.engine.datasource.DataConfiguration;
@@ -43,8 +47,8 @@ public class UpgradeManager {
     // The migration number of the currently installed files can be found in the "status file" (first column of first row)
     private static final int MIGRATION_NUMBER=2; 
     
-    private static final int DUPLICATE_SOURCES_ADD_AS_PREFERRED=0;
-    private static final int DUPLICATE_SOURCES_ADD_AS_MIRRORS=1;
+    private static final int DUPLICATE_SOURCES_ADD_AS_MIRRORS=0;    
+    private static final int DUPLICATE_SOURCES_ADD_AS_PREFERRED=1;
     private static final int DUPLICATE_SOURCES_REMOVE_OLD=2;
     private static final int DUPLICATE_SOURCES_REPLACE_ALL_SOURCES=3;
     private static final int REPLACE_EXISTING_TRACKS=4;    
@@ -209,8 +213,8 @@ public class UpgradeManager {
                                   + "Unless you have made changes to this configuration yourself, it is recommended to replace the existing configuration with the new version.\n"
                                   + "If you have made your own changes, you can try to merge these with the new updates.";        
         int[] datatracksSelection = client.selectOption(datatracksMessage, 
-                new String[]{"Add new sources as preferred for existing data tracks",
-                             "Add new sources as mirrors for existing data tracks",
+                new String[]{"Add new sources as mirrors for existing data tracks",
+                             "Add new sources as preferred for existing data tracks",
                              "Replace sources for same genome build for existing data tracks",
                              "Replace all sources for existing tracks (delete all old sources)",
                              "Replace all configurations for existing tracks",
@@ -221,9 +225,30 @@ public class UpgradeManager {
         if (datatracksSelection==null || datatracksSelection.length==0 || datatracksSelection[0]==6) engine.logMessage("Skipping update of Data Tracks configuration.");
         else updateDataTracksConfiguration(datatracksSelection[0]); // 
         
-        // 
-        replaceMotifCollection();    
-        updatePlugins();                    
+        // ----- Motif and Module collections -----
+        replaceMotifCollection(); 
+        
+        // ----- Plugins -----
+        String pluginsDirectory=engine.getPluginsDirectory();
+        File pluginDir = new File(pluginsDirectory);
+        boolean pluginsExist=false;
+        if (pluginDir.isDirectory()) {
+            Path dir = Paths.get(pluginsDirectory);
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
+                pluginsExist = stream.iterator().hasNext();
+            } catch (IOException e) {}           
+        }
+        if (pluginsExist) {
+            String pluginsMessage =  "Some previously installed plugins may not be compatible with the new version of MotifLab.\n"
+                                   + "Would you like to download and install upgrades from the MotifLab website if possible?";
+            int[] pluginsSelection = client.selectOption(pluginsMessage, new String[]{"Yes","No"}, false);  
+            if (pluginsSelection!=null && pluginsSelection.length>0 && pluginsSelection[0]==0) { // YES
+                updatePlugins(MIGRATION_NUMBER);
+            } else { // NO
+                engine.logMessage("Skipping update of plugins");
+            }  
+        }
+                    
     }
 
     /**
@@ -376,7 +401,6 @@ public class UpgradeManager {
             if (parentDir!=null && !parentDir.exists()) parentDir.mkdirs();
             program.saveConfigurationToFile(externalfile);
         } catch (Exception e) {
-            // e.printStackTrace(System.err);
             if (e instanceof SystemError) throw (SystemError)e;
             else throw new SystemError(e.getClass().getSimpleName()+":"+e.getMessage());
         }
@@ -399,7 +423,6 @@ public class UpgradeManager {
                 count++;
             } catch (Exception e) {
                 engine.logMessage("Unable to install bundled motif collection '"+filename+"' => "+e.getClass().getSimpleName()+":"+e.getMessage());
-                // e.printStackTrace(System.err);
             }
         }
     }    
@@ -448,7 +471,7 @@ public class UpgradeManager {
             InputStream stream=this.getClass().getResourceAsStream("/org/motiflab/engine/resources/"+filename);              
             engine.installConfigFileFromStream(filename,stream);
         } catch (Exception e) {
-           engine.logMessage("Unable to update "+description+" => "+e.getMessage());
+           engine.logMessage("Unable to update "+description+" -> "+e.getMessage());
         }        
     }
     
@@ -476,7 +499,6 @@ public class UpgradeManager {
         DataConfiguration dataconfiguration=(DataConfiguration)engine.getDataLoader().getCurrentDataConfiguration().clone();       
         HashMap<String,DataTrack> availableTracks=dataconfiguration.getAvailableTracks(); // direct reference to the HashMap in the DataConfiguration 
         HashMap<String,Server> availableServers=dataconfiguration.getServers();  // direct reference to the HashMap in the DataConfiguration
-        System.err.println("Existing configuration contains "+availableTracks.size()+" Data tracks and "+availableServers.size()+" servers");
         DataConfiguration bundledConfig=new DataConfiguration();
         try {
             InputStream inputstream=UpgradeManager.class.getResourceAsStream("/org/motiflab/engine/datasource/DataTracks.xml");
@@ -487,7 +509,6 @@ public class UpgradeManager {
         }
         HashMap<String,DataTrack> newDatatracks=bundledConfig.getAvailableTracks();
         HashMap<String,Server> newServers=bundledConfig.getServers();
-        System.err.println("Read "+newDatatracks.size()+" Data tracks and "+newServers.size()+" server configs from bundled resource file");
   
         if (mode==REPLACE_WHOLE_DATATRACK_CONFIG) {
             availableTracks.clear();
@@ -703,8 +724,118 @@ public class UpgradeManager {
         
     }  
     
-    private void updatePlugins() {
+    private void updatePlugins(int migrationNumber) {
+        String updatedPluginsRepository=engine.getPluginsRepositoryURL()+"v"+migrationNumber+"/";
+        File pluginsDirectory = new File(engine.getPluginsDirectory());
+        File[] pluginDirectories = pluginsDirectory.listFiles();
+        for (File pluginDir:pluginDirectories) {
+            HashMap<String, Object> metadata=null;
+            String pluginName=null;
+            try {
+                metadata=engine.readPluginMetaDataFromDirectory(pluginDir); 
+                pluginName=(String)metadata.get("name");
+            } catch (Exception e) {
+                pluginName=null; 
+            }
+            if (pluginName==null) continue;
+            Plugin plugin = engine.getPlugin(pluginName);
+            if (plugin==null) { // this plugin has been installed before but it could not be initialized by the engine now. Perhaps it needs an upgrade
+                try {
+                    updatePlugin(pluginName, updatedPluginsRepository);
+                    engine.logMessage("Updated plugin: "+pluginName);
+                } catch (IOException ioex) {
+                    engine.logMessage("Error while downloading updated plugin file for: "+pluginName+" -> "+ioex.toString());
+                } catch (Exception ex) {
+                    engine.logMessage("ERROR: Unable to update plugin: '"+pluginName+"' -> "+ex.toString());
+                }
+            }          
+        }       
+    }
+    
+    private void updatePlugin(String pluginName, String pluginsRepository) throws Exception {
+        String escapedName=pluginName.replace(" ", "+");
+        String api=pluginsRepository+"resolve/"+escapedName;
+        String upgradedPluginURL="";
+        try {
+            System.err.println("API: "+api);            
+            URL url=new URL(api);
+            System.err.println("API: "+url+" => "+upgradedPluginURL);            
+            upgradedPluginURL=MotifLabEngine.getPage(url);
+        } 
+        catch (MalformedURLException mfu) {
+            System.err.println("WARNING MALFORMED URL: "+mfu.toString());
+            return;
+        } 
         
-    }     
+        if (upgradedPluginURL.isEmpty()) throw new ExecutionError("Upgrade not found");
+        File pluginZIPfile=engine.createTempFile();                           
+        FileUtilities.copyLargeURLToFile(new URL(upgradedPluginURL), pluginZIPfile, null, null);
+        installPluginFromZip(pluginZIPfile); 
+    }
+    
+   /** Installs the plugin from the given zipFile into the plugin directory 
+     *  into a subdirectory with a name based on the "name" property of the plugin
+     *  (with non-word characters replaced with underscores)
+     *  The zipFile should be a regular file (not a DataRepositoryFile)
+     */
+    private void installPluginFromZip(File zipFile) throws ExecutionError {
+        HashMap<String,Object> metadata=null;
+        String pluginName=null;
+        try {
+            metadata=engine.readPluginMetaDataFromZIP(zipFile);
+            pluginName=metadata.get("name").toString();
+        } catch (SystemError e) {
+            throw new ExecutionError(e.getMessage());
+        }     
+        if (metadata.containsKey("motiflab_version")) {
+            String requiredVersion=metadata.get("motiflab_version").toString();
+            if (MotifLabEngine.compareVersions(requiredVersion)<0) throw new ExecutionError("This plugin requires version "+requiredVersion+" or higher of MotifLab");
+        }   
+        if (metadata.containsKey("requires")) {
+            String requires=metadata.get("requires").toString();
+            try {
+                engine.checkPluginRequirements(requires);
+            } catch (SystemError e) {
+                throw new ExecutionError(e.getMessage());
+            }
+        }      
+        String dirName=pluginName.replaceAll("\\W", "_");
+        File pluginDir=new File(engine.getPluginsDirectory(), dirName);
+        if (!pluginDir.exists()) {
+            throw new ExecutionError("Plugin directory does not match");
+        }    
+        try {
+            engine.unzipFile(zipFile, pluginDir);
+        } catch (IOException io) {
+            throw new ExecutionError("Unable to extract plugin ZIP-file");
+        }    
+        Plugin plugin=null;
+        try {
+            metadata=engine.readPluginMetaDataFromDirectory(pluginDir);
+            plugin=engine.instantiatePluginFromDirectory(pluginDir); // this loads the classes and instantiates the plugin object
+            String configuredName=(String)metadata.get("name");
+            String nameInPlugin=plugin.getPluginName();
+            if (!nameInPlugin.equals(configuredName)) throw new SystemError("Name returned by plugin itself ["+nameInPlugin+"] does not match name used in configuration ["+configuredName+"]!");          
+        } catch (SystemError se) {
+            plugin=null;
+            throw new ExecutionError(se.getMessage(), se);
+        }    
+        // now initialize the plugin and register it
+        try {
+            plugin.initializePlugin(engine);
+        } catch (SystemError se) { // A critical initialization error has occurred. The plugin should not be registered with the engine, so we will delete the plugin files
+            plugin=null;
+            throw new ExecutionError(se.getMessage(), se);
+        } catch (ExecutionError e) {
+            throw e;
+        }     
+        engine.registerPlugin(plugin, metadata);
+        try {
+            plugin.initializePluginFromClient(engine.getClient());
+        } catch (Exception e) {
+            throw new ExecutionError(e.getMessage(),e);
+        }
+    }
+   
     
 }

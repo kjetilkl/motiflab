@@ -3,27 +3,19 @@
 
 package org.motiflab.engine.data.analysis;
 
-import de.erichseifert.vectorgraphics2d.EPSGraphics2D;
-import de.erichseifert.vectorgraphics2d.PDFGraphics2D;
-import de.erichseifert.vectorgraphics2d.SVGGraphics2D;
-import de.erichseifert.vectorgraphics2d.VectorGraphics2D;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
@@ -58,6 +50,7 @@ import org.motiflab.engine.data.DataPartition;
 import org.motiflab.engine.data.NumericMap;
 import org.motiflab.engine.data.NumericVariable;
 import org.motiflab.engine.data.OutputData;
+import org.motiflab.engine.util.HTMLUtilities;
 
 
 /**
@@ -105,7 +98,7 @@ public class NumericMapDistributionAnalysis extends Analysis {
     @Override
     public Parameter[] getOutputParameters(String dataformat) {        
          Parameter boxplotpar=new Parameter("Box plot",String.class, BOTH,new String[]{NONE,MEDIAN_QUARTILES,MEAN_STD,BOTH},"Which statistics to show using box plots",false,false);        
-         Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","svg","pdf","eps"},"The image format to use for the graph",false,false);        
+         Parameter imageformat=new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false);        
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
          if (dataformat.equals(HTML)) return new Parameter[]{boxplotpar,imageformat,scalepar};
          else return new Parameter[0];
@@ -268,14 +261,7 @@ public class NumericMapDistributionAnalysis extends Analysis {
                 catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
             } 
             double scale=(scalepercent==100)?1.0:(((double)scalepercent)/100.0);
-            if (clusterColors==null) clusterColors=assignClusterColors(clusterNames, engine.getClient().getVisualizationSettings()); // assign new colors
-            File imagefile=outputobject.createDependentFile(engine,imageFormat);            
-            Dimension dim=null;
-            try {
-                dim=saveGraphAsImage(imagefile,plots,scale, engine.getClient().getVisualizationSettings());
-            } catch (IOException e) {
-                engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-            }
+            if (clusterColors==null) clusterColors=assignClusterColors(clusterNames, engine.getClient().getVisualizationSettings()); // assign new colors  
             if (format!=null) format.setProgress(50);
             outputobject.append("<br /><br />\n<table class=\"sortable\">\n",HTML);
             if (clusterNames!=null && !clusterNames.isEmpty()) {
@@ -298,12 +284,9 @@ public class NumericMapDistributionAnalysis extends Analysis {
             outputobject.append("</table>\n",HTML);
             outputobject.append("<br /><br /><br /><br />",HTML);
 
-            if (imageFormat.equals("pdf")) outputobject.append("<object type=\"application/pdf\" data=\"file:///"+imagefile.getAbsolutePath()+"\"></object>",HTML);
-            else {
-                outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\"",HTML);
-                if (dim!=null) outputobject.append(" width="+(int)Math.ceil(dim.width*scale)+" height="+(int)Math.ceil(dim.height*scale),HTML);                          
-                outputobject.append(" />\n",HTML);
-            }
+            File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+            String imageTag = getImageTag(imagefile,imageFormat,plots,scale, engine.getClient().getVisualizationSettings());
+            outputobject.append(imageTag,HTML);
         }
         outputobject.append("</div>\n",HTML);
         outputobject.append("</body>\n</html>\n",HTML);
@@ -677,18 +660,13 @@ public class NumericMapDistributionAnalysis extends Analysis {
         return new Object[]{clusterResults,clusterbins};
     }
 
-    
-   /** Creates a histogram chart based on the current data and saves it to file
-    * @param file A file to save the image to
-    * @param doNormalize If TRUE values will be normalized within each group 'inside' or 'outside'
-    */
-    private Dimension saveGraphAsImage(File file, int plots, double scale, VisualizationSettings settings) throws IOException {
+    private String getImageTag(File file, String imageformat, final int plots, final double scale, VisualizationSettings settings) {
         String[] cNames=null;
         int legendWidth=0;
         int legendHeight=0;
         int entries=1;
-        Font legendFont=settings.getSystemFont("graph.legendFont");
-        Font tickFont=settings.getSystemFont("graph.tickFont");
+        final Font legendFont=settings.getSystemFont("graph.legendFont");
+        final Font tickFont=settings.getSystemFont("graph.tickFont");
         
         if (clusterNames!=null && !clusterNames.isEmpty()) {
             cNames=new String[clusterNames.size()];
@@ -697,47 +675,29 @@ public class NumericMapDistributionAnalysis extends Analysis {
             legendWidth=dim.width;
             legendHeight=dim.height;
             entries=clusterNames.size();
-        }    
+        } 
+        final String[] finalClusterNames = cNames;
+        final int finalLegendWidth = legendWidth;
+        final int finalEntries = entries;
+        
         Dimension tickDimension=Graph.getDimension("100.0%", tickFont, null);
-        int translateX=tickDimension.width+5+10;
-        int graphwidth=500;
-        int marginLegendLeft=30;
-        int marginLegendRight=5;
-        int width=translateX+graphwidth+marginLegendLeft+legendWidth+marginLegendRight;
-        int graphheight=300; // height of graph in pixels (just the histogram);
-        int bottomSpace=10+10+tickDimension.height; // Space beneath the X-axis (should have room for tickmarks)
+        final int translateX=tickDimension.width+5+10;
+        final int graphwidth=500;
+        final int marginLegendLeft=30;
+        final int marginLegendRight=5;
+        final int width=translateX+graphwidth+marginLegendLeft+legendWidth+marginLegendRight;
+        final int graphheight=300; // height of graph in pixels (just the histogram);
+        final int bottomSpace=10+10+tickDimension.height; // Space beneath the X-axis (should have room for tickmarks)
         
         int height=graphheight+bottomSpace+((plots==PLOT_NONE)?0:(entries*25)); // image height
         if (height<legendHeight) height=legendHeight;
+        final int finalHeight = height;
         
         // write the image to file
-        if (file!=null) {
-            if (!file.getName().endsWith(".png")) {
-                    VectorGraphics2D g=null;
-                    String filename=file.getName();
-                         if (filename.endsWith(".svg")) g = new SVGGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                    else if (filename.endsWith(".pdf")) g = new PDFGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                    else if (filename.endsWith(".eps")) g = new EPSGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                    g.setClip(0, 0, (int)Math.ceil(width*scale),(int)Math.ceil(height*scale));
-                    paintImage(g, width, height, scale, plots, entries, graphwidth, graphheight, legendWidth, cNames, legendFont, tickFont, translateX, marginLegendLeft);                             
-                    FileOutputStream fileStream = new FileOutputStream(file);
-                    try {
-                        fileStream.write(g.getBytes());
-                    } finally {
-                        fileStream.close();
-                    }                                 
-            } else {
-                BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
-                Graphics2D g=image.createGraphics();  
-                paintImage(g, width, height, scale, plots, entries, graphwidth, graphheight, legendWidth, cNames, legendFont, tickFont, translateX, marginLegendLeft);
-                OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-                ImageIO.write(image, "png", output);
-                output.close(); 
-                g.dispose();
-            }          
-        }
-        return new Dimension(width,height);
-    }
+        HTMLUtilities.ImagePainter painter = (g) -> paintImage(g, width, finalHeight, scale, plots, finalEntries, graphwidth, graphheight, finalLegendWidth, finalClusterNames, legendFont, tickFont, translateX, marginLegendLeft);                             
+        return HTMLUtilities.getImageTag(painter, file, imageformat, height, width, scale);              
+    }    
+    
     
     
     /** Draws the graph into a Graphics object */

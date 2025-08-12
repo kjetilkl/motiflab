@@ -1701,7 +1701,8 @@ public class Graph {
         Graphics2D g=image.createGraphics();
         FontMetrics metrics=(font!=null)?g.getFontMetrics(font):g.getFontMetrics();
         int max=0;
-        for (String s:list) {
+        for (String s:list) { 
+            if (s==null || s.isEmpty()) continue;
             int stringlength=metrics.stringWidth(s);
             if (stringlength>max) max=stringlength;
         }

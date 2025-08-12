@@ -1,8 +1,3 @@
-/*
- 
- 
- */
-
 package org.motiflab.engine.data.analysis;
 
 import java.awt.Graphics;
@@ -23,14 +18,11 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -72,6 +64,7 @@ import org.motiflab.engine.data.SequenceCollection;
 import org.motiflab.engine.data.SequenceGroup;
 import org.motiflab.engine.data.SequenceNumericMap;
 import org.motiflab.engine.data.SequencePartition;
+import org.motiflab.engine.util.HTMLUtilities;
 
 /**
  *
@@ -125,21 +118,14 @@ public final class GCcontentAnalysis extends Analysis {
         Parameter groupsPar = new Parameter("Group by clusters",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Group sequences in partition-clusters together (affects sorting order)",false,false);
         Parameter summaryPar = new Parameter("Show only groups summary",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.FALSE,Boolean.TRUE},"Show only the summary statistics for each group and not GC-content for individual sequences",false,false);
         Parameter boxplotPar = new Parameter("Box plot",String.class, BOTH,new String[]{MEDIAN_QUARTILES,MEAN_STD,BOTH},"Which statistics to show using box plots",false,false);
+        Parameter imageformat=new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false);                                      
         Parameter scalePar = new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-        if (dataformat.equals(HTML)) return new Parameter[]{sortPar,groupsPar,summaryPar,boxplotPar,scalePar};
+        if (dataformat.equals(HTML)) return new Parameter[]{sortPar,groupsPar,summaryPar,boxplotPar,imageformat,scalePar};
         if (dataformat.equals(EXCEL)) return new Parameter[]{sortPar,summaryPar};
         if (dataformat.equals(RAWDATA)) return new Parameter[]{sortPar,groupsPar,summaryPar};
         return new Parameter[0];        
     }
-    
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("Graph scale") || parameter.equals("Box plot")) return new String[]{"HTML"};  
-//        if (parameter.equals("Group by clusters")) return new String[]{"HTML","RawData"};            
-//        if (parameter.equals("Show only groups summary") || parameter.equals("Sort by")) return new String[]{"HTML","RawData","Excel"};       
-//        return null;
-//    }     
-    
+ 
     
     @Override
     public String getAnalysisName() {
@@ -241,6 +227,7 @@ public final class GCcontentAnalysis extends Analysis {
         int scalepercent=100;
         int plots=PLOT_BOTH;
         String sortOrderString="Sequence name";
+        String imageFormat="png";        
         if (settings!=null) {
           try {
              Parameter[] defaults=getOutputParameters(format);
@@ -253,6 +240,7 @@ public final class GCcontentAnalysis extends Analysis {
              else if (plotString.equals(MEAN_STD)) plots=PLOT_MEAN_STD;
              else if (plotString.equals(BOTH)) plots=PLOT_BOTH;
              scalepercent=(Integer)settings.getResolvedParameter("Graph scale",defaults,engine);
+             imageFormat=(String)settings.getResolvedParameter("Image format",defaults,engine);               
           }
           catch (ExecutionError e) {throw e;}
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
@@ -269,10 +257,10 @@ public final class GCcontentAnalysis extends Analysis {
         if (showOnlySummary && sequenceGroups==null) {
             outputobject.append("<br /><br />No sequence groups selected<br />", HTML);
         } else {
-            formatGCgraph(outputobject, engine, vizSettings, sortBy, groupByCluster, showOnlySummary, plots, scale);
+            formatGCgraph(outputobject, imageFormat, engine, vizSettings, sortBy, groupByCluster, showOnlySummary, plots, scale);
             outputobject.append("<br /><br />", HTML);
         }
-        if (sequenceGroups!=null) formatGroupsTable(outputobject, engine, vizSettings);
+        if (sequenceGroups!=null) formatGroupsTableHTML(outputobject, engine, vizSettings);
         outputobject.append("<br /><br />", HTML);
         if (sequenceNames.size()<=60) outputobject.append("</center>",HTML); //        
         boolean ascending=true;
@@ -298,45 +286,54 @@ public final class GCcontentAnalysis extends Analysis {
     }
 
     /** Formats GC-graph and table with min/max/average of groups */
-    private void formatGCgraph(OutputData outputobject, MotifLabEngine engine, VisualizationSettings vizSettings, int sortBy, boolean grouping, boolean showOnlySummary, int plots, double scale) {
-        File imagefile=outputobject.createDependentFile(engine,"png");
-        try {
-            createGraphImage(imagefile,engine, vizSettings, sortBy, grouping, showOnlySummary, plots, scale);
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
-        outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\" />",HTML);
+    private void formatGCgraph(OutputData outputobject, String imageFormat, MotifLabEngine engine, VisualizationSettings vizSettings, int sortBy, boolean grouping, boolean showOnlySummary, int plots, double scale) {
+        File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+        String imageTag = getImageTag(imagefile, imageFormat, engine, vizSettings, sortBy, grouping, showOnlySummary, plots, scale);
+        outputobject.append(imageTag,HTML);
     }
 
 
-    private void formatGroupsTable(OutputData outputobject, MotifLabEngine engine, VisualizationSettings vizSettings) {
-            outputobject.append("<table class=\"sortable\">\n", HTML);
-            outputobject.append("<tr><th width=\"90\">Group</th><th width=\"90\">Size</th><th width=\"90\">Min</th><th width=\"90\">Max</th><th width=\"90\">Average</th><th width=\"90\">Std.&nbsp;dev.</th><th width=\"90\">Median</th><th width=\"90\">1st&nbsp;Quartile</th><th width=\"90\">3rd&nbsp;Quartile</th></tr>\n",HTML);
-            if (sequenceGroups instanceof SequenceCollection) {
-                double[] values=getStatistics((SequenceCollection)sequenceGroups);
-                outputobject.append("<tr><td style=\"background-color:#FF8888\">"+((SequenceCollection)sequenceGroups).getName()+"</td><td class=\"num\">"+((SequenceCollection)sequenceGroups).size()+"</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MIN]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MAX]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_AVERAGE]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_STDDEV]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MEDIAN]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_1ST_QUARTILE]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_3RD_QUARTILE]*100)+"%</td></tr>\n",HTML);
-            } else if (sequenceGroups instanceof SequencePartition) {
-                SequencePartition partition=(SequencePartition)sequenceGroups;
-                for (String clusterName:partition.getClusterNames()) {
-                    Color clusterColor=vizSettings.getClusterColor(clusterName); //.brighter();
-                    String colorString=VisualizationSettings.convertColorToHTMLrepresentation(clusterColor);
-                    String clusterNameString;
-                    if (getBrightness(clusterColor)<130) clusterNameString="<font color=\"#FFFFFF\">"+clusterName+"</font>";
-                    else clusterNameString=clusterName;
-                    double[] values=getStatistics(partition.getClusterAsSequenceCollection(clusterName, engine));
-                    outputobject.append("<tr><td style=\"background-color:"+colorString+"\">"+clusterNameString+"</td><td class=\"num\">"+partition.getClusterSize(clusterName)+"</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MIN]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MAX]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_AVERAGE]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_STDDEV]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MEDIAN]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_1ST_QUARTILE]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_3RD_QUARTILE]*100)+"%</td></tr>\n",HTML);
-                }
+    private void formatGroupsTableHTML(OutputData outputobject, MotifLabEngine engine, VisualizationSettings vizSettings) {
+        outputobject.append("<table class=\"sortable\">\n", HTML);
+        outputobject.append("<tr><th width=\"90\">Group</th><th width=\"90\">Size</th><th width=\"90\">Min</th><th width=\"90\">Max</th><th width=\"90\">Average</th><th width=\"90\">Std.&nbsp;dev.</th><th width=\"90\">Median</th><th width=\"90\">1st&nbsp;Quartile</th><th width=\"90\">3rd&nbsp;Quartile</th></tr>\n",HTML);
+        if (sequenceGroups instanceof SequenceCollection) {
+            double[] values=getStatistics((SequenceCollection)sequenceGroups);
+            outputobject.append("<tr><td style=\"background-color:#FF8888\">"+((SequenceCollection)sequenceGroups).getName()+"</td><td class=\"num\">"+((SequenceCollection)sequenceGroups).size()+"</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MIN]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MAX]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_AVERAGE]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_STDDEV]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MEDIAN]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_1ST_QUARTILE]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_3RD_QUARTILE]*100)+"%</td></tr>\n",HTML);
+        } else if (sequenceGroups instanceof SequencePartition) {
+            SequencePartition partition=(SequencePartition)sequenceGroups;
+            for (String clusterName:partition.getClusterNames()) {
+                Color clusterColor=vizSettings.getClusterColor(clusterName); //.brighter();
+                String colorString=VisualizationSettings.convertColorToHTMLrepresentation(clusterColor);
+                String clusterNameString;
+                if (getBrightness(clusterColor)<130) clusterNameString="<font color=\"#FFFFFF\">"+clusterName+"</font>";
+                else clusterNameString=clusterName;
+                double[] values=getStatistics(partition.getClusterAsSequenceCollection(clusterName, engine));
+                outputobject.append("<tr><td style=\"background-color:"+colorString+"\">"+clusterNameString+"</td><td class=\"num\">"+partition.getClusterSize(clusterName)+"</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MIN]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MAX]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_AVERAGE]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_STDDEV]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_MEDIAN]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_1ST_QUARTILE]*100)+"%</td><td class=\"num\">"+decimalformatter.format(values[STATISTIC_3RD_QUARTILE]*100)+"%</td></tr>\n",HTML);
             }
-            outputobject.append("</table>", HTML);
+        }
+        outputobject.append("</table>", HTML);
     }
 
     private void formatGroupsTableRaw(OutputData outputobject, MotifLabEngine engine) {
-            if (sequenceGroups==null) return;
-            outputobject.append("#Group\tSize\tMin\tMax\tAverage\tStd.dev.\tMedian\t1st Quartile\t3rd Quartile\n",RAWDATA);
-            if (sequenceGroups instanceof SequenceCollection) {
-                double[] values=getStatistics((SequenceCollection)sequenceGroups);
-                outputobject.append(((SequenceCollection)sequenceGroups).getName()+"\t",RAWDATA);
-                outputobject.append(((SequenceCollection)sequenceGroups).size()+"\t",RAWDATA);
+        if (sequenceGroups==null) return;
+        outputobject.append("#Group\tSize\tMin\tMax\tAverage\tStd.dev.\tMedian\t1st Quartile\t3rd Quartile\n",RAWDATA);
+        if (sequenceGroups instanceof SequenceCollection) {
+            double[] values=getStatistics((SequenceCollection)sequenceGroups);
+            outputobject.append(((SequenceCollection)sequenceGroups).getName()+"\t",RAWDATA);
+            outputobject.append(((SequenceCollection)sequenceGroups).size()+"\t",RAWDATA);
+            outputobject.append(values[STATISTIC_MIN]+"\t",RAWDATA);
+            outputobject.append(values[STATISTIC_MAX]+"\t",RAWDATA);
+            outputobject.append(values[STATISTIC_AVERAGE]+"\t",RAWDATA);
+            outputobject.append(values[STATISTIC_STDDEV]+"\t",RAWDATA);
+            outputobject.append(values[STATISTIC_MEDIAN]+"\t",RAWDATA);
+            outputobject.append(values[STATISTIC_1ST_QUARTILE]+"\t",RAWDATA);
+            outputobject.append(values[STATISTIC_3RD_QUARTILE]+"\n",RAWDATA);
+         } else if (sequenceGroups instanceof SequencePartition) {
+            SequencePartition partition=(SequencePartition)sequenceGroups;
+            for (String clusterName:partition.getClusterNames()) {
+                double[] values=getStatistics(partition.getClusterAsSequenceCollection(clusterName, engine));
+                outputobject.append(clusterName+"\t",RAWDATA);
+                outputobject.append(partition.getClusterSize(clusterName)+"\t",RAWDATA);
                 outputobject.append(values[STATISTIC_MIN]+"\t",RAWDATA);
                 outputobject.append(values[STATISTIC_MAX]+"\t",RAWDATA);
                 outputobject.append(values[STATISTIC_AVERAGE]+"\t",RAWDATA);
@@ -344,22 +341,9 @@ public final class GCcontentAnalysis extends Analysis {
                 outputobject.append(values[STATISTIC_MEDIAN]+"\t",RAWDATA);
                 outputobject.append(values[STATISTIC_1ST_QUARTILE]+"\t",RAWDATA);
                 outputobject.append(values[STATISTIC_3RD_QUARTILE]+"\n",RAWDATA);
-             } else if (sequenceGroups instanceof SequencePartition) {
-                SequencePartition partition=(SequencePartition)sequenceGroups;
-                for (String clusterName:partition.getClusterNames()) {
-                    double[] values=getStatistics(partition.getClusterAsSequenceCollection(clusterName, engine));
-                    outputobject.append(clusterName+"\t",RAWDATA);
-                    outputobject.append(partition.getClusterSize(clusterName)+"\t",RAWDATA);
-                    outputobject.append(values[STATISTIC_MIN]+"\t",RAWDATA);
-                    outputobject.append(values[STATISTIC_MAX]+"\t",RAWDATA);
-                    outputobject.append(values[STATISTIC_AVERAGE]+"\t",RAWDATA);
-                    outputobject.append(values[STATISTIC_STDDEV]+"\t",RAWDATA);
-                    outputobject.append(values[STATISTIC_MEDIAN]+"\t",RAWDATA);
-                    outputobject.append(values[STATISTIC_1ST_QUARTILE]+"\t",RAWDATA);
-                    outputobject.append(values[STATISTIC_3RD_QUARTILE]+"\n",RAWDATA);
-                }
             }
-            outputobject.append("\n", RAWDATA);
+        }
+        outputobject.append("\n", RAWDATA);
     }
 
     private int getBrightness(Color c) {
@@ -633,11 +617,41 @@ public final class GCcontentAnalysis extends Analysis {
     }    
     
  
-
-   
+    private String getImageTag(File file, String imageformat, MotifLabEngine engine, VisualizationSettings settings, int sortOrder, boolean grouping, boolean showOnlySummary, int boxplot, double scale) {
+        final int graphheight=200; // height of graph in pixels (just the histogram);
+        final int translateX=50; // the X coordinate for the top of the graph
+        final int translateY=30; // the Y coordinate for the top of the graph 
+        final int columnWidth=15;
+        int columns=(showOnlySummary)?0:results.size();
+        if (sequenceGroups!=null) {
+            if (sequenceGroups instanceof SequenceCollection) columns++;
+            else if (sequenceGroups instanceof SequencePartition) {
+                columns+=((SequencePartition)sequenceGroups).getNumberOfClusters();
+            }
+        }
+        final int graphwidth=columns*columnWidth;
+        final int width=graphwidth+translateX+10; //
+        int largestNameSize=findLargestNameSize(showOnlySummary);
+        final int height=translateY+graphheight+largestNameSize+30; 
+        final int finalColumns = columns; 
+        
+        // Create the image, write it to file and return an HTML img tag for it
+        HTMLUtilities.ImagePainter painter = (g) -> paintGraphImage(g, engine, settings, graphwidth, width, graphheight, height, translateX, translateY, finalColumns, columnWidth, sortOrder, grouping, showOnlySummary, boxplot, scale);
+        return HTMLUtilities.getImageTag(painter, file, imageformat, height, width, scale);         
+    }      
     
-  /** Creates a graph based on the current data and saves it to file (if file is not null)*/
-    private BufferedImage createGraphImage(File file, MotifLabEngine engine, VisualizationSettings settings, int sortOrder, boolean grouping, boolean showOnlySummary, int boxplot, double scale) throws IOException {
+    /**
+     * Create an image of the graph to display in a dialog
+     * @param engine
+     * @param settings
+     * @param sortOrder
+     * @param grouping
+     * @param showOnlySummary
+     * @param boxplot
+     * @param scale
+     * @return 
+     */
+    private BufferedImage createGraphImage(MotifLabEngine engine, VisualizationSettings settings, int sortOrder, boolean grouping, boolean showOnlySummary, int boxplot, double scale) {      
         int graphheight=200; // height of graph in pixels (just the histogram);
         int translateX=50; // the X coordinate for the top of the graph
         int translateY=30; // the Y coordinate for the top of the graph 
@@ -652,10 +666,20 @@ public final class GCcontentAnalysis extends Analysis {
         int graphwidth=columns*columnWidth;
         int width=graphwidth+translateX+10; //
         int largestNameSize=findLargestNameSize(showOnlySummary);
-        int height=translateY+graphheight+largestNameSize+30;
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
-        g.scale(scale, scale);
+        int height=translateY+graphheight+largestNameSize+30;       
+        BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g=image.createGraphics();             
+        paintGraphImage(g, engine, settings, graphwidth, width, graphheight, height, translateX, translateY, columns, columnWidth, sortOrder, grouping, showOnlySummary, boxplot, scale);
+        g.dispose();
+        return image;                                      
+    }  
+   
+    
+  /** Creates a graph based on the current data and saves it to file (if file is not null)*/
+    private void paintGraphImage(Graphics2D g, MotifLabEngine engine, VisualizationSettings settings, int graphwidth, int width, int graphheight, int height, 
+                                 int translateX, int translateY, 
+                                 int columns, int columnWidth, int sortOrder, boolean grouping, boolean showOnlySummary, int boxplot, double scale) {
+        g.scale(scale, scale);        
         Stroke defaultStroke=g.getStroke();
         BasicStroke fatStroke = new BasicStroke(3f,BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND);       
         BasicStroke dashed = new BasicStroke(1f,BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, new float[]{2f,3f}, 0f);
@@ -759,14 +783,6 @@ public final class GCcontentAnalysis extends Analysis {
                 offset+=columnWidth;
             }
         }
-        // write the image to file
-        if (file!=null) {
-            OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-            ImageIO.write(image, "png", output);
-            output.close(); 
-        }
-        g.dispose();
-        return image;
     }
     
     
@@ -1052,6 +1068,7 @@ public final class GCcontentAnalysis extends Analysis {
     private class HeaderPanel extends JPanel {
         private Font headerFont;
         private JCheckBox groupCheckBox;
+        private JCheckBox summaryCheckBox;
         private JComboBox orderCombobox;
         private JComboBox boxandwhiskersCombobox;
         private GraphPanel graphpanel;
@@ -1071,18 +1088,22 @@ public final class GCcontentAnalysis extends Analysis {
             JPanel controlsPanel=new JPanel(new FlowLayout(FlowLayout.RIGHT));
             groupCheckBox=new JCheckBox("    Group by cluster");
             groupCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
+            summaryCheckBox=new JCheckBox("    Show only summary");
+            summaryCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);            
             orderCombobox=new JComboBox(new String[]{"Sequence name","GC ascending", "GC descending"});
             boxandwhiskersCombobox=new JComboBox(new String[]{MEDIAN_QUARTILES,MEAN_STD,BOTH});
             boxandwhiskersCombobox.setSelectedItem(MEAN_STD);
-            controlsPanel.add(new javax.swing.JLabel("Order by  "));
-            controlsPanel.add(orderCombobox);
-            if (sequenceGroups!=null) {
-                controlsPanel.add(new javax.swing.JLabel("  Box plot "));
-                controlsPanel.add(boxandwhiskersCombobox);
-            }
             if (sequenceGroups instanceof SequencePartition) {
                 controlsPanel.add(groupCheckBox);
                 groupCheckBox.setSelected(true);
+            }            
+            controlsPanel.add(new javax.swing.JLabel("Order by  "));
+            controlsPanel.add(orderCombobox);
+            if (sequenceGroups!=null) {
+                controlsPanel.add(summaryCheckBox);     
+                summaryCheckBox.setSelected(true);
+                controlsPanel.add(new javax.swing.JLabel("  Box plot "));
+                controlsPanel.add(boxandwhiskersCombobox);
             }
             this.add(controlsPanel,BorderLayout.EAST);
             updateGraphImage();
@@ -1093,14 +1114,16 @@ public final class GCcontentAnalysis extends Analysis {
                 }
             };
             groupCheckBox.addActionListener(listener);
+            summaryCheckBox.addActionListener(listener);            
             orderCombobox.addActionListener(listener);
             boxandwhiskersCombobox.addActionListener(listener);                            
         }
         private void updateGraphImage() {
             String order=(String)orderCombobox.getSelectedItem();
             String boxAndWhiskers=(String)boxandwhiskersCombobox.getSelectedItem();
-            boolean grouping=groupCheckBox.isSelected();  
-            graphpanel.updateGraphImage(order, boxAndWhiskers, grouping);
+            boolean grouping=groupCheckBox.isSelected(); 
+            boolean onlySummary=summaryCheckBox.isSelected();             
+            graphpanel.updateGraphImage(order, boxAndWhiskers, grouping, onlySummary);
         }
     }
     
@@ -1115,23 +1138,23 @@ public final class GCcontentAnalysis extends Analysis {
             this.setOpaque(true);
         }
 
-        public final void updateGraphImage(String order, String boxAndWhiskers, boolean grouping) {
+        public final void updateGraphImage(String order, String boxAndWhiskers, boolean grouping, boolean showOnlySummary) {
             int sortOrder=SORT_BY_NAME;
             int boxplot=PLOT_MEAN_STD;
-            // showOnlySummary below could be based on a checkbox!
-            boolean showOnlySummary=(sequenceGroups!=null && results.size()>70); // if there are more than 70 sequences and groups have been specified. Show only the summary
+            // showOnlySummary=(sequenceGroups!=null && results.size()>70); // if there are more than 70 sequences and groups have been specified. Show only the summary
                  if (order.equals("GC ascending")) sortOrder=SORT_BY_GC_ASCENDING;
             else if (order.equals("GC descending")) sortOrder=SORT_BY_GC_DESCENDING;
                  if (boxAndWhiskers.equals(MEAN_STD)) boxplot=PLOT_MEAN_STD;
             else if (boxAndWhiskers.equals(MEDIAN_QUARTILES)) boxplot=PLOT_MEDIAN_QUARTILES;
             else if (boxAndWhiskers.equals(BOTH)) boxplot=PLOT_BOTH;
-            try {image=createGraphImage(null, gui.getEngine(), gui.getVisualizationSettings(),sortOrder,grouping, showOnlySummary, boxplot, 1.0);} catch (Exception e) {}
+            try {image=createGraphImage(gui.getEngine(), gui.getVisualizationSettings(),sortOrder,grouping, showOnlySummary, boxplot, 1.0);} catch (Exception e) {}
             if (image!=null) {
                 int width=image.getWidth()+30;    if (width<550) width=550;
                 int height=image.getHeight()+22;  if (height<300) height=300;
                 this.setPreferredSize(new Dimension(width,height));
             }
             repaint();
+            revalidate();           
         }
 
         @Override

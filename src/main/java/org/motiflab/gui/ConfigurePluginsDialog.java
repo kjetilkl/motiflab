@@ -197,7 +197,7 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
         return builder.toString();
     }
 
-    private boolean removePluginInListAndEngine(Plugin plugin) throws SystemError{
+    private boolean removePluginInListAndEngine(Plugin plugin) throws SystemError {
         boolean ok=gui.getEngine().uninstallPlugin(plugin);
         String pluginName=plugin.getPluginName();
         for (int i=0;i<pluginsModel.getRowCount();i++) {
@@ -211,6 +211,13 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
         }
         return ok;
     }
+    
+    /** Remove the old plugins directory */
+    private boolean removePluginDirectory(File directory) throws SystemError {
+        boolean ok=gui.getEngine().deleteTempFile(directory); // delete the plugin files right away
+        if (!ok) gui.getEngine().deleteOnExit(directory); // If that fails (maybe because of locked files), mark the files for deletion when the VM exits
+        return ok;
+    }    
 
 
     /** This method is called from within the constructor to
@@ -443,7 +450,7 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
        if (row<0) return;
        String pluginName=(String)pluginsTable.getValueAt(row, COLUMN_NAME);
        Plugin plugin=gui.getEngine().getPlugin(pluginName);
-       showPluginHelp(plugin);
+       showPluginHelp(plugin);      
     }//GEN-LAST:event_helpButtonPressed
 
     private void addPluginFromRepository(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addPluginFromRepository
@@ -454,7 +461,6 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
         String urlString=repositoryDialog.getURL();
         repositoryDialog.dispose();
         if (urlString==null) return;
-        addPluginInBackground(urlString);
     }//GEN-LAST:event_addPluginFromRepository
 
     private void addPluginInBackground(final Object source) {
@@ -490,7 +496,6 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
                 closeButton.setEnabled(true);
                 if (ex!=null) {
                     JOptionPane.showMessageDialog(ConfigurePluginsDialog.this, ex.getMessage(), "Plugin Error", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace(System.err);
                 } else { // install went OK
                     JOptionPane.showMessageDialog(ConfigurePluginsDialog.this, "The plugin was installed successfully", "Install Plugin", JOptionPane.INFORMATION_MESSAGE);
                 }
@@ -503,7 +508,9 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
     }
 
 
-    /** Installs the plugin from the given zipFile into the plugin directory with the given name (just a relative name)
+    /** Installs the plugin from the given zipFile into the plugin directory 
+     *  with a new based on the "name" property of the plugin (with non-word
+     *  characters replaced with underscores)
      *  The zipFile should be a regular file (not a DataRepositoryFile)
      */
     private void addPlugin(File zipFile) throws ExecutionError {
@@ -534,14 +541,25 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
             if (option==JOptionPane.YES_OPTION) {
                 try {
                     boolean ok=removePluginInListAndEngine(plugin);
-                    if (!ok) throw new ExecutionError("The previous plugin was uninstalled but some resources could not be reclaimed. In order to complete the process you should restart MotifLab and then install the new version again");
+                    if (!ok) throw new ExecutionError("The previous plugin was uninstalled but some resources could not be reclaimed.\nIn order to complete the process you should restart MotifLab and then install the new version again");
                 } catch (SystemError e) {
                      throw new ExecutionError(e.getMessage(),e);
                 }
             } else throw new ExecutionError("Plugin was not replaced");
-        }
+        } 
         String dirName=pluginName.replaceAll("\\W", "_");
         File pluginDir=new File(engine.getPluginsDirectory(), dirName);
+        if (plugin==null && pluginDir.exists()) { // The plugin dir already exists, but the plugin has not been correctly instantiated 
+            int option=JOptionPane.showConfirmDialog(rootPane, "A faulty plugin with the same name is already registered (\""+pluginName+"\").\nDo you want to replace the current version?", "Replace plug-in", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (option==JOptionPane.YES_OPTION) {
+                try {
+                    boolean ok=removePluginDirectory(pluginDir);
+                    if (!ok) throw new ExecutionError("The previous plugin was uninstalled but some resources could not be reclaimed.\nIn order to complete the process you should restart MotifLab and then install the new version again");
+                } catch (SystemError e) {
+                     throw new ExecutionError(e.getMessage(),e);
+                }
+            } else throw new ExecutionError("Plugin was not replaced");            
+        }        
         boolean ok=true;
         if (!pluginDir.exists()) {
             ok=pluginDir.mkdir();
@@ -556,6 +574,9 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
         try {
             metadata=engine.readPluginMetaDataFromDirectory(pluginDir);
             plugin=engine.instantiatePluginFromDirectory(pluginDir); // this loads the classes and instantiates the plugin object
+            String configuredName=(String)metadata.get("name");
+            String nameInPlugin=plugin.getPluginName();
+            if (!nameInPlugin.equals(configuredName)) throw new SystemError("Name returned by plugin itself ["+nameInPlugin+"] does not match name used in configuration ["+configuredName+"]!");               
         } catch (SystemError se) {
             plugin=null;
             removePluginDir(pluginDir);
@@ -576,7 +597,6 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
             plugin.initializePluginFromClient(gui);
         } catch (Exception e) {
             gui.logMessage("Plugin error for \""+pluginName+"\" when connecting with client => "+e.getMessage());
-            e.printStackTrace(System.err);
         }
         installPluginInList(plugin, metadata);
         if (plugin instanceof ConfigurablePlugin) { // for a plugin to be configurable here it must return either a configuration dialog or at least one non-hidden Parameter
@@ -595,14 +615,7 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
 
     private void removePluginDir(File pluginDir) {
         // first we must discard the classloader which may have placed locks on JAR-files
-        ClassLoader classLoader=gui.getEngine().getPluginClassLoader(pluginDir);
-        if (classLoader instanceof URLClassLoader) {
-            try {
-                ((URLClassLoader)classLoader).close(); // necessary to release the file lock on the JAR-files
-                classLoader=null;
-            } catch (IOException io) {}
-        }
-        System.gc(); // this is necessary in order to garbage collect the ClassLoader (which is necessary in order to delete the JAR-file). However, it is not guaranteed to work...
+        gui.getEngine().removeClassLoader(pluginDir);
         gui.getEngine().deleteTempFile(pluginDir); // this might fail...
         MotifLabEngine.deleteOnExit(pluginDir); // backup
     }

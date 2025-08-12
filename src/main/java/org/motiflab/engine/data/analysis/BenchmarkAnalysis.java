@@ -1,8 +1,3 @@
-/*
- 
- 
- */
-
 package org.motiflab.engine.data.analysis;
 
 import java.awt.BorderLayout;
@@ -21,7 +16,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -29,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -55,7 +48,6 @@ import org.motiflab.gui.ToolTipHeader;
 import org.motiflab.gui.VisualizationSettings;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
-//import org.apache.poi.POIXMLDocumentPart;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
@@ -83,6 +75,7 @@ import org.motiflab.engine.data.Sequence;
 import org.motiflab.engine.data.SequenceCollection;
 import org.motiflab.engine.data.SequenceGroup;
 import org.motiflab.engine.data.SequencePartition;
+import org.motiflab.engine.util.HTMLUtilities;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTBarSer;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTErrBars;
 import org.openxmlformats.schemas.drawingml.x2006.chart.CTNumData;
@@ -137,26 +130,17 @@ public class BenchmarkAnalysis extends Analysis {
          Parameter parMetrics=new Parameter("Metrics",String.class,"Sn,Sp,PPV,ASP,PC,Acc,CC,sSN,sPPV,sASP",null,string.toString(),false,false);
          Parameter parAbbr=new Parameter("Use abbreviations",Boolean.class,Boolean.TRUE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},null,false,false);         
          Parameter parX=new Parameter("X-axis",String.class,"Method",new String[]{"Method","Statistic/Groups"},null,false,false);
+         Parameter imageformat=new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false);                                                                      
          Parameter parZ=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
-         Parameter parL=new Parameter("Legend",String.class,"",null,"<html>This argument can be used to position the legend box.<br>If used, its value should be either should be either \"normal\", \"none\", a single positive value or three values separated by comma.<br>The first numeric value will be the %-scale the legend box should be displayed at.<br>The optional second and third values are interpreted as a coordinate at which to display the legend box.<br>Positive coordinates are offset down and to the right relative to an origin in the upper left corner.<br>Negative values are offset left and upwards relative to an origin in the lower right corner.</html>",false,false);
+         Parameter parL=new Parameter("Legend",String.class,"",null,"<html>This argument can be used to position the legend box.<br>If used, its value should be either \"normal\" (or \"right\"), \"left\", \"none\",<br>a single positive value or three values separated by comma.<br>The first numeric value will be the %-scale the legend box should be displayed at.<br>The optional second and third values are interpreted as an X,Y-coordinate at which to display the legend box.<br>The X-coordinate aligns the legend relative to the Y-axis.<br>Negative Y-coordinates align the legend to the bottom of the graph.</html>",false,false);
          Parameter parC=new Parameter("Color boxes",Boolean.class,Boolean.FALSE,new Boolean[]{Boolean.TRUE,Boolean.FALSE},"If selected, a box with the assigned color for the track will be output as the first column in the table",false,false);               
          
-         if (dataformat.equals(HTML)) return new Parameter[]{parMetrics,parAbbr,parX,parZ,parC,parL};
+         if (dataformat.equals(HTML)) return new Parameter[]{parMetrics,parAbbr,parX,imageformat,parZ,parC,parL};
          else if (dataformat.equals(EXCEL)) return new Parameter[]{}; // {parMetrics,parAbbr};
          else if (dataformat.equals(RAWDATA)) return new Parameter[]{parMetrics,parAbbr};
          else return new Parameter[0];
     }
     
-//    @Override
-//    public String[] getOutputParameterFilter(String parameter) {
-//        if (parameter.equals("X-axis")
-//         || parameter.equals("Graph scale")
-//         || parameter.equals("Legend")
-//         || parameter.equals("Color boxes")
-//        ) return new String[]{HTML};
-//        if (parameter.equals("Metrics") || parameter.equals("Use abbreviations")) return new String[]{HTML,EXCEL,RAWDATA};        
-//        return null;
-//    }
 
     @Override
     public String getAnalysisName() {
@@ -232,6 +216,7 @@ public class BenchmarkAnalysis extends Analysis {
         String legendScaleString="";
         Object legend=null;
         boolean showColorBoxes=false;
+        String imageFormat="png";
         if (outputSettings!=null) {
           try {
              Parameter[] defaults=getOutputParameters(format.getName());
@@ -239,6 +224,7 @@ public class BenchmarkAnalysis extends Analysis {
              abbreviate=(Boolean)outputSettings.getResolvedParameter("Use abbreviations",defaults,engine);
              xaxis=(String)outputSettings.getResolvedParameter("X-axis",defaults,engine);
              scalepercent=(Integer)outputSettings.getResolvedParameter("Graph scale",defaults,engine);
+             imageFormat=(String)outputSettings.getResolvedParameter("Image format",defaults,engine);             
              String[] metrics=formatString.trim().split("\\s*,\\s*");
              for (String metric:metrics) {                
                  if (isLongNameForStatistic(metric)) {
@@ -256,29 +242,39 @@ public class BenchmarkAnalysis extends Analysis {
         if (legendScaleString==null || legendScaleString.trim().isEmpty()) legendScaleString="normal"; else legendScaleString=legendScaleString.trim();
         if (legendScaleString.equalsIgnoreCase("none")) legend=null;
         else if (legendScaleString.equalsIgnoreCase("normal")) legend=legendScaleString;
+        else if (legendScaleString.equalsIgnoreCase("right"))  legend="normal";
+        else if (legendScaleString.equalsIgnoreCase("left"))   legend=new double[]{1.0,-1,0};     
         else {
-            String[] parts=legendScaleString.split("\\s*,\\s*");
+            String[] parts=legendScaleString.replace("%", "").split("\\s*,\\s*");
             if (!(parts.length==1 || parts.length==3)) throw new ExecutionError("The \"Legend\" parameter should be either \"normal\" or \"none\" or consist of either 1 single value or 3 comma-separated values");
-            double[] includeLegend=new double[3];
+            double[] includeLegend=new double[parts.length];
             for (int i=0;i<parts.length;i++) {
                 try {
                     includeLegend[i]=Double.parseDouble(parts[i]);
                 } catch (Exception e) {throw new ExecutionError("Unable to parse expected numerical value for \"Legend\" parameter: "+parts[i]);}
             }
-            includeLegend[0]=includeLegend[0]/100.0; // this was a percentage number
+            includeLegend[0]=includeLegend[0]/100.0; // this was a percentage number. Convert to scale factor
             legend=includeLegend;
         }        
         double scale=(scalepercent==100)?1.0:(((double)scalepercent)/100.0);
         engine.createHTMLheader("Benchmark Analysis", null, null, true, true, true, outputobject);
         outputobject.append("<h1 class=\"headline\">Benchmark evaluation against \""+answerTrackName+"\"</h1><br>",HTML);
-        formatSummaryTablesWithGraphs(outputobject,engine, graphStatistics, xaxis, scale, abbreviate, legend, showColorBoxes);
+        formatSummaryTablesWithGraphs(outputobject, imageFormat, engine, graphStatistics, xaxis, scale, abbreviate, legend, showColorBoxes);
         outputobject.append("</body>\n</html>\n",HTML);
         if (format!=null) format.setProgress(100);
         return outputobject;
     }
 
 
-
+    
+    private String getImageTag(File file, String imageformat, MotifLabEngine engine,  ArrayList<String> statistics, String groupname, boolean groupbymethod, boolean abbreviate, double scale, Object legend) {
+        HashMap<String,Object> imageSettings = getImageSettings(engine, statistics, groupname, groupbymethod, abbreviate, scale, legend);
+        int height=(Integer)imageSettings.get("height");
+        int width=(Integer)imageSettings.get("width"); 
+        // write the image to file
+        HTMLUtilities.ImagePainter painter = (g) -> paintChart(g, imageSettings); 
+        return HTMLUtilities.getImageTag(painter, file, imageformat, height, width, scale);              
+    }      
   /**
    * Creates a graph based on the current data and saves it to file (if file is not null)
    * @param file
@@ -291,15 +287,41 @@ public class BenchmarkAnalysis extends Analysis {
    * @throws IOException
    */
     @SuppressWarnings("unchecked")
-    private BufferedImage createGraphImage(File file, MotifLabEngine engine, ArrayList<String> statistics, String groupname, boolean groupbymethod, boolean abbreviate, double scale, Object legend) throws IOException {
+    private BufferedImage createGraphImage(MotifLabEngine engine, ArrayList<String> statistics, String groupname, boolean groupbymethod, boolean abbreviate, double scale, Object legend) {
+        HashMap<String,Object> imageSettings = getImageSettings(engine, statistics, groupname, groupbymethod, abbreviate, scale, legend);
+        int height=(Integer)imageSettings.get("scaledHeight");
+        int width=(Integer)imageSettings.get("scaledWidth");  
+        BufferedImage image=new BufferedImage(width,height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g=image.createGraphics(); 
+        paintChart(g, imageSettings);
+        g.dispose();
+        return image;        
+    }
+    
+    /**
+     * Determines the layout of the image, including the final size
+     * @param engine
+     * @param statistics
+     * @param groupname
+     * @param groupbymethod
+     * @param abbreviate
+     * @param scale
+     * @param legend
+     * @return 
+     */
+    private HashMap<String,Object> getImageSettings(MotifLabEngine engine, ArrayList<String> statistics, String groupname, boolean groupbymethod, boolean abbreviate, double scale, Object legend) {
         int graphheight=250; // height of graph in pixels (just the histogram);
-        int translateX=50; // the X coordinate for the top of the graph
+        int translateX=50; // the X coordinate for the top of the graph (leaves room for Y-axis tick marks and labels)
         int translateY=30; // the Y coordinate for the top of the graph
         int barwidth=7;
         int bardistance=9; // the distance from start of one bar to start of next (i.e. interdistance = bardistance-barwidth)
         int bargroupspacing=28;        
         int bargroupwidth=0; // to be calculated below
         int barshadow=0;
+        int legendPadding=30; // distance between graph and legend in normal position
+        int marginX=16;
+        int marginY=16; // margin below graph and minimum margin above (smaller than translateY, so only kicks in if legend extends above graph)    
+        int tickHeight=10; // approximate height of tickmark on the X-axis (without label)
         boolean gradientfill=false;
         boolean drawbox=false;
         boolean drawGridX=true;
@@ -370,24 +392,135 @@ public class BenchmarkAnalysis extends Analysis {
         int numbars=barElements.size(); // number of bars in each group
         String[] barElementsToArray=new String[barElements.size()];
         barElementsToArray=barElements.toArray(barElementsToArray);
+        
         Dimension legendDimension=Graph.getLegendDimension(barElementsToArray,null);
         int legendwidth=legendDimension.width;
         if (legendwidth<50) legendwidth=50; // this is only used to set image-width not to draw the actual legend box
         int legendheight=legendDimension.height;
         bargroupwidth=(numbars-1)*bardistance+barwidth;
         double legendScale=1.0;
-        if (legend instanceof double[]) legendScale=((double[])legend)[0];
-        legendwidth=(int)Math.round(legendwidth*legendScale);
-        legendheight=(int)Math.round(legendheight*legendScale);               
+        if (legend instanceof double[]) legendScale=((double[])legend)[0];  
+        legendwidth=(int)Math.ceil(legendwidth*legendScale);
+        legendheight=(int)Math.ceil(legendheight*legendScale); 
+               
+        // determine total width of graph and legend, based on placement
         int graphwidth=numbargroups*bargroupwidth+(numbargroups)*bargroupspacing; // this includes spacing on both sides of end groups!
-        int width=translateX+graphwidth+((legend instanceof String)?(50+legendwidth):16); //
+        int width=translateX+graphwidth+marginX; // width of image with graph
+        if (legend instanceof String || (legend instanceof double[] && ((double[])legend).length==1)) { // normal placement of legend to the right of the graph
+           width += (legendPadding+legendwidth); 
+        } else if (legend instanceof double[] && ((double[])legend).length==3) { // alternative coordinate for legend placement relative to Y-axis
+            int legendX=(int)Math.round(((double[])legend)[1]); // placement relative to Y-axis
+            if (legendX>=0) {
+                if (translateX+legendX+legendwidth+marginX>=width) width=translateX+legendX+legendwidth+marginX;
+            } else { // legend is placed to the left. The graph must be shifted accordingly
+               legendX=-legendX; // transform to positive value. Note that this is the anchor for the bottom-right corner of the legend box!
+               translateX+=(legendwidth+legendX+marginX); // add extra margin to the left of the legend box
+               width=translateX+graphwidth+marginX; //
+            }
+        } 
+        
+        // determine total height of graph and legend, based on placement
         int largestNameSize=Graph.findLongestString(xAxisElements, null);
-        int height=translateY+graphheight+largestNameSize+30;
-        if (height<translateY+legendheight) height=(translateY+legendheight+30);
-
-        //BufferedImage image=new BufferedImage(width,height, BufferedImage.TYPE_INT_RGB);
-        BufferedImage image=new BufferedImage((int)Math.round(width*scale),(int)Math.round(height*scale), BufferedImage.TYPE_INT_RGB);
-        Graphics2D g=image.createGraphics();
+        int graphheightWithLabels = graphheight+largestNameSize+tickHeight;
+        int height=translateY+graphheightWithLabels+marginY; // height of graph without legend box
+            
+        if (legend instanceof String || (legend instanceof double[] && ((double[])legend).length==1)) { // normal placement of legend to the right of the graph
+            // add more room for legend box extending past the bottom of the graph, if necessary
+            if (height<translateY+legendheight+marginY) height=(translateY+legendheight+marginY);
+        } else if (legend instanceof double[] && ((double[])legend).length==3) { // alternative coordinate for legend placement
+            int legendY=(int)Math.round(((double[])legend)[2]);
+            if (legendY>=0) { // top of legend is below top of graph
+                if (translateY+legendY+legendheight+marginY>height) height=translateY+legendY+legendheight+marginY;
+//            } else { // bottom of legend is placed relative to top of graph
+//               legendY=-legendY; // transform to positive value. Note that this is the anchor for the bottom-right corner of the legend box!
+//               translateY=marginY+legendheight+legendY; // move graph down to accound for legend above
+//               height=translateY+graphheightWithLabels+marginY;
+            } else { // bottom of legend is placed relative to bottom of graph
+                int legendTop = translateY+graphheight + legendY - legendheight; // note that legendY will be subtracted since it is negative
+                if (legendTop<marginY) { // legend is so big that it extends above the top of the image (or margin)
+                    translateY+=(marginY-legendTop);
+                    height=translateY+graphheightWithLabels+marginY;                   
+                }
+            }
+        }         
+              
+        HashMap<String,Object> properties = new HashMap<>();
+        properties.put("scale",scale); // double        
+        properties.put("height",height); // int
+        properties.put("width",width); // int  
+        properties.put("scaledHeight",(int)Math.ceil(height*scale)); // int
+        properties.put("scaledWidth",(int)Math.ceil(width*scale)); // int           
+        properties.put("graphheight",graphheight); // int
+        properties.put("graphwidth",graphwidth); // int        
+        properties.put("translateX",translateX); // int
+        properties.put("translateY",translateY); // int
+        properties.put("legendwidth",legendwidth);// int
+        properties.put("legendheight",legendheight); // int     
+        properties.put("legendPadding",legendPadding); // int   
+        properties.put("marginX",marginX); // int
+        properties.put("marginY",marginY); // int 
+        properties.put("tickHeight",tickHeight); // int        
+        properties.put("barwidth",barwidth); // int
+        properties.put("bardistance",bardistance);  // int
+        properties.put("bargroupspacing",bargroupspacing);// int
+        properties.put("bargroupwidth",bargroupwidth); // int
+        properties.put("barshadow",barshadow); // int
+        properties.put("gradientfill",gradientfill); // boolean
+        properties.put("drawbox",drawbox); // boolean
+        properties.put("drawGridX",drawGridX); // boolean
+        properties.put("drawGridY",drawGridY); // boolean
+        properties.put("statistic",statistic); // String - name of statistic if only a single one is selected   
+        properties.put("groupname",groupname); // String
+        properties.put("groupbymethod",groupbymethod); // boolean            
+        properties.put("statistics",statistics); // ArrayList<String>
+        properties.put("methodnames",methodnames); // ArrayList<String>        
+        properties.put("xAxisElements",xAxisElements); // ArrayList<String>
+        properties.put("barElements",barElements); // ArrayList<String> 
+        properties.put("minvalue",minvalue); // double
+        properties.put("maxvalue",maxvalue); // double  
+        properties.put("legendScale",legendScale); // double          
+        properties.put("legend",legend); // Object  
+        properties.put("borderSetting",borderSetting); // Object      
+        properties.put("settings",settings); // VisualizationSettings               
+        
+        return properties;    
+    }
+    
+    private void paintChart(Graphics2D g, HashMap<String,Object> imageSettings) {      
+        int height=(int)imageSettings.get("height"); //  
+        int width=(int)imageSettings.get("width"); //         
+        int graphheight=(int)imageSettings.get("graphheight"); // height of graph in pixels (just the histogram);
+        int graphwidth=(int)imageSettings.get("graphwidth"); //      
+        int translateX=(int)imageSettings.get("translateX"); // the X coordinate for the top of the graph
+        int translateY=(int)imageSettings.get("translateY"); // the Y coordinate for the top of the graph  
+        int legendPadding=(int)imageSettings.get("legendPadding");  
+        int legendheight=(int)imageSettings.get("legendheight");        
+        int marginX=(int)imageSettings.get("marginX"); 
+        int marginY=(int)imageSettings.get("marginY");  
+        int barwidth=(int)imageSettings.get("barwidth");
+        int bardistance=(int)imageSettings.get("bardistance"); // the distance from start of one bar to start of next (i.e. interdistance = bardistance-barwidth)
+        int bargroupspacing=(int)imageSettings.get("bargroupspacing");        
+        int bargroupwidth=(int)imageSettings.get("bargroupwidth"); // to be calculated below
+        int barshadow=(int)imageSettings.get("barshadow");
+        boolean gradientfill=(boolean)imageSettings.get("gradientfill");
+        boolean drawbox=(boolean)imageSettings.get("drawbox");
+        boolean drawGridX=(boolean)imageSettings.get("drawGridX");
+        boolean drawGridY=(boolean)imageSettings.get("drawGridY");  
+        double minvalue=(double)imageSettings.get("minvalue");
+        double maxvalue=(double)imageSettings.get("maxvalue");           
+        double scale=(double)imageSettings.get("scale");  
+        double legendScale=(double)imageSettings.get("legendScale");
+        String statistic = (String)imageSettings.get("statistic"); // String - name of statistic if only a single one is selected  
+        String groupname = (String)imageSettings.get("groupname"); //       
+        ArrayList<String> statistics = (ArrayList<String>)imageSettings.get("statistics");
+        ArrayList<String> methodnames = (ArrayList<String>)imageSettings.get("methodnames");        
+        ArrayList<String> xAxisElements = (ArrayList<String>)imageSettings.get("xAxisElements");
+        ArrayList<String> barElements = (ArrayList<String>)imageSettings.get("barElements");
+        Object legend = imageSettings.get("legend");  
+        Object borderSetting = imageSettings.get("borderSetting");          
+        boolean groupbymethod=(boolean)imageSettings.get("groupbymethod");    
+        VisualizationSettings settings=(VisualizationSettings)imageSettings.get("settings"); 
+        
         g.scale(scale, scale);
         g.setColor(java.awt.Color.WHITE);
         g.fillRect(0, 0, width+10, height+10); // I fill a little wider just in case or rounding errors when scaling
@@ -405,15 +538,14 @@ public class BenchmarkAnalysis extends Analysis {
         } 
         int xpos=translateX+(int)(bargroupspacing/2.0);
         int tickpos=graph.getYforValue(minvalue)+1;
-        int legendXpos=translateX+graphwidth+30;
+        int legendXpos=translateX+graphwidth+legendPadding; // default position
         int legendYpos=translateY;
-        if (legend instanceof double[]) {            
+        if (legend instanceof double[] && ((double[])legend).length==3) {            
             double offsetX=((double[])legend)[1];
             double offsetY=((double[])legend)[2];
-            legendwidth=(int)Math.round(legendwidth*legendScale);
-            legendheight=(int)Math.round(legendheight*legendScale);
-            legendXpos=(offsetX>=0)?(int)(graph.getXforValue(0)+offsetX):(int)(graph.getXforValue(1.0)+offsetX-legendwidth);
-            legendYpos=(offsetY>=0)?(int)(graph.getYforValue(maxvalue)+offsetY):(int)(graph.getYforValue(minvalue)+offsetY-legendheight);  
+            legendXpos=(offsetX>=0)?(int)(graph.getXforValue(0)+offsetX):marginX; 
+            // legendYpos=(offsetY>=0)?(int)(graph.getYforValue(maxvalue)+offsetY):marginY; // bottom of legend is placed relative to top of graph
+            legendYpos=(offsetY>=0)?(int)(graph.getYforValue(maxvalue)+offsetY):(int)(translateY+graphheight+offsetY-legendheight); // bottom of legend is placed relative to bottom of graph            
         }       
         if (groupbymethod) {  // group results by method along X-axis
             if (statistic==null) { // show all statistics
@@ -496,6 +628,12 @@ public class BenchmarkAnalysis extends Analysis {
                    else graph.drawVerticalStringXTick(statisticname, xpos+(int)((float)bargroupwidth/2.0)-1, tickpos, true);
                    xpos+=(bargroupspacing+bargroupwidth);
                }
+               // draw X-axis anew just to update the line
+               g.setColor(Color.BLACK);
+               int ypos=graph.getYforValue(minvalue);
+               g.drawLine(translateX, ypos, translateX+graphwidth, ypos);
+               if (drawbox) graph.drawBoundingBox();      
+               // draw legend box               
                if (legend!=null) {
                    AffineTransform current=g.getTransform();                   
                    g.translate(legendXpos, legendYpos);         
@@ -526,6 +664,13 @@ public class BenchmarkAnalysis extends Analysis {
                    graph.drawVerticalStringXTick(tickString, xpos+(int)((float)bargroupwidth/2.0)-1,tickpos,true);
                    xpos+=(bargroupspacing+bargroupwidth);
                }
+               // draw X-axis anew just to update the line
+               g.setColor(Color.BLACK);
+               int ypos=graph.getYforValue(minvalue);
+               g.drawLine(translateX, ypos, translateX+graphwidth, ypos);
+               if (drawbox) graph.drawBoundingBox();    
+               
+               // draw legend box
                if (legend!=null) {
                    AffineTransform current=g.getTransform();                   
                    g.translate(legendXpos, legendYpos);         
@@ -535,24 +680,10 @@ public class BenchmarkAnalysis extends Analysis {
                    g.setTransform(current);
                }
             }               
-        }
-
-
-        // draw X-axis anew just to update the line
-        g.setColor(Color.BLACK);
-        int ypos=graph.getYforValue(minvalue);
-        g.drawLine(translateX, ypos, translateX+graphwidth, ypos);
-        if (drawbox) graph.drawBoundingBox();        
-        // write the image to file
-        if (file!=null) {
-            OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-            ImageIO.write(image, "png", output);
-            output.close(); 
-        }
-        g.dispose();
-        return image;
+        }      
     }
 
+    
     private double getMinUsedValue(String statistic, ArrayList<String>statistics, String groupname, boolean groupbymethod, ArrayList<String> methodnames, ArrayList<String> xAxisElements, ArrayList<String> barElements) {
         double min=Double.MAX_VALUE;
         if (groupbymethod) {  // group results by method along X-axis
@@ -725,34 +856,28 @@ public class BenchmarkAnalysis extends Analysis {
     }
     
     @SuppressWarnings("unchecked")
-    private void formatSummaryTablesWithGraphs(OutputData outputobject, MotifLabEngine engine, ArrayList<String> graphStatistics, String xaxis, double scale, boolean abbreviate, Object legend, boolean showColorBoxes) {       
+    private void formatSummaryTablesWithGraphs(OutputData outputobject, String imageFormat, MotifLabEngine engine, ArrayList<String> graphStatistics, String xaxis, double scale, boolean abbreviate, Object legend, boolean showColorBoxes) {       
         String statisticHeader="Statistics";
         if (graphStatistics.size()==1) statisticHeader=graphStatistics.get(0);
-        if (groupnames.isEmpty() || groupnames.size()>1) { // output 'all' then each group in turn (if any)
-           File imagefile=outputobject.createDependentFile(engine,"png");
-           try {createGraphImage(imagefile,engine, graphStatistics, null, xaxis.equalsIgnoreCase("Method"), abbreviate, scale, legend);
-           } catch (IOException e) {engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);}
-           outputobject.append("<h2 class=\"groupheader\">"+statisticHeader+"</h2>",HTML);
-           outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\" /><br><br>",HTML);
-           formatSummaryTable(outputobject, engine, null, graphStatistics, showColorBoxes);
-           
+        if (groupnames.isEmpty() || groupnames.size()>1) { // output 'all' then each group in turn (if any)          
+           File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+           String imageTag = getImageTag(imagefile, imageFormat, engine, graphStatistics, null, xaxis.equalsIgnoreCase("Method"), abbreviate, scale, legend);       
+           outputobject.append(imageTag,HTML);                           
+           formatSummaryTable(outputobject, engine, null, graphStatistics, showColorBoxes);           
            for (String groupname:groupnames) { // output each group in turn
                outputobject.append("<br><hr><br>",HTML);
                outputobject.append("<h2 class=\"groupheader\">Group: "+groupname+"</h2>",HTML);
-               File imagefile2=outputobject.createDependentFile(engine,"png");
-               try {createGraphImage(imagefile2,engine, graphStatistics, groupname, xaxis.equalsIgnoreCase("Method"), abbreviate, scale, legend);
-               } catch (IOException e) {engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);}
-               outputobject.append("<h2>"+statisticHeader+"</h2>",HTML);
-               outputobject.append("<img src=\"file:///"+imagefile2.getAbsolutePath()+"\" /><br><br>",HTML);
+               File imagefile2=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+               String imageTag2 = getImageTag(imagefile2, imageFormat, engine, graphStatistics, groupname, xaxis.equalsIgnoreCase("Method"), abbreviate, scale, legend);       
+               outputobject.append(imageTag2,HTML);            
                formatSummaryTable(outputobject, engine, groupname, graphStatistics, showColorBoxes);
            }
         } else { // single group
             outputobject.append("<h2 class=\"groupheader\">Group: "+groupnames.get(0)+"</h2>",HTML);
-            File imagefile=outputobject.createDependentFile(engine,"png");
-            try {createGraphImage(imagefile,engine, graphStatistics, groupnames.get(0), xaxis.equalsIgnoreCase("Method"), abbreviate, scale, legend);
-            } catch (IOException e) {engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);}
-            outputobject.append("<h2>"+statisticHeader+"</h2>",HTML);
-            outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\" /><br><br>",HTML);
+            outputobject.append("<h2>"+statisticHeader+"</h2>",HTML);            
+            File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+            String imageTag = getImageTag(imagefile, imageFormat, engine, graphStatistics, groupnames.get(0), xaxis.equalsIgnoreCase("Method"), abbreviate, scale, legend);               
+            outputobject.append(imageTag,HTML);
             formatSummaryTable(outputobject, engine, groupnames.get(0), graphStatistics, showColorBoxes);
         }
     }
@@ -1718,7 +1843,7 @@ public class BenchmarkAnalysis extends Analysis {
             if (statisticname.equals("All")) showstatistics.addAll(getStatisticsLongNames());
             else showstatistics.add(statisticname);
             try {
-                image=createGraphImage(null, gui.getEngine(),showstatistics,showgroupname,groupByMethod,true,1.0,"normal");
+                image=createGraphImage(gui.getEngine(),showstatistics,showgroupname,groupByMethod,true,1.0,"normal");
             }
             catch (Exception e) {
                 gui.logMessage(e.getClass()+":"+e.getMessage());

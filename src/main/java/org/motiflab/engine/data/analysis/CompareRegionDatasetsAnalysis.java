@@ -53,6 +53,7 @@ import org.motiflab.engine.data.RegionDataset;
 import org.motiflab.engine.data.RegionSequenceData;
 import org.motiflab.engine.data.Sequence;
 import org.motiflab.engine.data.SequenceCollection;
+import org.motiflab.engine.util.HTMLUtilities;
 
 /**
  *
@@ -82,7 +83,7 @@ public class CompareRegionDatasetsAnalysis extends Analysis {
     /** Returns a list of output parameters that can be set when an Analysis is output */
     @Override
     public Parameter[] getOutputParameters(String dataformat) {
-         Parameter imageformat=new Parameter("Image format",String.class, "png",new String[]{"png","svg","pdf","eps"},"The image format to use for the graph",false,false);                              
+         Parameter imageformat=new Parameter("Image format",String.class, HTMLUtilities.getDefaultImageFormatForHTML(),HTMLUtilities.getImageFormatsForHTML(),"The image format to use for the graph",false,false);                              
          Parameter scalepar=new Parameter("Graph scale",Integer.class,100,new Integer[]{10,2000},"Scale of graphics plot (in percent)",false,false);
          if (dataformat.equals(HTML)) return new Parameter[]{imageformat,scalepar};
          else return new Parameter[0];
@@ -209,13 +210,18 @@ public class CompareRegionDatasetsAnalysis extends Analysis {
           catch (Exception ex) {throw new ExecutionError("An error occurred during output formatting", ex);}
         } 
         double scale=(scalepercent==100)?1.0:(((double)scalepercent)/100.0);
-        File imagefile=outputobject.createDependentFile(engine,imageFormat);
-        Object dimension=null;
-        try {
-            dimension=createGraphImage(imagefile, scale, engine.getClient().getVisualizationSettings());
-        } catch (IOException e) {
-            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
-        }
+        
+//        File imagefile=outputobject.createDependentFile(engine,imageFormat);
+//        Object dimension=null;
+//        try {
+//            dimension=createGraphImage(imagefile, scale, engine.getClient().getVisualizationSettings());
+//        } catch (IOException e) {
+//            engine.errorMessage("An error occurred when creating image file: "+e.toString(),0);
+//        }
+
+        File imagefile=(imageFormat.startsWith("embed"))?engine.createTempFile():outputobject.createDependentFile(engine,imageFormat); 
+        String imageTag = getImageTag(imagefile, imageFormat, scale, engine.getClient().getVisualizationSettings());
+        
         if (format!=null) format.setProgress(50);
         DecimalFormat formatter=new DecimalFormat("#.###");
         DecimalFormat decimalFormatter=new DecimalFormat("#.#");         
@@ -237,16 +243,19 @@ public class CompareRegionDatasetsAnalysis extends Analysis {
                 + "<td style=\"text-align:center\">"+((Double.isNaN(nF))?"-":formatter.format(nF))+"</td>"
                 + "<td style=\"text-align:center\">"+((Double.isNaN(nAcc))?"-":formatter.format(nAcc))+"</td><td style=\"text-align:center\">"+((Double.isNaN(nCC))?"-":formatter.format(nCC))+"</td></tr>\n</table>\n",HTML);
         outputobject.append("<br><br>\n",HTML);
-        if (imageFormat.equals("pdf")) outputobject.append("<object type=\"application/pdf\" data=\"file:///"+imagefile.getAbsolutePath()+"\"></object>",HTML);
-        else {
-            outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\"",HTML);
-            if (dimension instanceof Dimension) {
-                int width=((Dimension)dimension).width;
-                int height=((Dimension)dimension).height;
-                outputobject.append(" width="+(int)Math.ceil(width*scale)+" height="+(int)Math.ceil(height*scale),HTML);
-            }                    
-            outputobject.append(" />\n<br>\n",HTML);  
-        }                    
+//        if (imageFormat.equals("pdf")) outputobject.append("<object type=\"application/pdf\" data=\"file:///"+imagefile.getAbsolutePath()+"\"></object>",HTML);
+//        else {
+//            outputobject.append("<img src=\"file:///"+imagefile.getAbsolutePath()+"\"",HTML);
+//            if (dimension instanceof Dimension) {
+//                int width=((Dimension)dimension).width;
+//                int height=((Dimension)dimension).height;
+//                outputobject.append(" width="+(int)Math.ceil(width*scale)+" height="+(int)Math.ceil(height*scale),HTML);
+//            }                    
+//            outputobject.append(" />\n<br>\n",HTML);  
+//        }    
+
+        outputobject.append(imageTag,HTML);
+                
         outputobject.append("<br>\n",HTML);
         outputobject.append(decimalFormatter.format(nPPV*100)+"% of <span class=\"dataitem\">"+predictionTrackName+"</span> overlaps with <span class=\"dataitem\">"+answerTrackName+"</span> (PPV)<br>\n",HTML);
         outputobject.append(decimalFormatter.format(nSn*100)+"% of <span class=\"dataitem\">"+answerTrackName+"</span> overlaps with <span class=\"dataitem\">"+predictionTrackName+"</span> (SN)&nbsp;<br>\n",HTML);
@@ -257,53 +266,69 @@ public class CompareRegionDatasetsAnalysis extends Analysis {
         return outputobject;
     }
     
-    private Object createGraphImage(File file, double scale, VisualizationSettings settings) throws IOException {
+     private String getImageTag(File file, String imageformat, double scale, final VisualizationSettings settings) {
+        System.err.println("Compare Regions: getImageTag("+imageformat+") => "+file);
         String[] legends=new String[]{"Overlap (TP)","Unique to "+predictionTrackName+" (FP)","Unique to "+answerTrackName+" (FN)","Background (TN)"};
         Font font=settings.getSystemFont("graph.legendFont");
         Dimension legendsdim=Graph.getLegendDimension(legends, font);
-        int pieChartSize=160; //
-        int pieMargin=40;
-        int margin=5;
-        int width=pieChartSize+legendsdim.width+pieMargin+margin+margin;
-        int height=Math.max(pieChartSize,legendsdim.height)+margin+margin; // image height
-        
-        if (file!=null) {
-            if (file.getName().endsWith(".png")) { // bitmap PNG format   
-                BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
-                Graphics2D g=image.createGraphics();   
-                paintGraphImage(g, scale, width, height, pieChartSize, margin, pieMargin, legends, legendsdim, settings);      
-                OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
-                ImageIO.write(image, "png", output);
-                output.close(); 
-                g.dispose();
-                return new Dimension(width,height);                                
-            } else { // vector format      
-                VectorGraphics2D g=null;
-                String filename=file.getName();
-                     if (filename.endsWith(".svg")) g = new SVGGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                else if (filename.endsWith(".pdf")) g = new PDFGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                else if (filename.endsWith(".eps")) g = new EPSGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
-                g.setClip(0, 0, (int)Math.ceil(width*scale),(int)Math.ceil(height*scale));
-                paintGraphImage(g, scale, width, height, pieChartSize, margin, pieMargin, legends, legendsdim, settings);                     
-                FileOutputStream fileStream = new FileOutputStream(file);
-                try {
-                    fileStream.write(g.getBytes());
-                } finally {
-                    fileStream.close();
-                } 
-                return new Dimension(width,height); 
-            }
-        } else { // No output file. Create the image as a byte[] array for inclusion in Excel
-            BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
-            Graphics2D g=image.createGraphics();   
-            paintGraphImage(g, scale, width, height, pieChartSize, margin, pieMargin, legends, legendsdim, settings);
-            g.dispose();
-            return image;                        
-        }        
-    }  
+        final int pieChartSize=160; //
+        final int pieMargin=40;
+        final int margin=5;
+        final int width=pieChartSize+legendsdim.width+pieMargin+margin+margin;
+        final int height=Math.max(pieChartSize,legendsdim.height)+margin+margin; // image height
+
+        // Create the image, write it to file and return an HTML img tag for it
+        HTMLUtilities.ImagePainter painter = (g) -> paintGraphImage(g, scale, width, height, pieChartSize, margin, pieMargin, legends, legendsdim, settings);    
+        return HTMLUtilities.getImageTag(painter, file, imageformat, height, width, scale);         
+    }     
+    
+//    private Object createGraphImage(File file, double scale, VisualizationSettings settings) throws IOException {
+//        String[] legends=new String[]{"Overlap (TP)","Unique to "+predictionTrackName+" (FP)","Unique to "+answerTrackName+" (FN)","Background (TN)"};
+//        Font font=settings.getSystemFont("graph.legendFont");
+//        Dimension legendsdim=Graph.getLegendDimension(legends, font);
+//        int pieChartSize=160; //
+//        int pieMargin=40;
+//        int margin=5;
+//        int width=pieChartSize+legendsdim.width+pieMargin+margin+margin;
+//        int height=Math.max(pieChartSize,legendsdim.height)+margin+margin; // image height
+//        
+//        if (file!=null) {
+//            if (file.getName().endsWith(".png")) { // bitmap PNG format   
+//                BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
+//                Graphics2D g=image.createGraphics();   
+//                paintGraphImage(g, scale, width, height, pieChartSize, margin, pieMargin, legends, legendsdim, settings);      
+//                OutputStream output=MotifLabEngine.getOutputStreamForFile(file);
+//                ImageIO.write(image, "png", output);
+//                output.close(); 
+//                g.dispose();
+//                return new Dimension(width,height);                                
+//            } else { // vector format      
+//                VectorGraphics2D g=null;
+//                String filename=file.getName();
+//                     if (filename.endsWith(".svg")) g = new SVGGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
+//                else if (filename.endsWith(".pdf")) g = new PDFGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
+//                else if (filename.endsWith(".eps")) g = new EPSGraphics2D(0, 0, Math.ceil(width*scale), Math.ceil(height*scale));
+//                g.setClip(0, 0, (int)Math.ceil(width*scale),(int)Math.ceil(height*scale));
+//                paintGraphImage(g, scale, width, height, pieChartSize, margin, pieMargin, legends, legendsdim, settings);                     
+//                FileOutputStream fileStream = new FileOutputStream(file);
+//                try {
+//                    fileStream.write(g.getBytes());
+//                } finally {
+//                    fileStream.close();
+//                } 
+//                return new Dimension(width,height); 
+//            }
+//        } else { // No output file. Create the image as a byte[] array for inclusion in Excel
+//            BufferedImage image=new BufferedImage((int)Math.ceil(width*scale),(int)Math.ceil(height*scale), BufferedImage.TYPE_INT_RGB);
+//            Graphics2D g=image.createGraphics();   
+//            paintGraphImage(g, scale, width, height, pieChartSize, margin, pieMargin, legends, legendsdim, settings);
+//            g.dispose();
+//            return image;                        
+//        }        
+//    }  
     
 
-    private void paintGraphImage(Graphics2D g, double scale, int width, int height, int pieChartSize, int margin, int pieMargin, String[] legends, Dimension legendsdim, VisualizationSettings settings) throws IOException {
+    private void paintGraphImage(Graphics2D g, double scale, int width, int height, int pieChartSize, int margin, int pieMargin, String[] legends, Dimension legendsdim, VisualizationSettings settings) {
         Color firstTrackColor=settings.getForeGroundColor(predictionTrackName);
         Color secondTrackColor=settings.getForeGroundColor(answerTrackName);
         Color blendColor=VisualizationSettings.blendColors(firstTrackColor, secondTrackColor);
