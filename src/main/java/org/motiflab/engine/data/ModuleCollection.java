@@ -530,7 +530,19 @@ public class ModuleCollection extends DataCollection {
         return newcollection;
     }
 
-
+    public void setPredefinedCollectionName(String collectionname) {
+        setConstructorString(Operation_new.COLLECTION_PREFIX, collectionname);       
+    }
+    
+    public String getPredefinedCollectionName() {
+        return getConstructorString(Operation_new.COLLECTION_PREFIX);
+    }    
+    /** Returns TRUE if this ModuleCollection returns a system predefined collection  */
+    public boolean isPredefined() {
+        return hasConstructorString(Operation_new.COLLECTION_PREFIX);
+    }
+    
+    
     public static String getType() {return typedescription;}
 
     @Override

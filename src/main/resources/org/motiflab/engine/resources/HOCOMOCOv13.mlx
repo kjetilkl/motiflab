@@ -32,7 +32,7 @@
 #Long = F-box and leucine rich repeat protein 19
 #Factors = FBXL19,CXXC11,Fbl19,JHDM1C
 #W = 7
-#Class = 2.6.1.0.256
+#Class = 2.6.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq,PBM
@@ -156,7 +156,7 @@
 #Long = zinc finger protein 395
 #Factors = ZNF395,HDBP-2,HDBP2,HDRF-2,PBF,PRF-1
 #W = 10
-#Class = 2.3.2.255.2
+#Class = 2.2
 #Organisms = human (Homo sapiens)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq
@@ -182,7 +182,7 @@
 #Long = zinc finger translocation associated
 #Factors = ZFTA,C11orf95
 #W = 11
-#Class = 2.3.5.0.257
+#Class = 2.3.5
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq,PBM
@@ -285,7 +285,7 @@
 #Long = CPX chromosome region candidate 1
 #Factors = CPXCR1,CT77
 #W = 15
-#Class = 2.3.2.4.255
+#Class = 2.3.2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = C
 #Evidence= ChIP-Seq
@@ -316,7 +316,7 @@
 #Long = deoxynucleotidyltransferase terminal interacting protein 1
 #Factors = DNTTIP1,C20orf167,Tdif1,dJ447F3.4
 #W = 11
-#Class = 8.2.255.0.2
+#Class = 8.2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX
@@ -383,7 +383,7 @@
 #Long = Jrk helix-turn-helix protein
 #Factors = JRK,JH8,jerky
 #W = 19
-#Class = 3.0.256.0.1
+#Class = 3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,PBM
@@ -452,7 +452,7 @@
 #Long = zinc finger and BTB domain containing 8A
 #Factors = ZBTB8A,BOZF1,ZBTB8,ZNF916A
 #W = 20
-#Class = 2.3.2.1.255
+#Class = 2.3.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq
@@ -569,7 +569,7 @@
 #Long = NACC family member 2
 #Factors = NACC2,BEND9,BTBD14,BTBD14A,BTBD31,NAC-2
 #W = 10
-#Class = 3.0.257.0.1
+#Class = 3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq,PBM
@@ -772,7 +772,7 @@
 #Long = tigger transposable element derived 4
 #Factors = TIGD4
 #W = 17
-#Class = 3.0.256.0.3
+#Class = 3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq
@@ -1305,7 +1305,7 @@
 #Long = tigger transposable element derived 3
 #Factors = TIGD3
 #W = 17
-#Class = 3.0.256.0.2
+#Class = 3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq,PBM
@@ -1365,7 +1365,7 @@
 #Long = zinc finger protein 367
 #Factors = ZNF367,AFF29,CDC14B,ZFF29
 #W = 12
-#Class = 2.3.2.4.256
+#Class = 2.3.2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq
@@ -1393,7 +1393,7 @@
 #Long = zinc finger protein 503
 #Factors = ZNF503,NOLZ-1,NOLZ1,Nlz2
 #W = 13
-#Class = 2.3.2.256.1
+#Class = 2.3.2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= ChIP-Seq
@@ -1582,7 +1582,7 @@
 #Long = ATM interactor
 #Factors = ATMIN,ASCIZ,ZNF822
 #W = 21
-#Class = 2.3.3.0.257
+#Class = 2.3.3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= ChIP-Seq
@@ -1716,7 +1716,7 @@
 #Long = SLC2A4 regulator
 #Factors = SLC2A4RG,GEF,HDBP-1,HDBP1,Si-1-2,Si-1-2-19
 #W = 10
-#Class = 2.3.2.255.1
+#Class = 2.3.2
 #Organisms = human (Homo sapiens)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX
@@ -1839,7 +1839,7 @@
 #Long = CXXC finger protein 4
 #Factors = CXXC4,IDAX
 #W = 9
-#Class = 2.6.1.0.255
+#Class = 2.6.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq,PBM
@@ -1972,7 +1972,7 @@
 #Long = FLYWCH-type zinc finger 1
 #Factors = FLYWCH1
 #W = 26
-#Class = 2.3.4.255.1
+#Class = 2.3.4
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,PBM
@@ -2060,7 +2060,7 @@
 #Long = family with sequence similarity 200 member B
 #Factors = FAM200B,C4orf53
 #W = 14
-#Class = 2.3.5.0.255
+#Class = 2.3.5
 #Organisms = human (Homo sapiens)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq,PBM
@@ -2090,7 +2090,7 @@
 #Long = zinc finger protein 831
 #Factors = ZNF831,C20orf174
 #W = 11
-#Class = 2.3.2.4.257
+#Class = 2.3.2
 #Organisms = human (Homo sapiens)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq
@@ -2154,7 +2154,7 @@
 #Long = Methylcytosine dioxygenase TET3
 #Factors = TET3,KIAA0401
 #W = 18
-#Class = 2.6.1.0.8
+#Class = 2.6.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq,PBM
@@ -2272,7 +2272,7 @@
 #Long = telomeric repeat binding factor 1
 #Factors = TERF1,PIN2,TRBF1,TRF,TRF1,hTRF1-AS
 #W = 8
-#Class = 3.5.1.0.256
+#Class = 3.5.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,PBM
@@ -2700,7 +2700,7 @@
 #Long = CGG triplet repeat binding protein 1
 #Factors = CGGBP1,CGGBP,p20-CGGBP
 #W = 11
-#Class = 0.0.9.0.255
+#Class = 0
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX,SMiLE-Seq,PBM
@@ -2791,7 +2791,7 @@
 #Long = zinc finger protein 865
 #Factors = ZNF865
 #W = 21
-#Class = 2.3.3.0.259
+#Class = 2.3.3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX
@@ -2895,7 +2895,7 @@
 #Long = Zinc finger protein 699
 #Factors = ZNF699,Hangover homolog
 #W = 18
-#Class = 2.3.3.33.203
+#Class = 2.3.3
 #Organisms = human (Homo sapiens)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX
@@ -3031,7 +3031,7 @@
 #Long = Methyl-CpG-binding domain protein 3
 #Factors = MBD3
 #W = 21
-#Class = 0.0.0.0.257
+#Class = 0
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= ChIP-Seq
@@ -3504,7 +3504,7 @@
 #Long = myelin regulatory factor like
 #Factors = MYRFL,C12orf15,C12orf28,bcm1377
 #W = 18
-#Class = 6.6.1.0.255
+#Class = 6.6.1.0.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = C
 #Evidence= ChIP-Seq
@@ -3579,7 +3579,7 @@
 #Long = zinc finger protein 703
 #Factors = ZNF703,NLZ1,ZEPPO1,ZNF503L,ZPO1
 #W = 7
-#Class = 2.3.2.256.2
+#Class = 2.3.2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = C
 #Evidence= ChIP-Seq
@@ -3684,7 +3684,7 @@
 #Long = zinc finger protein 850
 #Factors = ZNF850,ZNF850P
 #W = 18
-#Class = 2.3.3.0.258
+#Class = 2.3.3
 #Organisms = human (Homo sapiens)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX
@@ -3793,7 +3793,7 @@
 #Long = MAX gene-associated protein
 #Factors = MGA,KIAA0518,MAD5,Kiaa4252,MAX dimerization protein 5
 #W = 19
-#Class = 1.2.6.7.4
+#Class = 1.2.6.8.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX
@@ -3831,7 +3831,7 @@
 #Long = Myb like, SWIRM and MPN domains 1
 #Factors = MYSM1,2A-DUB,2ADUB,BMFS4
 #W = 17
-#Class = 3.5.1.0.255
+#Class = 3.5.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= ChIP-Seq
@@ -3903,7 +3903,7 @@
 #Long = NK2 homeobox 1
 #Factors = TTF1,BCH,BHC,NK-2,NKX2.1,NKX2A
 #W = 21
-#Class = 3.5.1.0.257
+#Class = 3.5.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX,Genomic HT-SELEX
@@ -4253,7 +4253,7 @@
 #Long = zinc finger protein 888
 #Factors = ZNF888
 #W = 9
-#Class = 2.3.3.72.255
+#Class = 2.3.3
 #Organisms = human (Homo sapiens)
 #HMQuality = B
 #Evidence= ChIP-Seq
@@ -4461,7 +4461,7 @@
 #Long = tigger transposable element derived 5
 #Factors = TIGD5
 #W = 18
-#Class = 3.0.256.0.4
+#Class = 3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= HT-SELEX,Genomic HT-SELEX,SMiLE-Seq
@@ -4689,7 +4689,7 @@
 #Long = tigger transposable element derived 7
 #Factors = TIGD7,Sancho
 #W = 19
-#Class = 3.0.256.0.5
+#Class = 3
 #Organisms = human (Homo sapiens)
 #HMQuality = A
 #Evidence= HT-SELEX,Genomic HT-SELEX,SMiLE-Seq,PBM
@@ -4794,7 +4794,7 @@
 #Long = Zinc finger protein 587B
 #Factors = ZNF587B
 #W = 14
-#Class = 2.3.4.1.8
+#Class = 2.3.4
 #Organisms = human (Homo sapiens)
 #HMQuality = A
 #Evidence= HT-SELEX,Genomic HT-SELEX
@@ -5419,7 +5419,7 @@
 #Long = AT-hook containing transcription factor 1
 #Factors = AHCTF1,ELYS,MST108,MSTP108,TMBS62
 #W = 7
-#Class = 8.2.255.0.1
+#Class = 8.2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= PBM
@@ -5477,7 +5477,7 @@
 #Long = glyoxylate reductase 1 homolog
 #Factors = GLYR1,BM045,HIBDL,N-PAC,NP60,NPAC
 #W = 7
-#Class = 8.2.255.0.3
+#Class = 8.2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= PBM
@@ -5500,7 +5500,7 @@
 #Long = transcription factor 20
 #Factors = TCF20,AR1,DDVIBA,SPBP,TCF-20
 #W = 10
-#Class = 0.0.9.0.256
+#Class = 0
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= PBM
@@ -5526,7 +5526,7 @@
 #Long = PHD finger protein 21A
 #Factors = PHF21A,BHC80,BM-006,IDDBCS,NEDMS
 #W = 11
-#Class = 8.2.255.0.4
+#Class = 8.2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= PBM
@@ -5554,7 +5554,7 @@
 #Long = SET binding protein 1
 #Factors = SETBP1,MRD29,SEB
 #W = 14
-#Class = 8.2.255.0.5
+#Class = 8.2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= PBM
@@ -5642,7 +5642,7 @@
 #Long = Muscleblind-like protein 2
 #Factors = MBNL2,MBLL,MBLL39,MLP1,Kiaa4072
 #W = 8
-#Class = 0.0.9.0.6
+#Class = 0
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= PBM
@@ -5667,7 +5667,7 @@
 #Long = dachshund family transcription factor 2
 #Factors = DACH2
 #W = 12
-#Class = 0.0.9.1.2
+#Class = 3.3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX
@@ -5695,7 +5695,7 @@
 #Long = pogo transposable element derived with KRAB domain
 #Factors = POGK,BASS2,KRBOX2,LST003
 #W = 26
-#Class = 3.0.255.0.1
+#Class = 3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= HT-SELEX,SMiLE-Seq
@@ -5771,7 +5771,7 @@
 #Long = dachshund family transcription factor 1
 #Factors = DACH1,DACH
 #W = 17
-#Class = 0.0.9.1.1
+#Class = 3.3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX
@@ -8609,7 +8609,7 @@
 #Long = Major centromere autoantigen B
 #Factors = CENPB,Cenp-b
 #W = 18
-#Class = 3.0.256.0.6
+#Class = 3
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX
@@ -8931,7 +8931,7 @@
 #Long = Cytoplasmic polyadenylation element-binding protein 1
 #Factors = CPEB1,CPEB
 #W = 8
-#Class = 0.0.9.0.8
+#Class = 2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX
@@ -8957,7 +8957,7 @@
 #Long = Cytoplasmic polyadenylation element-binding protein 1
 #Factors = CPEB1,CPEB
 #W = 18
-#Class = 0.0.9.0.8
+#Class = 2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX
@@ -10258,7 +10258,7 @@
 #Long = Zinc finger protein neuro-d4
 #Factors = DPF1,BAF45B,NEUD4
 #W = 14
-#Class = 0.0.9.0.7
+#Class = 2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX,Methyl-HT-SELEX
@@ -11560,7 +11560,7 @@
 #Long = ETS domain-containing transcription factor ERF
 #Factors = ERF,Ets2 repressor factor,PE-2
 #W = 11
-#Class = 3.5.2.1.11
+#Class = 3.5.2.3.2.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX
@@ -14046,7 +14046,7 @@
 #Long = Forkhead box protein O6
 #Factors = FOXO6
 #W = 12
-#Class = 3.3.1.15.5
+#Class = 3.3.1.15.4
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX
@@ -17301,7 +17301,7 @@
 #Long = Heat shock transcription factor, Y-linked
 #Factors = HSFY1,HSFY2,HSF2L,HSFY,Heat shock transcription factor 2-like protein,HSF2-like
 #W = 19
-#Class = 3.4.1.0.8
+#Class = 3.4.1.0.6
 #Organisms = human (Homo sapiens)
 #HMQuality = B
 #Evidence= Methyl-HT-SELEX
@@ -17338,7 +17338,7 @@
 #Long = Heat shock transcription factor, Y-linked
 #Factors = HSFY1,HSFY2,HSF2L,HSFY,Heat shock transcription factor 2-like protein,HSF2-like
 #W = 18
-#Class = 3.4.1.0.8
+#Class = 3.4.1.0.6
 #Organisms = human (Homo sapiens)
 #HMQuality = B
 #Evidence= HT-SELEX
@@ -17374,7 +17374,7 @@
 #Long = Heat shock transcription factor, Y-linked
 #Factors = HSFY1,HSFY2,HSF2L,HSFY,Heat shock transcription factor 2-like protein,HSF2-like
 #W = 12
-#Class = 3.4.1.0.8
+#Class = 3.4.1.0.6
 #Organisms = human (Homo sapiens)
 #HMQuality = B
 #Evidence= HT-SELEX
@@ -18865,7 +18865,7 @@
 #Long = Homeobox protein Hox-D13
 #Factors = HXD13,HOX4I,Hox-4.8,Homeobox protein Hox-4I
 #W = 11
-#Class = 3.1.1.8.17
+#Class = 3.1.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = A
 #Evidence= ChIP-Seq,HT-SELEX
@@ -18894,7 +18894,7 @@
 #Long = Homeobox protein Hox-D13
 #Factors = HXD13,HOX4I,Hox-4.8,Homeobox protein Hox-4I
 #W = 11
-#Class = 3.1.1.8.17
+#Class = 3.1.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX,Methyl-HT-SELEX
@@ -23544,7 +23544,7 @@
 #Long = MAX gene-associated protein
 #Factors = MGAP,KIAA0518,MAD5,Kiaa4252,MAX dimerization protein 5
 #W = 10
-#Class = 1.2.6.7.4
+#Class = 1.2.6.8.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = C
 #Evidence= ChIP-Seq
@@ -23573,7 +23573,7 @@
 #Long = MAX gene-associated protein
 #Factors = MGAP,KIAA0518,MAD5,Kiaa4252,MAX dimerization protein 5
 #W = 18
-#Class = 1.2.6.7.4
+#Class = 1.2.6.8.1
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX
@@ -34225,7 +34225,7 @@
 #Long = SKI family transcriptional corepressor 1
 #Factors = SKOR1,CORL1,FUSSEL15,LBXCOR1
 #W = 18
-#Class = 0.0.9.0.5
+#Class = 0
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = C
 #Evidence= Methyl-HT-SELEX
@@ -34262,7 +34262,7 @@
 #Long = SKI family transcriptional corepressor 1
 #Factors = SKOR1,CORL1,FUSSEL15,LBXCOR1
 #W = 16
-#Class = 0.0.9.0.5
+#Class = 0
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = C
 #Evidence= HT-SELEX
@@ -34297,7 +34297,7 @@
 #Long = SKI family transcriptional corepressor 2
 #Factors = SKOR2,CORL2,FUSSEL18
 #W = 15
-#Class = 0.0.9.0.4
+#Class = 0
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX,Methyl-HT-SELEX
@@ -38444,7 +38444,7 @@
 #Long = Homeobox protein TGIF2LX
 #Factors = TF2LX,TGIFLX,TGF-beta-induced transcription factor 2-like protein,TGFB-induced factor 2-like protein, X-linked,TGIF-like on the X
 #W = 8
-#Class = 3.1.4.5.3
+#Class = 3.1.4
 #Organisms = human (Homo sapiens)
 #HMQuality = B
 #Evidence= HT-SELEX,Methyl-HT-SELEX
@@ -38469,7 +38469,7 @@
 #Long = Homeobox protein TGIF2LX
 #Factors = TF2LX,TGIFLX,TGF-beta-induced transcription factor 2-like protein,TGFB-induced factor 2-like protein, X-linked,TGIF-like on the X
 #W = 16
-#Class = 3.1.4.5.3
+#Class = 3.1.4
 #Organisms = human (Homo sapiens)
 #HMQuality = B
 #Evidence= HT-SELEX,Methyl-HT-SELEX
@@ -38502,7 +38502,7 @@
 #Long = Homeobox protein TGIF2LY
 #Factors = TF2LY,TGIFLY,TGF-beta-induced transcription factor 2-like protein,TGFB-induced factor 2-like protein, Y-linked,TGIF-like on the Y
 #W = 14
-#Class = 3.1.4.5.4
+#Class = 3.1.4
 #Organisms = human (Homo sapiens)
 #HMQuality = B
 #Evidence= HT-SELEX,Methyl-HT-SELEX
@@ -38533,7 +38533,7 @@
 #Long = Homeobox protein TGIF2LY
 #Factors = TF2LY,TGIFLY,TGF-beta-induced transcription factor 2-like protein,TGFB-induced factor 2-like protein, Y-linked,TGIF-like on the Y
 #W = 14
-#Class = 3.1.4.5.4
+#Class = 3.1.4
 #Organisms = human (Homo sapiens)
 #HMQuality = B
 #Evidence= HT-SELEX,Methyl-HT-SELEX
@@ -50349,7 +50349,7 @@
 #Long = Zinc finger protein 704
 #Factors = ZN704,Gig1,Zfp704
 #W = 16
-#Class = 0.0.9.0.2
+#Class = 2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX,Methyl-HT-SELEX
@@ -50555,7 +50555,7 @@
 #Long = Zinc finger protein 714
 #Factors = ZN714
 #W = 18
-#Class = 2.3.3.0.170
+#Class = 2.3.3.59.5
 #Organisms = human (Homo sapiens)
 #HMQuality = C
 #Evidence= ChIP-Seq
@@ -51896,7 +51896,7 @@
 #Long = Zinc finger protein 821
 #Factors = ZN821,Zfp821
 #W = 17
-#Class = 0.0.9.0.1
+#Class = 2
 #Organisms = human (Homo sapiens),mouse (Mus musculus)
 #HMQuality = B
 #Evidence= HT-SELEX,Methyl-HT-SELEX

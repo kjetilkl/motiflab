@@ -309,9 +309,14 @@ public class Motif extends Data implements Comparable, BasicDataType {
         if (classification!=null && classification.matches("[^0-9\\.]")) throw new ExecutionError("Illegal motif class: '"+classification+"' for "+getPresentationName());
         if (classification!=null) {
             classification=MotifClassification.trimToLevel(classification, 6);
-            if (!MotifClassification.isKnownClassString(classification)) throw new ExecutionError("Unknown motif class: '"+classification+"' for "+getPresentationName());
+            if (MotifClassification.isKnownClassString(classification)) {
+                this.classification=classification;                           
+            } else {
+                MotifLabEngine.getEngine().logMessage("WARNING: disregarding unknown motif class '"+classification+"' for "+getPresentationName(), 22);
+                // throw new ExecutionError("Unknown motif class: '"+classification+"' for "+getPresentationName());
+            }
         }
-        this.classification=classification;
+        
     }
     
     // public boolean isHalfsite() {return part==HALFSITE;}

@@ -269,7 +269,7 @@ public class DataTrackConfiguration_AddFromConfigFileDialog extends javax.swing.
     private void helpButtonPressed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpButtonPressed
         Object help=null;
         try {
-           help=new java.net.URL(gui.getEngine().getWebSiteURL()+"getHelp.php?section=documentation_Configure_datatracks_XML");
+           help=new java.net.URL(gui.getEngine().getWebSiteURL()+"help/section=documentation_Configure_datatracks_XML");
         } catch (Exception e) {
             help="Help unavailable";
         }

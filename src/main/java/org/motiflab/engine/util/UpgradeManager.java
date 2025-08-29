@@ -134,7 +134,7 @@ public class UpgradeManager {
             String upgradeMessage = "This version of MotifLab has made updates to some of its resources and configuration files.\n"
                                   + "It is recommended that you upgrade your existing configurations to match.";              
             client.displayMessage(upgradeMessage, MotifLabClient.WARNING_MESSAGE);                                     
-            String makeBackupMessage = "Would you like to create a backup of your configuration files first (to ZIP archive)?";            
+            String makeBackupMessage = "Would you like to create a backup of your old configuration files first (to ZIP archive)?";            
             int[] makeBackupChoice = client.selectOption(makeBackupMessage, new String[]{"Yes","No"}, false); 
             if (makeBackupChoice[0]==0) backupCurrentConfigurationFiles();
             performUpgradeSteps(oldMigrationNumber); // upgrade from older version of MotifLab with no migration number
@@ -147,7 +147,7 @@ public class UpgradeManager {
             throw new SystemError("It seems that something went wrong during installation. Please try to restart MotifLab");
         }     
         client.progressReportMessage(-1);
-        client.displayMessage("To make sure that all the new configurations have been applied, it is recommended to restart MotifLab", MotifLabClient.WARNING_MESSAGE);
+        client.displayMessage("To make sure that all the new configurations have been properly applied, it is recommended to restart MotifLab", MotifLabClient.WARNING_MESSAGE);
     }    
             
     /**
@@ -160,7 +160,7 @@ public class UpgradeManager {
         if (oldMigrationNumber<2) {
              upgradeToMigrationVersion2();
         } else if (oldMigrationNumber==3) {
-            // this may happen in the future. It will deal with it then...
+            // this may happen in the future. I will deal with it then...
         }
     }
     
@@ -226,8 +226,36 @@ public class UpgradeManager {
         else updateDataTracksConfiguration(datatracksSelection[0]); // 
         
         // ----- Motif and Module collections -----
-        replaceMotifCollection(); 
-        
+        String motifsMessage  = "This version of MotifLab comes with updated motif collections for TRANSFAC Public, JASPAR (2024 version) and HOCOMOCO v13.\n"
+                              + "These collections rely on an updated version of the \"TFclass\" classification scheme by Edgar Wingender (from 2018),\n"
+                              + "which has breaking changes that make it incompatible with the classifications used by the old MotifLab.\n\n"
+                              + "Note that motifs in saved sessions may still refer to the old classification scheme, which can cause some issues.\n\n"
+                              + "Would you like to update the TF classification scheme and install the new motif collections?\n(corresponding old collections will be removed)";
+        int[] motifSelection = client.selectOption(motifsMessage, new String[]{"Yes","No"}, false);       
+        if (motifSelection!=null && motifSelection.length>0 && motifSelection[0]==0) { // YES
+            try {
+                engine.removePredefinedMotifCollection("Jaspar Core");
+            } catch (Exception e) {
+                engine.logMessage("WARNING: "+e.getMessage());
+            }
+            try {
+                engine.removePredefinedMotifCollection("TRANSFAC Public");
+            } catch (Exception e) {
+                engine.logMessage("WARNING: "+e.getMessage());
+            }            
+            updateTFclass();
+            ArrayList<String> newMotifCollections=new ArrayList<>();
+            newMotifCollections.add("JASPAR2024.mlx");
+            newMotifCollections.add("JASPAR2024_redundant.mlx");
+            newMotifCollections.add("Transfac_public.mlx");
+            newMotifCollections.add("HOCOMOCOv13.mlx");                              
+            installBundledMotifCollections(newMotifCollections, 60, 80);
+
+        } else { // don't install new motif collections and TF classification scheme
+            engine.logMessage("Skipping update of the TF classification scheme and motif collections");
+        }           
+        // add new module collections. No need to ask
+         
         // ----- Plugins -----
         String pluginsDirectory=engine.getPluginsDirectory();
         File pluginDir = new File(pluginsDirectory);
@@ -248,7 +276,7 @@ public class UpgradeManager {
                 engine.logMessage("Skipping update of plugins");
             }  
         }
-                    
+        client.progressReportMessage(90);                   
     }
 
     /**
@@ -720,8 +748,8 @@ public class UpgradeManager {
         } else replaceConfigFile("GeneIDResolver.config","Gene ID resolver");
     }
     
-    private void replaceMotifCollection() {
-        
+    private void updateTFclass() {
+       replaceConfigFile("TFclass.config","transcription factor classifications (\"TFClass\")"); 
     }  
     
     private void updatePlugins(int migrationNumber) {

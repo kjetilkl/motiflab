@@ -89,7 +89,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     private HashMap<String,Operation> operationslist=new HashMap<String,Operation>();
     private HashMap<String,DataFormat> dataformatslist=new HashMap<String,DataFormat>();
     private HashMap<Class,String> defaultdataformats=new HashMap<Class,String>();
-    private HashMap<String,Object[]> predefinedMotifCollections=new HashMap<String,Object[]>();// (String)Object[0]=filename, (Integer)Object[1]=collection size
+    private HashMap<String,Object[]> predefinedMotifCollections=new HashMap<String,Object[]>(); // key is name, value is (String)Object[0]=filename, (Integer)Object[1]=collection size
+    private HashMap<String,Object[]> predefinedModuleCollections=new HashMap<String,Object[]>();// key is name, value is (String)Object[0]=filename, (Integer)Object[1]=collection size    
     private HashMap<String,DataRepository> datarepositories=null;
     private HashMap<String,MotifLabResource> motiflabresources=null;
     private HashMap<String,Class> datarepositoryTypes=null;
@@ -109,6 +110,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     private int networkTimeoutDelay=25000; // milliseconds until the DataLoader should call a network timeout and proceed to the next mirror in the list (or throw Exception if there are no more mirrors)
     private String motiflabDirectoryPath="";
     private String MotifCollectionDirectory="MLab_MotifCollections";
+    private String ModuleCollectionDirectory="MLab_ModuleCollections";    
     private int maxSequenceLength=0;
     private int concurrentThreadCount=4;
     private boolean dataUpdatesAllowed=true;
@@ -228,7 +230,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         importOperations(); // import known operations
         importAnalyses(); // import Analyses programs
         importDataFormats(); // import known data formats     
-        importPredefinedMotifCollections(); // import information about predefined motif collections   
+        importPredefinedMotifCollections(); // import information about predefined motif collections
+        importPredefinedModuleCollections(); // import information about predefined motif collections
         importExternalPrograms(); // import external programs         
         importDataRepositories();         
         importPlugins(null, new String[]{"type:DataSource", "load:early"});  // Data Sources and "early" plugins should already have been imported, so skip them here...         
@@ -3243,6 +3246,9 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         return p;
     }    
     
+ // ==============================================================================   
+    
+    
     /** Reads a configuration file (actually a serialized object) describing the
      *  predefined MotifCollections known to the system
      */
@@ -3367,23 +3373,39 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         } 
     }
    
-
+    /**
+     * Removes the motif collection with the given name from the list of predefined motif collections.
+     * The file is also deleted from disk.
+     * @motifCollectionName the name of the motif collection to remove
+     * @throws Exception
+     */
+    public void removePredefinedMotifCollection(String motifCollectionName) throws Exception {
+        String filename = getFilenameForMotifCollection(motifCollectionName);
+        File file = new File(filename);
+        if (file.exists()) {
+            boolean deleted = file.delete();
+            if (deleted) {
+                predefinedMotifCollections.remove(motifCollectionName);       
+                savePredefinedMotifCollectionsConfiguration();
+            } else throw new ExecutionError("Unable to remove motif collection: "+motifCollectionName);
+        }
+    }
 
     /**
      * Saves the current configuration of predefined motif collections back to the standard config file
      * @throws Exception
      */
     public void savePredefinedMotifCollectionsConfiguration() throws Exception {
-           File configfile=new File(getMotifLabDirectory()+File.separator+"predefinedMotifCollectionsConfig.txt");
-           BufferedWriter filewriter = new BufferedWriter(new FileWriter(configfile));
-           for (String name:predefinedMotifCollections.keySet()) {
-               Object[] entry=predefinedMotifCollections.get(name);
-               String filename=(String)entry[0];
-               int size=(Integer)entry[1];
-               filewriter.write(name+"\t"+size+"\t"+filename+"\n");               
-           }
-           filewriter.close();
-           if (!configfile.exists()) throw new ExecutionError("Unable to save config file for predefined motif collections");
+        File configfile=new File(getMotifLabDirectory()+File.separator+"predefinedMotifCollectionsConfig.txt");
+        BufferedWriter filewriter = new BufferedWriter(new FileWriter(configfile));
+        for (String name:predefinedMotifCollections.keySet()) {
+            Object[] entry=predefinedMotifCollections.get(name);
+            String filename=(String)entry[0];
+            int size=(Integer)entry[1];
+            filewriter.write(name+"\t"+size+"\t"+filename+"\n");               
+        }
+        filewriter.close();
+        if (!configfile.exists()) throw new ExecutionError("Unable to save config file for predefined motif collections");
     }
 
     /** Loads information about predefined motif collections from the standard config file and returns this information in the form of a hashmap
@@ -3414,7 +3436,193 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
            return config;   
     }
 
-     
+
+    /** Reads a configuration file (actually a serialized object) describing the
+     *  predefined ModuleCollections known to the system
+     */
+    @SuppressWarnings("unchecked")
+    private void importPredefinedModuleCollections() {
+        logMessage("Importing Module Collections");
+        File configfile=new File(getMotifLabDirectory()+File.separator+"predefinedModuleCollectionsConfig.txt");
+        if (configfile.exists()) {
+            try {
+               predefinedModuleCollections=loadPredefinedModuleCollectionsConfiguration();
+            } catch (Exception e) {errorMessage("Unable to load predefined module collections: "+e.toString(),0);}
+        } else {
+            File modulecollectiondir=getPredefinedModuleCollectionDirectory();
+            if (!modulecollectiondir.exists()) {
+               boolean ok=modulecollectiondir.mkdirs();
+               if (!ok) errorMessage("Unable to create directory for predefined module collections", 0);  
+            }
+        }        
+
+    }
+    
+    public File getPredefinedModuleCollectionDirectory() {
+       return new File(getMotifLabDirectory()+java.io.File.separator+ModuleCollectionDirectory); 
+    }
+    
+    /** 
+     * Returns the name of the file which stores the data for the given module collection
+     * (in MotifLabModule format)
+     */
+    public String getFilenameForModuleCollection(String moduleCollectionName) {
+        Object[] info=predefinedModuleCollections.get(moduleCollectionName);
+        if (info==null) return null;
+        else return getMotifLabDirectory()+File.separator+ModuleCollectionDirectory+File.separator+(String)info[0];
+    }
+     /** 
+     * Returns the size of the predefined module collection with the given name
+     */
+    public int getSizeForModuleCollection(String moduleCollectionName) {
+        Object[] info=predefinedModuleCollections.get(moduleCollectionName);
+        if (info==null) return 0;
+        else return (Integer)info[1];
+    }
+    
+    /** Returns a list (or rather a Set) of the names of predefined module collections known to the engine */
+    public Set<String> getPredefinedModuleCollections() {
+        return predefinedModuleCollections.keySet();               
+    }
+    
+    /** 
+     * Registers the given ModuleCollection as part of the set of predefined collections 
+     * This will save the collection in the working directory (replacing any previous collections
+     * with the same name) and also update the 'registry' of predefined collections
+     * @param collection The ModuleCollection to be registered
+     */
+    public void registerPredefinedModuleCollection(ModuleCollection collection) throws Exception {
+        String name=collection.getPredefinedCollectionName();
+        if (name==null || name.isEmpty()) name=collection.getName();
+        String filename=name.replace(" ", "_"); // just in case
+        DataFormat format=getDataFormat("MotifLabModule");
+        filename+=("."+format.getSuffix());
+        int collectionsize=collection.size();
+        String fullpath=getMotifLabDirectory()+File.separator+ModuleCollectionDirectory+File.separator+filename;      
+        if (format==null) throw new SystemError("Unknown dataformat: MotifLabModule");
+        saveDataToFile(collection, format, fullpath);
+        Object[] oldentry=predefinedModuleCollections.get(name);
+        predefinedModuleCollections.put(name, new Object[]{filename,new Integer(collectionsize)});
+        try {
+            collection.setPredefinedCollectionName(name);
+            savePredefinedModuleCollectionsConfiguration();
+        } catch (Exception e) {
+           if (oldentry==null) predefinedModuleCollections.remove(name);
+           else predefinedModuleCollections.put(name,oldentry); // restore old entry if something went wrong during save
+           throw e;
+        } 
+     }
+
+     /**
+      * Registers a predefined ModuleCollection which is read from a stream (in MotifLabModule format)
+      * The collection is saved locally beneath the work directory
+      * @param stream
+      * @param filename The filename of the file where the collection should be saved (just a simple name, not the full path)
+      * @param collectionName if not null, the collection will be given this name, else the name will be taken either from the '#Collection = name' line in the stream (if found) or from the given filename
+      * @throws java.lang.Exception
+      */
+     public void registerPredefinedModuleCollectionFromStream(InputStream stream, String filename, String collectionName) throws Exception {
+        String name=(collectionName!=null)?collectionName:filename;
+        String fullpath=getMotifLabDirectory()+File.separator+ModuleCollectionDirectory+File.separator+filename;
+        File outputfile=new File(fullpath);
+        BufferedReader inputStream=null;
+        BufferedWriter outputStream=null;
+        int collectionsize=0;
+        try {
+            inputStream=new BufferedReader(new InputStreamReader(stream));
+            outputStream=new BufferedWriter(new FileWriter(outputfile));
+            String line;
+            while((line=inputStream.readLine())!=null) {
+                if (line.startsWith("#ModuleID")) collectionsize++;
+                else if (line.startsWith("#Collection")) {
+                    String[] parts=line.split("=");
+                    if (collectionName==null) name=parts[parts.length-1].trim();
+                    else name=collectionName;
+                    line="#Collection = "+name;
+                }
+                outputStream.write(line);
+                outputStream.newLine();
+            }
+        } finally {
+            try {
+                if (inputStream!=null) inputStream.close();
+                if (outputStream!=null) outputStream.close();
+            } catch (IOException ioe) {}
+        }        
+        Object[] oldentry=predefinedModuleCollections.get(name);
+        predefinedModuleCollections.put(name, new Object[]{filename,new Integer(collectionsize)});
+        try {
+            savePredefinedModuleCollectionsConfiguration();
+        } catch (Exception e) {
+           if (oldentry==null) predefinedModuleCollections.remove(name);
+           else predefinedModuleCollections.put(name,oldentry);
+           throw e;
+        } 
+    }
+   
+    /**
+     * Removes the module collection with the given name from the list of predefined module collections.
+     * The file is also deleted from disk.
+     * @moduleCollectionName the name of the module collection to remove
+     * @throws Exception
+     */
+    public void removePredefinedModuleCollection(String moduleCollectionName) throws Exception {
+        String filename = getFilenameForModuleCollection(moduleCollectionName);
+        File file = new File(filename);
+        if (file.exists()) {
+            boolean deleted = file.delete();
+            if (deleted) {
+                predefinedModuleCollections.remove(moduleCollectionName);       
+                savePredefinedModuleCollectionsConfiguration();
+            } else throw new ExecutionError("Unable to remove module collection: "+moduleCollectionName);
+        }
+    }
+
+    /**
+     * Saves the current configuration of predefined module collections back to the standard config file
+     * @throws Exception
+     */
+    public void savePredefinedModuleCollectionsConfiguration() throws Exception {
+        File configfile=new File(getMotifLabDirectory()+File.separator+"predefinedModuleCollectionsConfig.txt");
+        BufferedWriter filewriter = new BufferedWriter(new FileWriter(configfile));
+        for (String name:predefinedModuleCollections.keySet()) {
+            Object[] entry=predefinedModuleCollections.get(name);
+            String filename=(String)entry[0];
+            int size=(Integer)entry[1];
+            filewriter.write(name+"\t"+size+"\t"+filename+"\n");               
+        }
+        filewriter.close();
+        if (!configfile.exists()) throw new ExecutionError("Unable to save config file for predefined module collections");
+    }
+
+    /** Loads information about predefined module collections from the standard config file and returns this information in the form of a hashmap
+     *  @return A hashmap where the key is the name of a collection and the Object[] value contains the filename for this collection and its size
+     */
+    public HashMap<String, Object[]> loadPredefinedModuleCollectionsConfiguration() throws Exception {
+           File configfile=new File(getMotifLabDirectory()+File.separator+"predefinedModuleCollectionsConfig.txt");
+           if (!configfile.exists()) return null;
+           HashMap<String,Object[]> config = new HashMap<String,Object[]>();
+           BufferedReader filereader = new BufferedReader(new FileReader(configfile));
+           String line;
+           while ((line=filereader.readLine())!=null) {
+               if (line.trim().isEmpty() || line.startsWith("#")) continue;
+               String[] split=line.split("\t");
+               if (split.length!=3) throw new SystemError("Unrecognized line format in config file for predefined module collections. Expected 3 fields but found "+split.length);
+               String collectionName=split[0];
+               String filename=split[2];
+               int size=0;
+               try {
+                   size=Integer.parseInt(split[1]);
+               } catch (NumberFormatException e) {
+                  filereader.close();
+                  throw new SystemError("Unable to parse expected numerical value in config file for predefined module collections. Value = '"+split[1]+"'"); 
+               }
+               config.put(collectionName, new Object[]{filename,new Integer(size)});
+           }
+           filereader.close();
+           return config;   
+    }
+    
      
     /** Saves the specified data object to file in the given dataformat */
     public void saveDataToFile(Data data, DataFormat dataformat, String filename) throws Exception {

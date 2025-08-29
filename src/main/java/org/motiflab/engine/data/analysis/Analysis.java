@@ -122,7 +122,7 @@ public abstract class Analysis extends Data implements ParameterExporter {
         if (engine!=null) {
             try {
                String safename=getAnalysisName().replace(" ", "_");
-               return new java.net.URL(engine.getWebSiteURL()+"getHelp.php?type=Analysis&topic="+safename);
+               return new java.net.URL(engine.getWebSiteURL()+"help/type=Analysis&topic="+safename);
             } catch (Exception e) {}            
         }
         return null;

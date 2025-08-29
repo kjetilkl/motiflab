@@ -51,7 +51,7 @@ public abstract class DataFormat implements ParameterExporter, Comparable {
         if (engine!=null) {
             try {
                String safename=getName().replace(" ", "_");
-               return new java.net.URL(engine.getWebSiteURL()+"getHelp.php?type=DataFormat&topic="+safename);
+               return new java.net.URL(engine.getWebSiteURL()+"help/type=DataFormat&topic="+safename);
             } catch (Exception e) {}            
         }
         return null;

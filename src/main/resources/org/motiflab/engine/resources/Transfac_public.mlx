@@ -8042,7 +8042,7 @@
 #Short = P$PBF_01
 #Long = PBF (Prolamin box binding factor)
 #W = 11
-#Class = 2.3.2.255.2
+#Class = 2.2
 #Factors = PBF
 #Organisms = maize (Zea mays)
 #Interactions = M00010,M00345,M00372,M00374,M00443,MA1417,MA1417_1,MA1417_2
@@ -11441,7 +11441,7 @@
 #Long = NERF1a (new Ets-related factor 1a)
 #W = 18
 #Quality = 2
-#Class = 3.5.2.1.11
+#Class = 3.5.2.3.2.2
 #Transfac class = C0016
 #Factors = NERF,NERF-2b,NERF-1a,NERF-2,NERF-1b
 #Organisms = human (Homo sapiens)

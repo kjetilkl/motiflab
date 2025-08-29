@@ -927,7 +927,7 @@ private void collapsePathRecursively(TreePath path) {
             if (valueAsObject instanceof String) {
                String stringValue=(String)valueAsObject;
                if (stringValue.matches("^[0-9\\.]+")) { // node represents a motif class
-                  nodetext=stringValue+":"+MotifClassification.getNameForClass(stringValue);
+                  nodetext=stringValue+": "+MotifClassification.getNameForClass(stringValue);
                } else nodetext=stringValue;
             } else if (valueAsObject instanceof ModuleMotif) {
                   nodetext=((ModuleMotif)valueAsObject).getRepresentativeName();
@@ -1242,7 +1242,7 @@ private class CheckBoxTreeCellRenderer extends JPanel implements TreeCellRendere
                       button.setIcon(unselectedIcon);      
                   }
                }
-               stringValue=stringValue+":"+MotifClassification.getNameForClass(stringValue);
+               stringValue=stringValue+": "+MotifClassification.getNameForClass(stringValue);
            } else if (stringValue.equals(MotifClassification.UNKNOWN_CLASS_LABEL) && doColorByClass) {
                   Color labelColor=settings.getClassLabelColor(stringValue);
                   if (labelColor!=null) {

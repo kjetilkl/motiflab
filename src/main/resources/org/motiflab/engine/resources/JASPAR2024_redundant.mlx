@@ -1,5 +1,5 @@
 #MotifLabMotif   (inspired by INCLUSive Motif Model v1.0)
-#Collection=JASPAR_2024_redundant
+#Collection=JASPAR 2024 redundant
 
 #ID = MA0001_1
 #Jaspar = MA0001.1
@@ -3606,7 +3606,7 @@
 #Short = MAX::MYC
 #Long =  Myc proto-oncogene protein::Protein max
 #Factors = MYC,MAX
-#Class = 1.2.6.5.6
+#Class = 1.2.6.5
 #DimerClass = 1.2.6.5.5
 #Part = Dimer
 #W = 11
@@ -3633,7 +3633,7 @@
 #Short = MAX::MYC
 #Long =  Myc proto-oncogene protein::Protein max
 #Factors = MYC,MAX
-#Class = 1.2.6.5.6
+#Class = 1.2.6.5
 #DimerClass = 1.2.6.5.5
 #Part = Dimer
 #W = 10
@@ -3936,7 +3936,7 @@
 #Short = PBF
 #Long =  Dof zinc finger protein PBF
 #Factors = PBF
-#Class = 2.3.2.255.2
+#Class = 2.2
 #W = 5
 #Organisms = maize (Zea mays)
 #PubMed = 10074718
@@ -9353,7 +9353,7 @@
 #Short = MYC
 #Long =  Myc proto-oncogene protein
 #Factors = MYC
-#Class = 1.2.6.5.6
+#Class = 1.2.6.5
 #W = 12
 #Organisms = human (Homo sapiens)
 #PubMed = 18555785
@@ -9379,7 +9379,7 @@
 #Short = MYC
 #Long =  Myc proto-oncogene protein
 #Factors = MYC
-#Class = 1.2.6.5.6
+#Class = 1.2.6.5
 #W = 8
 #Organisms = human (Homo sapiens)
 #PubMed = 18555785
@@ -35603,7 +35603,7 @@
 #Short = ZNF410
 #Long =  Zinc finger protein 410
 #Factors = ZNF410,ZN410
-#Class = 2.3.3.0.2
+#Class = 2.3.3.24.2
 #W = 17
 #Organisms = human (Homo sapiens)
 #PubMed = 19443739
@@ -35634,7 +35634,7 @@
 #Short = ZNF410
 #Long =  Zinc finger protein 410
 #Factors = ZNF410,ZN410
-#Class = 2.3.3.0.2
+#Class = 2.3.3.24.2
 #W = 16
 #Organisms = human (Homo sapiens)
 #PubMed = 19443739
@@ -38043,7 +38043,7 @@
 #Short = MGA
 #Long =  MAX gene-associated protein
 #Factors = MGA,MGAP
-#Class = 1.2.6.7.4
+#Class = 1.2.6.8.1
 #W = 8
 #Organisms = human (Homo sapiens)
 #PubMed = 12093383
@@ -53603,7 +53603,7 @@
 #Short = ZNF282
 #Long =  Zinc finger protein 282
 #Factors = ZNF282,ZN282
-#Class = 2.3.3.0.8
+#Class = 2.3.3.38
 #W = 17
 #Organisms = human (Homo sapiens)
 #PubMed = 28092692
@@ -53633,7 +53633,7 @@
 #Short = ZNF282
 #Long =  Zinc finger protein 282
 #Factors = ZNF282,ZN282
-#Class = 2.3.3.0.8
+#Class = 2.3.3.38
 #W = 15
 #Organisms = human (Homo sapiens)
 #PubMed = 28092692

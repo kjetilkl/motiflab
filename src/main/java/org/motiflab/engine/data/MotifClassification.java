@@ -68,8 +68,9 @@ public static String UNKNOWN_CLASS_LABEL="Unknown class";
  * E.g. the argument "1.2" will return "Helix-loop-helix factors (bHLH)"
  */    
 public static String getNameForClass(String classString) {
-    return classToNameMap.get(classString);
-}
+    String className = (classToNameMap!=null)?classToNameMap.get(classString):null;
+    return (className!=null)?className:"*** Missing class name ***";
+} 
     
 /** Returns the level (as integer) for the class (as string)
  *  1 = Superclass (top level)

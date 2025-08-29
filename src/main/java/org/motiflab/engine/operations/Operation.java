@@ -64,7 +64,7 @@ public abstract class Operation {
     public Object getHelp(MotifLabEngine engine) {
         if (engine!=null) {
             try {
-               return new java.net.URL(engine.getWebSiteURL()+"getHelp.php?type=Operation&topic="+getName());
+               return new java.net.URL(engine.getWebSiteURL()+"help/type=Operation&topic="+getName());
             } catch (Exception e) {}            
         }
         return null;

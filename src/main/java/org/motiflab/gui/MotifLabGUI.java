@@ -3172,7 +3172,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
     }
 
     public void showHelpDialog(String helpstring) {
-        String urlstring=engine.getWebSiteURL()+"getHelp.php?"+helpstring;
+        String urlstring=engine.getWebSiteURL()+"help/"+helpstring;
         String errorString="No documentation available";
         URL url=null;
         try {url=new URL(urlstring);} catch (MalformedURLException e) {errorString=e.getMessage();}
@@ -7394,7 +7394,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             @Override
             public Boolean doInBackground() {
                 try {
-                    URL url=new URL(engine.getWebSiteURL()+"example_sessions.php?"+engine.getVersion());
+                    URL url=new URL(engine.getWebSiteURL()+"example_sessions/"+engine.getVersion());
 	   	    ArrayList<String> lines=MotifLabEngine.getPageAsList(url);
                     for (String line:lines) {
                         if (line.isEmpty() || line.startsWith("#")) continue;
