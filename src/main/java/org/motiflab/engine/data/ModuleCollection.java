@@ -6,6 +6,11 @@
 package org.motiflab.engine.data;
 
 import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,6 +27,7 @@ import org.motiflab.engine.task.OperationTask;
 import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.Parameter;
 import org.motiflab.engine.ParameterSettings;
+import org.motiflab.engine.dataformat.DataFormat;
 import org.motiflab.engine.operations.Operation_new;
 import org.motiflab.engine.protocol.ParseError;
 import org.motiflab.engine.protocol.StandardParametersParser;
@@ -45,10 +51,11 @@ public class ModuleCollection extends DataCollection {
     protected String modulecollectionName;
     protected ArrayList<String> storage; // this is a list of ModuleCRM names.  (The collection stores names rather than actual Module objects)
     private ArrayList<Data> payload=null; // this is used to temporarily store Modules (and maybe constituent Motifs) that should be registered with the engine
-    private String fromList=null; // a configuration string used if this collection is based on a (non-resolved) list of references
-    private String fromInteractions=null; // a configuration string used if this collection is created from known motif interactions
-    private String fromTrack=null; // a configuration string used when this collection is based on a track. Format example: "<trackname>,support>=80%"     
-    private String fromMap=null;   // a configuration string used when this collection is based on a map. Format example: "<mapname>,value>=0" or "mapname,value in [0,1]"
+ 
+    private String fromList=null; // LEGACY FIELD: a configuration string used if this collection is based on a (non-resolved) list of references
+    private String fromInteractions=null; // LEGACY FIELD: a configuration string used if this collection is created from known motif interactions
+    private String fromTrack=null; // LEGACY FIELD: a configuration string used when this collection is based on a track. Format example: "<trackname>,support>=80%"     
+    private String fromMap=null;   // LEGACY FIELD: a configuration string used when this collection is based on a map. Format example: "<mapname>,value>=0" or "mapname,value in [0,1]"
     /**
      * Constructs a new initially "empty" ModuleCRM collection with the given name
      *
@@ -790,8 +797,7 @@ public class ModuleCollection extends DataCollection {
         if (payload==null) return false;
         else return !payload.isEmpty();
     }
-
-    
+ 
     
     
 /**
@@ -810,7 +816,32 @@ public class ModuleCollection extends DataCollection {
 public static ModuleCollection parseModuleCollectionParameters(String text, String targetName, ArrayList<String> notfound, MotifLabEngine engine, OperationTask task) throws ExecutionError, InterruptedException {
        boolean silentMode=false;
        if (notfound!=null) {silentMode=true;notfound.clear();}
-       if (text.startsWith(Operation_new.RANDOM_PREFIX)) { // predefined collection
+       if (text.startsWith(Operation_new.COLLECTION_PREFIX)) { // predefined collection
+            String collectionName=text.substring(Operation_new.COLLECTION_PREFIX.length());
+            String filename=engine.getFilenameForModuleCollection(collectionName);
+            if (filename==null) throw new ExecutionError("Unknown Motif Collection: "+collectionName);
+            BufferedReader inputStream=null;
+            ArrayList<String> input=new ArrayList<String>();
+            try {
+                inputStream=new BufferedReader(new InputStreamReader(new FileInputStream(new File(filename)))); // these are locally installed files, not repository files
+                String line;
+                while((line=inputStream.readLine())!=null) {input.add(line);}
+            } catch (IOException e) {
+                throw new ExecutionError("An error occurred when loading predefined Module Collection: ["+e.getClass().getSimpleName()+"] "+e.getMessage(),0);
+            } finally {
+                try {
+                    if (inputStream!=null) inputStream.close();
+                } catch (IOException ioe) {System.err.println("SYSTEM ERROR: An error occurred when closing BufferedReader Operation_new.parseModuleCollectionParameters(): "+ioe.getMessage());}
+            }
+            DataFormat format = engine.getDataFormat("MotifLabModule");
+            if (format==null) throw new ExecutionError("Unknown Dataformat: MotifLabModule");
+            ModuleCollection data=new ModuleCollection(targetName);
+            try {data=(ModuleCollection)format.parseInput(input, data, null, task);}
+            catch (InterruptedException ie) {throw ie;}
+            catch (Exception e) {throw new ExecutionError(e.getMessage());}
+            data.setPredefinedCollectionName(collectionName);
+            return data;
+        } else if (text.startsWith(Operation_new.RANDOM_PREFIX)) { // predefined collection
             String configstring=text.substring(Operation_new.RANDOM_PREFIX.length()).trim();
             String[] parts=configstring.split("\\s+from\\s+|\\*s,\\s*");                        
             if (parts[0].isEmpty()) throw new ExecutionError("Missing size specification for random collection");

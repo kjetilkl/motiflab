@@ -137,7 +137,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             System.setSecurityManager(null); // disable any security managers to avoid problems with plugins when running via Web Start
         } catch (SecurityException e) {
             System.err.println("Warning: Unable to disable the installed security manager. Some functionality could be restricted (especially for plugins).");
-        }
+        }       
         storage=new DataStorage();
         SequenceCollection defaultSequenceCollection=new SequenceCollection(defaultSequenceCollectionName);
         try {storeDataItem(defaultSequenceCollection);} catch (Exception e) {}
@@ -2562,7 +2562,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     /** Returns the base-URL for the Web Site (including forward slash at the end) */
     public String getWebSiteURL() {
         // this should perhaps be a configurable property?
-        return "https://www.motiflab.org/";  // previously "https://tare.medisin.ntnu.no/motiflab/";
+        // return "https://tare.medisin.ntnu.no/motiflab/";
+        return "https://www.motiflab.org/";  
     }
 
     /** Returns the base-URL for the External Programs Repository (including forward slash at the end) */
@@ -3315,7 +3316,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         if (format==null) throw new SystemError("Unknown dataformat: MotifLabMotif");
         saveDataToFile(collection, format, fullpath);
         Object[] oldentry=predefinedMotifCollections.get(name);
-        predefinedMotifCollections.put(name, new Object[]{filename,new Integer(collectionsize)});
+        predefinedMotifCollections.put(name, new Object[]{filename,collectionsize});
         try {
             collection.setPredefinedCollectionName(name);
             savePredefinedMotifCollectionsConfiguration();
@@ -3363,7 +3364,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             } catch (IOException ioe) {}
         }        
         Object[] oldentry=predefinedMotifCollections.get(name);
-        predefinedMotifCollections.put(name, new Object[]{filename,new Integer(collectionsize)});
+        predefinedMotifCollections.put(name, new Object[]{filename,collectionsize});
         try {
             savePredefinedMotifCollectionsConfiguration();
         } catch (Exception e) {
@@ -3381,6 +3382,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
      */
     public void removePredefinedMotifCollection(String motifCollectionName) throws Exception {
         String filename = getFilenameForMotifCollection(motifCollectionName);
+        if (filename==null) return; // No such collection exists
         File file = new File(filename);
         if (file.exists()) {
             boolean deleted = file.delete();
@@ -3430,7 +3432,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                   filereader.close();
                   throw new SystemError("Unable to parse expected numerical value in config file for predefined motif collections. Value = '"+split[1]+"'"); 
                }
-               config.put(collectionName, new Object[]{filename,new Integer(size)});
+               config.put(collectionName, new Object[]{filename,size});
            }
            filereader.close();
            return config;   
@@ -3491,7 +3493,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
      * with the same name) and also update the 'registry' of predefined collections
      * @param collection The ModuleCollection to be registered
      */
-    public void registerPredefinedModuleCollection(ModuleCollection collection) throws Exception {
+    public void registerPredefinedModuleCollection(ModuleCollection collection, boolean includeMotifModels) throws Exception {
         String name=collection.getPredefinedCollectionName();
         if (name==null || name.isEmpty()) name=collection.getName();
         String filename=name.replace(" ", "_"); // just in case
@@ -3500,9 +3502,13 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         int collectionsize=collection.size();
         String fullpath=getMotifLabDirectory()+File.separator+ModuleCollectionDirectory+File.separator+filename;      
         if (format==null) throw new SystemError("Unknown dataformat: MotifLabModule");
-        saveDataToFile(collection, format, fullpath);
+        ParameterSettings settings=new ParameterSettings();
+        settings.setParameter("Include single motifs", includeMotifModels); 
+        settings.setParameter("Include non-standard fields", includeMotifModels);
+        settings.setParameter("Include module color info", includeMotifModels);       
+        saveDataToFile(collection, format, settings, fullpath);
         Object[] oldentry=predefinedModuleCollections.get(name);
-        predefinedModuleCollections.put(name, new Object[]{filename,new Integer(collectionsize)});
+        predefinedModuleCollections.put(name, new Object[]{filename,collectionsize});
         try {
             collection.setPredefinedCollectionName(name);
             savePredefinedModuleCollectionsConfiguration();
@@ -3550,7 +3556,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
             } catch (IOException ioe) {}
         }        
         Object[] oldentry=predefinedModuleCollections.get(name);
-        predefinedModuleCollections.put(name, new Object[]{filename,new Integer(collectionsize)});
+        predefinedModuleCollections.put(name, new Object[]{filename,collectionsize});
         try {
             savePredefinedModuleCollectionsConfiguration();
         } catch (Exception e) {
@@ -3568,6 +3574,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
      */
     public void removePredefinedModuleCollection(String moduleCollectionName) throws Exception {
         String filename = getFilenameForModuleCollection(moduleCollectionName);
+        if (filename==null) return;
         File file = new File(filename);
         if (file.exists()) {
             boolean deleted = file.delete();
@@ -3617,7 +3624,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
                   filereader.close();
                   throw new SystemError("Unable to parse expected numerical value in config file for predefined module collections. Value = '"+split[1]+"'"); 
                }
-               config.put(collectionName, new Object[]{filename,new Integer(size)});
+               config.put(collectionName, new Object[]{filename,size});
            }
            filereader.close();
            return config;   
@@ -3631,6 +3638,14 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         dataformat.format(data, output, null, null);
         output.saveToFile(filename,this);        
     }
+    
+    /** Saves the specified data object to file in the given dataformat */
+    public void saveDataToFile(Data data, DataFormat dataformat, ParameterSettings settings, String filename) throws Exception {
+        OutputData output=new OutputData("output_"+data.getName());
+        if (dataformat!=null && !dataformat.canFormatOutput(data)) throw new SystemError("can not format '"+data.getName()+"' ["+data.getTypeDescription()+"] in format '"+dataformat.getName()+"'");
+        dataformat.format(data, output, settings, null);
+        output.saveToFile(filename,this);        
+    }    
             
     /** Saves an object to file by serialization */
     public void saveSerializedObject(Object object, String filename) throws Exception {
@@ -3986,7 +4001,7 @@ public static Class getClassForName(String classname) throws ClassNotFoundExcept
         String stylesheet=settings.getStylesheetSetting();
         String javascriptSetting=settings.getJavascriptSetting();
         StringBuilder builder=new StringBuilder();
-        builder.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\" \"http://www.w3.org/TR/html4/frameset.dtd\">");
+        builder.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\" \"https://www.w3.org/TR/html4/frameset.dtd\">");
         builder.append("<html>\n");
         builder.append("<head>\n");
         builder.append("<title>");
@@ -3994,7 +4009,7 @@ public static Class getClassForName(String classname) throws ClassNotFoundExcept
         builder.append("</title>\n");
         if (includeJavascript && !javascriptSetting.equalsIgnoreCase(VisualizationSettings.HTML_SETTING_NONE)) {
            if (javascriptSetting.equalsIgnoreCase(VisualizationSettings.HTML_SETTING_LINK)) {
-               builder.append("<script type=\"text/javascript\" src=\"http://www.motiflab.org/motiflab.js\"></script>\n"); //
+               builder.append("<script type=\"text/javascript\" src=\"https://www.motiflab.org/motiflab.js\"></script>\n"); //
            } else {
                String scriptCode=null;
                try {scriptCode=MotifLabEngine.readTextFile(getMotifLabDirectory()+java.io.File.separator+"motiflab.js");} catch (IOException e) {System.err.println("Error while reading 'motiflab.js':"+e.toString());}
@@ -4009,7 +4024,7 @@ public static Class getClassForName(String classname) throws ClassNotFoundExcept
                         String filename=outputdata.createTextfileDependency(this, scriptCode, sharedID, "js");
                         builder.append("<script type=\"text/javascript\" src=\""+filename+"\"></script>\n");
                    }
-               } else builder.append("<script type=\"text/javascript\" src=\"http://www.motiflab.org/motiflab.js\"></script>\n"); // default if script could not be read
+               } else builder.append("<script type=\"text/javascript\" src=\"https://www.motiflab.org/motiflab.js\"></script>\n"); // default if script could not be read
            }
 
         }
@@ -5539,12 +5554,12 @@ public void removeAllResources() {
     public static Object convertToType(Object value, Class type) throws ExecutionError {
         if (type.isAssignableFrom(value.getClass()) || value==null) return value; // no need to convert
         if (type==Integer.class) {
-            if (value instanceof Double) return new Integer( ((Double)value).intValue() );
+            if (value instanceof Double) return ((Double)value).intValue();
             else try {
                 return Integer.parseInt(value.toString());
             } catch (NumberFormatException e) {}
         } else if (type==Double.class) {
-            if (value instanceof Integer) return new Double( ((Integer)value).doubleValue() );
+            if (value instanceof Integer) return ((Integer)value).doubleValue();
             else try {
                 return Double.parseDouble(value.toString());
             } catch (NumberFormatException e) {}            

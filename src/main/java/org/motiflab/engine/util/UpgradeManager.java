@@ -236,12 +236,12 @@ public class UpgradeManager {
             try {
                 engine.removePredefinedMotifCollection("Jaspar Core");
             } catch (Exception e) {
-                engine.logMessage("WARNING: "+e.getMessage());
+                if (e.getMessage()!=null) engine.logMessage("WARNING: "+e.getMessage());
             }
             try {
                 engine.removePredefinedMotifCollection("TRANSFAC Public");
             } catch (Exception e) {
-                engine.logMessage("WARNING: "+e.getMessage());
+                if (e.getMessage()!=null) engine.logMessage("WARNING: "+e.getMessage());
             }            
             updateTFclass();
             ArrayList<String> newMotifCollections=new ArrayList<>();

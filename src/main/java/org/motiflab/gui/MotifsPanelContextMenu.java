@@ -41,24 +41,24 @@ import org.motiflab.engine.operations.Operation_analyze;
 * @author kjetikl
 */
 public class MotifsPanelContextMenu extends JPopupMenu  {
-private static String EDIT_DATA="Edit";
-private static String RENAME_DATA="Rename";
-private static String DELETE_DATA="Delete";
-private static String SHOW="Show";
-private static String HIDE="Hide";
-private static String SHOW_ONLY_SELECTED="Show Only Selected";   
-private static String SHOW_ALL="Show All";  
-private static String HIDE_ALL="Hide All";      
-private static String COLOR_SUBMENU_HEADER="Set Color";
-private static String COLOR_BY_CLUSTERS="Set Motif Colors from Clusters";
-private static String COMPARE_TO_KNOWN_MOTIFS="Compare to Other Motifs";
-private static String SAVE_MOTIF_LOGO="Save Motif Logo";  
-private static String OPERATION_SUBMENU_HEADER="Perform Operation";
-private static String SAVE_AS_PREDEFINED="Save As Predefined";
-private static String EXPAND_NODE="Expand";
-private static String COLLAPSE_NODE="Collapse";
-private static String EXPAND_ALL_NODES="Expand All";
-private static String COLLAPSE_ALL_NODES="Collapse All";
+private final static String EDIT_DATA="Edit";
+private final static String RENAME_DATA="Rename";
+private final static String DELETE_DATA="Delete";
+private final static String SHOW="Show";
+private final static String HIDE="Hide";
+private final static String SHOW_ONLY_SELECTED="Show Only Selected";   
+private final static String SHOW_ALL="Show All";  
+private final static String HIDE_ALL="Hide All";      
+private final static String COLOR_SUBMENU_HEADER="Set Color";
+private final static String COLOR_BY_CLUSTERS="Set Motif Colors from Clusters";
+private final static String COMPARE_TO_KNOWN_MOTIFS="Compare to Other Motifs";
+private final static String SAVE_MOTIF_LOGO="Save Motif Logo";  
+private final static String OPERATION_SUBMENU_HEADER="Perform Operation";
+private final static String SAVE_AS_PREDEFINED="Save As Predefined";
+private final static String EXPAND_NODE="Expand";
+private final static String COLLAPSE_NODE="Collapse";
+private final static String EXPAND_ALL_NODES="Expand All";
+private final static String COLLAPSE_ALL_NODES="Collapse All";
 
 
 private MotifLabEngine engine;
@@ -194,7 +194,7 @@ public static MotifsPanelContextMenu getInstance(JTree tree, MotifLabGUI gui, Mo
             ExternalDBLinkMenu dbmenu=new ExternalDBLinkMenu(id, gui);
             this.add(dbmenu);// if (dbmenu.isEnabled()) this.add(dbmenu);            
         }
-        if (dataitem instanceof MotifCollection) {
+        if (dataitem instanceof MotifCollection || dataitem instanceof ModuleCollection) {
             JMenuItem saveAsPredefinedItem=new JMenuItem(SAVE_AS_PREDEFINED);
             saveAsPredefinedItem.addActionListener(menuItemListener);
             this.add(saveAsPredefinedItem);
@@ -329,7 +329,8 @@ public static MotifsPanelContextMenu getInstance(JTree tree, MotifLabGUI gui, Mo
                 saveLogoPanel.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
                 saveLogoPanel.setVisible(true);
            } else if (e.getActionCommand().equals(SAVE_AS_PREDEFINED)) {
-                 saveAsPredefined();
+                      if (dataitem instanceof MotifCollection)  saveAsPredefinedMotifCollection();
+                 else if (dataitem instanceof ModuleCollection) saveAsPredefinedModuleCollection();
            } else if (e.getActionCommand().equals(COLOR_BY_CLUSTERS)) {
                 if (dataitem instanceof MotifPartition) {
                    ArrayList<String> clusters=((MotifPartition)dataitem).getClusterNames();
@@ -347,8 +348,9 @@ public static MotifsPanelContextMenu getInstance(JTree tree, MotifLabGUI gui, Mo
        }            
     }
 
-    private void saveAsPredefined() {
-       String collectionName=((MotifCollection)dataitem).getPredefinedCollectionName();
+    private void saveAsPredefinedMotifCollection() {
+       String collectionName=null;
+       if (dataitem instanceof MotifCollection) collectionName=((MotifCollection)dataitem).getPredefinedCollectionName();
        if (collectionName==null || collectionName.isEmpty()) collectionName=dataitem.getName();
        boolean ok=false;
        String msg="Please enter a name for the collection";
@@ -375,9 +377,40 @@ public static MotifsPanelContextMenu getInstance(JTree tree, MotifLabGUI gui, Mo
             String errmsg="An error occurred while saving motif collection:\n"+ex.toString();
             JOptionPane.showMessageDialog(gui.getFrame(), errmsg, "Save error", JOptionPane.ERROR_MESSAGE);
        }
-
-
     }
+    
+    private void saveAsPredefinedModuleCollection() {
+       String collectionName=null;
+       if (dataitem instanceof ModuleCollection) collectionName=((ModuleCollection)dataitem).getPredefinedCollectionName();
+       if (collectionName==null || collectionName.isEmpty()) collectionName=dataitem.getName();
+       boolean ok=false;
+       String msg="Please enter a name for the collection";
+       while (!ok) {
+           collectionName=(String)JOptionPane.showInputDialog(gui.getFrame(), msg, "Save collection as predefined", JOptionPane.QUESTION_MESSAGE, null, null, collectionName);
+           if (collectionName==null || collectionName.trim().isEmpty()) {
+               return;
+           }
+           String test=collectionName.replaceAll("\\s", "_");
+           String nameerror=gui.getEngine().checkNameValidity(test, false);
+           if (nameerror==null) ok=true;
+           else msg=nameerror;
+       }
+       java.util.Set<String> existingCollections=engine.getPredefinedModuleCollections();
+       if (existingCollections.contains(collectionName)) {
+           int choice=JOptionPane.showConfirmDialog(gui.getFrame(), "There is already a predefined collection with this name.\nDo you want to replace it?","Save collection as predefined",JOptionPane.YES_NO_CANCEL_OPTION);
+           if (choice!=JOptionPane.YES_OPTION) return;
+       }
+       int choice=JOptionPane.showConfirmDialog(gui.getFrame(), "Would you like to include the single motif models when saving?\n(If they are not included, the motifs must be imported separately)","Save collection as predefined",JOptionPane.YES_NO_OPTION);
+       boolean includeMotifModels=(choice==JOptionPane.YES_OPTION);
+       ((ModuleCollection)dataitem).setPredefinedCollectionName(collectionName);
+       try {
+            engine.registerPredefinedModuleCollection((ModuleCollection) dataitem, includeMotifModels); // this will also set the 'predefined collection name' in the dataitem
+            JOptionPane.showMessageDialog(gui.getFrame(), "Collection saved OK", "Save collection as predefined", JOptionPane.INFORMATION_MESSAGE);
+       } catch (Exception ex) {
+            String errmsg="An error occurred while saving module collection:\n"+ex.toString();
+            JOptionPane.showMessageDialog(gui.getFrame(), errmsg, "Save error", JOptionPane.ERROR_MESSAGE);
+       }
+    }    
 
 
     private void setColorForModule(ModuleCRM cisRegModule, Color newColor) {

@@ -12,9 +12,17 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -26,8 +34,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.BevelBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import org.motiflab.engine.ExecutionError;
 import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.Parameter;
 import org.motiflab.engine.ParameterSettings;
@@ -50,6 +65,7 @@ import org.motiflab.gui.LoadFromFilePanel;
 import org.motiflab.gui.ModuleBrowserPanel;
 import org.motiflab.gui.MotifLabGUI;
 import org.motiflab.gui.ParametersPanel;
+import static org.motiflab.gui.prompt.Prompt.errorMessageFont;
 
 
 /**
@@ -61,19 +77,25 @@ public class Prompt_ModuleCollection extends Prompt {
     private ModuleCollection data;
 
     private ModuleBrowserPanel manualSelectionPanel;
+    private JPanel predefinedCollectionsPanel;    
     private JPanel importCollectionPanel;
     private LoadFromFilePanel loadFromFilePanel;
     private JPanel parseListPanel;
     private JPanel fromPropertyPanel;    
     private JPanel fromInteractionsPanel;
-    private JTabbedPane tabbedPanel=null;
+    private JTabbedPane tabbedPanel=null;    
     private boolean showExisting=false;
     private boolean isimported=false;
 
+    private DefaultTableModel predefinedCollectionsTableModel;
+    private JTable predefinedCollectionsTable;
+    private JLabel predefinedPanelErrorLabel; 
+    private JScrollPane scrollpane;    
+    
     private JTextArea parseListTextArea;
     private JCheckBox ignoreParseErrors;
     private JCheckBox resolveInProtocol;
-    
+         
     private JPanel fromMapPanel;
     private JComboBox fromMapSelection;
     private JComboBox fromMapOperator;
@@ -120,6 +142,7 @@ public class Prompt_ModuleCollection extends Prompt {
         setDataItemName(data.getName());
         setTitle("Module Collection");
         manualSelectionPanel=new ModuleBrowserPanel(gui, data, modal, false);
+        setupPredefinedModelsPanel();        
         setupImportModelPanel();
         setupParseListPanel();
         setupFromInteractionsPanel();
@@ -129,6 +152,7 @@ public class Prompt_ModuleCollection extends Prompt {
         boolean modulesAvailable=engine.hasDataItemsOfType(ModuleCRM.class);
         boolean motifsAvailable=engine.hasDataItemsOfType(Motif.class);
         tabbedPanel=new JTabbedPane();
+        tabbedPanel.addTab("Predefined", predefinedCollectionsPanel);        
         if (modulesAvailable) tabbedPanel.addTab("Manual Selection", manualSelectionPanel);
         if (modulesAvailable) tabbedPanel.addTab("From List", parseListPanel);
         if (modulesAvailable) tabbedPanel.addTab("From Property", fromPropertyPanel);        
@@ -137,11 +161,12 @@ public class Prompt_ModuleCollection extends Prompt {
         if (motifsAvailable) tabbedPanel.addTab("From Interactions", fromInteractionsPanel);
         tabbedPanel.addTab("Import Collection", importCollectionPanel);
         JPanel internal=new JPanel(new BorderLayout());
-        Dimension size=new Dimension(580,500);
+        Dimension size=new Dimension(750,500);
         internal.setMinimumSize(size);
         internal.setPreferredSize(size);
         // internal.setMaximumSize(size);
         manualSelectionPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+        if (predefinedCollectionsPanel!=null) predefinedCollectionsPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));        
         importCollectionPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         parseListPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
         fromInteractionsPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
@@ -152,9 +177,69 @@ public class Prompt_ModuleCollection extends Prompt {
         setMainPanel(internal);
         pack();
         if (modulesAvailable) tabbedPanel.setSelectedComponent(manualSelectionPanel);
-        else tabbedPanel.setSelectedComponent(importCollectionPanel);
+        else tabbedPanel.setSelectedComponent(predefinedCollectionsPanel);
         if (showExisting) focusOKButton();
     }   
+    
+    private void setupPredefinedModelsPanel() {
+        predefinedCollectionsPanel=new JPanel();
+        String[] columns = new String[]{"Name","Modules"};
+        Set<String> collectionNames=engine.getPredefinedModuleCollections();        
+        Object[][] predefinedcollectionstable = new Object[collectionNames.size()][2];
+        int i=0;
+        for (String name:collectionNames) {
+            predefinedcollectionstable[i][0]=name;
+            predefinedcollectionstable[i][1]=new Integer(engine.getSizeForModuleCollection(name));
+            i++;
+        }
+        
+        predefinedCollectionsTableModel=new DefaultTableModel(predefinedcollectionstable,columns){
+            @Override
+            public Class getColumnClass(int col) {
+                if (col==1) return Integer.class;
+                else  return String.class;
+            }
+        };
+        predefinedCollectionsTable=new JTable(predefinedCollectionsTableModel) {
+            @Override
+            public boolean isCellEditable(int row,int col) {return false;}
+        };
+        predefinedCollectionsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        predefinedCollectionsTable.getColumn("Modules").setMinWidth(65);
+        predefinedCollectionsTable.getColumn("Modules").setMaxWidth(65);
+        predefinedCollectionsTable.getColumn("Modules").setWidth(65);
+        predefinedCollectionsPanel.setLayout(new BorderLayout());
+        scrollpane=new JScrollPane(predefinedCollectionsTable);
+        predefinedCollectionsTable.setFillsViewportHeight(true);
+        predefinedCollectionsTable.setAutoCreateRowSorter(true);
+        predefinedCollectionsTable.getTableHeader().setReorderingAllowed(false);
+        predefinedCollectionsPanel.add(scrollpane,BorderLayout.CENTER);
+        JPanel statuspanel=new JPanel(new FlowLayout(FlowLayout.LEFT));
+        predefinedPanelErrorLabel=new JLabel("  ");
+        predefinedPanelErrorLabel.setFont(errorMessageFont);
+        predefinedPanelErrorLabel.setForeground(java.awt.Color.RED);
+        statuspanel.add(predefinedPanelErrorLabel);
+        predefinedCollectionsPanel.add(statuspanel,BorderLayout.SOUTH);
+        predefinedCollectionsTable.getColumn("Modules").setCellRenderer(new Prompt_ModuleCollection.CellRenderer_RightAlign());
+        predefinedCollectionsTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (showExisting) return;
+                int row=predefinedCollectionsTable.getSelectedRow();
+                if (row>=0) {
+                  String trackname=(String)predefinedCollectionsTable.getValueAt(row, predefinedCollectionsTable.getColumn("Name").getModelIndex());
+                  setDataItemName(trackname.replace(" ", "_"));
+                } else setDataItemName(data.getName());
+            }
+        });
+        predefinedCollectionsTable.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount()==2) clickOK();
+                 }
+        });
+        predefinedCollectionsTable.getRowSorter().toggleSortOrder(0);
+    }    
     
     private void setupImportModelPanel() {
         ArrayList<DataFormat> dataformats=engine.getDataInputFormats(ModuleCollection.class);
@@ -518,6 +603,20 @@ public class Prompt_ModuleCollection extends Prompt {
     public boolean onOKPressed() {
         if (tabbedPanel==null || tabbedPanel.getSelectedComponent()==manualSelectionPanel) {
             manualSelectionPanel.updateModuleCollection();
+        } else if (tabbedPanel.getSelectedComponent()==predefinedCollectionsPanel) {
+             int row=predefinedCollectionsTable.getSelectedRow();
+             if (row<0) return false;
+             String collectionname=(String)predefinedCollectionsTable.getValueAt(row, 0);
+             data.setPredefinedCollectionName(collectionname);
+             if (showExisting) {
+                 try {
+                    data=importPredefinedCollection(data); // replace already existing collection. This will not result in "new" operation
+                 } catch (Exception e) {
+                    //e.printStackTrace(System.err);
+                    reportPredefinedCollectionlError(e.getMessage());
+                    return false;                    
+                 }
+             }
         } else if (tabbedPanel.getSelectedComponent()==importCollectionPanel) {
             try {
                 String filename=loadFromFilePanel.getFilename();
@@ -526,6 +625,7 @@ public class Prompt_ModuleCollection extends Prompt {
                 ParameterSettings settings=loadFromFilePanel.getParameterSettings();
                 data=(ModuleCollection)loadFromFilePanel.loadData(data,ModuleCollection.getType());
                 isimported=true;
+                data.setPredefinedCollectionName(null);
                 setImportFromFileSettings(filename, (format!=null)?format.getName():null, settings);
             } catch (Exception e) {
                 String errorType=(e instanceof IOException)?"I/O-error":"error";
@@ -680,6 +780,49 @@ public class Prompt_ModuleCollection extends Prompt {
         return isimported;
     }
 
+    private void reportPredefinedCollectionlError(String msg) {
+        if (msg==null) msg="NULL";
+        predefinedPanelErrorLabel.setText(msg);
+    }
+    
 
+    
+    private ModuleCollection importPredefinedCollection(ModuleCollection data) throws ExecutionError {
+        String collectionName=data.getPredefinedCollectionName();
+        if (collectionName==null) throw new ExecutionError("SYSTEM ERROR: No predefined collection defined");
+        String filename=engine.getFilenameForModuleCollection(collectionName);
+        String formatname="MotifLabModule";
+        if (filename==null) throw new ExecutionError("Unknown Module Collection: "+collectionName);
+        BufferedReader inputStream=null;
+        ArrayList<String> input=new ArrayList<String>();
+        try {
+            inputStream=new BufferedReader(new InputStreamReader(new BufferedInputStream(new FileInputStream(new File(filename))))); // these files will always be installed locally
+            String line;
+            while((line=inputStream.readLine())!=null) {input.add(line);}
+        } catch (IOException e) { 
+            throw new ExecutionError("An error occurred when loading predefined Module Collection:\n["+e.getClass().getSimpleName()+"] "+e.getMessage(),0);
+        } finally {
+            try {
+                if (inputStream!=null) inputStream.close();
+            } catch (IOException ioe) {System.err.println("SYSTEM ERROR: An error occurred when closing BufferedReader in Prompt_ModuleCollection.importPredefinedCollection(): "+ioe.getMessage());}
+        }           
+        DataFormat format = engine.getDataFormat(formatname);
+        if (format==null) throw new ExecutionError("Unknown Dataformat: "+formatname);    
+        try {data=(ModuleCollection)format.parseInput(input, data,null,null);}
+        catch (Exception e) {throw new ExecutionError(e.getClass().getSimpleName()+":"+e.getMessage());} 
+        data.setPredefinedCollectionName(collectionName);
+        return data;        
+    }
 
+    private class CellRenderer_RightAlign extends DefaultTableCellRenderer {
+        public CellRenderer_RightAlign() {
+               super();
+               this.setHorizontalAlignment(DefaultTableCellRenderer.RIGHT);              
+        }
+        @Override
+        public void setValue(Object value) {
+               if (value!=null)setText(value.toString());
+               else setText("");
+           }
+    }// end class CellRenderer_RightAlign         
 }

@@ -270,7 +270,7 @@ public class DataFormat_GTF extends DataFormat {
     private HashMap<String,Object> parseSingleLineInStandardFormat(String line, int lineNumber) throws ParseError {
         HashMap<String,Object> result=new HashMap<String,Object>();
         String[] fields=line.split("\t");
-        if (fields.length!=9) throw new ParseError("Expected at 9 fields per line in GTF-format. Got "+fields.length+":\n"+line, lineNumber);
+        if (fields.length!=9) throw new ParseError("Expected 9 fields per line in GTF-format. Got "+fields.length+":\n"+line, lineNumber);
         String chromosome=fields[0];
         if (chromosome.startsWith("chr")) chromosome=chromosome.substring(3);
         int underscorepos=fields[1].indexOf('_');

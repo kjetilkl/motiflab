@@ -698,7 +698,7 @@ public class DataLoader {
      * @param source A String (filename or URL) or a File object or an URL-object pointing to a file which contains the data
      * @param datatype The type of data to return (only needed if 'target' is NULL)
      * @param target The data object that should be initialized with the data read (if NULL a new object will be created)
-     * @param The format of the data in the file
+     * @param format The format of the data in the file
      * @param settings Additional settings for parameters of the data format
      */
      public Data loadData(Object source, String datatype, Data target, DataFormat format, ParameterSettings settings, ExecutableTask task) throws Exception {

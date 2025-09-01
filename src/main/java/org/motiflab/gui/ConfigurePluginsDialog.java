@@ -461,6 +461,7 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
         String urlString=repositoryDialog.getURL();
         repositoryDialog.dispose();
         if (urlString==null) return;
+        addPluginInBackground(urlString);
     }//GEN-LAST:event_addPluginFromRepository
 
     private void addPluginInBackground(final Object source) {
@@ -486,7 +487,7 @@ public class ConfigurePluginsDialog extends javax.swing.JDialog {
                     ex=e;
                     return Boolean.FALSE;
                 } finally {
-
+                    
                 }
                 return Boolean.TRUE;
             } // end doInBackground

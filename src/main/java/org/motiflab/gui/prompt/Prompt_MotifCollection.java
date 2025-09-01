@@ -123,7 +123,6 @@ public class Prompt_MotifCollection extends Prompt {
         setDataItemName(data.getName());
         setTitle(title);
         manualSelectionPanel=new MotifBrowserPanel(gui, data, modal, false);
-        //if (!showExisting) setupPredefinedModelsPanel();
         setupPredefinedModelsPanel();
         setupFromTrackPanel();
         setupParseListPanel();

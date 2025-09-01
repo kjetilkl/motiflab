@@ -222,7 +222,7 @@ public class DataSource_http_GET extends DataSource {
                 dataformat.parseInput(page,segment,dataformatSettings, task);
             } catch (ParseError e) {
                 // check if this could have been caused by something besides a format error.
-                // for instance a "Reached output limit of 100000 data values" error which 
+                // for instance a "Reached output limit of 100000 data values" error 
                 int line=e.getLineNumber();
                 if (line>0) { // this means the line number is reported. Output a few lines around the offending line to the log to provide context (low priority)
                     line--; // subtract 1 since line numbers start at 1          
@@ -237,8 +237,8 @@ public class DataSource_http_GET extends DataSource {
                         dataloader.getEngine().logMessage("   [ "+(i+1)+((i==line)?" * ":"   ")+"]:      "+contextLine, 5);
                     } 
                     dataloader.getEngine().logMessage("----------------------------------------------------------------------------------------------------------------", 5);   
-                    String suggestion=checkForCommonErrors(page,first,last,url.getHost());
-                    if (suggestion!=null) dataloader.getEngine().logMessage(suggestion);
+                    String suggestion=checkForCommonErrors(page,url.getHost());
+                    if (suggestion!=null) dataloader.getEngine().logMessage(suggestion);                    
                 } 
                 throw(e);
             }
@@ -312,16 +312,16 @@ public class DataSource_http_GET extends DataSource {
      * If a parseError occurs when loading data from a web page, this little ad-hoc method
      * will check for some common problems and return 
      * @param lines
-     * @param start
-     * @param end
      * @return An error and possible solution to present to the user or NULL
      */
-    private String checkForCommonErrors(ArrayList<String> lines, int start, int end, String host) {
-        for (int i=start;i<=end;i++) {
+    private String checkForCommonErrors(ArrayList<String> lines, String host) {
+        for (int i=0;i<lines.size();i++) {
             String line=lines.get(i);
             if (line.matches("Reached output limit of (\\d+) data values.*")) { // error reported by UCSC 
                 String number=line.substring("Reached output limit of ".length(),line.indexOf(" data values"));
                 return "NOTE: The data download failed because the server '"+host+"' has imposed a maximum limit of "+number+" values per request. To fix this, select 'Configure Datatracks' from the 'Configure' menu, click on 'Configure Server Settings' and set the 'Max span' attribute for the server '"+host+"' to "+number+" or less.";
+            } else if (line.contains("The Genome Browser is protecting itself from bots")) {
+                return "NOTE: The data download failed because the server thinks you may be a bot. It might work if you try again later";
             }
         }
         return null;

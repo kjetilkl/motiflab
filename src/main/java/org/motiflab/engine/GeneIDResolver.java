@@ -264,7 +264,7 @@ public class GeneIDResolver {
             if (pair[1].isEmpty()) throw new ParseError("Missing BioMart database for organism with taxonomy ID '"+pair[0]+"'");
         }        
         for (String[] tuple:buildBioMartURLs) { // check BioMart URLs
-            if (tuple.length<2) throw new ParseError("Expected at least two fields for BioMart entry");
+            if (tuple.length<2) throw new ParseError("Expected at least 2 fields for BioMart entry");
             if (tuple[1]!=null && !(tuple[1].startsWith("config=") || tuple[1].startsWith("file=") || tuple[1].startsWith("webfile=") || tuple[1].startsWith("archive=") || tuple[1].startsWith("biomart=") || tuple[1].startsWith("ensembl="))) {
                 try {URL url=new URL(tuple[1]);}
                 catch (MalformedURLException e) {throw new ParseError("Malformed URL for genome build '"+tuple[0]+"'");}
