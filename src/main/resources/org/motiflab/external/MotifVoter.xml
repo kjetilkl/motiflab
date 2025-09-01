@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<program name="MotifVoter" class="EnsemblePrediction">
+    <properties>
+      <author>Edward Wijaya, Siu-Ming Yiu, Ngo Thanh Son, Rajaraman Kanagasabai and Wing-Kin Sung</author>
+      <citation>Wijaya E, Yiu SM, Son NT, Kanagasabai R and Sung WK (2008) "MotifVoter: a novel ensemble method for fine-grained integration of generic motif finders" &lt;i&gt;Bioinformatics&lt;/i&gt;, &lt;b&gt;24&lt;/b&gt;(20):2288-95</citation>
+      <contact>Wing-Kin Sung (ksung@comp.nus.edu.sg)</contact>
+      <homepage>http://www.comp.nus.edu.sg/~bioinfo/MotifVoter/</homepage>
+      <description>MotifVoter is a variance based ensemble method for discovery of binding sites</description>
+    </properties>
+    <service type="bundled" location="org.motiflab.external.MotifVoter"/>
+
+</program>
