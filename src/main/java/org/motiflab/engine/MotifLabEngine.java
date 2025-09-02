@@ -6063,19 +6063,7 @@ public void removeAllResources() {
     
     /** Returns a string representation of a number where digits have been grouped using commas (3 digits in each group starting from the back) */
     public static String groupDigitsInNumber(int number) {
-        boolean negative=(number<0);
-        if (negative) number=-number;
-        String numberAsString=""+number;
-        String prefix=(negative)?"-":"";
-        String buffer="";
-        while (numberAsString.length()>3) {
-            int cutoff=numberAsString.length()-3;          
-            String group=numberAsString.substring(cutoff);
-            numberAsString=numberAsString.substring(0,cutoff);            
-            buffer=group+buffer;
-            if (numberAsString.length()>0) buffer=(","+buffer);
-        }
-        return prefix+numberAsString+buffer;
+        return String.format("%,d", number);
     }
     
     /**

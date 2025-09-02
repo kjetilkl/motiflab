@@ -249,7 +249,11 @@ public class UpgradeManager {
             newMotifCollections.add("JASPAR2024_redundant.mlx");
             newMotifCollections.add("Transfac_public.mlx");
             newMotifCollections.add("HOCOMOCOv13.mlx");                              
-            installBundledMotifCollections(newMotifCollections, 60, 80);
+            installBundledMotifCollections(newMotifCollections, 60, 70);
+            ArrayList<String> newModuleCollections=new ArrayList<>();
+            newModuleCollections.add("example_modules.mod");
+            newModuleCollections.add("TRANSCompel.mod");                             
+            installBundledModuleCollections(newModuleCollections, 70, 80);            
 
         } else { // don't install new motif collections and TF classification scheme
             engine.logMessage("Skipping update of the TF classification scheme and motif collections");
@@ -402,7 +406,11 @@ public class UpgradeManager {
         // --- install predefined Motif Collections ---
         ArrayList<String> bundledMotifs=locateBundledFiles("/org/motiflab/engine/resources","*.mlx",null);
         if (client!=null) client.logMessage("Installing bundled motif collections");
-        installBundledMotifCollections(bundledMotifs,50,80);
+        installBundledMotifCollections(bundledMotifs,50,70);
+        // --- install predefined Module Collections ---
+        ArrayList<String> bundledModules=locateBundledFiles("/org/motiflab/engine/resources","*.mod",null);
+        if (client!=null) client.logMessage("Installing bundled module collections");
+        installBundledModuleCollections(bundledModules,70,80);        
         // --- install Data Tracks configuration ---
         try {          
             InputStream stream=this.getClass().getResourceAsStream("/org/motiflab/engine/datasource/DataTracks.xml");              
@@ -453,7 +461,26 @@ public class UpgradeManager {
                 engine.logMessage("Unable to install bundled motif collection '"+filename+"' => "+e.getClass().getSimpleName()+":"+e.getMessage());
             }
         }
-    }    
+    } 
+    
+    private void installBundledModuleCollections(final ArrayList<String> bundledModules, final int progressStart, final int progressEnd)  {
+        final float range=progressEnd-progressStart;
+        int count = 0;
+        File dir = engine.getPredefinedModuleCollectionDirectory();
+        if (!dir.exists()) dir.mkdirs();            
+        int size=bundledModules.size();
+        for (String filename:bundledModules) {
+            try {
+                InputStream stream=this.getClass().getResourceAsStream("/org/motiflab/engine/resources/"+filename);
+                if (client!=null) client.progressReportMessage((int)(progressStart+(range/(float)size)*count));
+                if (client!=null) client.logMessage("Installing motif collection: "+filename);
+                engine.registerPredefinedModuleCollectionFromStream(stream, filename, null);
+                count++;
+            } catch (Exception e) {
+                engine.logMessage("Unable to install bundled module collection '"+filename+"' => "+e.getClass().getSimpleName()+":"+e.getMessage());
+            }
+        }
+    }      
    
    
     private ArrayList<String> locateBundledFiles(String resourceDir, String glob, String[] exclude) {
