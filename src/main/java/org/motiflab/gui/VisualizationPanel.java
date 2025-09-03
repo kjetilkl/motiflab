@@ -6,8 +6,6 @@
 
 package org.motiflab.gui;
 
-
-
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
@@ -18,7 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import javax.swing.Action;
@@ -35,25 +32,15 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelListener;
 import java.awt.print.Printable;
-import java.awt.print.PrinterAbortException;
 import java.awt.print.PrinterException;
-import java.awt.print.PrinterJob;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import javax.print.PrintService;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.SwingUtilities;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JViewport;
-import javax.swing.RepaintManager;
 import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.data.SequenceCollection;
 import org.motiflab.engine.data.Sequence;
@@ -66,7 +53,7 @@ import org.motiflab.engine.data.Region;
 
 /**
  * This class represents the main panel shown in the "Visualization" tab in the GUI.
- * It is responsible for visualizing all the sequences and datatracks (through division of labour
+ * It is responsible for visualizing all the sequences and datatracks (through division of labor
  * to classes such as SequenceVisualizer which draws all chosen tracks for a single sequence).
  * 
  * @author  kjetikl
@@ -178,6 +165,10 @@ public class VisualizationPanel extends javax.swing.JScrollPane implements Visua
         mainVisualizationPanel.addMouseListener(mouseEventDispatcher);
         mainVisualizationPanel.addMouseMotionListener(mouseEventDispatcher);      
         
+    }
+    
+    public void setDirty() {
+        isDirty=true;
     }
     
     public JPanel getMainVisualizationPanel() {
@@ -548,7 +539,7 @@ public class VisualizationPanel extends javax.swing.JScrollPane implements Visua
      */
     @SuppressWarnings("unchecked")
     private void setupMainVisualizationPanel() {
-        // settings.getGUI().logMessage("setupMainVisualizationPanel()");
+        //settings.getGUI().logMessage("setupMainVisualizationPanel()");
         SequenceVisualizer focusedSequence=null;
         ArrayList<SequenceVisualizer> tempList=(ArrayList<SequenceVisualizer>)sequenceVisualizers.clone(); // make a copy of the current list of SequenceVisualizer
         for (SequenceVisualizer viz:tempList) if (viz.hasFocus()) {focusedSequence=viz;break;} // remember which sequence that currently has focus
@@ -1185,194 +1176,27 @@ public class VisualizationPanel extends javax.swing.JScrollPane implements Visua
     }      
 
         
-    
-
-    /** This method has been stolen from Swing */
-    public boolean print(final MessageFormat headerFormat, final MessageFormat footerFormat, final boolean showPrintDialog,final PrintService service,final PrintRequestAttributeSet attributes, final boolean interactive) throws PrinterException {
-/*
-        final PrinterJob job = PrinterJob.getPrinterJob();
-        final Printable printable;
-        final PrintingStatus printingStatus;
-        final boolean isHeadless = GraphicsEnvironment.isHeadless();
-        final boolean isEventDispatchThread = SwingUtilities.isEventDispatchThread();
-        if (interactive && ! isHeadless) {
-            printingStatus = PrintingStatus.createPrintingStatus(this, job);
-            printable = this;
-        } else {
-            printingStatus = null; 
-            printable = this;
-        }
-
-        if (service != null) {
-            job.setPrintService(service);
-        }
-
-        job.setPrintable(printable);
-
-        final PrintRequestAttributeSet attr = (attributes == null) 
-            ? new HashPrintRequestAttributeSet() 
-            : attributes;        
-
-        if (showPrintDialog && ! isHeadless && ! job.printDialog(attr)) {
-            return false;
-        }
-
-        //
-        // there are three cases for printing:
-        // 1. print non interactively (! interactive || isHeadless)
-        // 2. print interactively off EDT
-        // 3. print interactively on EDT
-        // 
-        // 1 and 2 prints on the current thread (3 prints on another thread)
-        // 2 and 3 deal with PrintingStatusDialog
-        //
-        final Callable<Object> doPrint = 
-            new Callable<Object>() {
-                public Object call() throws Exception {
-                    try {
-                        job.print(attr);
-                    } finally {
-                        if (printingStatus != null) {
-                            printingStatus.dispose();
-                        }
-                    }
-                    return null;
-                }
-            };
-
-        final FutureTask<Object> futurePrinting = 
-            new FutureTask<Object>(doPrint);
-
-        final Runnable runnablePrinting = 
-            new Runnable() {
-                public void run() {
-                    //disable component
-                    boolean wasEnabled = false;
-                    if (isEventDispatchThread) {
-                        if (isEnabled()) {
-                            wasEnabled = true;
-                            setEnabled(false);
-                        }
-                    } else {
-                        try {
-                            wasEnabled = SwingUtilities2.submit(
-                                new Callable<Boolean>() {
-                                    public Boolean call() throws Exception {
-                                        boolean rv = isEnabled();
-                                        if (rv) {
-                                            setEnabled(false);
-                                        } 
-                                        return rv;
-                                    }
-                                }).get();
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        } catch (ExecutionException e) {
-                            Throwable cause = e.getCause();
-                            if (cause instanceof Error) {
-                                throw (Error) cause;
-                            } 
-                            if (cause instanceof RuntimeException) {
-                                throw (RuntimeException) cause;
-                            } 
-                            throw new AssertionError(cause);
-                        }
-                    }
-
-                    futurePrinting.run();
-
-                    //enable component
-                    if (wasEnabled) {
-                        if (isEventDispatchThread) {
-                            setEnabled(true);
-                        } else {
-                            try {
-                                SwingUtilities2.submit(
-                                    new Runnable() {
-                                        public void run() {
-                                            setEnabled(true);
-                                        }
-                                    }, null).get();
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            } catch (ExecutionException e) {
-                                Throwable cause = e.getCause();
-                                if (cause instanceof Error) {
-                                    throw (Error) cause;
-                                } 
-                                if (cause instanceof RuntimeException) {
-                                    throw (RuntimeException) cause;
-                                } 
-                                throw new AssertionError(cause);
-                            }
-                        }
-                    }
-                }
-            };
-        
-        if (! interactive || isHeadless) {
-            runnablePrinting.run();
-        } else {
-            if (isEventDispatchThread) {
-                (new Thread(runnablePrinting)).start();
-                printingStatus.showModal(true);
-            } else {
-                printingStatus.showModal(false);
-                runnablePrinting.run();
-            }
-        }
-        
-        //the printing is done successfully or otherwise. 
-        //dialog is hidden if needed.
-        try {
-            futurePrinting.get();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof PrinterAbortException) {
-                if (printingStatus != null
-                    && printingStatus.isAborted()) {
-                    return false;
-                } else {
-                    throw (PrinterAbortException) cause;
-                }
-            } else if (cause instanceof PrinterException) {
-                throw (PrinterException) cause;
-            } else if (cause instanceof RuntimeException) {
-                throw (RuntimeException) cause;
-            } else if (cause instanceof Error) {
-                throw (Error) cause;
-            } else {
-                throw new AssertionError(cause);
-            }
-        }
-        */
-        return true;
-    }
 
     @Override
     public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-        if (pageIndex > 0) {
-          return(NO_SUCH_PAGE);
-        } else {
-          Graphics2D g2d = (Graphics2D)graphics;
-          RepaintManager currentManager = RepaintManager.currentManager(mainVisualizationPanel);
-          currentManager.setDoubleBufferingEnabled(false);          
-          g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-          int height=mainVisualizationPanel.getHeight();
-          int width=getImageWidth();
-            // scale to fill the page
-          double dw = pageFormat.getImageableWidth();
-          double dh = pageFormat.getImageableHeight();
-          double xScale = dw/(double)width;
-          double yScale = dh/(double)height;
-          double scale = Math.min(xScale,yScale);
-          g2d.scale(scale, scale);        
-          mainVisualizationPanel.printAll(g2d);
-          currentManager.setDoubleBufferingEnabled(true);
-          return(PAGE_EXISTS);
+        Graphics2D g2d = (Graphics2D)graphics;
+        double pageWidth = pageFormat.getImageableWidth();
+        double pageHeight = pageFormat.getImageableHeight();
+        double panelWidth = getImageWidth(); // mainVisualizationPanel.getWidth();
+        double panelHeight = mainVisualizationPanel.getHeight();
+        // Scale so that panel width == page width
+        double scale = pageWidth / panelWidth;
+        double scaledPanelHeight = panelHeight * scale;
+        int totalPages = (int) Math.ceil(scaledPanelHeight / pageHeight);
+        if (pageIndex >= totalPages) {
+            return NO_SUCH_PAGE;
         }
+        // shift down by the height of previous pages
+        g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY() - pageIndex * pageHeight);          
+        // apply scale
+        g2d.scale(scale, scale);                  
+        mainVisualizationPanel.printAll(g2d);
+        return PAGE_EXISTS;
     }
     
     private int getImageWidth() {

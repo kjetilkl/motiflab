@@ -323,7 +323,6 @@ public class ProtocolEditor extends javax.swing.JPanel implements DataListener, 
         return gui;
     }
    
-    
     public final void setFont(String fontname, int size) {
         if (fontname==null) fontname=Font.MONOSPACED;
         if (size<6) size=12;
@@ -356,7 +355,7 @@ public class ProtocolEditor extends javax.swing.JPanel implements DataListener, 
            repaint();
         }        
     }
-    
+       
     /**
      * Installs a new Protocol in the ProtocolEditor
      * (this will register all required listeners, set the document in the editor and
@@ -421,6 +420,10 @@ public class ProtocolEditor extends javax.swing.JPanel implements DataListener, 
     }
     
     
+    public JEditorPane getEditorPane() {
+        return protocolEditor;
+    }
+   
    /**
     * Populates the list of currently open protocols in the header
     */
@@ -954,12 +957,27 @@ public class ProtocolEditor extends javax.swing.JPanel implements DataListener, 
     /** Specifies whether the ProtocolEditor should display language keywords,
      *  data object names etc. in different colors
      */
-    public void setUseColors(boolean flag) {
+    public void setUseColors(boolean useColors) {
         ColoringEditorKit editorKit=(ColoringEditorKit)protocolEditor.getEditorKit();
-        editorKit.setUseColors(flag);
+        editorKit.setUseColors(useColors);
         protocolEditor.revalidate();
         protocolEditor.repaint();
     }
+    
+    /**
+     * Enables or disables line wrapping in the Protocol Editor
+     * NOTE: the is a recently introduced functionality that should only
+     * be used when "printing" the document, since the rest of the editor
+     * does not support line-wrapping yet (for instance, the line numbering
+     * is not able to handle line-wrapping)
+     * @param lineWrapping 
+     */
+    public void setLineWrapping(boolean lineWrapping) {
+        ColoringEditorKit editorKit=(ColoringEditorKit)protocolEditor.getEditorKit();
+        editorKit.setLineWrapping(lineWrapping);
+        protocolEditor.revalidate();
+        protocolEditor.repaint();
+    }    
 
     /** 
      * Sets up the colors used to highlight keywords in the protocol editor
@@ -1794,23 +1812,41 @@ private class ProtocolEditorPane extends JEditorPane {
 
 /** This editor kit can color keywords and special tokens in the text */
 private class ColoringEditorKit extends DefaultEditorKit implements ViewFactory {
-        private boolean shouldUseColors=true;
+        private boolean shouldUseColors = true;
+        private boolean lineWrapping = false;
         private Object[] datatypenames=null; // each entry is a String[] containing a datatypename split into words e.g. [Motif], [Sequence,Collection] or [DNA,sequence,dataset]
         private HashMap<Integer,SortedMap> colorcache=new HashMap<Integer,SortedMap>(); // caches information about keyword coloring, must be updated each time the document is changed
         
-        public void setUseColors(boolean flag) {
-            shouldUseColors=flag;
+        public void setUseColors(boolean useColors) {
+            shouldUseColors=useColors;
         }
+        
+        /**
+         * Enables/Disables line-wrapping in the Protocol Editor.
+         * NOTE: the is a recently introduced functionality that should only
+         * be used when "printing" the document, since the rest of the editor
+         * does not support line-wrapping yet (for instance, the line numbering
+         * is not able to handle line-wrapping)
+         * @param doLineWrap 
+         */
+        public void setLineWrapping(boolean doLineWrap) {
+            lineWrapping = doLineWrap;
+        }        
+        
         public void clearCachedColoringInformation() {
             colorcache.clear();
         }
         
         @Override
-        public ViewFactory getViewFactory() {return this;}
-        @Override
-        public View create (Element elem) {
-             return new CustomView(elem);
+        public ViewFactory getViewFactory() {
+            return this;
         }
+        
+        @Override
+        public View create(Element elem) {
+            return lineWrapping ? new CustomWrappedView(elem) : new CustomPlainView(elem);
+        }
+        
         public ColoringEditorKit() {
             super();
             String[] availabletypes=Operation_new.getAvailableTypes();
@@ -1969,7 +2005,7 @@ private class ColoringEditorKit extends DefaultEditorKit implements ViewFactory 
                      else if (word.startsWith("\"") && word.endsWith("\"")) color=color_textstring;
                 }
                 if (color!=null) {
-                    colorMap.put(wordstart, new Object[]{new Integer(wordend),color});      
+                    colorMap.put(wordstart, new Object[]{wordend,color});      
                 }
                 wordstart=wordend;               
             }
@@ -1977,98 +2013,122 @@ private class ColoringEditorKit extends DefaultEditorKit implements ViewFactory 
         return colorMap;
     }   
     
+       
+    /* -----------------  A view without line-wrapping  ----------------- */
+    private class CustomPlainView extends PlainView {
         
-  private class CustomView extends PlainView {// Note this is an inner class of ColoringEditorKit
-    
-   public CustomView(Element elem) {
-       super(elem);
-   }
+        public CustomPlainView(Element elem) { 
+            super(elem);
+        }
+        
+        @Override
+        @Deprecated
+        protected void drawLine(int lineIndex, Graphics g, int x, int y) {
+            drawLine(lineIndex, (g instanceof Graphics2D) ? (Graphics2D) g : (Graphics2D) g.create(), (float) x, (float) y);
+        }
+        
+        @Override
+        protected void drawLine(int lineIndex, Graphics2D g, float x, float y) {
+            Element line = getElement().getElement(lineIndex);
+            try {
+                if (line.isLeaf()) {
+                    drawElement(lineIndex, line, g, x, y);
+                } else {
+                    int count = line.getElementCount();
+                    for (int i = 0; i < count; i++) {
+                        Element elem = line.getElement(i);
+                        x = drawElement(lineIndex, elem, g, x, y);
+                    }
+                }
+            } catch (BadLocationException e) {
+                System.err.print("Can't render line: " + lineIndex);
+            }
+        }
 
-    @Override
-   protected void drawLine(int lineIndex, Graphics g, int x, int y) {
-        Element line = getElement().getElement(lineIndex);
-	Element elem;
-	
-	try {
-	    if (line.isLeaf()) {
-                drawElement(lineIndex, line, g, x, y);
-	    } else {
-	        // this line contains the composed text.
-	        int count = line.getElementCount();
-		for(int i = 0; i < count; i++) {
-		    elem = line.getElement(i);
-		    x = drawElement(lineIndex, elem, g, x, y);
-		}
-	    }
-        } catch (BadLocationException e) {
-            System.err.print("Can't render line: " + lineIndex);
+        private float drawElement(int lineIndex, Element elem, Graphics g, float x, float y) throws BadLocationException {
+            int p0 = elem.getStartOffset();
+            int p1 = Math.min(getDocument().getLength(), elem.getEndOffset());
+            return drawRange((Graphics2D)g, x, y, p0, p1, this, getDocument(), getLineBuffer());
         }
     }
-   
-    private int drawElement(int lineIndex, Element elem, Graphics g, int x, int y) throws BadLocationException {
-	int p0 = elem.getStartOffset();
-        int p1 = elem.getEndOffset();
-        p1 = Math.min(getDocument().getLength(), p1);
-	x = drawUnselectedText(g, x, y, p0, p1);        
-        return x;
-    }
-    
-    
-    @Override
-    @SuppressWarnings("unchecked")
-    protected int drawUnselectedText(Graphics graphics, int x, int y, int p0, int p1) throws BadLocationException {
 
-        Document doc = getDocument();
-        String text = doc.getText(p0, p1 - p0);
-        Segment segment = getLineBuffer();
+    /* ----------------- Line wrap-enabled: use WrappedPlainView which supports it already ------------- */
+    private class CustomWrappedView extends WrappedPlainView {
+        public CustomWrappedView(Element elem) { 
+            super(elem,false); // settings the second argument to TRUE should enable line wraps at word boundaries, but it does not work as well...
+        }    
+        
+        @Override
+        protected void drawLine(int p0, int p1, Graphics2D g, float fx, float fy) {
+            try {
+                drawRange(g, fx, fy, p0, p1, this, getDocument(), getLineBuffer());
+            } catch (BadLocationException ex) {
+                System.err.println("Can't render range: " + p0 + "-" + p1);
+            }
+        }
+
+        /**
+         * Backwards-compatibility: older JDKs call this deprecated signature.
+         */
+        @Override
+        @Deprecated
+        protected void drawLine(int p0, int p1, Graphics g, int x, int y) {
+            drawLine(p0, p1, (g instanceof Graphics2D) ? (Graphics2D) g : (Graphics2D) g.create(), (float) x, (float) y);
+        }
+    }
+
+    /* ----------------- Shared painting helper used by both views ----------------- */
+    /**
+     * Paint the text in document range [p0,p1) starting at (startX,y),
+     */
+    private float drawRange(Graphics2D graphics, float startX, float y, int p0, int p1, TabExpander expander, Document doc, Segment segment) throws BadLocationException {
+        int length = p1 - p0;
+        String text = doc.getText(p0, length);
 
         if (!shouldUseColors) {
             graphics.setColor(Color.black);
-             doc.getText(p0, text.length(), segment);
-             x = Utilities.drawTabbedText(segment, x, y, graphics, this, 0);
-            return x; // Note early return           
+            doc.getText(p0, length, segment);
+            return Utilities.drawTabbedText(segment, startX, y, graphics, expander, 0);
         }
-        
-        // --- draw colored text below this line ---       
 
-        // determine the tokens in this line of text and the colors to use for them
-        SortedMap<Integer, Object[]> colorMap=processLineForColoring(text);
-          
-        // Colour the parts
-        int i = 0;        
+        SortedMap<Integer, Object[]> colorMap = processLineForColoring(text);
+        int i = 0;
+        float x = startX;
+
         for (Map.Entry<Integer, Object[]> entry : colorMap.entrySet()) {
             int start = entry.getKey();
             Object[] value = entry.getValue();
-            int end = (Integer)value[0];
-            Color color=(Color)value[1];
+            int end = (Integer) value[0];
+            Color color = (Color) value[1];
 
-            if (i < start) { // paint black text at the start of the line
+            if (i < start) { // paint black text before colored token
                 graphics.setColor(Color.black);
                 doc.getText(p0 + i, start - i, segment);
-                x = Utilities.drawTabbedText(segment, x, y, graphics, this, i);
+                x = Utilities.drawTabbedText(segment, x, y, graphics, expander, i);
             }
 
+            // paint colored token
             graphics.setColor(color);
             i = end;
             doc.getText(p0 + start, i - start, segment);
-            x = Utilities.drawTabbedText(segment, x, y, graphics, this, start);       
+            x = Utilities.drawTabbedText(segment, x, y, graphics, expander, start);
         }
 
-        // Paint possible remaining text black
+        // paint remainder
         if (i < text.length()) {
             graphics.setColor(Color.black);
             doc.getText(p0 + i, text.length() - i, segment);
-            x = Utilities.drawTabbedText(segment, x, y, graphics, this, i);
+            x = Utilities.drawTabbedText(segment, x, y, graphics, expander, i);
         }
         return x;
-    }                
+    }
 
-  } // end of private class CustomView                
-    } // end of private class ColoringEditorKit
+ 
+} // end of private class ColoringEditorKit
  
 
 
-
+// This component is used to draw the blue gradient in the header of the Protocol editor
 private class GradientPanel extends JPanel {
     private Color leftEnd=new Color(80,80,255);
     private Color rightEnd=new Color(150,230,255);

@@ -38,6 +38,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedOutputStream;
@@ -89,6 +90,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JList;
@@ -103,6 +105,7 @@ import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.ListCellRenderer;
 import javax.swing.MenuElement;
@@ -114,6 +117,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 import javax.swing.undo.UndoableEdit;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -3004,44 +3008,52 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         Component currentWindow=mainWindow.getSelectedComponent();
         if (currentWindow instanceof ProtocolEditor && getProtocolEditor().getProtocol()!=null) {
-                if (java.awt.Desktop.isDesktopSupported()) {
-                    java.awt.Desktop desktop=java.awt.Desktop.getDesktop();
-                    try {
-                        File tempfile=File.createTempFile(getProtocolEditor().getProtocol().getName(), ".txt");
-                        savePlainDocumentToFile((javax.swing.text.PlainDocument)getProtocolEditor().getProtocol().getDocument(),tempfile);
-                        desktop.print(tempfile);
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(this.getFrame(), e.getClass().getSimpleName()+":\n\n"+e.getMessage(),"Print Error" ,JOptionPane.ERROR_MESSAGE);
+                ProtocolEditor editor = getProtocolEditor();
+                try {                   
+                    editor.setLineWrapping(true); // temporary enable line wrapping to allow long lines to be printed out fully rather than being cropped
+                    boolean complete = getProtocolEditor().getEditorPane().print();
+                    if (complete) {
+                        System.out.println("Printing completed successfully.");
+                    } else {
+                        System.out.println("Printing canceled.");
                     }
-                } else {
-                    try {
-                        ((ProtocolEditor)currentWindow).print();
-                    } catch (PrinterException e) {
-                        JOptionPane.showMessageDialog(this.getFrame(), e.getMessage(),"Print Error" ,JOptionPane.ERROR_MESSAGE);
-                    }
+                } catch (PrinterException e) {
+                    JOptionPane.showMessageDialog(this.getFrame(), e.getMessage(),"Print Error" ,JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    editor.setLineWrapping(false);
                 }
         } else if (currentWindow instanceof OutputPanel) {
-                if (java.awt.Desktop.isDesktopSupported()) {
-                    java.awt.Desktop desktop=java.awt.Desktop.getDesktop();
-                    try {
-                        OutputData outputdata=((OutputPanel)currentWindow).getOutputData();
-                        String suffix=outputdata.getPreferredFileSuffix();
-                        File tempfile=File.createTempFile(outputdata.getName(), "."+suffix);
-                        outputdata.saveToFile(tempfile, false, null, engine);
-                        desktop.print(tempfile);
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(this.getFrame(), e.getClass().getSimpleName()+":\n\n"+e.getMessage(),"Print Error" ,JOptionPane.ERROR_MESSAGE);
+                try {
+                    OutputData outputdata=((OutputPanel)currentWindow).getOutputData();
+                    String format=outputdata.getDataFormat();
+                    if (format.equalsIgnoreCase("HTML")) {
+                        JEditorPane editorPane = new JEditorPane("text/html",outputdata.getContentsAsString());
+                        boolean complete = editorPane.print();
+                        if (complete) logMessage("Printing complete");
+                        else logMessage("Printing cancelled");
+                    } else if (!outputdata.isBinary()) {
+                        JEditorPane editorPane = new JEditorPane("text/plain",outputdata.getContentsAsString());
+                        boolean complete = editorPane.print();
+                        if (complete) logMessage("Printing complete");
+                        else logMessage("Printing cancelled");                       
+                    } else {
+                        String msg = "Unable to print output in "+format+" format.\nPlease save the content to a file and open it in a suitable external editor for printing";
+                        JOptionPane.showMessageDialog(this.getFrame(), msg,"Print Error", JOptionPane.ERROR_MESSAGE);
                     }
-                } else {
-                    try {
-                        ((OutputPanel)currentWindow).print();
-                    } catch (PrinterException e) {
-                        JOptionPane.showMessageDialog(this.getFrame(), e.getMessage(),"Print Error" ,JOptionPane.ERROR_MESSAGE);
-                    }
+                } catch (PrinterException e) {
+                    JOptionPane.showMessageDialog(this.getFrame(), e.getMessage(),"Print Error", JOptionPane.ERROR_MESSAGE);
                 }
         } else if (currentWindow instanceof VisualizationPanel) {
+                logMessage("Printing visualization...");
+                VisualizationPanel vizPanel=(VisualizationPanel)currentWindow;
+                vizPanel.setDirty(); // just in case
                 try {
-                    ((VisualizationPanel)currentWindow).print(null, null, true, null, null, true);
+                    PrinterJob job = PrinterJob.getPrinterJob();
+                    job.setPrintable(vizPanel);
+                    if (job.printDialog()) {
+                        job.print();
+                    }                                        
+                    logMessage("Print job completed");
                 } catch (PrinterException e) {
                     JOptionPane.showMessageDialog(this.getFrame(), e.getMessage(),"Print Error" ,JOptionPane.ERROR_MESSAGE);
                 }
@@ -3049,25 +3061,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         getFrame().setCursor(Cursor.getDefaultCursor());
     }
 
-    /** Saves a document to file in a quick and dirty way... */
-    private void savePlainDocumentToFile(javax.swing.text.PlainDocument document, File file) throws Exception {
-        javax.swing.text.Element root=document.getDefaultRootElement();
-        int linecount=root.getElementCount();
-        java.io.PrintWriter outputStream=new java.io.PrintWriter(new java.io.FileWriter(file));
-        for (int i=0;i<linecount;i++) {
-              javax.swing.text.Element e=root.getElement(i);
-              String line=document.getText(e.getStartOffset(),e.getEndOffset()-e.getStartOffset());
-              line=line.trim();
-              outputStream.println(line);
-        }
-        outputStream.close();
-    }
-
-
-
-
-
-
+    
     @Action(enabledProperty = "undoEnabled")
     public void undo() {
         getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));

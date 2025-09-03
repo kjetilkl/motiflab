@@ -1724,7 +1724,7 @@ public class VisualizationSettings implements ListDataListener, ExtendedDataList
     public String getConnectorType(String datasetname) {
         Object value=getSetting(datasetname+"."+CONNECTOR_TYPE);
         if (value instanceof String) return (String)value;
-        else if (value instanceof Integer ) { // legacy setting
+        else if (value instanceof Integer) { // legacy setting
             switch((Integer)value) {
                 case CONNECTOR_STRAIGHT_LINE:return "Straight Line";
                 case CONNECTOR_ANGLED:return "Angled Line"; 
@@ -1733,8 +1733,9 @@ public class VisualizationSettings implements ListDataListener, ExtendedDataList
                 default: return "Bounding Box";
             }
         }
-        else {
-            String connector="Bounding Box";
+        else { // default value
+            boolean modTrack=isModuleTrack(datasetname);
+            String connector=(modTrack)?"Angled Line":"Bounding Box"; // before: "Bounding Box";
             storeSetting(datasetname+"."+CONNECTOR_TYPE,connector);
             return connector;
         }
@@ -1887,8 +1888,12 @@ public class VisualizationSettings implements ListDataListener, ExtendedDataList
     public int drawRegionBorders(String datasetname) {      
         Object value=getSetting(datasetname+"."+DRAW_REGION_BORDERS);
         if (value!=null && value instanceof Integer) {
-            return ((Integer)value).intValue();
-        } return 0;
+            return ((Integer)value);
+        } else {
+           int border=(isMotifOrModuleTrack(datasetname))?1:0;
+           storeSetting(datasetname+"."+DRAW_REGION_BORDERS, border);
+           return border;
+        }       
     }
 
     /**
@@ -4301,6 +4306,25 @@ public class VisualizationSettings implements ListDataListener, ExtendedDataList
        return getMacros().containsKey(macroname);      
     }
     
+    private boolean isMotifTrack(String trackName) {
+        Data dataitem=client.getEngine().getDataItem(trackName);
+        return (dataitem instanceof RegionDataset && ((RegionDataset)dataitem).isMotifTrack());        
+    }
+    
+    private boolean isModuleTrack(String trackName) {
+        Data dataitem=client.getEngine().getDataItem(trackName);
+        return (dataitem instanceof RegionDataset && ((RegionDataset)dataitem).isModuleTrack());        
+    } 
+    
+    private boolean isMotifOrModuleTrack(String trackName) {
+        Data dataitem=client.getEngine().getDataItem(trackName);
+        return (dataitem instanceof RegionDataset && (((RegionDataset)dataitem).isMotifTrack() || ((RegionDataset)dataitem).isModuleTrack()));        
+    }     
+    
+    private boolean isNestedTrack(String trackName) {
+        Data dataitem=client.getEngine().getDataItem(trackName);
+        return (dataitem instanceof RegionDataset && ((RegionDataset)dataitem).isNestedTrack());        
+    }     
 
     
 // --------------------------------------------------------------------------------------------
