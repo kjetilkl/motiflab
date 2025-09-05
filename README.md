@@ -3,7 +3,7 @@
 <p align="center">
     <img src ="https://img.shields.io/badge/version-2.0-blueviolet.svg"/>
     <img src ="https://img.shields.io/badge/platform-windows|linux|macos-yellow.svg"/>
-    <img src ="https://img.shields.io/badge/java-1.8-blue.svg" />
+    <img src ="https://img.shields.io/badge/java-23-blue.svg" />
 </p>
 
 MotifLab is a general workbench for analysing regulatory regions and discovering transcription factor binding sites and cis-regulatory modules in DNA sequences.
