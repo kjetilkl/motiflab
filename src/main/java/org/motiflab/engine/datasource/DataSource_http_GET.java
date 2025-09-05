@@ -26,9 +26,13 @@ import org.motiflab.engine.data.NumericDataset;
 import org.motiflab.engine.data.RegionDataset;
 import org.motiflab.engine.dataformat.DataFormat;
 import org.motiflab.engine.protocol.ParseError;
+//import io.github.bonigarcia.wdm.WebDriverManager;
+//import org.openqa.selenium.WebDriver;
+//import org.openqa.selenium.chrome.ChromeDriver;
+//import org.openqa.selenium.chrome.ChromeOptions;
 
 /**
- * A DataSource objects that retrieves data using a simple HTTP "GET" request to obtain a
+ * A DataSource object that retrieves data using a simple HTTP "GET" request to obtain a
  * webpage containing the relevant data. The webpage is then parsed by a DataFormat object
  * (according to the specified dataFormat) to construct a FeatureSequenceData object.
  * Information necessary to obtain the data includes the base-URL that points to the web
@@ -49,11 +53,11 @@ public class DataSource_http_GET extends DataSource {
  
     /**
      * Creates a new instance of DataSource_http_GET based on the given arguments
-     * @param name
+     * @param datatrack
      * @param organism
+     * @param genomebuild
      * @param baseURL
      * @param dataFormatName
-     * @param delay
      * @param parameterStringTemplate
      */
     public DataSource_http_GET(DataTrack datatrack, int organism, String genomebuild, String baseURL, String dataFormatName, String parameterStringTemplate) {
@@ -246,12 +250,16 @@ public class DataSource_http_GET extends DataSource {
         return segment;
     }
     
- 
-    
+
     private ArrayList<String> getPage(URL url, int timeout, ExecutableTask task) throws Exception {
         ArrayList<String> document=new ArrayList<String>();
         URLConnection connection=url.openConnection();
         connection.setConnectTimeout(timeout);
+        // Set request headers to mimic Chrome
+        connection.setRequestProperty("User-Agent", 
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+            "AppleWebKit/537.36 (KHTML, like Gecko) " +
+            "Chrome/115.0.0.0 Safari/537.36");  
         // Check if the response is a redirection from HTTP to HTTPS. This must be handled manually
         int status = ((HttpURLConnection)connection).getResponseCode();
         String location = ((HttpURLConnection)connection).getHeaderField("Location");
@@ -276,6 +284,26 @@ public class DataSource_http_GET extends DataSource {
         }            
         return document;
     }
+    
+//     private ArrayList<String> getPage_advanced(URL url, int timeout, ExecutableTask task) throws Exception {
+//        WebDriverManager.chromedriver().setup();
+//
+//        ChromeOptions options = new ChromeOptions();
+//        options.addArguments("--headless=new"); // modern headless mode
+//        options.addArguments("--disable-gpu");
+//        options.addArguments("--no-sandbox");
+//
+//        WebDriver driver = new ChromeDriver(options);
+//        try {
+//            driver.get(url.toString());
+//            String pageSource = driver.getPageSource();
+//            java.util.List<String> lines = java.util.Arrays.asList(pageSource.split("\\R"));
+//            return new java.util.ArrayList<>(lines);
+//        } finally {
+//            driver.quit();
+//        }          
+//    }   
+    
 
     @Override
     public DataSource clone() {

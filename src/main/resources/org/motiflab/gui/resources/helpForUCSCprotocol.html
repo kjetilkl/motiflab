@@ -1,0 +1,18 @@
+<html>
+    <h1>UCSC protocol</h1>
+    The UCSC protocol will retrieve data from the UCSC Genome Browser API at <span style="color:blue"><tt> https://api.genome.ucsc.edu</tt></span><br>
+    <br><br>
+    For <i>DNA sequence</i> tracks, you can choose to fetch all DNA bases in uppercase letters or represent <i>repeat regions</i> in the sequence with lowercase letters.
+    <br><br>
+    For <i>numeric data tracks</i>, the name of the track must be specified with a <b>track</b> parameter, e.g. "phastCons100way".
+    <br><br>
+    For <i>region tracks</i>, not only must the name of the track be specified with the <b>track</b> parameter,
+    but since the names used internally in the UCSC database for the standard region properties (<b>start</b>, <b>end</b>, <b>type</b>, <b>strand</b> and <b>score</b>)
+    varies from track to track, the names used for these properties must also be specified.
+    In addition, it is possible to specify <b>extra</b> parameters to be included in the annotation of regions.
+    This is done with a comma-separated list of key=value pairs, where the key is the name of an internal property available for that track in the UCSC database 
+    and the value is the name you would like to use for this property in MotifLab. 
+    (If you double-click on a region, you will see these listed under "Additional Properties", and they will also be displayed in the tooltip if you hover the mouse over a region.)
+    
+
+</html>

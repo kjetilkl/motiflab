@@ -205,6 +205,12 @@ public class DataTrack implements Cloneable {
         }    
     }    
     
+    /**
+     * @return True if this track has at least one data source
+     */
+    public boolean hasDatasources() {
+        return (datasources!=null && !datasources.isEmpty());
+    }
     
     /** Returns an ordered list of data sources available for this DataTrack */
     public ArrayList<DataSource> getDatasources() {

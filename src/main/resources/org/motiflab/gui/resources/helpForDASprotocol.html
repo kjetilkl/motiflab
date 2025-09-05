@@ -1,5 +1,16 @@
 <html>
     <h1>DAS protocol</h1>
-The DAS protocol can be used to retrieve track data from a Distributed Annotation System (DAS) server.
+    The DAS protocol can be used to retrieve track data from a <b>Distributed Annotation System</b> (DAS) server.
+    It supports DNA and region tracks, but not numeric tracks.
+    <br><br>
+    The protocol has two configurable settings: <b>Base URL</b> and <b>Feature</b>.<br>
+    <br>
+    The <b>Base URL</b> should be set to the address of the DAS end-point, where the data for the track can be retrieved for a specific genome build.
+    For DNA tracks this could for instance be something like "<tt>https://genome.ucsc.edu/cgi-bin/das/hg38/dna</tt>" for the "hg38" genome build.
+    For region tracks, the base URL would usually end with "features" rather than "dna", e.g. "<tt>https://genome.ucsc.edu/cgi-bin/das/hg38/features</tt>".
+    <br><br>
+    The "Feature" setting is only used for region tracks (not for DNA tracks), and specifies the name of the tracks you want to retrieve.
+    This value will be used as an added "type" argument when contacting the DAS server.
+    
 
 </html>

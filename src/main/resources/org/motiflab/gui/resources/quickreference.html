@@ -7,9 +7,9 @@
 <tbody><tr>
 <td style="border:0px">
 
-<h3>Visualization Panel</h3>
+<h1>Visualization Panel</h1>
 <font size="-1">
-In order to use short-cut keys in the Visualization Panel, you first need to select a target sequence which will receive <i>focus</i>.
+In order to use shortcut keys in the Visualization Panel, you first need to select a target sequence which will receive <i>focus</i>.
 To select a sequence, simply point the mouse anywhere within the sequence track window or on the sequence label.
 The sequence which currently has focus will be marked with a yellow wedge in front of its name.
 </font>
@@ -65,7 +65,22 @@ The sequence which currently has focus will be marked with a yellow wedge in fro
 
 <br><br>
 
-<h3>Features Panel</h3>
+<h2>Region tracks</h2>
+<font size="-1">
+The following shortcuts work if you have selected (clicked on or pointed the mouse at) a region in a region track in the Visualization panel.
+</font>
+<br><br>
+<table style="border:1px solid black;border-collapse:collapsed;" border="1">
+<tbody><tr><th style="background:#BFEA2D">Key</th><th style="background:#BFEA2D">Action</th></tr>
+<tr><td style="text-align:center;">Shift+M</td><td>Mark/unmark region. The mark is normally not visualized, but if you hover the mouse over the region, it should show the "mark=true" property. </td></tr>
+<tr><td style="text-align:center;">Delete</td><td>Delete region</td></tr>
+<tr><td style="text-align:center;">comma</td><td>Jump to previous region. (The previous region will be centered in the view port)</td></tr>
+<tr><td style="text-align:center;">dot</td><td>Jump to next region. (The next region will be centered in the view port)</td></tr>
+</tbody></table>
+
+<br><br>
+
+<h1>Features Panel</h1>
 <font size="-1">
 First select the feature you want to control by clicking on it with the mouse.<br>
 Multiple features can be selected simultaneously by holding down the SHIFT or CONTROL keys while selecting.
@@ -94,6 +109,7 @@ Multiple features can be selected simultaneously by holding down the SHIFT or CO
 <tr><td style="text-align:center;">)</td><td> </td><td>Turn track upside-down (for Region Datasets).<br>This only works for unexpanded region tracks that do not visualize strand orientation.
                                                        Normally, the regions in these tracks will be drawn upwards from the bottom of the track (with height proportional to score).
                                                        Pressing the "close parenthesis" key will draw the regions instead from the top down. Press "open parenthesis" to go back to normal mode.</td></tr>
+<tr><td style="text-align:center;">(</td><td> </td><td>Turn track right-side-up (for Region Datasets)</td></tr>
 <tr><td style="text-align:center;">X or E</td><td> </td><td>Expand/contract track (for Region Datasets)</td></tr>
 <tr><td style="text-align:center;">Delete</td><td> </td><td>Delete feature track</td></tr>
 <tr><td style="text-align:center;">U</td><td> </td><td>Sort sequences by selected feature (in descending order unless SHIFT is down).<br>&nbsp;&nbsp;&nbsp;Region Datasets: sort by number of visible regions<br>&nbsp;&nbsp;&nbsp;Numeric Datasets: sort by sum of values<br>&nbsp;&nbsp;&nbsp;DNA Datasets: sort by GC-content</td></tr>
@@ -109,7 +125,7 @@ Multiple features can be selected simultaneously by holding down the SHIFT or CO
 <span style="font-size:10px">* These actions can also be controlled using the mouse-wheel instead of the +/&ndash; keys</span><br>
 
 <br><br>
-<h3>Motifs Panel</h3>
+<h1>Motifs Panel</h1>
 <table style="border:1px solid black;border-collapse:collapsed" border="1">
 <tbody><tr><th style="background:#BFEA2D">Key</th><th style="background:#BFEA2D">Action</th></tr>
 <tr><td style="text-align:center;">SPACE or V</td><td>Toggle visibility of selected entries</td></tr>
@@ -120,12 +136,14 @@ Multiple features can be selected simultaneously by holding down the SHIFT or CO
 <tr><td style="text-align:center;">Shift + H</td><td>Hide all entries</td></tr>
 <tr><td style="text-align:center;">Delete</td><td>Delete selected entries*</td></tr>
 </tbody></table>
-<span style="font-size:10px">* Motifs and Modules can not be deleted with the Delete-key, only Collections and Partitions can be deleted this way</span><br>
+<span style="font-size:10px">* Inidividual Motifs and Modules can not be deleted with the Delete-key, only Collections and Partitions can be deleted this way.
+The default sequence collection "AllSequences" cannot be deleted.
+</span><br>
 
 
 <br><br>
 
-<h3>Data Objects Panel</h3>
+<h1>Data Objects Panel</h1>
 <table style="border:1px solid black;border-collapse:collapsed" border="1">
 <tbody><tr><th style="background:#BFEA2D">Key</th><th style="background:#BFEA2D">Action</th></tr>
 <tr><td style="text-align:center;">S</td><td>Show sequences in selected Sequence Collection(s)</td></tr>
@@ -139,7 +157,7 @@ Multiple features can be selected simultaneously by holding down the SHIFT or CO
 </tbody></table>
 
 <br><br>
-<h3>Data Tables</h3>
+<h1>Data Tables</h1>
 The following keyboard short-cuts can be used wherever tables of data objects
 (sequences, motifs, modules or region types) are shown, for instance in the Motif Browser or in dialogs showing Collections,
 Partitions, Numeric Maps or Analyses. The "visibility" of the entries refers

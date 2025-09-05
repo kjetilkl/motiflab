@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import org.motiflab.engine.ExecutionError;
 import org.motiflab.engine.GeneIDResolver;
 import org.motiflab.engine.MotifLabClient;
@@ -32,6 +33,7 @@ import org.motiflab.engine.SystemError;
 import org.motiflab.engine.data.Organism;
 import org.motiflab.engine.datasource.DataConfiguration;
 import org.motiflab.engine.datasource.DataSource;
+import org.motiflab.engine.datasource.DataSource_http_GET;
 import org.motiflab.engine.datasource.DataTrack;
 import org.motiflab.engine.datasource.Server;
 import org.motiflab.external.ExternalProgram;
@@ -223,7 +225,16 @@ public class UpgradeManager {
                             }, 
                 false);
         if (datatracksSelection==null || datatracksSelection.length==0 || datatracksSelection[0]==6) engine.logMessage("Skipping update of Data Tracks configuration.");
-        else updateDataTracksConfiguration(datatracksSelection[0]); // 
+        else updateDataTracksConfiguration(datatracksSelection[0]); //
+        if (datatracksSelection[0]!=5) { // Ask to remove old sources from UCSC based on the HTTP GET protocol
+            String ucscMessage =  "The UCSC Genome Browser recently added bot-protection to their web site to ban automatic access by non-human agents.\n"
+                                  + "This means that data sources based on the HTTP GET protocol no longer work for this site.\n"
+                                  + "Would you like to remove old data sources you have from the UCSC Genome Browser?";
+            int[] ucscSelection = client.selectOption(ucscMessage, new String[]{"Yes","No"}, false);
+            if (ucscSelection!=null && ucscSelection.length>0 && ucscSelection[0]==0) { // YES
+                removeOldUCSCsources();
+            }
+        }
         
         // ----- Motif and Module collections -----
         String motifsMessage  = "This version of MotifLab comes with updated motif collections for TRANSFAC Public, JASPAR (2024 version) and HOCOMOCO v13.\n"
@@ -633,6 +644,44 @@ public class UpgradeManager {
         engine.getDataLoader().installConfiguration(dataconfiguration); // replace currently used configuration
     }  
     
+    
+    /**
+     * Removes old data sources from UCSC Genome Browser based on the HTTP GET protocol,
+     * since this site has now added bot-protection which bans non-human access.
+     * Datatracks with no sources left afterwards will also be deleted.
+     */
+    private void removeOldUCSCsources() {  
+        // first make a copy (clone) of the current data configuration. This should have been loaded during engine.initialize();    
+        DataConfiguration dataconfiguration=(DataConfiguration)engine.getDataLoader().getCurrentDataConfiguration().clone();       
+        HashMap<String,DataTrack> availableTracks=dataconfiguration.getAvailableTracks(); // direct reference to the HashMap in the DataConfiguration 
+
+        Iterator<String> iterator = availableTracks.keySet().iterator();
+        while (iterator.hasNext()) {            
+            String trackname = iterator.next();
+            DataTrack oldTrack=availableTracks.get(trackname);
+            ArrayList<DataSource> sources=(ArrayList<DataSource>)oldTrack.getDatasources().clone();
+            for (DataSource source:sources) {
+                if (!DataSource_http_GET.PROTOCOL_NAME.equals(source.getProtocol())) continue;
+                if (((DataSource_http_GET)source).getBaseURL().contains("ucsc.edu")) {
+                    oldTrack.removeIdenticalDataSources(source);
+                    engine.logMessage("Removing "+source.toString(), 10);
+                }                
+            } 
+            if (!oldTrack.hasDatasources()) {
+                engine.logMessage("Track ["+trackname+"] has no remaining data sources. It will be removed!");
+                iterator.remove();
+            }
+        } 
+              
+        // save configuration to file
+        try {
+            File configurationfile = engine.getDataLoader().getDataConfigurationFile();
+            dataconfiguration.saveConfigurationToFile(configurationfile);
+        } catch (Exception e) {
+            engine.logMessage("ERROR: Unable to save Data Tracks configuration: ");
+        }        
+        engine.getDataLoader().installConfiguration(dataconfiguration); // replace currently used configuration
+    }      
     
     /**
      * Updates the Organisms configuration on disk

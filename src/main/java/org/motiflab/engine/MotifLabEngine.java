@@ -189,6 +189,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
      */
     private void initializeDataSourceTypes() {
         registerResource(org.motiflab.engine.datasource.DataSource_http_GET.getTemplateInstance());
+        registerResource(org.motiflab.engine.datasource.DataSource_UCSC.getTemplateInstance());        
         registerResource(org.motiflab.engine.datasource.DataSource_DAS.getTemplateInstance());
         registerResource(org.motiflab.engine.datasource.DataSource_FileServer.getTemplateInstance());
         registerResource(org.motiflab.engine.datasource.DataSource_SQL.getTemplateInstance());
@@ -205,6 +206,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
         }
         catch (Exception e) {
             errorMessage("DataTracks: "+e.getMessage(), 0);
+            // e.printStackTrace(System.err);
         }     
         dataLoader.setUseCache(preferences.getBoolean(PREFERENCES_USE_CACHE_FEATUREDATA, true));
         try {

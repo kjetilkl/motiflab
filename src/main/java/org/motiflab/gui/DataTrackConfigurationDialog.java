@@ -11,9 +11,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DragSource;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -78,6 +78,7 @@ import org.motiflab.engine.datasource.DataSource_http_GET;
 import org.motiflab.engine.datasource.Server;
 import org.motiflab.engine.protocol.ParseError;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import org.motiflab.engine.datasource.DataSource_UCSC;
 
 /**
  *
@@ -666,7 +667,28 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editGETsourceBaseURLlabel = new javax.swing.JLabel();
         editGETsourceBaseURLtextfield = new javax.swing.JTextField();
         editGETsourceParametersLabel = new javax.swing.JLabel();
-        editGETsourceParametersTextfield = new javax.swing.JTextField();
+        editGETsourceParametersTextfield = new javax.swing.JTextField();       
+        editUCSCsourcePanel = new javax.swing.JPanel();
+        editUCSCsourcePanelInner = new javax.swing.JPanel();        
+        editUCSCsourcePanelInnerTrack = new javax.swing.JPanel();
+        editUCSCsourcePanelInnerRegion = new javax.swing.JPanel();
+        editUCSCsourcePanelInnerDNA = new javax.swing.JPanel();  
+        editUCSCsourceTrackLabel = new javax.swing.JLabel(); 
+        editUCSCsourceStartLabel = new javax.swing.JLabel(); 
+        editUCSCsourceEndLabel = new javax.swing.JLabel(); 
+        editUCSCsourceTypeLabel = new javax.swing.JLabel(); 
+        editUCSCsourceStrandLabel = new javax.swing.JLabel(); 
+        editUCSCsourceScoreLabel = new javax.swing.JLabel(); 
+        editUCSCsourceExtraLabel = new javax.swing.JLabel(); 
+        editUCSCsourceKeepCaseInDNALabel = new javax.swing.JLabel();
+        editUCSCsourceTrackTextfield = new javax.swing.JTextField(); 
+        editUCSCsourceStartTextfield = new javax.swing.JTextField(); 
+        editUCSCsourceEndTextfield = new javax.swing.JTextField(); 
+        editUCSCsourceTypeTextfield= new javax.swing.JTextField(); 
+        editUCSCsourceStrandTextfield = new javax.swing.JTextField(); 
+        editUCSCsourceScoreTextfield = new javax.swing.JTextField(); 
+        editUCSCsourceExtraTextfield = new javax.swing.JTextField(); 
+        editUCSCsourceKeepCaseInDNAcheckBox = new javax.swing.JCheckBox();                
         DataFormatSettingsTopPanel = new javax.swing.JPanel();
         additionalDataFormatSettingsPanel_GET = new javax.swing.JPanel();
         editDASsourcePanel = new javax.swing.JPanel();
@@ -1329,6 +1351,8 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         cardpaneEditSourceMainCardPanel.setName("cardpaneEditSourceMainCardPanel"); // NOI18N
         cardpaneEditSourceMainCardPanel.setLayout(new java.awt.CardLayout());
 
+        // ------------------- GET protocol --------------------------------------        
+        
         editGETsourcePanel.setName("editGETsourcePanel"); // NOI18N
         editGETsourcePanel.setLayout(new java.awt.BorderLayout());
 
@@ -1383,7 +1407,180 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editGETsourcePanel.add(DataFormatSettingsTopPanel, java.awt.BorderLayout.CENTER);
 
         cardpaneEditSourceMainCardPanel.add(editGETsourcePanel, "GETprotocol");
+        
+        // ------------------- UCSC protocol --------------------------------------        
+        
+        editUCSCsourcePanel.setName("editUCSCsourcePanel"); // NOI18N
+        editUCSCsourcePanel.setLayout(new java.awt.FlowLayout(FlowLayout.LEFT));
+        editUCSCsourcePanelInner.setName("editUCSCsourcePanelInner"); // NOI18N
+        editUCSCsourcePanelInner.setLayout(new java.awt.BorderLayout());        
 
+        editUCSCsourcePanelInnerTrack.setName("editUSCSsourcePanelInnerTop"); // NOI18N
+        editUCSCsourcePanelInnerTrack.setLayout(new java.awt.GridBagLayout());
+
+        editUCSCsourceTrackLabel.setText(resourceMap.getString("editUCSCsourceTrackLabel.text")); // NOI18N
+        editUCSCsourceTrackLabel.setName("editUCSCsourceTrackLabel"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        editUCSCsourcePanelInnerTrack.add(editUCSCsourceTrackLabel, gridBagConstraints);
+
+        editUCSCsourceTrackTextfield.setColumns(15);
+        editUCSCsourceTrackTextfield.setText(resourceMap.getString("editUCSCsourceTrackTextfield.text")); // NOI18N
+        editUCSCsourceTrackTextfield.setName("editUCSCsourceTrackTextfield"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        editUCSCsourcePanelInnerTrack.add(editUCSCsourceTrackTextfield, gridBagConstraints);
+
+        editUCSCsourcePanelInnerRegion.setName("editUCSCsourcePanelInnerRegion"); // NOI18N
+        editUCSCsourcePanelInnerRegion.setLayout(new java.awt.GridBagLayout());        
+
+        editUCSCsourceStartLabel.setText(resourceMap.getString("editUCSCsourceStartLabel.text")); // NOI18N
+        editUCSCsourceStartLabel.setName("editUCSCsourceStartLabel"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceStartLabel, gridBagConstraints);
+
+        editUCSCsourceStartTextfield.setColumns(15);
+        editUCSCsourceStartTextfield.setText(resourceMap.getString("editUCSCsourceStartTextfield.text")); // NOI18N
+        editUCSCsourceStartTextfield.setName("editUCSCsourceStartTextfield"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceStartTextfield, gridBagConstraints);
+        
+        editUCSCsourceEndLabel.setText(resourceMap.getString("editUCSCsourceEndLabel.text")); // NOI18N
+        editUCSCsourceEndLabel.setName("editUCSCsourceEndLabel"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceEndLabel, gridBagConstraints);
+
+        editUCSCsourceEndTextfield.setColumns(15);
+        editUCSCsourceEndTextfield.setText(resourceMap.getString("editUCSCsourceEndTextfield.text")); // NOI18N
+        editUCSCsourceEndTextfield.setName("editUCSCsourceEndTextfield"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceEndTextfield, gridBagConstraints);  
+             
+        editUCSCsourceTypeLabel.setText(resourceMap.getString("editUCSCsourceTypeLabel.text")); // NOI18N
+        editUCSCsourceTypeLabel.setName("editUCSCsourceTypeLabel"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceTypeLabel, gridBagConstraints);
+
+        editUCSCsourceTypeTextfield.setColumns(15);
+        editUCSCsourceTypeTextfield.setText(resourceMap.getString("editUCSCsourceTypeTextfield.text")); // NOI18N
+        editUCSCsourceTypeTextfield.setName("editUCSCsourceTypeTextfield"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceTypeTextfield, gridBagConstraints);     
+      
+        editUCSCsourceStrandLabel.setText(resourceMap.getString("editUCSCsourceStrandLabel.text")); // NOI18N
+        editUCSCsourceStrandLabel.setName("editUCSCsourceStrandLabel"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceStrandLabel, gridBagConstraints);
+
+        editUCSCsourceStrandTextfield.setColumns(15);
+        editUCSCsourceStrandTextfield.setText(resourceMap.getString("editUCSCsourceStrandTextfield.text")); // NOI18N
+        editUCSCsourceStrandTextfield.setName("editUCSCsourceStrandTextfield"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceStrandTextfield, gridBagConstraints);         
+                
+        editUCSCsourceScoreLabel.setText(resourceMap.getString("editUCSCsourceScoreLabel.text")); // NOI18N
+        editUCSCsourceScoreLabel.setName("editUCSCsourceScoreLabel"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceScoreLabel, gridBagConstraints);
+
+        editUCSCsourceScoreTextfield.setColumns(15);
+        editUCSCsourceScoreTextfield.setText(resourceMap.getString("editUCSCsourceScoreTextfield.text")); // NOI18N
+        editUCSCsourceScoreTextfield.setName("editUCSCsourceScoreTextfield"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceScoreTextfield, gridBagConstraints);         
+        
+        editUCSCsourceExtraLabel.setText(resourceMap.getString("editUCSCsourceExtraLabel.text")); // NOI18N
+        editUCSCsourceExtraLabel.setName("editUCSCsourceExtraLabel"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceExtraLabel, gridBagConstraints);
+
+        editUCSCsourceExtraTextfield.setColumns(35);
+        editUCSCsourceExtraTextfield.setText(resourceMap.getString("editUCSCsourceExtraTextfield.text")); // NOI18N
+        editUCSCsourceExtraTextfield.setName("editUCSCsourceExtraTextfield"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        editUCSCsourcePanelInnerRegion.add(editUCSCsourceExtraTextfield, gridBagConstraints);        
+        
+        editUCSCsourcePanelInnerDNA.setName("editUCSCsourcePanelInnerDNA"); // NOI18N
+        editUCSCsourcePanelInnerDNA.setLayout(new java.awt.GridBagLayout()); 
+              
+        editUCSCsourceKeepCaseInDNALabel.setText(resourceMap.getString("editUCSCsourceKeepCaseInDNALabel.text")); // NOI18N
+        editUCSCsourceKeepCaseInDNALabel.setName("editUCSCsourceKeepCaseInDNALabel"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        editUCSCsourcePanelInnerDNA.add(editUCSCsourceKeepCaseInDNALabel, gridBagConstraints);
+
+        editUCSCsourceKeepCaseInDNAcheckBox.setSelected(false);
+        editUCSCsourceKeepCaseInDNAcheckBox.setName("editUCSCsourceKeepCaseInDNAcheckBox"); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        editUCSCsourcePanelInnerDNA.add(editUCSCsourceKeepCaseInDNAcheckBox, gridBagConstraints);        
+                  
+        editUCSCsourcePanelInner.add(editUCSCsourcePanelInnerTrack, java.awt.BorderLayout.NORTH);       
+        editUCSCsourcePanelInner.add(editUCSCsourcePanelInnerRegion, java.awt.BorderLayout.CENTER);
+        editUCSCsourcePanelInner.add(editUCSCsourcePanelInnerDNA, java.awt.BorderLayout.SOUTH); 
+
+        editUCSCsourcePanel.add(editUCSCsourcePanelInner);
+
+        cardpaneEditSourceMainCardPanel.add(editUCSCsourcePanel, "UCSCprotocol");
+                        
+        // ------------------- DAS protocol --------------------------------------
+        
         editDASsourcePanel.setName("editDASsourcePanel"); // NOI18N
         editDASsourcePanel.setLayout(new java.awt.BorderLayout());
 
@@ -1428,6 +1625,8 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
 
         cardpaneEditSourceMainCardPanel.add(editDASsourcePanel, "DASprotocol");
 
+        // --------------------- FILE protocol ------------------------------------
+        
         editFILEsourcePanel.setName("editFILEsourcePanel"); // NOI18N
         editFILEsourcePanel.setLayout(new java.awt.BorderLayout());
 
@@ -1463,8 +1662,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
                 }
             }
         });
-        
-        
+             
         editFILEsourceFilenameLabel.setText(resourceMap.getString("editFILEsourceFilenameLabel.text")); // NOI18N
         editFILEsourceFilenameLabel.setName("editFILEsourceFilenameLabel"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1530,6 +1728,8 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
 
         cardpaneEditSourceMainCardPanel.add(editFILEsourcePanel, "FILEprotocol");
 
+        // ----------------------- SQL protocol ----------------------------------        
+        
         editSQLsourcePanel.setName("editSQLsourcePanel"); // NOI18N
         editSQLsourcePanel.setLayout(new java.awt.BorderLayout());
 
@@ -1686,12 +1886,16 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editSQLsourcePanel.add(editSQLsourceTablePanel, java.awt.BorderLayout.CENTER);
 
         cardpaneEditSourceMainCardPanel.add(editSQLsourcePanel, "SQLprotocol");
+        
+        // ----------------------  VOID protocol ----------------------------        
 
         editVOIDsourcePanel.setName("editVOIDsourcePanel"); // NOI18N
         editVOIDsourcePanel.setLayout(new java.awt.BorderLayout());
         cardpaneEditSourceMainCardPanel.add(editVOIDsourcePanel, "VOIDprotocol");
 
         internalWrapper1.add(cardpaneEditSourceMainCardPanel);
+        
+        // ---------------------------------------------------------        
 
         cardpaneEditSourceMainCard.add(internalWrapper1, java.awt.BorderLayout.NORTH);
 
@@ -1795,7 +1999,6 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
     }
 
 private void exitWithoutSaving(java.awt.event.MouseEvent evt) {
-
      setVisible(false);
 }
 
@@ -1877,7 +2080,11 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
       else if (protocol.equals(DataSource_FileServer.PROTOCOL_NAME)) ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "FILEprotocol");
       else if (protocol.equals(DataSource_SQL.PROTOCOL_NAME)) ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "SQLprotocol");
       else if (protocol.equals(DataSource_VOID.PROTOCOL_NAME)) ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "VOIDprotocol");
-      else { // plugin protocol
+      else if (protocol.equals(DataSource_UCSC.PROTOCOL_NAME)) {
+          setupUCSCpanelForTrackType(currentDataTrack);
+          ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "UCSCprotocol");
+      }      
+      else { // plugin protocol?
             JPanel datasourcepanel=null;
             Object resource=engine.getResource(protocol, "DataSource");
             if (resource instanceof DataSource) {
@@ -1980,7 +2187,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
     private void protocolHelpButtonPressed(java.awt.event.ActionEvent evt) {
         String protocol=(String)editSourceProtocolCombobox.getSelectedItem();
         StringBuilder builder = new StringBuilder();
-        if (MotifLabEngine.inArray(protocol, new String[]{DataSource_http_GET.PROTOCOL_NAME, DataSource_DAS.PROTOCOL_NAME, DataSource_FileServer.PROTOCOL_NAME, DataSource_SQL.PROTOCOL_NAME, DataSource_VOID.PROTOCOL_NAME}, true)) {
+        if (MotifLabEngine.inArray(protocol, new String[]{DataSource_http_GET.PROTOCOL_NAME, DataSource_DAS.PROTOCOL_NAME, DataSource_FileServer.PROTOCOL_NAME, DataSource_SQL.PROTOCOL_NAME, DataSource_UCSC.PROTOCOL_NAME, DataSource_VOID.PROTOCOL_NAME}, true)) {
             try {
                 BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/org/motiflab/gui/resources/helpFor"+protocol+"protocol.html"), "UTF-8"));
                 for (int c = br.read(); c != -1; c = br.read()) builder.append((char)c);
@@ -2121,13 +2328,34 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
     private javax.swing.JLabel editFILEsourceSegmentsizeLabel;
     private javax.swing.JSpinner editFILEsourceSegmentsizeSpinner;
     private javax.swing.JLabel editFILEsourceModeLabel;
-    private javax.swing.JComboBox editFILEsourceModeCombox;
+    private javax.swing.JComboBox editFILEsourceModeCombox;    
     private javax.swing.JLabel editGETsourceBaseURLlabel;
     private javax.swing.JTextField editGETsourceBaseURLtextfield;
     private javax.swing.JPanel editGETsourcePanel;
     private javax.swing.JPanel editGETsourcePanelInner;
     private javax.swing.JLabel editGETsourceParametersLabel;
-    private javax.swing.JTextField editGETsourceParametersTextfield;
+    private javax.swing.JTextField editGETsourceParametersTextfield;    
+    private javax.swing.JPanel editUCSCsourcePanel;
+    private javax.swing.JPanel editUCSCsourcePanelInner;    
+    private javax.swing.JPanel editUCSCsourcePanelInnerTrack;
+    private javax.swing.JPanel editUCSCsourcePanelInnerRegion;
+    private javax.swing.JPanel editUCSCsourcePanelInnerDNA;    
+    private javax.swing.JLabel editUCSCsourceTrackLabel;
+    private javax.swing.JTextField editUCSCsourceTrackTextfield;
+    private javax.swing.JLabel editUCSCsourceStartLabel;
+    private javax.swing.JTextField editUCSCsourceStartTextfield;    
+    private javax.swing.JLabel editUCSCsourceEndLabel;
+    private javax.swing.JTextField editUCSCsourceEndTextfield;
+    private javax.swing.JLabel editUCSCsourceTypeLabel;
+    private javax.swing.JTextField editUCSCsourceTypeTextfield;
+    private javax.swing.JLabel editUCSCsourceStrandLabel;
+    private javax.swing.JTextField editUCSCsourceStrandTextfield;    
+    private javax.swing.JLabel editUCSCsourceScoreLabel;
+    private javax.swing.JTextField editUCSCsourceScoreTextfield; 
+    private javax.swing.JLabel editUCSCsourceExtraLabel;
+    private javax.swing.JTextField editUCSCsourceExtraTextfield;
+    private javax.swing.JLabel editUCSCsourceKeepCaseInDNALabel;
+    private javax.swing.JCheckBox editUCSCsourceKeepCaseInDNAcheckBox;
     private javax.swing.JButton editSQLsourceAddPropertyButton;
     private javax.swing.JTextField editSQLsourceDatabaseNameField;
     private javax.swing.JLabel editSQLsourceDatabaseNameLabel;
@@ -2242,7 +2470,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
          Object[][] data=new Object[sources.size()][columnNames.length];
          for (int i=0;i<sources.size();i++) {
              DataSource source=sources.get(i);
-             data[i]=new Object[]{new Integer(source.getOrganism()),source.getGenomeBuild(),source.getProtocol(),source.getDataFormat(),source.getServerAddress()};
+             data[i]=new Object[]{source.getOrganism(),source.getGenomeBuild(),source.getProtocol(),source.getDataFormat(),source.getServerAddress()};
          }
          datasourceTableModel=new DefaultTableModel(data,columnNames);
          datasourceTable.setModel(datasourceTableModel);
@@ -2274,13 +2502,22 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
          editGETsourceBaseURLtextfield.setText("");
          editGETsourceParametersTextfield.setText("");
          editFILEsourceFilenameTextfield.setText("");
-         editFILEsourceSegmentsizeSpinner.setValue(new Integer(0));
+         editFILEsourceSegmentsizeSpinner.setValue(0);
          editSQLsourceServerURLField.setText("");
          editSQLsourcePortField.setText("");
          editSQLsourceUsernameField.setText("");
          editSQLsourcePasswordField.setText("");
          editSQLsourceDatabaseNameField.setText("");
          editSQLsourceTableNameField.setText("");
+         
+         editUCSCsourceTrackTextfield.setText("");
+         editUCSCsourceStartTextfield.setText("");
+         editUCSCsourceEndTextfield.setText("");
+         editUCSCsourceTypeTextfield.setText("");
+         editUCSCsourceScoreTextfield.setText("");
+         editUCSCsourceStrandTextfield.setText(""); 
+         editUCSCsourceExtraTextfield.setText(""); 
+         editUCSCsourceKeepCaseInDNAcheckBox.setSelected(false);
 
          if (datasource==null) {
              ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "GETprotocol"); // default to GET protocol if no datasource is provided
@@ -2293,6 +2530,25 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
              editGETsourceParametersTextfield.setText(((DataSource_http_GET)datasource).getParameter());
              editGETsourceParametersTextfield.setCaretPosition(0);
              ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "GETprotocol");
+         } else if (datasource instanceof DataSource_UCSC) {
+             String trackName=((DataSource_UCSC)datasource).getParameter("track");
+             String startField=((DataSource_UCSC)datasource).getParameter("start");
+             String endField=((DataSource_UCSC)datasource).getParameter("end");
+             String typeField=((DataSource_UCSC)datasource).getParameter("type"); 
+             String strandField=((DataSource_UCSC)datasource).getParameter("strand"); 
+             String scoreField=((DataSource_UCSC)datasource).getParameter("score");   
+             String extraField=((DataSource_UCSC)datasource).getParameter("extra");
+             String keepCaseField=((DataSource_UCSC)datasource).getParameter("keepCaseInDNA");                         
+             editUCSCsourceTrackTextfield.setText( (trackName!=null)?trackName:"" );
+             editUCSCsourceStartTextfield.setText( (startField!=null)?startField:"" );
+             editUCSCsourceEndTextfield.setText( (endField!=null)?endField:"" );
+             editUCSCsourceTypeTextfield.setText( (typeField!=null)?typeField:"" );
+             editUCSCsourceStrandTextfield.setText( (strandField!=null)?strandField:"" );
+             editUCSCsourceScoreTextfield.setText( (scoreField!=null)?scoreField:"" );
+             editUCSCsourceExtraTextfield.setText( (extraField!=null)?extraField:"" );
+             editUCSCsourceKeepCaseInDNAcheckBox.setSelected( keepCaseField!=null && keepCaseField.equalsIgnoreCase("true") );
+             setupUCSCpanelForTrackType(currentDataTrack);             
+             ((CardLayout)cardpaneEditSourceMainCardPanel.getLayout()).show(cardpaneEditSourceMainCardPanel, "UCSCprotocol");
          } else if (datasource instanceof DataSource_FileServer) {
              String filepath=((DataSource_FileServer)datasource).getFilepath();
              int segmentsize=((DataSource_FileServer)datasource).getSegmentsize();
@@ -2329,11 +2585,28 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
          getRootPane().setDefaultButton(editSourceOKButton);
     }
 
+    
+    private void setupUCSCpanelForTrackType(DataTrack track) {
+        editUCSCsourcePanelInner.remove(editUCSCsourcePanelInnerTrack);
+        editUCSCsourcePanelInner.remove(editUCSCsourcePanelInnerRegion);
+        editUCSCsourcePanelInner.remove(editUCSCsourcePanelInnerDNA);
+        if (track.getDataType()==RegionDataset.class || track.getDataType()==NumericDataset.class) {
+            editUCSCsourcePanelInner.add(editUCSCsourcePanelInnerTrack, java.awt.BorderLayout.NORTH);
+        }
+        if (track.getDataType()==RegionDataset.class) {
+            editUCSCsourcePanelInner.add(editUCSCsourcePanelInnerRegion, java.awt.BorderLayout.CENTER);
+        }
+        if (track.getDataType()==DNASequenceDataset.class) {
+            editUCSCsourcePanelInner.add(editUCSCsourcePanelInnerDNA, java.awt.BorderLayout.NORTH);
+        }             
+        editUCSCsourcePanel.revalidate();        
+    }    
+    
     private void setSourceDataFormatEnabled(boolean enabled) {
         editSourceDataFormatLabel.setVisible(enabled);
         editSourceDataFormatCombobox.setVisible(enabled);
     }
-
+        
     /** Returns TRUE if the given DataSource protocol uses standard Data Formats to parse track data */
     private boolean usesStandardDataFormat(String protocol) {
         DataSource ds=getDataSourceTemplate(protocol);
@@ -2380,6 +2653,7 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
 
     @Action
     public void addDataSource() {
+        currentDataSource = null;
         if (currentDataTrack==null) { // setup a temp track if no track has been configured just yet
             String editname=dataTrackPropertiesNameTextfield.getText().trim();
             if (editname.isEmpty()) {
@@ -2859,9 +3133,34 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
                 currentDataSource=new DataSource_http_GET(currentDataTrack,organism,build,baseURL,dataformat,parameters);
                 currentDataSource.setDataFormatSettings(dataformatSettings);
             }
+            else if (protocol.equals(DataSource_UCSC.PROTOCOL_NAME)) {
+                currentDataSource=new DataSource_UCSC(currentDataTrack,organism,build);
+                if (currentDataTrack.getDataType()==NumericDataset.class || currentDataTrack.getDataType()==RegionDataset.class) {
+                    String trackName=editUCSCsourceTrackTextfield.getText().trim();
+                    ((DataSource_UCSC)currentDataSource).setParameter("track", trackName);
+                }
+                if (currentDataTrack.getDataType()==RegionDataset.class) {
+                    String startField=editUCSCsourceStartTextfield.getText().trim();
+                    String endField=editUCSCsourceEndTextfield.getText().trim();
+                    String typeField=editUCSCsourceTypeTextfield.getText().trim();
+                    String strandField=editUCSCsourceStrandTextfield.getText().trim();
+                    String scoreField=editUCSCsourceScoreTextfield.getText().trim();
+                    String extraField=editUCSCsourceExtraTextfield.getText().trim();               
+                    ((DataSource_UCSC)currentDataSource).setParameter("start", startField);
+                    ((DataSource_UCSC)currentDataSource).setParameter("end", endField);
+                    ((DataSource_UCSC)currentDataSource).setParameter("type", typeField);
+                    ((DataSource_UCSC)currentDataSource).setParameter("strand", strandField);
+                    ((DataSource_UCSC)currentDataSource).setParameter("score", scoreField);
+                    ((DataSource_UCSC)currentDataSource).setParameter("extra", extraField);                   
+                } 
+                if (currentDataTrack.getDataType()==DNASequenceDataset.class) {
+                    Boolean keepCase=editUCSCsourceKeepCaseInDNAcheckBox.isSelected();
+                    ((DataSource_UCSC)currentDataSource).setParameter("keepCaseInDNA", (keepCase)?"true":"false");
+                }                   
+            }            
             else if (protocol.equals(DataSource_FileServer.PROTOCOL_NAME)) {
                 String filepath=editFILEsourceFilenameTextfield.getText().trim();
-                int segmentsize=((Integer)editFILEsourceSegmentsizeSpinner.getValue()).intValue();
+                int segmentsize=((Integer)editFILEsourceSegmentsizeSpinner.getValue());
                 currentDataSource=new DataSource_FileServer(currentDataTrack,organism,build, filepath, segmentsize, dataformat);
                 currentDataSource.setDataFormatSettings(dataformatSettings);
             }
@@ -2911,23 +3210,46 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
         } else { // editing existing data source for a track
             String currentprotocol=currentDataSource.getProtocol();
             if (protocol.equals(currentprotocol)) { // protocol is the same as before. Just replace the current values in the datasource object
-                 currentDataSource.setDataFormat(dataformat);
-                 currentDataSource.setGenomeBuild(build);
-                 currentDataSource.setOrganism(organism);
-                 currentDataSource.setDataFormatSettings(dataformatSettings);
-                 if (currentDataSource instanceof DataSource_DAS) {
+                currentDataSource.setDataFormat(dataformat);
+                currentDataSource.setGenomeBuild(build);
+                currentDataSource.setOrganism(organism);
+                currentDataSource.setDataFormatSettings(dataformatSettings);
+                if (currentDataSource instanceof DataSource_DAS) {
                     String baseURL=editDASsourceBaseURLtextfield.getText().trim();
                     String feature=editDASsourceFeatureTextfield.getText().trim();
                     ((DataSource_DAS)currentDataSource).setBaseURL(baseURL);
                     ((DataSource_DAS)currentDataSource).setFeature(feature);
-                 } else if (currentDataSource instanceof DataSource_http_GET) {
+                } else if (currentDataSource instanceof DataSource_http_GET) {
                     String baseURL=editGETsourceBaseURLtextfield.getText().trim();
                     String parameter=editGETsourceParametersTextfield.getText().trim();
                     ((DataSource_http_GET)currentDataSource).setBaseURL(baseURL);
                     ((DataSource_http_GET)currentDataSource).setParameter(parameter);
-                 } else if (currentDataSource instanceof DataSource_FileServer) {
-                     String filepath=editFILEsourceFilenameTextfield.getText().trim();
-                     int segmentsize=((Integer)editFILEsourceSegmentsizeSpinner.getValue()).intValue();
+                } else if (currentDataSource instanceof DataSource_UCSC) {
+                    if (currentDataTrack.getDataType()==NumericDataset.class || currentDataTrack.getDataType()==RegionDataset.class) {
+                        String trackName=editUCSCsourceTrackTextfield.getText().trim();
+                        ((DataSource_UCSC)currentDataSource).setParameter("track", trackName);
+                    }
+                    if (currentDataTrack.getDataType()==RegionDataset.class) {
+                        String startField=editUCSCsourceStartTextfield.getText().trim();
+                        String endField=editUCSCsourceEndTextfield.getText().trim();
+                        String typeField=editUCSCsourceTypeTextfield.getText().trim();
+                        String strandField=editUCSCsourceStrandTextfield.getText().trim();
+                        String scoreField=editUCSCsourceScoreTextfield.getText().trim();
+                        String extraField=editUCSCsourceExtraTextfield.getText().trim();               
+                        ((DataSource_UCSC)currentDataSource).setParameter("start", startField);
+                        ((DataSource_UCSC)currentDataSource).setParameter("end", endField);
+                        ((DataSource_UCSC)currentDataSource).setParameter("type", typeField);
+                        ((DataSource_UCSC)currentDataSource).setParameter("strand", strandField);
+                        ((DataSource_UCSC)currentDataSource).setParameter("score", scoreField);
+                        ((DataSource_UCSC)currentDataSource).setParameter("extra", extraField);                   
+                    } 
+                    if (currentDataTrack.getDataType()==DNASequenceDataset.class) {
+                        Boolean keepCase=editUCSCsourceKeepCaseInDNAcheckBox.isSelected();
+                        ((DataSource_UCSC)currentDataSource).setParameter("keepCaseInDNA", (keepCase)?"true":"false");
+                    } 
+                } else if (currentDataSource instanceof DataSource_FileServer) {
+                    String filepath=editFILEsourceFilenameTextfield.getText().trim();
+                    int segmentsize=((Integer)editFILEsourceSegmentsizeSpinner.getValue());
                     ((DataSource_FileServer)currentDataSource).setFilepath(filepath);
                     ((DataSource_FileServer)currentDataSource).setSegmentsize(segmentsize);
                  } else if (currentDataSource instanceof DataSource_SQL) {
@@ -2981,9 +3303,34 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
                      String parameter=editGETsourceParametersTextfield.getText().trim();
                      newsource=new DataSource_http_GET(currentDataTrack,organism,build,baseURL,dataformat,parameter);
                  }
+                 else if (protocol.equals(DataSource_UCSC.PROTOCOL_NAME)) {
+                    newsource=new DataSource_UCSC(currentDataTrack,organism,build);
+                    if (currentDataTrack.getDataType()==NumericDataset.class || currentDataTrack.getDataType()==RegionDataset.class) {
+                        String trackName=editUCSCsourceTrackTextfield.getText().trim();
+                        ((DataSource_UCSC)newsource).setParameter("track", trackName);
+                    }
+                    if (currentDataTrack.getDataType()==RegionDataset.class) {
+                        String startField=editUCSCsourceStartTextfield.getText().trim();
+                        String endField=editUCSCsourceEndTextfield.getText().trim();
+                        String typeField=editUCSCsourceTypeTextfield.getText().trim();
+                        String strandField=editUCSCsourceStrandTextfield.getText().trim();
+                        String scoreField=editUCSCsourceScoreTextfield.getText().trim();
+                        String extraField=editUCSCsourceExtraTextfield.getText().trim();               
+                        ((DataSource_UCSC)newsource).setParameter("start", startField);
+                        ((DataSource_UCSC)newsource).setParameter("end", endField);
+                        ((DataSource_UCSC)newsource).setParameter("type", typeField);
+                        ((DataSource_UCSC)newsource).setParameter("strand", strandField);
+                        ((DataSource_UCSC)newsource).setParameter("score", scoreField);
+                        ((DataSource_UCSC)newsource).setParameter("extra", extraField);                   
+                    } 
+                    if (currentDataTrack.getDataType()==DNASequenceDataset.class) {
+                        Boolean keepCase=editUCSCsourceKeepCaseInDNAcheckBox.isSelected();
+                        ((DataSource_UCSC)newsource).setParameter("keepCaseInDNA", (keepCase)?"true":"false");
+                    }                                                               
+                 }                 
                  else if (protocol.equals(DataSource_FileServer.PROTOCOL_NAME)) {
                      String filepath=editFILEsourceFilenameTextfield.getText().trim();
-                     int segmentsize=((Integer)editFILEsourceSegmentsizeSpinner.getValue()).intValue();
+                     int segmentsize=((Integer)editFILEsourceSegmentsizeSpinner.getValue());
                      newsource=new DataSource_FileServer(currentDataTrack,organism, build, filepath, segmentsize, dataformat);
                  }
                  else if (protocol.equals(DataSource_SQL.PROTOCOL_NAME)) {

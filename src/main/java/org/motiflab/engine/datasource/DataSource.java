@@ -168,7 +168,7 @@ public abstract class DataSource implements Cloneable, MotifLabResource {
      }
      
      /** This should return TRUE if the DataSource relies on a standard data format (such as e.g. FASTA or GTF format)
-      *  which means that the track data can be parsed by one of MotifLab*s internal DataFormat classes 
+      *  which means that the track data can be parsed by one of MotifLab's internal DataFormat classes 
       *  or FALSE if the DataSource uses a proprietary format and must therefore be responsible for parsing its own data 
       */
      public abstract boolean usesStandardDataFormat();

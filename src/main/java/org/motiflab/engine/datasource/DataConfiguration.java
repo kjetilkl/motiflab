@@ -103,15 +103,20 @@ public class DataConfiguration implements Cloneable {
     public void saveConfigurationToFile(File configurationfile) throws Exception{
         Document document=getXMLrepresentation();
         TransformerFactory factory=TransformerFactory.newInstance();
+        OutputStream stream=null;
         try {
             factory.setAttribute("indent-number", new Integer(3));
         } catch (IllegalArgumentException iae) {}
-        Transformer transformer=factory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        DOMSource source=new DOMSource(document); 
-        OutputStream stream=MotifLabEngine.getOutputStreamForFile(configurationfile);
-        StreamResult result=new StreamResult(new OutputStreamWriter(new BufferedOutputStream(stream),"UTF-8"));
-        transformer.transform(source, result);
+        try {
+            Transformer transformer=factory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            DOMSource source=new DOMSource(document); 
+            stream=MotifLabEngine.getOutputStreamForFile(configurationfile);
+            StreamResult result=new StreamResult(new OutputStreamWriter(new BufferedOutputStream(stream),"UTF-8"));
+            transformer.transform(source, result);
+        } finally  {
+            if (stream!=null) stream.close();
+        }
     }
 
     
@@ -231,6 +236,7 @@ public class DataConfiguration implements Cloneable {
                 else if (protocoltype.equals(DataSource_FileServer.PROTOCOL_NAME)) datasource=new DataSource_FileServer(track, organism, build, dataformatName);
                 else if (protocoltype.equals(DataSource_SQL.PROTOCOL_NAME)) datasource=new DataSource_SQL(track, organism, build);
                 else if (protocoltype.equals(DataSource_VOID.PROTOCOL_NAME)) datasource=new DataSource_VOID(track, organism, build);
+                else if (protocoltype.equals(DataSource_UCSC.PROTOCOL_NAME)) datasource=new DataSource_UCSC(track, organism, build);                
                 else { // this could be a plugin datasource
                     Object ds=MotifLabEngine.getEngine().getResource(protocoltype, "DataSource");
                     if (ds instanceof DataSource) {

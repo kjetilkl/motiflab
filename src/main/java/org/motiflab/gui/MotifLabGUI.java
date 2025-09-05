@@ -3340,9 +3340,9 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                         StyledDocument log=logPanel.getStyledDocument();
                         int pos=log.getLength();
                         log.insertString(pos, msg+"\n", null);
-                        if (useColorsInLog && (msg.startsWith("NOTE:") || msg.contains("WARNING:") || msg.contains("Warning:") || msg.contains("ERROR:") || msg.contains("Error:"))) {
+                        if (useColorsInLog && (msg.toUpperCase().startsWith("NOTE:") || msg.contains("WARNING:") || msg.contains("Warning:") || msg.contains("ERROR:") || msg.contains("Error:"))) {
                             Color usecolor=Color.RED;
-                            if (msg.startsWith("NOTE:")) usecolor=Color.BLUE;
+                            if (msg.toUpperCase().startsWith("NOTE:")) usecolor=Color.BLUE;
                             else if (msg.contains("WARNING:") || msg.contains("Warning:")) usecolor=Color.MAGENTA;
                             javax.swing.text.StyleContext sc = javax.swing.text.StyleContext.getDefaultStyleContext();
                             javax.swing.text.AttributeSet aset = sc.addAttribute(javax.swing.text.SimpleAttributeSet.EMPTY, javax.swing.text.StyleConstants.Foreground, usecolor);
@@ -7178,7 +7178,10 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             public void done() { // this method is invoked on the EDT!
                 MotifLabGUI.this.getFrame().setCursor(Cursor.getDefaultCursor());
                 if (ex!=null) {
-                    logMessage(ex.getMessage());
+                    String msg=ex.getMessage();
+                    if (msg==null) msg=ex.getClass().getCanonicalName();
+                    ex.printStackTrace(System.err);
+                    logMessage(msg);
                     if (isFirstTime) JOptionPane.showMessageDialog(MotifLabGUI.this.getFrame(), "It seems that something went wrong during installation.\nPlease try to restart MotifLab","Install error",JOptionPane.ERROR_MESSAGE);
                     else JOptionPane.showMessageDialog(MotifLabGUI.this.getFrame(), "It seems that something went wrong during the upgrade.\nPlease try to restart MotifLab","Upgrade error",JOptionPane.ERROR_MESSAGE);
                 } else {
