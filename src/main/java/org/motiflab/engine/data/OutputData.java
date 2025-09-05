@@ -655,19 +655,19 @@ public class OutputData extends Data {
             if (file instanceof DataRepositoryFile) outputStream=new PrintWriter(((DataRepositoryFile)file).getFileAsOutputStream());
             else if (file instanceof File) outputStream=new PrintWriter((File)file);
             for (int i=0;i<linecount;i++) { 
-                  Element e=root.getElement(i);  
-                  String line=document.getText(e.getStartOffset(),e.getEndOffset()-e.getStartOffset());
-                  // remove newlines
-                  if (line.endsWith("\r\n")) line=line.substring(0,line.length()-2);
-                  else if (line.endsWith("\n")) line=line.substring(0,line.length()-1);
-                  if (dependencies!=null) line=replaceDependencies(line, dependencyPrefix, true); // replace internal dependency-filenames with the names of the external files (which they will have after they have been saved, which will happen later...) 
-                  if (i<linecount-1 || !line.isEmpty()) outputStream.println(line);
-                  if (i%100==0 && progressListener!=null) {// report progress every 100th line
-                      double p=(double)i/(double)linecount; // document progress
-                      double documentFraction=(dependencies==null)?1.0:0.5; // documentFraction=1.0/(double)((dependencies==null)?0:dependencies.size()+1); // portion of total progress reserved for document
-                      Integer progress=new Integer((int)(p*documentFraction*100.0));
-                      progressListener.propertyChange(new PropertyChangeEvent(this, org.motiflab.engine.task.ExecutableTask.PROGRESS, null, progress));
-                  }
+                Element e=root.getElement(i);  
+                String line=document.getText(e.getStartOffset(),e.getEndOffset()-e.getStartOffset());
+                // remove newlines
+                if (line.endsWith("\r\n")) line=line.substring(0,line.length()-2);
+                else if (line.endsWith("\n")) line=line.substring(0,line.length()-1);
+                if (dependencies!=null) line=replaceDependencies(line, dependencyPrefix, true); // replace internal dependency-filenames with the names of the external files (which they will have after they have been saved, which will happen later...) 
+                if (i<linecount-1 || !line.isEmpty()) outputStream.println(line);
+                if (i%100==0 && progressListener!=null) {// report progress every 100th line
+                    double p=(double)i/(double)linecount; // document progress
+                    double documentFraction=(dependencies==null)?1.0:0.5; // documentFraction=1.0/(double)((dependencies==null)?0:dependencies.size()+1); // portion of total progress reserved for document
+                    Integer progress=new Integer((int)(p*documentFraction*100.0));
+                    progressListener.propertyChange(new PropertyChangeEvent(this, org.motiflab.engine.task.ExecutableTask.PROGRESS, null, progress));
+                }
             }                    
         } catch (BadLocationException bad) { 
             System.err.println("SYSTEM ERROR: BadLocationException in OutputData.saveToFile(): "+bad.getMessage());

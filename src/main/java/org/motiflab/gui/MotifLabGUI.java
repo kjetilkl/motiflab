@@ -51,6 +51,7 @@ import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.lang.management.ManagementFactory;
@@ -63,6 +64,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -120,6 +122,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 import javax.swing.undo.UndoableEdit;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ApplicationContext;
@@ -1459,7 +1462,8 @@ public final class MotifLabGUI extends FrameView implements MotifLabClient, Data
         fileMenuSeparator3 = new javax.swing.JSeparator();
         filePrintMenuItem = new javax.swing.JMenuItem();
         fileSaveAsImageMenuItem = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        fileSaveAsIndividualImagesMenuItem = new javax.swing.JMenuItem();
+        fileSaveAsHTMLpageMenuItem = new javax.swing.JMenuItem();
         fileMenuSeparator4 = new javax.swing.JSeparator();
         fileSaveAndExitMenuItem = new javax.swing.JMenuItem();
         javax.swing.JMenuItem fileExitMenuItem = new javax.swing.JMenuItem();
@@ -1955,9 +1959,13 @@ public final class MotifLabGUI extends FrameView implements MotifLabClient, Data
         fileSaveAsImageMenuItem.setName("fileSaveAsImageMenuItem"); // NOI18N
         fileMenu.add(fileSaveAsImageMenuItem);
 
-        jMenuItem1.setAction(actionMap.get("saveAsIndividualImagesMethod")); // NOI18N
-        jMenuItem1.setName("jMenuItem1"); // NOI18N
-        fileMenu.add(jMenuItem1);
+        fileSaveAsIndividualImagesMenuItem.setAction(actionMap.get("saveAsIndividualImagesMethod")); // NOI18N
+        fileSaveAsIndividualImagesMenuItem.setName("fileSaveAsIndividualImagesMenuItem"); // NOI18N
+        fileMenu.add(fileSaveAsIndividualImagesMenuItem);
+
+        fileSaveAsHTMLpageMenuItem.setAction(actionMap.get("saveAsHTMLpageMethod")); // NOI18N
+        fileSaveAsHTMLpageMenuItem.setName("fileSaveAsHTMLpageMenuItem"); // NOI18N
+        fileMenu.add(fileSaveAsHTMLpageMenuItem);
 
         fileMenuSeparator4.setName("fileMenuSeparator4"); // NOI18N
         fileMenu.add(fileMenuSeparator4);
@@ -3009,7 +3017,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         Component currentWindow=mainWindow.getSelectedComponent();
         if (currentWindow instanceof ProtocolEditor && getProtocolEditor().getProtocol()!=null) {
                 ProtocolEditor editor = getProtocolEditor();
-                try {                   
+                try {
                     editor.setLineWrapping(true); // temporary enable line wrapping to allow long lines to be printed out fully rather than being cropped
                     boolean complete = getProtocolEditor().getEditorPane().print();
                     if (complete) {
@@ -3035,7 +3043,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                         JEditorPane editorPane = new JEditorPane("text/plain",outputdata.getContentsAsString());
                         boolean complete = editorPane.print();
                         if (complete) logMessage("Printing complete");
-                        else logMessage("Printing cancelled");                       
+                        else logMessage("Printing cancelled");
                     } else {
                         String msg = "Unable to print output in "+format+" format.\nPlease save the content to a file and open it in a suitable external editor for printing";
                         JOptionPane.showMessageDialog(this.getFrame(), msg,"Print Error", JOptionPane.ERROR_MESSAGE);
@@ -3052,7 +3060,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                     job.setPrintable(vizPanel);
                     if (job.printDialog()) {
                         job.print();
-                    }                                        
+                    }
                     logMessage("Print job completed");
                 } catch (PrinterException e) {
                     JOptionPane.showMessageDialog(this.getFrame(), e.getMessage(),"Print Error" ,JOptionPane.ERROR_MESSAGE);
@@ -3061,7 +3069,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         getFrame().setCursor(Cursor.getDefaultCursor());
     }
 
-    
+
     @Action(enabledProperty = "undoEnabled")
     public void undo() {
         getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -3179,7 +3187,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
     }
 
     @Override
-    public void displayMessage(String message, int type) {     
+    public void displayMessage(String message, int type) {
         if (SwingUtilities.isEventDispatchThread()) displayMessageInternal(message, type);
         else try {
             SwingUtilities.invokeAndWait(() -> { // block background workers calling this method until the dialog is closed
@@ -3187,21 +3195,21 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             });
         } catch (InterruptedException | InvocationTargetException e) { }
     }
-    
-    private void displayMessageInternal(String message, int type) {      
-        String header=""; 
+
+    private void displayMessageInternal(String message, int type) {
+        String header="";
         int paneltype=JOptionPane.INFORMATION_MESSAGE;
         if (type==ERROR_MESSAGE) {header="ERROR"; paneltype=JOptionPane.ERROR_MESSAGE;}
-        else if (type==WARNING_MESSAGE) {header="Warning";paneltype=JOptionPane.WARNING_MESSAGE;}                    
+        else if (type==WARNING_MESSAGE) {header="Warning";paneltype=JOptionPane.WARNING_MESSAGE;}
         if (message.length()<200) JOptionPane.showMessageDialog(getFrame(), message, header, paneltype);
         else  {
             if (message.contains("\n")) message=message.replaceAll("\n", "<br>"); // InfoDialog uses HTML formatting
             InfoDialog infodialog=new InfoDialog(this, header, message, 700, 450);
             infodialog.setVisible(true);
-            infodialog.dispose();           
+            infodialog.dispose();
         }
-    }    
-    
+    }
+
     @Override
     public int[] selectOption(String message, String[] options, final boolean allowMultipleChoice) {
         if (SwingUtilities.isEventDispatchThread()) return selectOptionInternal(message, options, allowMultipleChoice);
@@ -3213,16 +3221,16 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             });
         } catch (InterruptedException | InvocationTargetException e) {
             // Handle exceptions
-        } 
+        }
         return (int[])selection[0];
     }
-    
+
     private int[] selectOptionInternal(String message, String[] options, boolean allowMultipleChoice) {
         if (message.contains("\n")) {
-            message=message.replaceAll("\n\n\\s+\\* ", "<br><br>&nbsp;&nbsp;&nbsp;&bull; "); // bullet point                
+            message=message.replaceAll("\n\n\\s+\\* ", "<br><br>&nbsp;&nbsp;&nbsp;&bull; "); // bullet point
             message=message.replaceAll("\n", "<br>");
             message="<html>"+message+"</html>";
-        }          
+        }
         if (options.length==2 && "YES".equalsIgnoreCase(options[0]) && "NO".equalsIgnoreCase(options[1])) {
             int choice = JOptionPane.showConfirmDialog(getFrame(), message, "", JOptionPane.YES_NO_OPTION);
             return new int[]{(choice==JOptionPane.YES_OPTION)?0:1};
@@ -3231,13 +3239,13 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             for (String option:options) {if (option.length()>optionTextLength) optionTextLength=option.length();}
             if (options.length<6 && optionTextLength<20) {
                int choice = JOptionPane.showOptionDialog(getFrame(),message, "", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-               return new int[]{choice};               
+               return new int[]{choice};
             } else { // options are many or verbose, so it is better to display them as a list of radio-buttons
                 JPanel outer = new JPanel(new BorderLayout(0, 10));
-                outer.add(new JLabel(message),BorderLayout.NORTH);                
-                JPanel boxpanel = new JPanel(new GridLayout(0,1));             
+                outer.add(new JLabel(message),BorderLayout.NORTH);
+                JPanel boxpanel = new JPanel(new GridLayout(0,1));
                 ButtonGroup group = new ButtonGroup();
-                JRadioButton[] boxes = new JRadioButton[options.length];               
+                JRadioButton[] boxes = new JRadioButton[options.length];
                 for (int i=0;i<options.length;i++) {
                     boxes[i]=new JRadioButton(options[i]);
                     boxpanel.add(boxes[i]);
@@ -3248,30 +3256,30 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                     JScrollPane scrollpane = new JScrollPane(boxpanel);
                     outer.add(scrollpane,BorderLayout.CENTER);
                 } else outer.add(boxpanel,BorderLayout.CENTER);
-                int result = JOptionPane.showConfirmDialog(getFrame(),outer,"",JOptionPane.OK_CANCEL_OPTION); 
+                int result = JOptionPane.showConfirmDialog(getFrame(),outer,"",JOptionPane.OK_CANCEL_OPTION);
                 if (result==JOptionPane.CANCEL_OPTION) return new int[]{};
                 else {
                     for (int i=0;i<boxes.length;i++) {
                         if (boxes[i].isSelected()) return new int[]{i};
                     }
                     return new int[]{};
-                }                
-            }           
-        } else { // custom implementation to allow multiple choice         
+                }
+            }
+        } else { // custom implementation to allow multiple choice
             JPanel outer = new JPanel(new BorderLayout(0, 10));
-            outer.add(new JLabel(message),BorderLayout.NORTH);                
-            JPanel boxpanel = new JPanel(new GridLayout(0,1)); 
-            JCheckBox[] boxes = new JCheckBox[options.length];               
+            outer.add(new JLabel(message),BorderLayout.NORTH);
+            JPanel boxpanel = new JPanel(new GridLayout(0,1));
+            JCheckBox[] boxes = new JCheckBox[options.length];
             for (int i=0;i<options.length;i++) {
                 boxes[i]=new JCheckBox(options[i]);
                 boxpanel.add(boxes[i]);
-                if (i==0) boxes[i].setSelected(true);                
+                if (i==0) boxes[i].setSelected(true);
             }
             if (options.length>5) {
                 JScrollPane scrollpane = new JScrollPane(boxpanel);
                 outer.add(scrollpane,BorderLayout.CENTER);
             } else outer.add(boxpanel,BorderLayout.CENTER);
-            int result = JOptionPane.showConfirmDialog(getFrame(),outer,"",JOptionPane.OK_CANCEL_OPTION); 
+            int result = JOptionPane.showConfirmDialog(getFrame(),outer,"",JOptionPane.OK_CANCEL_OPTION);
             if (result==JOptionPane.CANCEL_OPTION) return new int[]{};
             else {
                 ArrayList<Integer> chosen = new ArrayList<>();
@@ -3281,10 +3289,10 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                 int[] selected = new int[chosen.size()];
                 for (int i=0;i<chosen.size();i++) selected[i]=chosen.get(i);
                 return selected;
-            }                       
+            }
         }
-    }    
-    
+    }
+
     /** Displays a message in a popup dialog
      * @param message The message to display
      * @param type The type of message (based on types in JOptionPane)
@@ -4010,7 +4018,8 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
     private javax.swing.JMenuItem importFromFileMenuItem;
     private javax.swing.JMenuItem installConfigFileMenuItem;
     private javax.swing.JMenuItem interactionFilterMenuItem;
-    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem fileSaveAsIndividualImagesMenuItem;
+    private javax.swing.JMenuItem fileSaveAsHTMLpageMenuItem;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
@@ -5238,7 +5247,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                         if (ex.getMessage().equals("Newer version")) message.append("The saved session requires a newer version of MotifLab.");
                         else message.append("The saved session is not compatible with the current version/setup of MotifLab.");
                         // System.err.println(ex);
-                        // ex.printStackTrace(System.err);                                        
+                        // ex.printStackTrace(System.err);
                         if (requirements!=null && requirements.length>0) {
                             ArrayList<String> missingPlugins=new ArrayList<String>();
                             ArrayList<String> additionRequirements=new ArrayList<String>();
@@ -5486,6 +5495,50 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         setLastUsedDirectory(dir);
     }
 
+    @Action
+    public void saveAsHTMLpageMethod() {
+        getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        File file=null;
+        File parentDir=getLastUsedDirectory();
+        final JFileChooser fc = getFileChooser(parentDir);
+        fc.addChoosableFileFilter(new FileNameExtensionFilter("HTML", "html","HTML"));        
+        fc.setDialogTitle("Save Sequences as HTML page");
+        JPanel subsetPanel=new JPanel(new BorderLayout());
+        subsetPanel.setLayout(new FlowLayout());
+        subsetPanel.setBorder(BorderFactory.createTitledBorder("Sequences"));
+        ArrayList<String> subset=new ArrayList<String>();
+        ArrayList<String> collection=engine.getNamesForAllDataItemsOfType(SequenceCollection.class);
+        collection.remove(engine.getDefaultSequenceCollectionName());
+        Collections.sort(collection,MotifLabEngine.getNaturalSortOrderComparator(true));
+        subset.add(engine.getDefaultSequenceCollectionName());
+        subset.addAll(collection);
+        collection.clear();
+        collection=engine.getNamesForAllDataItemsOfType(Sequence.class);
+        Collections.sort(collection,MotifLabEngine.getNaturalSortOrderComparator(true));
+        subset.addAll(collection);
+        String[] array=new String[0];
+        array=subset.toArray(array);
+        JComboBox subsetCombobox=new JComboBox<>(array);
+        subsetCombobox.setEditable(true);
+        subsetPanel.add(subsetCombobox);
+        fc.setAccessory(subsetPanel);
+        File preselected=getLastUsedDirectory();
+        fc.setSelectedFile(preselected);
+        int returnValue=fc.showSaveDialog(getFrame());
+        if (returnValue==JFileChooser.APPROVE_OPTION) {
+            file=fc.getSelectedFile();
+        } else {
+            getFrame().setCursor(Cursor.getDefaultCursor());
+            return;
+        }
+        if (!file.getName().toLowerCase().endsWith(".html")) {
+            file=new File(file.getParent(),file.getName()+".html");
+        }
+        String subsetName=(String)subsetCombobox.getSelectedItem();
+        saveSequencesAsHTMLpageInBackground(file,subsetName);
+        setLastUsedDirectory(file.getParentFile());
+    }
+
 
     @Action
     public void saveAsImageMethod() {
@@ -5719,6 +5772,93 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
         worker.execute();
     }
 
+    /** A convenience method to save images to an HTML page off the EDT */
+    private void saveSequencesAsHTMLpageInBackground(final File file, final String subset) {
+        SwingWorker worker=new SwingWorker<Boolean, Void>() {
+            Exception ex=null;
+            int count=0;
+            @Override
+            public Boolean doInBackground() {
+                BufferedImage testimage=new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+                Graphics2D testgraphics=testimage.createGraphics();
+                ArrayList<String> sequenceNames;
+                Data seqData=engine.getDataItem(subset);
+                if (seqData instanceof SequenceCollection) {
+                    sequenceNames=((SequenceCollection)seqData).getAllSequenceNames();
+                } else if (seqData instanceof Sequence) {
+                    sequenceNames=new ArrayList<>(1);
+                    sequenceNames.add(subset);
+                } else sequenceNames=new ArrayList<>(0);
+                String title=file.getName();
+                title=title.substring(0,title.indexOf('.'));
+                Graphics2D g=null;
+                ByteArrayOutputStream imageStream=null;
+                PrintWriter outputStream=null;
+                try {
+                    outputStream=new PrintWriter(file);
+                    outputStream.println("<html>");
+                    outputStream.println("  <header>");
+                    outputStream.println("     <title>"+title+"</title>");
+                    outputStream.println("     <style type=\"text/css\">");
+                    outputStream.println("        body {background-color: #E0E0E0;}");
+                    outputStream.println("        h1 {font-family: Arial, sans-serif;font-size:18pt;margin-bottom:4pt;");                    
+                    outputStream.println("     </style>");                   
+                    outputStream.println("  </header>");
+                    outputStream.println("  <body>");                    
+                    for (String sequenceName:sequenceNames) {
+                        SequenceVisualizer seqViz=visualizationPanel.getSequenceVisualizer(sequenceName);
+                        if (seqViz==null) {ex=new ExecutionError("Found no visualization for sequence '"+sequenceName+"'");return Boolean.FALSE;}
+                        if (seqViz.isVisualizerDirty()) {seqViz.paint(testgraphics);} // force initialization by painting in a different image
+                        //JPanel panel=seqViz.getTracksPanel();
+                        java.awt.Rectangle rect=seqViz.getTrackPanelBounds();
+                        if (rect.width==0 || rect.height==0) logMessage("Skipping image for sequence '"+sequenceName+"' (size="+rect.width+","+rect.height+")");
+                        BufferedImage image=new BufferedImage(rect.width, rect.height, BufferedImage.TYPE_INT_RGB);
+                        g=image.createGraphics();
+                        g.setColor(java.awt.Color.WHITE);
+                        g.fillRect(0, 0, rect.width, rect.height);
+                        g.translate(-rect.x, -rect.y); // the panel contains other things besides the tracks. The rectangle holds the bounds for the tracks.
+                        seqViz.paint(g); // I paint the whole thing but only the tracks will fit inside the image now
+                        g.dispose();
+                        imageStream = new ByteArrayOutputStream();
+                        ImageIO.write(image, "png", imageStream);
+                        imageStream.close();
+                        byte[] imageBytes=imageStream.toByteArray();
+                        StringBuilder builder = new StringBuilder();
+                        outputStream.print("<h1>");
+                        outputStream.print(sequenceName);
+                        outputStream.println("</h1>");
+                        outputStream.print("<img src=\"data:image/png;base64,");
+                        outputStream.print(Base64.getEncoder().encodeToString(imageBytes));
+                        outputStream.print("\"");
+                        outputStream.println(" /></br></br></br>");
+                        outputStream.println(builder.toString());
+                        count++;
+                    }
+                    outputStream.println("  </body>\n</html>");
+                    outputStream.close();
+                } catch (Exception e) {
+                    ex=e;
+                    return Boolean.FALSE;
+                } finally {
+                    if (g!=null) g.dispose();
+                    if (imageStream!=null) try {imageStream.close();} catch (Exception anyx) {}
+                    if (outputStream!=null) try {outputStream.close();} catch (Exception anyx) {}
+                }
+                return Boolean.TRUE;
+            } // end doInBackground
+            @Override
+            public void done() { // this method is invoked on the EDT!
+                if (ex!=null) {
+                     JOptionPane.showMessageDialog(getFrame(), ex.getClass().getSimpleName().toString()+":\n"+ex.getMessage(),"File error" ,JOptionPane.ERROR_MESSAGE);
+                     logMessage("Save error: "+ex.getMessage());
+                } else { // save went OK
+                     logMessage("Saved "+count+" sequences to HTML page: "+file.getAbsolutePath());
+                }
+                getFrame().setCursor(Cursor.getDefaultCursor());
+            }
+        }; // end of SwingWorker class
+        worker.execute();
+    }
 
     /** Returns the directory last used to load or save files. This can be used to
      *  initialize new FileChoosers with the same location
@@ -6988,14 +7128,14 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
 
 
     /**
-     * This method checks with the UpgradeManager to see if an upgrade 
+     * This method checks with the UpgradeManager to see if an upgrade
      * of some configuration files or other installed resources are needed
      * because they were created by an older version of MotifLab than the one
      * which is currently running
      */
     public void checkIfUpgradeIsNeeded() {
         final UpgradeManager upgradeManager = new UpgradeManager(engine);
-        if (!upgradeManager.isUpgradeNeeded()) return; // no need to upgrade at this point      
+        if (!upgradeManager.isUpgradeNeeded()) return; // no need to upgrade at this point
         setProgress(10); // just to have some starting value for the upgrade process
         final boolean isFirstTime = upgradeManager.isFirstTime();
         if (isFirstTime) {
@@ -7018,7 +7158,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
             InfoDialog dialog=new InfoDialog(MotifLabGUI.this, "MotifLab installation", document, 500,400);
             dialog.setVisible(true);
             dialog.dispose();
-        } 
+        }
         MotifLabGUI.this.getFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
         // Perform installation in the background
@@ -7116,7 +7256,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                 } catch (Exception e) {
                     ex=e;
                     return Boolean.FALSE;
-                } 
+                }
                 return Boolean.TRUE;
             } // end doInBackground
             @Override
