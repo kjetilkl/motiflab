@@ -34,6 +34,8 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -57,6 +59,10 @@ import org.motiflab.engine.protocol.ParseError;
  * @author  kjetikl
  */
 public class SequenceInputDialog extends javax.swing.JDialog {
+    
+    private static String lastSelectedGenomeBuild=null;
+    private static String lastSelectedOrganism=null;
+    
     private JTable advancedInputTable;
 //    private MotifLabGUI gui;
     private MotifLabEngine engine;
@@ -71,11 +77,11 @@ public class SequenceInputDialog extends javax.swing.JDialog {
     /** Creates new form SequenceInputDialog */
     public SequenceInputDialog(MotifLabEngine engine) {
         super((engine.getClient() instanceof MinimalGUI)?((MinimalGUI)engine.getClient()).getFrame():((MotifLabGUI)engine.getClient()).getFrame(), true);
-        this.engine=engine;
+        this.engine=engine;      
         this.idResolver=engine.getGeneIDResolver();
         this.MAX_SEQUENCE_LENGTH=engine.getMaxSequenceLength();
-        autoCorrectNames=engine.autoCorrectSequenceNames();
-        initComponents();
+        autoCorrectNames=engine.autoCorrectSequenceNames();        
+        initComponents();       
         if (engine.getClient() instanceof MinimalGUI) { // remove some GUI elements when used by the minimalGUI client
             bottomPanel.remove(loadDNAtrackPanel);
             additionalOptionsPanel.remove(includeSequenceInProtocolCheckbox);
@@ -145,15 +151,20 @@ public class SequenceInputDialog extends javax.swing.JDialog {
                 if (supportedBuilds!=null) {
                     genomeBuildCombobox.setModel(new DefaultComboBoxModel(supportedBuilds));
                     genomeBuildCombobox.setEnabled(true);
-                } else {
+                    lastSelectedOrganism=organismname;                    
+                } else {                 
                     genomeBuildCombobox.setEnabled(false);
+                    lastSelectedOrganism=null;
                 }
             }
         });
-        if (idResolver.isOrganismSupported(9606)) { // select human as default
+        if (idResolver.isOrganismSupported(9606)) { // select human as default. This can be changed later if settings have been saved
            organismCombobox.setSelectedItem(Organism.getCommonName(9606));
         } else organismCombobox.setSelectedIndex(0);
-
+        genomeBuildCombobox.addActionListener((ActionEvent e) -> {
+            lastSelectedGenomeBuild=(String)genomeBuildCombobox.getSelectedItem();
+        });     
+        
         organismComboboxBED.setModel(new DefaultComboBoxModel(organismNames));
         organismComboboxBED.addActionListener(new ActionListener() {
             @Override
@@ -164,14 +175,22 @@ public class SequenceInputDialog extends javax.swing.JDialog {
                 if (supportedBuilds!=null) {
                     genomeBuildComboboxBED.setModel(new DefaultComboBoxModel(supportedBuilds));
                     genomeBuildComboboxBED.setEnabled(true);
+                    lastSelectedOrganism=organismname;                    
                 } else {
                     genomeBuildComboboxBED.setEnabled(false);
+                    lastSelectedOrganism=null;                    
                 }
             }
         });
-        if (idResolver.isOrganismSupported(9606)) { // select human as default
+
+        if (idResolver.isOrganismSupported(9606)) { // select human as default. This can be changed later if settings have been saved
            organismComboboxBED.setSelectedItem(Organism.getCommonName(9606));
         } else organismComboboxBED.setSelectedIndex(0);
+              
+        genomeBuildComboboxBED.addActionListener((ActionEvent e) -> {
+            lastSelectedGenomeBuild=(String)genomeBuildComboboxBED.getSelectedItem();
+        });
+        
         exampleBEDbutton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 showBEDExample();
@@ -194,6 +213,12 @@ public class SequenceInputDialog extends javax.swing.JDialog {
                 if (settings.length>2 && settings[2]!=null) genomeBuildCombobox.setSelectedItem(settings[2]);
                 if (settings.length>3 && settings[3]!=null) organismComboboxBED.setSelectedItem(settings[3]);
                 if (settings.length>4 && settings[4]!=null) genomeBuildComboboxBED.setSelectedItem(settings[4]);
+                if (settings.length>5 && settings[5]!=null) {
+                    if (settings[5].equals("BEDtab")) tabPanel.setSelectedComponent(BEDtab);
+                    else if (settings[5].equals("GeneIDsTab")) tabPanel.setSelectedComponent(GeneIDsTab);
+                    else if (settings[5].equals("CoordinatesTab")) tabPanel.setSelectedComponent(CoordinatesTab);
+ 
+                }                
             }
         } catch (Exception e) {}
     }
@@ -883,15 +908,57 @@ public class SequenceInputDialog extends javax.swing.JDialog {
         BEDtab.add(BEDtabMainPanel, java.awt.BorderLayout.CENTER);
 
         tabPanel.addTab(resourceMap.getString("BEDtab.TabConstraints.tabTitle"), BEDtab); // NOI18N
+        tabPanel.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                Component selectedTab=tabPanel.getSelectedComponent();
+                if (selectedTab==BEDtab) {
+                    if (lastSelectedOrganism!=null) organismComboboxBED.setSelectedItem(lastSelectedOrganism);
+                    if (lastSelectedGenomeBuild!=null) genomeBuildComboboxBED.setSelectedItem(lastSelectedGenomeBuild);
+                } else if (selectedTab==GeneIDsTab) {
+                    if (lastSelectedOrganism!=null) organismCombobox.setSelectedItem(lastSelectedOrganism);
+                    if (lastSelectedGenomeBuild!=null) genomeBuildCombobox.setSelectedItem(lastSelectedGenomeBuild);                   
+                }
+            }
+        });
 
         getContentPane().add(tabPanel, java.awt.BorderLayout.CENTER);
 
         pack();
     }
 
+private void storeDialogSettings() {
+    // save current settings to initialize dialog with the same selections next time
+    String[] settings=new String[]{
+       (String)identifierTypeCombobox.getSelectedItem(),
+       (String)organismCombobox.getSelectedItem(),
+       (String)genomeBuildCombobox.getSelectedItem(),
+       (String)organismComboboxBED.getSelectedItem(),
+       (String)genomeBuildComboboxBED.getSelectedItem(),
+       (String)tabPanel.getSelectedComponent().getName()
+    };
+    if ( (settings[1]!=null && !settings[1].equals(settings[3])) || (settings[2]!=null && !settings[2].equals(settings[4])) ) {
+        // make sure settings in the GeneIDs panel match those in the BED panel
+        if (tabPanel.getSelectedComponent()==BEDtab) {
+            settings[1]=settings[3];
+            settings[2]=settings[4];
+        } else {
+            settings[3]=settings[1];
+            settings[4]=settings[2];           
+        }
+    }
+    try {
+        engine.storeSystemObject(settings, "SequenceDialogSettings.ser");
+    } catch (Exception e) {
+       // not really important
+    }    
+}    
+    
 private void onOKClicked(java.awt.event.ActionEvent evt) {
     okButton.setEnabled(false);
     errorMessageLabel.setText("");
+    storeDialogSettings();
+    
     if (loadDNAtrackCheckbox.isSelected()) {
         String targetName=dnaTrackNameTextfield.getText().trim();
         String nameError=engine.checkNameValidity(targetName,false);
@@ -901,15 +968,7 @@ private void onOKClicked(java.awt.event.ActionEvent evt) {
            return;
         }
     }
-    // save current settings to initialize dialog with the same selections next time
-    String[] settings=new String[]{
-       (String)identifierTypeCombobox.getSelectedItem(),
-       (String)organismCombobox.getSelectedItem(),
-       (String)genomeBuildCombobox.getSelectedItem(),
-       (String)organismComboboxBED.getSelectedItem(),
-       (String)genomeBuildComboboxBED.getSelectedItem()
-    };
-    try {engine.storeSystemObject(settings, "SequenceDialogSettings.ser");} catch (Exception e) {}
+
     // now create the sequence objects
     AddSequencesTask task=null;
     if (tabPanel.getSelectedComponent()==GeneIDsTab) {
@@ -1000,7 +1059,8 @@ private void importManualEntriesFromFile() {
 
 
 private void onCancelClicked(java.awt.event.ActionEvent evt) {
-      this.setVisible(false);
+    storeDialogSettings();
+    this.setVisible(false);
 }
 
 private void onBrowseButtonPressed(java.awt.event.ActionEvent evt) {
