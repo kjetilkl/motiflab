@@ -60,6 +60,7 @@ public class MainPanel extends JTabbedPane implements DataListener {
         private JMenu viewMenu=null;
         private final MainPanel mainpanel=this;
         private String closingDownNow=null; 
+        private Object[] showTabHook = null; // if this is [int,String], it is a signal that this MainPanel should show the "String" panel after "int" OutputData tabs have been added
         
 	public MainPanel(MotifLabGUI gui, JMenu viewMenu) {
             this.gui=gui;
@@ -276,6 +277,18 @@ public class MainPanel extends JTabbedPane implements DataListener {
            return false;          
     }       
       
+    /**
+     * This is a signal to the MainPanel to display the selected tab
+     * after "count" OutputData objects have been added to the panel
+     * This is used as a hack to restore the correct tab after importing
+     * session since race-conditions lead to data objects being added
+     * after the correct tab was initially set
+     * @param tabName
+     * @param count 
+     */
+    public void setShowTabHook(String tabName, int count) {
+        showTabHook=new Object[]{tabName,count};
+    }
     
 // -----------------------------------------------------------------------        
     public void dataAdded(Data data) {
@@ -288,6 +301,13 @@ public class MainPanel extends JTabbedPane implements DataListener {
                 addTab(data.getName(), newpanel, true);
                 setupViewMenu();
                 MainPanel.this.setSelectedComponent(newpanel);
+                if (showTabHook!=null) {
+                    int outputTabs=MainPanel.this.getTabCount();
+                    if (outputTabs>=(int)showTabHook[1]) {
+                        MainPanel.this.setSelectedTab((String)showTabHook[0]);
+                        showTabHook=null; // turn of signal
+                    }
+                }
             }
         });        
     }

@@ -44,7 +44,6 @@ import java.beans.PropertyChangeListener;
 import java.io.BufferedOutputStream;
 import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidClassException;
@@ -74,8 +73,6 @@ import java.util.TimeZone;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
@@ -107,7 +104,6 @@ import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.ListCellRenderer;
 import javax.swing.MenuElement;
@@ -119,7 +115,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 import javax.swing.undo.UndoableEdit;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -5318,9 +5313,9 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                     visualizationSettings.enableVisualizationSettingsNotifications(true); // reenable
                     //visualizationSettings.notifyListenersOfSequenceLayoutUpdate(VisualizationSettingsListener.REORDERED, engine.getDefaultSequenceCollection());
                     // restore output data objects (same as tabnames)
-                    for (String outputDataName:tabNames){
+                    for (String outputDataName:tabNames){                       
                         Data element=getDataByNameFromList(datalist,outputDataName);
-                        if (element==null) continue;
+                        if (element==null) continue; // Probably Visualization or Protocol
                         try {
                             engine.storeDataItem(element); // this will show the tab
                         } catch (Exception e) {
@@ -5362,7 +5357,10 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
                         ((OutputData)output).setDirty(true); // mark all output data as dirty so that it is possible to save them again
                     }
                     undoManager.discardAllEdits(); // reset the undo queue
-                    if (selectedTabName!=null) mainWindow.setSelectedTab(selectedTabName);
+                    if (selectedTabName!=null) {
+                        mainWindow.setSelectedTab(selectedTabName);
+                        mainWindow.setShowTabHook(selectedTabName, tabNames.length); // setup a hook in case the previous statement is overriden because of race-conditions
+                    }                    
                     registerRecentSession(fullpath);
                     recplaystopButtonGroup.clearSelection();
                     if (isRecording()) {
