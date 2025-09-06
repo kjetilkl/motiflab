@@ -365,13 +365,13 @@
          <Protocol type="UCSC"><track>knownGene</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand><extra>geneName=gene,geneType</extra></Protocol>
       </DataSource>
       <DataSource build="mm10" organism="10090">
-         <Protocol type="UCSC"><track>knownGene</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand><extra>geneName=gene,geneType</extra></Protocol>
+         <Protocol type="UCSC"><track>knownGene</track><start>txStart</start><end>txEnd</end><type>name</type><strand>strand</strand><extra>proteinID=protein</extra></Protocol>
       </DataSource> 
       <DataSource build="mm9" organism="10090">
-         <Protocol type="UCSC"><track>knownGene</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand><extra>geneName=gene,geneType</extra></Protocol>
+         <Protocol type="UCSC"><track>knownGene</track><start>txStart</start><end>txEnd</end><type>name</type><strand>strand</strand><extra>proteinID=protein</extra></Protocol>
       </DataSource>
       <DataSource build="mm8" organism="10090">
-         <Protocol type="UCSC"><track>knownGene</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand><extra>geneName=gene,geneType</extra></Protocol>
+         <Protocol type="UCSC"><track>knownGene</track><start>txStart</start><end>txEnd</end><type>name</type><strand>strand</strand><extra>proteinID=protein</extra></Protocol>
       </DataSource>                
    </DataTrack>   
    
@@ -592,16 +592,6 @@
       <DataSource build="hg18" organism="9606">
          <Protocol type="UCSC"><track>oreganno</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand></Protocol>
       </DataSource>
-
-      <DataSource build="mm10" organism="10090">
-         <Protocol type="UCSC"><track>oreganno</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand></Protocol>
-      </DataSource>
-      <DataSource build="mm9" organism="10090">
-         <Protocol type="UCSC"><track>oreganno</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand></Protocol>
-      </DataSource>
-      <DataSource build="mm8" organism="10090">
-         <Protocol type="UCSC"><track>oreganno</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand></Protocol>
-      </DataSource>               
       <DataSource build="hg18" organism="9606">
          <Protocol type="GET">
             <URL>https://motiflab.org/getData.cgi</URL>
@@ -609,6 +599,13 @@
          </Protocol>
          <dataformat name="BED"/>
       </DataSource>
+      <DataSource build="mm10" organism="10090">
+         <Protocol type="UCSC"><track>oreganno</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand></Protocol>
+      </DataSource>
+      <DataSource build="mm9" organism="10090">
+         <Protocol type="UCSC"><track>oreganno</track><start>chromStart</start><end>chromEnd</end><type>name</type><strand>strand</strand></Protocol>
+      </DataSource>             
+
    </DataTrack>
    <DataTrack description="General Binding Preference"
               name="GBP"
@@ -1017,10 +1014,7 @@
    <DataTrack description="Predicted transcription factor binding sites within conserved regions" name="TFBSConsSites" source="UCSC Genome Browser" type="region">
       <DataSource build="hg18" organism="9606">
          <Protocol type="UCSC"><track>tfbsConsSites</track><start>chromStart</start><end>chromEnd</end><type>name</type><score>score</score><strand>strand</strand></Protocol>
-      </DataSource>
-      <DataSource build="mm8" organism="10090">
-         <Protocol type="UCSC"><track>tfbsConsSites</track><start>chromStart</start><end>chromEnd</end><type>name</type><score>score</score><strand>strand</strand></Protocol>
-      </DataSource>      
+      </DataSource>    
    </DataTrack>   
    
    <DataTrack description="H3K4me1 Mark (Often Found Near Regulatory Elements)" name="H3K4me1 GM12878" source="UCSC Genome Browser" type="numeric">
@@ -1171,10 +1165,7 @@
             <URL>https://genome.ucsc.edu/cgi-bin/das/hg18/features</URL>
             <Feature>ccdsGene</Feature>
          </Protocol>
-      </DataSource>
-      <DataSource build="mm39" organism="10090">
-         <Protocol type="UCSC"><track>ccdsGene</track><start>cdsStart</start><end>cdsEnd</end><type>name</type><score>score</score><strand>strand</strand></Protocol>
-      </DataSource>  
+      </DataSource> 
       <DataSource build="mm10" organism="10090">
          <Protocol type="UCSC"><track>ccdsGene</track><start>cdsStart</start><end>cdsEnd</end><type>name</type><score>score</score><strand>strand</strand></Protocol>
       </DataSource>  
