@@ -81,7 +81,7 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     public static final String PREFERENCES_AUTO_CORRECT_SEQUENCE_NAMES="autocorrectSequenceNames";  
 
     private static String version="2.0"; // 
-    private static Date releaseDate=getCorrectDate(2025, 7, 24); // Note: Official release date for v2.0 has not been determined yet...
+    private static Date releaseDate=getCorrectDate(2025, 9, 12); //
     
     private DataStorage storage;
     private HashSet<MessageListener> messagelisteners=new HashSet<MessageListener>();

@@ -205,7 +205,9 @@ public class TextVariable extends Data {
      */
     public boolean matches(String string) {
         for (String stored:storage) { // the stored strings can be regexes!
-            stored="(?i)"+stored; // case insensitive match 
+            stored="(?i)"+stored; // case insensitive match
+            if (!(stored.startsWith("^") || stored.startsWith("."))) stored=".*"+stored;
+            if (!(stored.endsWith("$") || stored.endsWith(".*"))) stored=stored+".*";
             if (string.matches(stored)) return true;
         }
         return false;

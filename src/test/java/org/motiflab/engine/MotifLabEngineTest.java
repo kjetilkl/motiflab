@@ -5,49 +5,10 @@
  */
 package org.motiflab.engine;
 
-import org.motiflab.engine.MotifLabResource;
-import org.motiflab.engine.MotifLabResourceWrapper;
-import org.motiflab.engine.MotifLabEngine;
 import java.awt.Color;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import javax.swing.Icon;
-import javax.swing.text.Document;
-import org.motiflab.engine.data.DNASequenceDataset;
-import org.motiflab.engine.data.Data;
-import org.motiflab.engine.data.MotifCollection;
-import org.motiflab.engine.data.OutputData;
-import org.motiflab.engine.data.OutputDataDependency;
-import org.motiflab.engine.data.RegionDataset;
-import org.motiflab.engine.data.Sequence;
-import org.motiflab.engine.data.SequenceCollection;
-import org.motiflab.engine.data.analysis.Analysis;
-import org.motiflab.engine.dataformat.DataFormat;
-import org.motiflab.engine.datasource.DataLoader;
-import org.motiflab.engine.datasource.DataRepository;
-import org.motiflab.engine.operations.Operation;
-import org.motiflab.engine.protocol.Protocol;
-import org.motiflab.engine.task.ExecutableTask;
-import org.motiflab.engine.task.ProtocolTask;
-import org.motiflab.engine.util.MotifComparator;
-import org.motiflab.external.ExternalProgram;
 import org.motiflab.gui.SimpleDataPanelIcon;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -3448,7 +3409,7 @@ public class MotifLabEngineTest {
     public void testRegisterResource() {
         System.out.println("registerResource");
         MotifLabResource resource1 = new MotifLabResourceWrapper("First", null, String.class, null, "This is the first resource");
-        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, new Integer(2));
+        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, 2);
         MotifLabResource resource3 = new MotifLabResourceWrapper("Third", "DTV", NullPointerException.class, null, new NullPointerException("Third resource"));
         MotifLabResource resource4 = new MotifLabResourceWrapper("First", "DTV", NullPointerException.class, null, new NullPointerException("Fourth resource"));
         MotifLabResource resource5 = new MotifLabResourceWrapper("Second", null, NullPointerException.class, null, new NullPointerException("Fifth resource"));
@@ -3481,7 +3442,7 @@ public class MotifLabEngineTest {
     public void testDeregisterResource() {
         System.out.println("deregisterResource");
         MotifLabResource resource1 = new MotifLabResourceWrapper("First", null, String.class, null, "This is the first resource");
-        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, new Integer(2));
+        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, 2);
         MotifLabResource resource3 = new MotifLabResourceWrapper("Third", "DTV", NullPointerException.class, null, new NullPointerException("Third resource"));
         MotifLabResource resource4 = new MotifLabResourceWrapper("First", "DTV", NullPointerException.class, null, new NullPointerException("Fourth resource"));
         MotifLabResource resource5 = new MotifLabResourceWrapper("Second", null, NullPointerException.class, null, new NullPointerException("Fifth resource"));
@@ -3510,7 +3471,7 @@ public class MotifLabEngineTest {
     public void testGetResourceClass() {
         System.out.println("getResourceClass");
         MotifLabResource resource1 = new MotifLabResourceWrapper("First", null, String.class, null, "This is the first resource");
-        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, new Integer(2));
+        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, 2);
         MotifLabResource resource3 = new MotifLabResourceWrapper("Third", "DTV", NullPointerException.class, null, new NullPointerException("Third resource"));     
         MotifLabEngine engine = MotifLabEngine.getEngine();
         engine.removeAllResources(); // ensure there are no existing resources left over from other tests that can interfere         
@@ -3547,7 +3508,7 @@ public class MotifLabEngineTest {
     public void testGetResource() {
         System.out.println("getResource");
         MotifLabResource resource1 = new MotifLabResourceWrapper("First", null, String.class, null, "This is the first resource");
-        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, new Integer(2));
+        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, 2);
         MotifLabResource resource3 = new MotifLabResourceWrapper("Third", "DTV", NullPointerException.class, null, new NullPointerException("Third resource"));
         MotifLabResource resource4 = new MotifLabResourceWrapper("First", "DTV", NullPointerException.class, null, new NullPointerException("Fourth resource"));
         MotifLabResource resource5 = new MotifLabResourceWrapper("Second", null, NullPointerException.class, null, new NullPointerException("Fifth resource"));
@@ -3574,7 +3535,7 @@ public class MotifLabEngineTest {
     public void testGetResources_Class() {
         System.out.println("getResources");
         MotifLabResource resource1 = new MotifLabResourceWrapper("First", null, String.class, null, "This is the first resource");
-        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, new Integer(2));
+        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, 2);
         MotifLabResource resource3 = new MotifLabResourceWrapper("Third", "DTV", NullPointerException.class, null, new NullPointerException("Third resource"));
         MotifLabResource resource4 = new MotifLabResourceWrapper("First", "DTV", NullPointerException.class, null, new NullPointerException("Fourth resource"));
         MotifLabResource resource5 = new MotifLabResourceWrapper("Second", null, NullPointerException.class, null, new NullPointerException("Fifth resource"));
@@ -3605,7 +3566,7 @@ public class MotifLabEngineTest {
     public void testGetResources_String() {
         System.out.println("getResources");
         MotifLabResource resource1 = new MotifLabResourceWrapper("First", null, String.class, null, "This is the first resource");
-        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", "numbers", Integer.class, null, new Integer(2));
+        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", "numbers", Integer.class, null, 2);
         MotifLabResource resource3 = new MotifLabResourceWrapper("Third",  "DTV", NullPointerException.class, null, new NullPointerException("Third resource"));
         MotifLabResource resource4 = new MotifLabResourceWrapper("First",  "DTV", NullPointerException.class, null, new NullPointerException("Fourth resource"));
         MotifLabResource resource5 = new MotifLabResourceWrapper("Second", "DTV", NullPointerException.class, null, new NullPointerException("Fifth resource"));
@@ -3638,7 +3599,7 @@ public class MotifLabEngineTest {
     public void testGetResourceNames_Class() {
         System.out.println("getResourceNames");
         MotifLabResource resource1 = new MotifLabResourceWrapper("First", null, String.class, null, "This is the first resource");
-        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, new Integer(2));
+        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", null, Integer.class, null, 2);
         MotifLabResource resource3 = new MotifLabResourceWrapper("Third", "DTV", NullPointerException.class, null, new NullPointerException("Third resource"));
         MotifLabResource resource4 = new MotifLabResourceWrapper("First", "DTV", NullPointerException.class, null, new NullPointerException("Fourth resource"));
         MotifLabResource resource5 = new MotifLabResourceWrapper("Second", null, NullPointerException.class, null, new NullPointerException("Fifth resource"));
@@ -3675,7 +3636,7 @@ public class MotifLabEngineTest {
     public void testGetResourceNames_String() {
         System.out.println("getResourceNames");
         MotifLabResource resource1 = new MotifLabResourceWrapper("First", null, String.class, null, "This is the first resource");
-        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", "numbers", Integer.class, null, new Integer(2));
+        MotifLabResource resource2 = new MotifLabResourceWrapper("Second", "numbers", Integer.class, null, 2);
         MotifLabResource resource3 = new MotifLabResourceWrapper("Third",  "DTV", NullPointerException.class, null, new NullPointerException("Third resource"));
         MotifLabResource resource4 = new MotifLabResourceWrapper("First",  "DTV", NullPointerException.class, null, new NullPointerException("Fourth resource"));
         MotifLabResource resource5 = new MotifLabResourceWrapper("Second", "DTV", NullPointerException.class, null, new NullPointerException("Fifth resource"));

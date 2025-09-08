@@ -1796,6 +1796,8 @@ public static ModuleCollection parseModuleCollectionParameters(String text, Stri
         for (Object operand:operands) {
            if (operand instanceof String) {
                String target=( ((String)operand).startsWith("\"") && ((String)operand).endsWith("\"") && ((String)operand).length()>2)?((String)operand).substring(1,((String)operand).length()-1):(String)operand;
+               if (!(target.startsWith("^") || target.startsWith("."))) target=".*"+target;
+               if (!(target.endsWith("$") || target.endsWith(".*"))) target=target+".*";
                if (modulevalue.matches("(?i)"+target)) return true; // case insensitive match         
            }                
            else if (operand instanceof TextVariable && ((TextVariable)operand).matches(modulevalue)) return true;

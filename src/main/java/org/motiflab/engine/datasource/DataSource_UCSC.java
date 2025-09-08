@@ -282,46 +282,6 @@ public class DataSource_UCSC extends DataSource {
     }      
     
     @Override
-    public DataSegment loadDataSegment(DataSegment segment, ExecutableTask task) throws Exception {
-        int timeout=dataloader.getEngine().getNetworkTimeout();
-        String chromosome=segment.getChromosome();
-        int start=segment.getSegmentStart();
-        int end=segment.getSegmentEnd();
-        String apiURL;
-        
-        if (dataTrack.getDataType()==DNASequenceDataset.class) {
-            apiURL = baseURL_DNA;
-        } else if (dataTrack.getDataType()==RegionDataset.class) {
-            apiURL = baseURL_Region;
-        } else if (dataTrack.getDataType()==NumericDataset.class) {
-            apiURL = baseURL_Numeric;
-        } else throw new ExecutionError("Unknown track type for UCSC data source");
-        apiURL=apiURL.replace(PATTERN_TEMPLATE_CHROMOSOME, chromosome);    
-        apiURL=apiURL.replace(PATTERN_TEMPLATE_START, ""+(start-1)); // convert to 0-indexed BED-format used by UCSC in the URL    
-        apiURL=apiURL.replace(PATTERN_TEMPLATE_END, ""+end); // this does not need to be converted since it is "exclusive" in BED-format
-        if (trackName!=null) apiURL=apiURL.replace("$TRACK", trackName);  
-        if (genomebuild!=null) apiURL=apiURL.replace("$GENOME", genomebuild);  
-        URL url;        
-        url = new URL(apiURL);
-        int waitperiod=getServerTimeslot();
-        if (waitperiod>0) {Thread.sleep(waitperiod);} // this can throw InterruptedException
-        
-        Object data=null;
-        if (dataTrack.getDataType()==DNASequenceDataset.class) {
-            int expectedLength=end-start+1;
-            data=loadDNAdata(url,expectedLength,task);    
-        } else if (dataTrack.getDataType()==RegionDataset.class) {
-            data=loadRegionData(url,start,task);           
-        } else if (dataTrack.getDataType()==NumericDataset.class) {
-            int expectedLength=end-start+1;
-            data=loadNumericData(url,start,expectedLength,task);    
-        }
-        segment.setSegmentData(data);
-        return segment;
-    }
-    
-     
-    @Override
     public DataSource clone() {
         DataSource_UCSC copy=new DataSource_UCSC(dataTrack, organism, genomebuild);        
         copy.delay=this.delay; // ?!
@@ -386,10 +346,49 @@ public class DataSource_UCSC extends DataSource {
         }       
         element.appendChild(protocol);
         return element;
-    }   
+    }       
     
+    @Override
+    public DataSegment loadDataSegment(DataSegment segment, ExecutableTask task) throws Exception {
+        int timeout=dataloader.getEngine().getNetworkTimeout();
+        String chromosome=segment.getChromosome();
+        if (!chromosome.startsWith("chr")) chromosome="chr"+chromosome; // some genomes apparently require this
+        int start=segment.getSegmentStart();
+        int end=segment.getSegmentEnd();
+        String apiURL;
+       
+        
+        if (dataTrack.getDataType()==DNASequenceDataset.class) {
+            apiURL = baseURL_DNA;
+        } else if (dataTrack.getDataType()==RegionDataset.class) {
+            apiURL = baseURL_Region;
+        } else if (dataTrack.getDataType()==NumericDataset.class) {
+            apiURL = baseURL_Numeric;
+        } else throw new ExecutionError("Unknown track type for UCSC data source");
+        apiURL=apiURL.replace(PATTERN_TEMPLATE_CHROMOSOME, chromosome);    
+        apiURL=apiURL.replace(PATTERN_TEMPLATE_START, ""+(start-1)); // convert to 0-indexed BED-format used by UCSC in the URL    
+        apiURL=apiURL.replace(PATTERN_TEMPLATE_END, ""+end); // this does not need to be converted since it is "exclusive" in BED-format
+        if (trackName!=null) apiURL=apiURL.replace("$TRACK", trackName);  
+        if (genomebuild!=null) apiURL=apiURL.replace("$GENOME", genomebuild);  
+        URL url;        
+        url = new URL(apiURL);
+        int waitperiod=getServerTimeslot();
+        if (waitperiod>0) {Thread.sleep(waitperiod);} // this can throw InterruptedException
+        
+        Object data=null;
+        if (dataTrack.getDataType()==DNASequenceDataset.class) {
+            int expectedLength=end-start+1;
+            data=loadDNAdata(url,expectedLength,task);    
+        } else if (dataTrack.getDataType()==RegionDataset.class) {
+            data=loadRegionData(url,start,task);           
+        } else if (dataTrack.getDataType()==NumericDataset.class) {
+            int expectedLength=end-start+1;
+            data=loadNumericData(url,start,expectedLength,task);    
+        }
+        segment.setSegmentData(data);
+        return segment;
+    }
     
-
 
     public char[] loadDNAdata(URL url, int length, ExecutableTask task) throws Exception {
         try (InputStream in = url.openStream()) {
@@ -485,7 +484,7 @@ public class DataSource_UCSC extends DataSource {
         int progress=0;
 
         try (InputStream in = url.openStream()) {
-            JsonFactory factory = new JsonFactory();
+            JsonFactory factory = new JsonFactory();           
             JsonParser parser = factory.createParser(in);
 
             while (!parser.isClosed()) {

@@ -279,9 +279,9 @@ public class MainPanel extends JTabbedPane implements DataListener {
       
     /**
      * This is a signal to the MainPanel to display the selected tab
-     * after "count" OutputData objects have been added to the panel
+     * after "count" tabs have been added to the panel.
      * This is used as a hack to restore the correct tab after importing
-     * session since race-conditions lead to data objects being added
+     * sessions, since race-conditions may lead to data objects being added
      * after the correct tab was initially set
      * @param tabName
      * @param count 
