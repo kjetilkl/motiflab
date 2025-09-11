@@ -2023,8 +2023,7 @@ public class SequenceVisualizer extends JPanel implements VisualizationSettingsL
         @Override
         public void paintComponent(Graphics g) { // paint SequenceLabel
             int align=settings.getSequenceLabelAlignment();
-            if (align==SwingConstants.TRAILING) return; // the label should not be painted here
-            //super.paintComponent(g); // draws the text on the label            
+            if (align==SwingConstants.TRAILING) return; // the label should not be painted here        
             java.awt.Font font=getFont();
             java.awt.Rectangle bounds=font.getStringBounds(sequenceName, ((Graphics2D)g).getFontRenderContext()).getBounds();
             int sequenceNameWidth=bounds.width; 

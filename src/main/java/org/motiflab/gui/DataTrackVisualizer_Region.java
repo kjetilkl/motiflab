@@ -145,7 +145,7 @@ public abstract class DataTrackVisualizer_Region extends DataTrackVisualizer {
            int[] bounds=getScreenCoordinateRangeFromGenomic(newregion.getGenomicStart(), newregion.getGenomicEnd(), xoffset);
            drawNewRegionBox(g, newregion, bounds[0], yoffset, bounds[1]-bounds[0], height);
        }
-    } // end paintComponent
+    } 
    
    /**
     * Draws a region box with the given size at the given coordinates at scale=1.0 (1:1 ratio between graphics buffer coordinates and pixels)

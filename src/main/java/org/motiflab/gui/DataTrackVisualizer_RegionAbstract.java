@@ -183,14 +183,14 @@ public abstract class DataTrackVisualizer_RegionAbstract extends DataTrackVisual
         showTypeLabel=(Boolean)settings.getSettingAsType(featureName+".showTypeLabel", Boolean.TRUE);  
         showMotifLogo=(Boolean)settings.getSettingAsType(featureName+".showMotifLogo", Boolean.TRUE);  
         drawDirectionArrows=(Boolean)settings.getSettingAsType(featureName+".drawDirectionArrows", Boolean.TRUE); 
-        labelColorStyle=(Integer)settings.getSettingAsType(featureName+".typeLabelColor", new Integer(0)); // 0=BLACK or WHITE depending on bg, 1=BLACK, 2=WHITE.
+        labelColorStyle=(Integer)settings.getSettingAsType(featureName+".typeLabelColor", 0); // 0=BLACK or WHITE depending on bg, 1=BLACK, 2=WHITE.
         scaleMotifLogoByIC=(Boolean)settings.getSettingAsType(featureName+".scaleMotifLogoByIC", Boolean.TRUE);          
-        regionspacing=(Integer)settings.getSettingAsType(featureName+".regionSpacing", new Integer(regionspacing));
+        regionspacing=(Integer)settings.getSettingAsType(featureName+".regionSpacing", regionspacing);
         if (regionspacing<2) regionspacing=2;       
         expanded_track_margin=rowSpacing; // I have chosen to use rowSpacing as margin instead of having the margin as a separate setting (line below)
         // expanded_track_margin=(Integer)settings.getSettingAsType(featureName+".trackMargin", new Integer(expanded_track_margin)); //         
         if (expanded_track_margin<0) expanded_track_margin=0;    
-        shadowOffset=(Integer)settings.getSettingAsType(featureName+".shadowOffset", new Integer(shadowOffset)); 
+        shadowOffset=(Integer)settings.getSettingAsType(featureName+".shadowOffset", shadowOffset); 
         if (isExpanded() && !settings.hasVariableTrackHeight(featureName)) settings.setVariableTrackHeight(featureName, true); // Just in case: these two should always be synchronized for expanded tracks.
         dropShadows=settings.useDropShadows(featureName);
         drawNested=settings.visualizeNestedRegions(featureName);
@@ -263,7 +263,7 @@ public abstract class DataTrackVisualizer_RegionAbstract extends DataTrackVisual
             if (sequencesegmentspan[0]>0) cropclip.x=sequencesegmentspan[0];
             cropclip.width=sequencesegmentspan[1]-sequencesegmentspan[0]+1; 
             if (cropclip.width>sequenceWindowWidth) cropclip.width=sequenceWindowWidth;
-            graphics.setClip(cropclip);
+            graphics.setClip(cropclip.intersection(clip));
         } // this clips the rendering at the start and end of sequence segment                       
         RegionVisualizationFilter filter=gui.getRegionVisualizationFilter(); 
         if (filter instanceof RegionVisualizationFilterGroup) filter=((RegionVisualizationFilterGroup)filter).getApplicableFilters(featureName); // only consider those filters that actually apply

@@ -321,7 +321,6 @@ public abstract class DataTrackVisualizer extends JComponent implements MouseInp
               scaleTransform.translate(-scaleFactor+xoffset,0);            
               scaleTransform.scale(orientedScaleFactor,1.0);
               scaleTransform.translate(translation,0); //  
-                 
               // - - - - -
               relativeStart=(optimize)?relativeStart_optimized:relativeStart_regular;
               // - - - First draw the background  (The background is only painted for the parent track)             
@@ -353,10 +352,10 @@ public abstract class DataTrackVisualizer extends JComponent implements MouseInp
               buffer.setTransform(saveAt); // restore default transform again before drawing the "edit overlay"
               drawEditOverlay(buffer, relativeStart, height, width, drawnSequenceRegionLength, xoffset,yoffset, orientation);  
               // - - - - -              
-             int labelStyle=(Integer)settings.getSettingAsType(VisualizationSettings.TRACK_LABEL_STYLE, new Integer(2));              
+             int labelStyle=(Integer)settings.getSettingAsType(VisualizationSettings.TRACK_LABEL_STYLE, 2);              
              if (labelStyle>=0) {                  
-                 double align=(Double)settings.getSettingAsType(VisualizationSettings.TRACK_LABEL_ALIGNMENT, new Double(0.0));
-                 int fontSize=(Integer)settings.getSettingAsType(VisualizationSettings.TRACK_LABEL_SIZE, new Integer(10));
+                 double align=(Double)settings.getSettingAsType(VisualizationSettings.TRACK_LABEL_ALIGNMENT, 0.0);
+                 int fontSize=(Integer)settings.getSettingAsType(VisualizationSettings.TRACK_LABEL_SIZE, 10);
                  if (fontSize>4 && fontSize<=40 && trackNameFont.getSize()!=fontSize) trackNameFont=new java.awt.Font(java.awt.Font.SANS_SERIF, java.awt.Font.PLAIN, fontSize); // To Do: allow font to be changed just like other system fonts!
                  int ascent=g.getFontMetrics(trackNameFont).getAscent();              
                  if (ascent+4<height) {
@@ -367,7 +366,7 @@ public abstract class DataTrackVisualizer extends JComponent implements MouseInp
                  } // do not draw if track height is too small    
               } // end showTrackNames
           } // end (drawnSequenceRegionLength>0)
-      
+          
      } // end paintComponent
            
   private static final Color labelShadowColor=new Color(0,0,0,32); 

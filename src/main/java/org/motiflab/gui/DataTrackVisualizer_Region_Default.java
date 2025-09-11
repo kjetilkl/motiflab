@@ -13,7 +13,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.QuadCurve2D;
 import java.util.ArrayList;
 import java.util.Collections;
-import javax.swing.JDialog;
 import org.motiflab.engine.MotifLabEngine;
 import org.motiflab.engine.data.Motif;
 import org.motiflab.engine.data.RegionSequenceData;
