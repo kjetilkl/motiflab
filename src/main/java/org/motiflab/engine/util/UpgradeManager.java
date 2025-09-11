@@ -149,7 +149,7 @@ public class UpgradeManager {
             throw new SystemError("It seems that something went wrong during installation. Please try to restart MotifLab");
         }     
         client.progressReportMessage(-1);
-        client.displayMessage("To make sure that all the new configurations have been properly applied, it is recommended to restart MotifLab", MotifLabClient.WARNING_MESSAGE);
+        if (oldMigrationNumber!=null) client.displayMessage("To make sure that all the new configurations have been properly applied, it is recommended to restart MotifLab", MotifLabClient.WARNING_MESSAGE);
     }    
             
     /**

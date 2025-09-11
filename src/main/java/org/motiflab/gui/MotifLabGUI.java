@@ -7052,7 +7052,7 @@ public void updatePartialDataItem(String featurename, String sequencename, Objec
     @Action
     public void showWelcomeScreen() {
         try {
-            String welcomepage=engine.getWebSiteURL()+"welcomepage.html";
+            String welcomepage=engine.getWebSiteURL()+"welcomepage2.html";
             java.net.URL url=new java.net.URL(welcomepage);
             OutputData welcome=new OutputData("Welcome",url);
             engine.storeDataItem(welcome);
