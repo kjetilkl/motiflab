@@ -353,16 +353,13 @@ public class UCSC_API_trackDialog extends javax.swing.JDialog {
             Exception ex=null;
             @Override
             public Void doInBackground() {
-                //gui.logMessage("doInBackground");
                 try {
                     getTracksFromUCSC(genomebuild, filter);
                 } catch (InterruptedException ie) {
                     //
                 } catch (Exception e) {
-                    // gui.logMessage("UCSC server error: "+e.toString());
                     ex=e;
                 }
-                //gui.logMessage("doInBackground:end");
                 return null;
             }
             @Override
@@ -379,7 +376,6 @@ public class UCSC_API_trackDialog extends javax.swing.JDialog {
                     int count = ucscTrackTableModel.getRowCount();
                     progressBar.setString("Found "+count+" track"+((count!=1)?"s":""));
                 }
-                //gui.logMessage("done:end");
             }
         }; // end of SwingWorker class
         worker.execute();

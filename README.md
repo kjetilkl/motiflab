@@ -12,21 +12,13 @@ For more information, including screenshots and examples, please visit the proje
 ![Screenshot](https://www.motiflab.org/screenshots/motiflab_github_screenshot.png)
 
 
-> [!WARNING]  
-> MotifLab version 2.0 is currently under development and is still considered to be in "pre-release" stage.
-> The final released version may not be 100% compatible with pre-release versions (especially when it comes to saved sessions).
-
-
 ### Prerequisites
 
 MotifLab is written in Java. To build the project from source you will need:
 
-* [Java JDK 8](https://www.java.com) - programming language
+* [Java JDK 23](https://www.java.com) - programming language
 * [Maven](https://maven.apache.org/) - build and dependency manager
 
-> [!IMPORTANT]  
-> Note that it is currently not possible to build MotifLab with a more recent JDK than JDK 8, because MotifLab contains a class named "Module" (referring to _cis-regulatory modules_)
-> that conflicts with the Module class that was introduced in Java 9.
 
 MotifLab relies on a package published in GitHub Packages. To obtain this dependency, you must add a `<server>` block for the "github" server configured with your GitHub username and token in your Maven settings file `settings.xml`. (This file is usually found within the hidden `.m2` folder in your home directory. On Unix/Linux systems, this would be `~/.m2/settings.xml`. On windows, it could be `C:\Users\{USERNAME}\.m2\settings.xml`). Failing to add this server block will lead to a "401 Unauthorized" error.  
 ```xml
