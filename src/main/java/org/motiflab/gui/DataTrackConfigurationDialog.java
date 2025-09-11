@@ -6,6 +6,7 @@
 
 package org.motiflab.gui;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -403,6 +404,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
     private DefaultComboBoxModel getAddDataTrackOptions() {
         ArrayList<String> options=new ArrayList<>();
         options.add("UCSC Genome Browser");
+        // options.add("UCSC Genome Browser (old)");        
         options.add("DAS Registry");
         options.add("Configuration file");
         options.add("Manual entry");
@@ -419,6 +421,7 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         ArrayList<String> options=new ArrayList<>();
         options.add("Manual entry");
         options.add("UCSC Genome Browser");
+        // options.add("UCSC Genome Browser (old)");        
         options.add("DAS Registry");
         // add plugin options
         ArrayList<MotifLabResource> resources=engine.getResources("DataSourceConfigurationDialog"); // Note that the resource type is different from the one in the method above
@@ -1416,23 +1419,28 @@ public class DataTrackConfigurationDialog extends javax.swing.JDialog {
         editUCSCsourcePanelInner.setLayout(new java.awt.BorderLayout());        
 
         editUCSCsourcePanelInnerTrack.setName("editUSCSsourcePanelInnerTop"); // NOI18N
-        editUCSCsourcePanelInnerTrack.setLayout(new java.awt.GridBagLayout());
+        // editUCSCsourcePanelInnerTrack.setLayout(new java.awt.GridBagLayout());
+        editUCSCsourcePanelInnerTrack.setLayout(new java.awt.BorderLayout());
+        JPanel editUCSCsourcePanelInnerTrack2 = new JPanel();
+        editUCSCsourcePanelInnerTrack2.setLayout(new java.awt.GridBagLayout());
 
         editUCSCsourceTrackLabel.setText(resourceMap.getString("editUCSCsourceTrackLabel.text")); // NOI18N
         editUCSCsourceTrackLabel.setName("editUCSCsourceTrackLabel"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
-        editUCSCsourcePanelInnerTrack.add(editUCSCsourceTrackLabel, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 16, 0);
+        editUCSCsourcePanelInnerTrack2.add(editUCSCsourceTrackLabel, gridBagConstraints);
 
-        editUCSCsourceTrackTextfield.setColumns(15);
+        editUCSCsourceTrackTextfield.setColumns(18);
         editUCSCsourceTrackTextfield.setText(resourceMap.getString("editUCSCsourceTrackTextfield.text")); // NOI18N
         editUCSCsourceTrackTextfield.setName("editUCSCsourceTrackTextfield"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
-        editUCSCsourcePanelInnerTrack.add(editUCSCsourceTrackTextfield, gridBagConstraints);
-
+        gridBagConstraints.insets = new java.awt.Insets(10, 28, 16, 0);
+        editUCSCsourcePanelInnerTrack2.add(editUCSCsourceTrackTextfield, gridBagConstraints);
+        
+        editUCSCsourcePanelInnerTrack.add(editUCSCsourcePanelInnerTrack2, BorderLayout.WEST);
+               
         editUCSCsourcePanelInnerRegion.setName("editUCSCsourcePanelInnerRegion"); // NOI18N
         editUCSCsourcePanelInnerRegion.setLayout(new java.awt.GridBagLayout());        
 
@@ -2672,7 +2680,8 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
             currentDataTrack.setDisplayDirectivesProtocol(dsp.isEmpty()?null:dsp);
         }
         String selectedSource=(String)editTrackAddSourceCombobox.getSelectedItem();
-             if (selectedSource.equalsIgnoreCase("UCSC Genome Browser")) addDataSourceFromUCSC();
+             if (selectedSource.equalsIgnoreCase("UCSC Genome Browser (old)")) addDataSourceFromUCSC();
+        else if (selectedSource.equalsIgnoreCase("UCSC Genome Browser")) addDataSourceFromUCSC_API();
         else if (selectedSource.equalsIgnoreCase("DAS Registry")) addDataSourceFromDAS();
         else if (selectedSource.equalsIgnoreCase("Manual entry")) showEditDataSourcePanel(null);
         else { // this could be a plugin
@@ -2697,6 +2706,22 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
            ucscdialog.dispose();
         }
     }
+    
+    private void addDataSourceFromUCSC_API() {
+        UCSC_API_trackDialog ucscAPIdialog = new UCSC_API_trackDialog(gui,currentDataTrack);
+        ucscAPIdialog.setLocation(gui.getFrame().getWidth()/2-ucscAPIdialog.getWidth()/2, gui.getFrame().getHeight()/2-ucscAPIdialog.getHeight()/2);
+        ucscAPIdialog.setVisible(true);
+        if (ucscAPIdialog.isOKPressed()) {
+            DataSource newsource=ucscAPIdialog.getDataSource(currentDataTrack);
+            ucscAPIdialog.dispose();
+            if (newsource!=null) {
+               currentDataTrack.addDataSource(newsource);
+               showEditDataTrackPanel(currentDataTrack);
+            }
+        } else {
+           ucscAPIdialog.dispose();
+        }
+    }    
 
     private void addDataSourceFromDAS() {
         DASRegistryDialog dasdialog = new DASRegistryDialog(gui, currentDataTrack);
@@ -2784,7 +2809,8 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
     @Action
     public void allTrackAddButtonClicked() {
          String selectedSource=(String)addTrackSourceCombobox.getSelectedItem();
-              if (selectedSource.equalsIgnoreCase("UCSC Genome Browser")) allTracksAddFromUCSCGenomeBrowser();
+              if (selectedSource.equalsIgnoreCase("UCSC Genome Browser")) allTracksAddFromUCSC_API();
+         else if (selectedSource.equalsIgnoreCase("UCSC Genome Browser (old)")) allTracksAddFromUCSCGenomeBrowser();
          else if (selectedSource.equalsIgnoreCase("DAS Registry")) allTracksAddFromDASRegistry();
          else if (selectedSource.equalsIgnoreCase("Configuration file")) allTracksAddFromConfigFile();
          else if (selectedSource.equalsIgnoreCase("Manual entry")) showEditDataTrackPanel(null);
@@ -2817,6 +2843,27 @@ private void editSourceProtocolChanged(java.awt.event.ItemEvent evt) {
            ucscdialog.dispose();
         }
     }
+    
+    private void allTracksAddFromUCSC_API() {
+        UCSC_API_trackDialog ucscAPIdialog = new UCSC_API_trackDialog(gui,null);
+        ucscAPIdialog.setLocation(gui.getFrame().getWidth()/2-ucscAPIdialog.getWidth()/2, gui.getFrame().getHeight()/2-ucscAPIdialog.getHeight()/2);
+        ucscAPIdialog.setVisible(true);
+        if (ucscAPIdialog.isOKPressed()) {
+            DataTrack newtrack=ucscAPIdialog.getDataTrack();
+            ucscAPIdialog.dispose();
+            if (newtrack!=null) {
+                String newtrackname=newtrack.getName();
+                if (availableTracks.containsKey(newtrackname)) {
+                    int choice=JOptionPane.showConfirmDialog(this, "A data track named \""+newtrackname+"\" already exists.\nWould you like to replace this track?","Replace data track",JOptionPane.OK_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
+                    if (choice!=JOptionPane.OK_OPTION) return;
+                }
+                availableTracks.put(newtrack.getName(), newtrack);
+                showAllTracksPanel(); // this will setup the table from the configuration
+            }
+        } else {
+           ucscAPIdialog.dispose();
+        }
+    }    
 
     private void allTracksAddFromDASRegistry() {
         DASRegistryDialog dasdialog = new DASRegistryDialog(gui);

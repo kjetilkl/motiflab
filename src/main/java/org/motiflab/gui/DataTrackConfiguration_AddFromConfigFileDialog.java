@@ -1,9 +1,4 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * DataTrackConfiguration_AddFromConfigFileDialog.java
  *
  * Created on Apr 4, 2013, 1:09:00 PM

@@ -69,7 +69,7 @@ public class DataTrackDialog extends javax.swing.JDialog {
         datatrackTable.getTableHeader().setReorderingAllowed(false);
         datatrackTable.getColumn(TABLECOLUMN_SUPPORTED).setMinWidth(20);
         datatrackTable.getColumn(TABLECOLUMN_SUPPORTED).setMaxWidth(20);
-        datatrackTable.getColumn(TABLECOLUMN_TYPE).setMaxWidth(50);
+        datatrackTable.getColumn(TABLECOLUMN_TYPE).setMinWidth(50);
         datatrackTable.getColumn(TABLECOLUMN_TYPE).setMaxWidth(50);
         datatrackTable.getColumn(TABLECOLUMN_NAME).setCellRenderer(new DescriptionRenderer());
         datatrackTable.getColumn(TABLECOLUMN_SUPPORTED).setCellRenderer(new SupportedDatatrackRenderer());

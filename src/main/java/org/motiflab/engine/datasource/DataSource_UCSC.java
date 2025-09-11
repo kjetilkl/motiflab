@@ -150,7 +150,8 @@ public class DataSource_UCSC extends DataSource {
         return true;
     } 
     private boolean mapsEqual(HashMap<String,String> map1, HashMap<String,String> map2) {
-        if (map1==null && map2!=null) return false;
+        if (map1==null && map2==null) return true;
+        else if (map1==null && map2!=null) return false;
         else if (map1!=null && map2==null) return false;
         else if (map1.size()!=map2.size()) return false;        
         else {
@@ -470,6 +471,7 @@ public class DataSource_UCSC extends DataSource {
                         progress++;
                         if (progress>=2000) {
                             if (Thread.interrupted() || task.getStatus().equals(ExecutableTask.ABORTED)) throw new InterruptedException();
+                            Thread.yield();
                             progress=0;
                         }
                     }
@@ -541,22 +543,25 @@ public class DataSource_UCSC extends DataSource {
                         // check if the region has all the attributes, then add it to the list if everything is OK
                         if (start==null) throw new ExecutionError("Missing required region attribute: start");
                         if (end==null) throw new ExecutionError("Missing required region attribute: end");
-                        if (type==null) throw new ExecutionError("Missing required region attribute: type");
+                        // if (type==null) throw new ExecutionError("Missing required region attribute: type");
                         // if (strand==null) throw new ExecutionError("Missing required region attribute: strand"); // should this be required?
                         // if (score==null) throw new ExecutionError("Missing required region attribute: score");   // should this be required?                   
                         region.setRelativeStart(start-genomicStart);
                         region.setRelativeEnd(end-genomicStart);
-                        region.setType(type);
+                        region.setType( (type!=null)?type:trackName); // 
                         if (score!=null) region.setScore(score);
-                        if (strand!=null) region.setOrientation(strand);
+                        if (strand!=null) region.setOrientation(strand);                        
                         segment.add(region);
                         
                         token=parser.nextToken(); // this should now be START_OBJECT or END_ARRAY
                         
                         progress++;
-                        if (progress>=500) {
+                        if (progress%500==0) {
                             if (Thread.interrupted() || task.getStatus().equals(ExecutableTask.ABORTED)) throw new InterruptedException();
-                            progress=0;
+                            if (progress>=1000) {
+                                Thread.yield();
+                                progress=0;
+                            }
                         }                        
                     }
                 }
