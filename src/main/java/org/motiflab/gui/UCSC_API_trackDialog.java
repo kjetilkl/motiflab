@@ -378,6 +378,7 @@ public class UCSC_API_trackDialog extends javax.swing.JDialog {
                 }
             }
         }; // end of SwingWorker class
+        ucscTrackTableModel.setRowCount(0); // clear current contents of the table
         worker.execute();
     }
     
@@ -507,7 +508,6 @@ public class UCSC_API_trackDialog extends javax.swing.JDialog {
      * @throws InterruptedException 
      */
     private void getTracksFromUCSC(String genome, Class trackType) throws InterruptedException, IOException, ParseError { 
-        ucscTrackTableModel.setRowCount(0); // clear current contents of the table
         URL url = null; 
         try {
             url = new URL(apiEndPoint+"/list/tracks?genome="+genome+";trackLeavesOnly=1");        
