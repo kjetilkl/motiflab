@@ -31,6 +31,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -415,21 +416,22 @@ public class MotifBrowserPanel extends JPanel implements DataListener {
     @Override
     public void dataAdded(Data data) {
         if (!(data instanceof Motif)) return;
-        model.addMotif((Motif)data);
+        SwingUtilities.invokeLater(() -> model.addMotif((Motif)data));
     }
 
     @Override
     public void dataRemoved(Data data) {
         if (!(data instanceof Motif)) return;
-        model.removeMotif((Motif)data); 
+        SwingUtilities.invokeLater(() -> model.removeMotif((Motif)data));
     }
 
     @Override
     public void dataUpdate(Data oldvalue, Data newvalue) {}
+    
     @Override
     public void dataUpdated(Data data) {
          if (!(data instanceof Motif)) return;
-         model.fireTableDataChanged();
+         SwingUtilities.invokeLater(() -> model.fireTableDataChanged());
     }
 
     @Override
@@ -529,11 +531,11 @@ private class ManualSelectionTableModel extends AbstractTableModel {
     
     @Override
     public Class getColumnClass(int c) {
-        if (c==SELECTED_COLUMN) return Boolean.class; // first column
-        else if (c==MOTIF_COLUMN || c==LOGO_COLUMN) return Motif.class; // 
-        else { // c==FILTER_COLUMN
-            return filterPropertyClass.get(filterColumn);
-        }
+        return switch (c) {
+            case SELECTED_COLUMN -> Boolean.class; // first column
+            case MOTIF_COLUMN, LOGO_COLUMN -> Motif.class; // 
+            default -> filterPropertyClass.get(filterColumn); // c==FILTER_COLUMN
+        };
     }
     
     @Override    
@@ -1105,11 +1107,6 @@ private class ManualSelectionContextMenu extends JPopupMenu implements ActionLis
          JMenuItem selectShownMotifsItem=new JMenuItem(SELECT_SHOWN_MOTIFS);
          JMenuItem selectOnlyShownMotifsItem=new JMenuItem(SELECT_ONLY_SHOWN_MOTIFS);
          JMenuItem createCollectionItem=new JMenuItem(CREATE_MOTIF_COLLECTION);  
-         // ----- testing 1-2-3 -------------
-//         if (selectMotifsFromMenu.getItemCount()>MenuScroller.DEFAULT_MENU_SIZE) MenuScroller.setScrollerFor(selectMotifsFromMenu);
-//         if (selectOnlyMotifsFromMenu.getItemCount()>MenuScroller.DEFAULT_MENU_SIZE) MenuScroller.setScrollerFor(selectOnlyMotifsFromMenu);
-//         if (includeMotifsFromMenu.getItemCount()>MenuScroller.DEFAULT_MENU_SIZE) MenuScroller.setScrollerFor(includeMotifsFromMenu);   
-         // ----- end of testing ------------
          updateMenu();
          
          displayItem.addActionListener(this);
@@ -1182,11 +1179,6 @@ private class ManualSelectionContextMenu extends JPopupMenu implements ActionLis
                     subitem3.addActionListener(includeFromCollectionListener);
                     includeMotifsFromMenuCluster.add(subitem3);                    
                 }
-                // ----- testing 1-2-3 -------------                
-//                if (selectMotifsFromMenuCluster.getItemCount()>MenuScroller.DEFAULT_MENU_SIZE) MenuScroller.setScrollerFor(selectMotifsFromMenuCluster);
-//                if (selectOnlyMotifsFromMenuCluster.getItemCount()>MenuScroller.DEFAULT_MENU_SIZE) MenuScroller.setScrollerFor(selectOnlyMotifsFromMenuCluster);
-//                if (includeMotifsFromMenuCluster.getItemCount()>MenuScroller.DEFAULT_MENU_SIZE) MenuScroller.setScrollerFor(includeMotifsFromMenuCluster);   
-                // ----- end of testing ------------
                 selectMotifsFromMenu.add(selectMotifsFromMenuCluster);
                 selectOnlyMotifsFromMenu.add(selectOnlyMotifsFromMenuCluster);
                 includeMotifsFromMenu.add(includeMotifsFromMenuCluster);                 

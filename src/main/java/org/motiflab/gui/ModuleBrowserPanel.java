@@ -35,6 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
@@ -368,21 +369,22 @@ public class ModuleBrowserPanel extends JPanel implements DataListener {
     @Override
     public void dataAdded(Data data) {
         if (!(data instanceof ModuleCRM)) return;
-        model.addModule((ModuleCRM)data);
+        SwingUtilities.invokeLater(() -> model.addModule((ModuleCRM)data));
     }
 
     @Override
     public void dataRemoved(Data data) {
         if (!(data instanceof ModuleCRM)) return;
-        model.removeModule((ModuleCRM)data);
+        SwingUtilities.invokeLater(() -> model.removeModule((ModuleCRM)data));
     }
 
     @Override
     public void dataUpdate(Data oldvalue, Data newvalue) {}
+    
     @Override
     public void dataUpdated(Data data) {
-         if (!(data instanceof ModuleCRM)) return;
-         model.fireTableDataChanged();
+        if (!(data instanceof ModuleCRM)) return;
+        SwingUtilities.invokeLater(() -> model.fireTableDataChanged());
     }
 
     @Override

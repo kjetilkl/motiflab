@@ -18,12 +18,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -35,8 +33,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
@@ -440,21 +438,22 @@ public class MotifBrowserPanel_MultiColumn extends JPanel implements DataListene
     @Override
     public void dataAdded(Data data) {
         if (!(data instanceof Motif)) return;
-        model.addMotif((Motif)data);
+        SwingUtilities.invokeLater(() -> model.addMotif((Motif)data));
     }
 
     @Override
     public void dataRemoved(Data data) {
         if (!(data instanceof Motif)) return;
-        model.removeMotif((Motif)data); 
+        SwingUtilities.invokeLater(() -> model.removeMotif((Motif)data)); 
     }
 
     @Override
     public void dataUpdate(Data oldvalue, Data newvalue) {}
+    
     @Override
     public void dataUpdated(Data data) {
          if (!(data instanceof Motif)) return;
-         model.fireTableDataChanged();
+         SwingUtilities.invokeLater(() -> model.fireTableDataChanged());
     }
 
     @Override
