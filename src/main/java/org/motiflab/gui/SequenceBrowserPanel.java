@@ -36,6 +36,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
@@ -379,21 +380,22 @@ public class SequenceBrowserPanel extends JPanel implements DataListener {
     @Override
     public void dataAdded(Data data) {
         if (!(data instanceof Sequence)) return;
-        model.addSequence((Sequence)data);
+        SwingUtilities.invokeLater(() -> model.addSequence((Sequence)data));
     }
 
     @Override
     public void dataRemoved(Data data) {
         if (!(data instanceof Sequence)) return;
-        model.removeSequence((Sequence)data);
+        SwingUtilities.invokeLater(() -> model.removeSequence((Sequence)data));
     }
 
     @Override
     public void dataUpdate(Data oldvalue, Data newvalue) {}
+    
     @Override
     public void dataUpdated(Data data) {
          if (!(data instanceof Sequence)) return;
-         model.fireTableDataChanged();
+         SwingUtilities.invokeLater(() -> model.fireTableDataChanged());
     }
 
     @Override
