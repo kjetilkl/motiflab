@@ -327,11 +327,10 @@ public class UCSC_API_trackDialog extends javax.swing.JDialog {
     @SuppressWarnings("unchecked")
     private void keyReleasedInFilterTextfield(java.awt.event.KeyEvent evt) {                                              
         String text=filterTextfield.getText();                                             
-        int column=ucscTrackTableModel.findColumn(TABLECOLUMN_DESCRIPTION);
         if (text!=null && text.isEmpty()) expressionRowFilter=null;
         else {
             text=text.replaceAll("\\W", ""); // to avoid problems with regex characters
-            expressionRowFilter=RowFilter.regexFilter("(?i)"+text,column);
+            expressionRowFilter=RowFilter.regexFilter("(?i)"+text);
         }
         ((TableRowSorter)ucscTrackTable.getRowSorter()).setRowFilter(expressionRowFilter);
     } 
