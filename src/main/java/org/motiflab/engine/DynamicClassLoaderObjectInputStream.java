@@ -41,6 +41,16 @@ public class DynamicClassLoaderObjectInputStream extends ObjectInputStream {
         return super.resolveClass(desc);
     }
 
+@Override
+protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
+    ObjectStreamClass desc = super.readClassDescriptor();  
+    if (desc.getName().equals("org.motiflab.engine.protocol.SerializedStandardProtocol")  && desc.getSerialVersionUID() == 2306348599327710469L) {
+        // this is a hack
+        return ObjectStreamClass.lookup(org.motiflab.engine.protocol.SerializedStandardProtocol.class);
+    }
+    return desc;
+}    
+    
     @Override
     protected Object resolveObject(Object obj) throws IOException {
         if (obj instanceof org.motiflab.engine.data.Module) {

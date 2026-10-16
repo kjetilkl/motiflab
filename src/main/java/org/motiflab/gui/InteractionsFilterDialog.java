@@ -5,9 +5,9 @@
  * Notes to self:
  * The current implementation stores the affected regions and sequences
  * direcly in datastructures and then compares these to regions queried by filters etc.
- * However, if the underlying data track is updated (for instance by someone deleting a single region)
- * The objects stored in this tools internal data structures will not be the same as those
- * updated objects used by the rest of the system so the comparisons (as done here) will fail
+ * However, if the underlying data track is updated (for instance by someone deleting a single region),
+ * the objects stored in this tool's internal data structures will not be the same as those
+ * updated objects used by the rest of the system, so the comparisons (as done here) will fail
  * in those cases even if the two objects compared are believed to be the same since equals() would return true.
  * I think the reason why they are not regarded as equal is because the hashCode() method (which I have not always overriden)
  * would return two different values for the two objects that are considered to be the same for practical purposes here.

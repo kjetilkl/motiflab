@@ -80,8 +80,8 @@ public final class MotifLabEngine implements MessageListener, ExtendedDataListen
     public static final String CONCURRENT_THREADS="concurrentThreadCount"; 
     public static final String PREFERENCES_AUTO_CORRECT_SEQUENCE_NAMES="autocorrectSequenceNames";  
 
-    private static String version="2.0"; // 
-    private static Date releaseDate=getCorrectDate(2025, 9, 12); //
+    private static String version="2.0.2"; // 
+    private static Date releaseDate=getCorrectDate(2026, 10, 16); //
     
     private DataStorage storage;
     private HashSet<MessageListener> messagelisteners=new HashSet<MessageListener>();
@@ -4345,7 +4345,7 @@ public static Class getClassForName(String classname) throws ClassNotFoundExcept
         //   4 = Added support for "transparent gradients". Sessions restored from versions prior to v4 should have their gradients updated
         //   5 = Major refactoring in MotifLab version 2.0. All packages now reside under "org.motiflab" and the Module class has been renamed to "ModuleCRM" to be compatible with Java 9
         //       Also, requirements were separated out in its own field and an optional "client" HashMap added to the end
-        int sessionFormatVersion=4; // 
+        int sessionFormatVersion=5; // 
         if (progressListener!=null) progressListener.processProgressEvent(this,0);
         try {
             resetOutputDataDependencyProcessedFlags();      
@@ -4410,7 +4410,7 @@ public static Class getClassForName(String classname) throws ClassNotFoundExcept
         String[] tabNames;
         String selectedTabName=null;  
         logMessage("Restoring session...",9);
-        int supportedSessionFormat=4; // the newest session format supported by this version of MotifLab
+        int supportedSessionFormat=5; // the newest session format supported by this version of MotifLab
         try {
             DynamicClassLoaderObjectInputStream inputStream = new DynamicClassLoaderObjectInputStream(new BufferedInputStream(input),this);            
             String versionString=(String)inputStream.readObject(); // the version info could potentially be used later if the format changes
